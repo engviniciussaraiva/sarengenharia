@@ -23,6 +23,25 @@ button {
     padding: 8px 15px;
     border: none;
     cursor: pointer;
+    margin-top: 10px;
+}
+
+select, input {
+    padding: 8px;
+    margin: 5px 0;
+    width: 300px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+
+.resultado {
+    margin-top: 20px;
+    font-weight: bold;
 }
 </style>
 </head>
@@ -41,17 +60,101 @@ if (sessionStorage.getItem("logado") !== "true") {
     <button onclick="logout()">Sair</button>
 </div>
 
-<hr>
+<div class="card">
+    <h2>Classificação de Ocupação</h2>
 
-<h2>Teste do Sistema</h2>
+    <label>Grupo:</label><br>
+    <select id="grupo">
+        <option value="">Selecione</option>
+        <option value="A">Grupo A</option>
+        <option value="C">Grupo C</option>
+        <option value="F">Grupo F</option>
+    </select><br>
 
-<p>Se você está vendo isso, o login funcionou corretamente.</p>
+    <label>Divisão:</label><br>
+    <select id="divisao">
+        <option value="">Selecione</option>
+        <option value="A-1">A-1</option>
+        <option value="C-2">C-2</option>
+        <option value="F-1">F-1</option>
+    </select><br>
+
+    <label>Área construída (m²):</label><br>
+    <input type="number" id="area"><br>
+
+    <label>Altura (m):</label><br>
+    <input type="number" id="altura"><br>
+
+    <button onclick="classificar()">Classificar</button>
+
+    <div class="resultado" id="resultado"></div>
+</div>
 
 <script>
+
+// 🔥 BASE ESTRUTURADA (simulando banco)
+
+const BaseOcupacoes = [
+    {
+        grupo: "A",
+        divisao: "A-1",
+        descricao: "Residencial Unifamiliar",
+        carga_incendio: 300,
+        risco: "Baixo"
+    },
+    {
+        grupo: "C",
+        divisao: "C-2",
+        descricao: "Comércio Varejista",
+        carga_incendio: 800,
+        risco: "Médio"
+    },
+    {
+        grupo: "F",
+        divisao: "F-1",
+        descricao: "Local de Reunião de Público",
+        carga_incendio: 1200,
+        risco: "Alto"
+    }
+];
+
+function buscarOcupacao(grupo, divisao) {
+    return BaseOcupacoes.find(
+        item => item.grupo === grupo && item.divisao === divisao
+    );
+}
+
+function classificar() {
+
+    const grupo = document.getElementById("grupo").value;
+    const divisao = document.getElementById("divisao").value;
+    const area = document.getElementById("area").value;
+    const altura = document.getElementById("altura").value;
+
+    const ocupacao = buscarOcupacao(grupo, divisao);
+
+    if (!ocupacao) {
+        document.getElementById("resultado").innerHTML = "Ocupação não encontrada.";
+        return;
+    }
+
+    document.getElementById("resultado").innerHTML = `
+        🔎 Ocupação Identificada: ${ocupacao.descricao} <br>
+        🔥 Carga de Incêndio: ${ocupacao.carga_incendio} MJ/m² <br>
+        ⚠ Classificação de Risco: ${ocupacao.risco}
+    `;
+
+    // 🔥 SALVANDO PARA FUTUROS MÓDULOS
+    sessionStorage.setItem("ocupacao", JSON.stringify(ocupacao));
+    sessionStorage.setItem("area", area);
+    sessionStorage.setItem("altura", altura);
+}
+
 function logout() {
-    sessionStorage.removeItem("logado");
+    sessionStorage.clear();
     window.location.href = "/index.html";
 }
+
 </script>
 
 </body>
