@@ -2,32 +2,57 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>SAR - Sistema</title>
-
-<script>
-if (sessionStorage.getItem("acesso_liberado") !== "true") {
-    window.location.href = "index.html";
-}
-</script>
+<title>SAR – Sistema</title>
 
 <style>
 body {
-    margin: 0;
     font-family: Arial, sans-serif;
     background: #f4f4f4;
     padding: 40px;
 }
 
-h1 {
-    color: #1b5e20;
+.topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+button {
+    background: #1b5e20;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
 }
 </style>
 </head>
 
 <body>
 
-<h1>SAR Sistema Rodando 🚀</h1>
-<p>Ambiente estruturado com proteção básica.</p>
+<script>
+// PROTEÇÃO
+if (sessionStorage.getItem("logado") !== "true") {
+    window.location.href = "/index.html";
+}
+</script>
+
+<div class="topo">
+    <h1>SAR – Sistema Avançado de Resposta</h1>
+    <button onclick="logout()">Sair</button>
+</div>
+
+<hr>
+
+<h2>Teste do Sistema</h2>
+
+<p>Se você está vendo isso, o login funcionou corretamente.</p>
+
+<script>
+function logout() {
+    sessionStorage.removeItem("logado");
+    window.location.href = "/index.html";
+}
+</script>
 
 </body>
 </html>
