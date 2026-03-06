@@ -2,9 +2,11 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>SAR – Login</title>
+<title>SAR – Sistema Avançado de Resposta</title>
+
 <style>
 body {
+    margin: 0;
     font-family: Arial, sans-serif;
     background: #f4f4f4;
     display: flex;
@@ -12,58 +14,41 @@ body {
     align-items: center;
     height: 100vh;
 }
-.login-box {
-    background: white;
-    padding: 40px;
-    border-radius: 8px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+
+.container {
     text-align: center;
-    width: 300px;
 }
-input {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
+
+h1 {
+    font-size: 28px;
 }
+
+p {
+    color: #666;
+}
+
 button {
+    margin-top: 20px;
     background: #1b5e20;
     color: white;
-    padding: 10px;
+    padding: 12px 25px;
     border: none;
-    width: 100%;
     cursor: pointer;
-}
-.erro {
-    color: red;
-    font-size: 14px;
+    font-size: 16px;
 }
 </style>
 </head>
+
 <body>
 
-<div class="login-box">
-    <h2>SAR – Sistema Avançado</h2>
+<div class="container">
+    <h1>SAR – Sistema Avançado de Resposta</h1>
+    <p>Classificação e Enquadramento Técnico Automatizado</p>
 
-    <input type="text" id="usuario" placeholder="Usuário">
-    <input type="password" id="senha" placeholder="Senha">
-
-    <button onclick="login()">Entrar</button>
-
-    <div class="erro" id="erro"></div>
+    <button onclick="window.location.href='login.html'">
+        Acessar Sistema
+    </button>
 </div>
-
-<script>
-function login() {
-    const usuario = document.getElementById("usuario").value;
-    const senha = document.getElementById("senha").value;
-
-    if (usuario === "vinicius" && senha === "sar2026") {
-        window.location.href = "app.html";
-    } else {
-        document.getElementById("erro").innerText = "Usuário ou senha inválidos.";
-    }
-}
-</script>
 
 </body>
 </html>
