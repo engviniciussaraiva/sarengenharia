@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Login – SAR</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-box {
+    background: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    text-align: center;
+    width: 320px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+button {
+    background: #1b5e20;
+    color: white;
+    padding: 10px;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+}
+
+.erro {
+    color: red;
+    font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-box">
+    <h2>Acesso ao Sistema</h2>
+
+    <input type="text" id="usuario" placeholder="Usuário">
+    <input type="password" id="senha" placeholder="Senha">
+
+    <button onclick="login()">Entrar</button>
+
+    <div class="erro" id="erro"></div>
+</div>
+
+<script>
+function login() {
+    const usuario = document.getElementById("usuario").value;
+    const senha = document.getElementById("senha").value;
+
+    if (usuario === "vinicius" && senha === "sar2026") {
+        window.location.href = "app.html";
+    } else {
+        document.getElementById("erro").innerText = "Usuário ou senha inválidos.";
+    }
+}
+</script>
+
+</body>
+</html>
