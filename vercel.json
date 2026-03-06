@@ -1,0 +1,33 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "x-robots-tag",
+          "value": "noindex"
+        }
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "authorization",
+          "value": "Basic c2FyOlNhcjIwMjYh"
+        }
+      ],
+      "dest": "/$1"
+    },
+    {
+      "src": "/(.*)",
+      "status": 401,
+      "headers": {
+        "WWW-Authenticate": "Basic realm=\"SAR Engenharia\""
+      }
+    }
+  ]
+}
