@@ -64,7 +64,8 @@ function login() {
     const senha = document.getElementById("senha").value;
 
     if (usuario === "vinicius" && senha === "sar2026") {
-        window.location.href = "app.html";
+        sessionStorage.setItem("logado", "true");
+        window.location.href = "/app.html";
     } else {
         document.getElementById("erro").innerText = "Usuário ou senha inválidos.";
     }
