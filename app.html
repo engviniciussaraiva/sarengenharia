@@ -24,27 +24,37 @@ body{
   color:var(--text);
 }
 
-/* Layout principal */
-.layout{
+/* ====== BARRA SUPERIOR ====== */
+.topbar{
+  height:60px;
+  background:var(--primary);
   display:flex;
-  min-height:100vh;
+  align-items:center;
+  padding:0 25px;
+  color:#fff;
+  font-weight:600;
+  font-size:18px;
 }
 
-/* Área esquerda */
+/* ====== LAYOUT ====== */
+.layout{
+  display:flex;
+  min-height:calc(100vh - 60px);
+}
+
 .main{
   flex:1;
   padding:30px;
 }
 
-/* Painel lateral */
 .sidebar{
   width:340px;
-  background:#ffffff;
+  background:#fff;
   border-left:1px solid #ddd;
   padding:20px;
   position:sticky;
-  top:0;
-  height:100vh;
+  top:60px;
+  height:calc(100vh - 60px);
   box-shadow:-3px 0 8px rgba(0,0,0,0.04);
 }
 
@@ -53,7 +63,7 @@ body{
   color:var(--primary);
 }
 
-/* Cards */
+/* ====== CARDS ====== */
 .card{
   background:var(--card);
   border-radius:10px;
@@ -76,6 +86,13 @@ details.card summary{
   margin-top:15px;
 }
 
+.grid3{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:20px;
+  margin-top:15px;
+}
+
 label{
   font-weight:600;
   display:block;
@@ -90,6 +107,7 @@ input, select{
   font-size:14px;
 }
 
+/* ===== BADGES ===== */
 .badge{
   display:inline-block;
   padding:4px 10px;
@@ -110,13 +128,7 @@ input, select{
   margin-left:10px;
 }
 
-.titulo-modulo{
-  font-size:22px;
-  font-weight:700;
-  color:var(--primary);
-  margin-bottom:20px;
-}
-
+/* ===== PAINEL ===== */
 .painel-item{
   margin-bottom:15px;
 }
@@ -131,16 +143,31 @@ hr{
 
 <body>
 
+<div class="topbar">
+SAR – Sistema Avançado de Resposta
+</div>
+
 <div class="layout">
 
-<!-- 🔹 ÁREA PRINCIPAL -->
+<!-- ===== MAIN ===== -->
 <div class="main">
 
-<div class="titulo-modulo">🧱 Cadastro da Edificação</div>
+<!-- 🧱 LOTE -->
+<div class="card">
+<h3>🧱 Lote</h3>
 
+<label>Quantidade de Edificações:</label>
+<input type="number" id="qtdEdificacoes" value="1" min="1">
+
+<label>Nome da Edificação:</label>
+<input type="text" id="nomeEdificacao" value="Bloco Principal">
+
+</div>
+
+<!-- 🏢 EDIFICAÇÃO -->
 <details class="card" open>
 <summary>
-🏢 Edificação A
+🏢 Edificação – <span id="tituloEdificacao">Bloco Principal</span>
 <span class="status">🟡 Parcial</span>
 <span id="badgeProcesso" class="badge clcb">CLCB</span>
 </summary>
@@ -148,34 +175,24 @@ hr{
 <div class="grid2">
 
 <div>
-<label>Referência:</label>
-<input type="text" id="ref">
-
 <label>Grupo de Ocupação:</label>
-<select id="grupo">
-<option value="">-- Selecionar --</option>
-<option value="C">Comercial</option>
-<option value="F">Local de Reunião</option>
-<option value="J">Depósito</option>
+<select>
+<option>-- Selecionar --</option>
 </select>
 
-<label>Descrição:</label>
-<input type="text" id="descricao">
-
+<label>Altura Total (m):</label>
+<input type="number">
 </div>
 
 <div>
-<label>Altura Total (m):</label>
-<input type="number" id="altura">
-
 <label>Possui Subsolo?</label>
-<select id="subsolo">
-<option value="nao">Não</option>
-<option value="sim">Sim</option>
+<select>
+<option>Não</option>
+<option>Sim</option>
 </select>
 
-<label>Quantidade Pavimentos:</label>
-<input type="number" id="pavimentos">
+<label>Pavimentos:</label>
+<input type="number">
 </div>
 
 </div>
@@ -184,25 +201,20 @@ hr{
 
 <h4>📐 Áreas</h4>
 
-<div class="grid2">
+<div class="grid3">
 
 <div>
-<label>Área Construída (m²):</label>
+<label>Área Total Edificada (m²)</label>
 <input type="number" id="areaTotal">
 </div>
 
 <div>
-<label>Desconto Estrutural (m²):</label>
-<input type="number" id="descontoEstrutural">
+<label>Área Descontada (m²)</label>
+<input type="number" id="areaDescontada">
 </div>
 
 <div>
-<label>Desconto permitido para CLCB (m²):</label>
-<input type="number" id="descontoCLCB">
-</div>
-
-<div>
-<label>Área Computada (m²):</label>
+<label>Área Computada (m²)</label>
 <input type="number" id="areaComputada" readonly>
 </div>
 
@@ -212,10 +224,10 @@ hr{
 
 </div>
 
-<!-- 🔹 PAINEL LATERAL -->
+<!-- ===== SIDEBAR ===== -->
 <div class="sidebar">
 
-<h3>📊 Análise Técnica</h3>
+<h3>📊 Análise do Lote</h3>
 
 <div class="painel-item">
 <strong>Área Total:</strong>
@@ -223,13 +235,8 @@ hr{
 </div>
 
 <div class="painel-item">
-<strong>Área Computada Real:</strong>
-<div id="painelAreaReal">0,00 m²</div>
-</div>
-
-<div class="painel-item">
-<strong>Área válida p/ CLCB:</strong>
-<div id="painelAreaCLCB">0,00 m²</div>
+<strong>Área Computada:</strong>
+<div id="painelAreaComp">0,00 m²</div>
 </div>
 
 <hr>
@@ -245,74 +252,45 @@ hr{
 
 <script>
 
-// Estrutura interna correta
-const lote = {
-  edificacoes: [
-    {
-      area_total:0,
-      desconto_estrutural:0,
-      desconto_clcb:0,
-      area_real:0,
-      area_para_clcb:0,
-      processo_provisorio:"CLCB"
-    }
-  ]
-};
+// Atualiza nome da edificação
+document.getElementById("nomeEdificacao").addEventListener("input", function(){
+  const nome = this.value || "Bloco Principal";
+  document.getElementById("tituloEdificacao").innerText = nome;
+});
 
-const areaTotal = document.getElementById("areaTotal");
-const descontoEstrutural = document.getElementById("descontoEstrutural");
-const descontoCLCB = document.getElementById("descontoCLCB");
+// Cálculo simples provisório
+function atualizar(){
+  const total = parseFloat(document.getElementById("areaTotal").value)||0;
+  const desc = parseFloat(document.getElementById("areaDescontada").value)||0;
 
-function atualizarCalculos(){
+  const comp = total - desc;
 
-  const total = parseFloat(areaTotal.value)||0;
-  const estrut = parseFloat(descontoEstrutural.value)||0;
-  const clcb = parseFloat(descontoCLCB.value)||0;
-
-  const areaReal = total - estrut;
-  const areaCLCB = total - estrut - clcb;
-
-  document.getElementById("areaComputada").value = areaReal.toFixed(2);
+  document.getElementById("areaComputada").value = comp.toFixed(2);
 
   document.getElementById("painelAreaTotal").innerText = total.toFixed(2)+" m²";
-  document.getElementById("painelAreaReal").innerText = areaReal.toFixed(2)+" m²";
-  document.getElementById("painelAreaCLCB").innerText = areaCLCB.toFixed(2)+" m²";
+  document.getElementById("painelAreaComp").innerText = comp.toFixed(2)+" m²";
 
-  // Processo provisório simples (apenas por área por enquanto)
-  let processo = "CLCB";
-
-  if(areaCLCB > 750){
-    processo = "PTS";
-  }
+  let processo = comp <= 750 ? "CLCB" : "PTS";
 
   atualizarBadge(processo);
-
 }
 
 function atualizarBadge(processo){
-
   const badge = document.getElementById("painelBadge");
   const badgeCard = document.getElementById("badgeProcesso");
 
-  badge.className = "badge";
-  badgeCard.className = "badge";
+  badge.className="badge";
+  badgeCard.className="badge";
 
-  if(processo==="CLCB"){
-    badge.classList.add("clcb");
-    badgeCard.classList.add("clcb");
-  }
-  if(processo==="PTS"){
-    badge.classList.add("pts");
-    badgeCard.classList.add("pts");
-  }
+  if(processo==="CLCB"){badge.classList.add("clcb"); badgeCard.classList.add("clcb");}
+  if(processo==="PTS"){badge.classList.add("pts"); badgeCard.classList.add("pts");}
 
-  badge.innerText = processo;
-  badgeCard.innerText = processo;
+  badge.innerText=processo;
+  badgeCard.innerText=processo;
 }
 
-areaTotal.addEventListener("input", atualizarCalculos);
-descontoEstrutural.addEventListener("input", atualizarCalculos);
-descontoCLCB.addEventListener("input", atualizarCalculos);
+document.getElementById("areaTotal").addEventListener("input", atualizar);
+document.getElementById("areaDescontada").addEventListener("input", atualizar);
 
 </script>
 
