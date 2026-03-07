@@ -2,201 +2,318 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>SAR – Sistema Avançado de Resposta</title>
+<title>SAR 1.0 – Sistema Avançado de Resposta</title>
 
 <style>
-:root {
-  --primary: #1b5e20;
-  --primary-dark: #0d3c14;
-  --bg-page: #f4f4f4;
-  --bg-card: #ffffff;
-  --text: #333333;
-  --border: #e0e0e0;
+:root{
+  --primary:#176f3d;
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --text:#222;
 
-  --clcb: #2e7d32;
-  --pts: #ef6c00;
-  --pt: #d32f2f;
-  --ct: #6a1b9a;
+  --clcb:#2e7d32;
+  --pts:#ef6c00;
+  --pt:#d32f2f;
+  --ct:#6a1b9a;
 }
 
-body {
-  margin: 0;
-  padding: 40px;
-  background: var(--bg-page);
-  font-family: 'Segoe UI', Arial, sans-serif;
-  color: var(--text);
+body{
+  margin:0;
+  font-family:'Segoe UI', Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
 }
 
-.topo {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
+/* Layout principal */
+.layout{
+  display:flex;
+  min-height:100vh;
 }
 
-h1 {
-  margin: 0;
-  color: var(--primary-dark);
+/* Área esquerda */
+.main{
+  flex:1;
+  padding:30px;
 }
 
-button {
-  background: var(--primary);
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
+/* Painel lateral */
+.sidebar{
+  width:340px;
+  background:#ffffff;
+  border-left:1px solid #ddd;
+  padding:20px;
+  position:sticky;
+  top:0;
+  height:100vh;
+  box-shadow:-3px 0 8px rgba(0,0,0,0.04);
 }
 
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  margin-bottom: 20px;
-  overflow: hidden;
+.sidebar h3{
+  margin-top:0;
+  color:var(--primary);
 }
 
-.card-header {
-  background: var(--primary);
-  color: white;
-  padding: 12px 16px;
-  font-weight: bold;
-  cursor: pointer;
+/* Cards */
+.card{
+  background:var(--card);
+  border-radius:10px;
+  padding:20px;
+  margin-bottom:25px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
 }
 
-.card-content {
-  padding: 20px;
-  display: block;
+details.card summary{
+  font-weight:700;
+  font-size:18px;
+  cursor:pointer;
+  color:var(--primary);
 }
 
-input, select {
-  padding: 8px;
-  margin: 5px 0 15px 0;
-  width: 300px;
+.grid2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+  margin-top:15px;
 }
 
-.resultado {
-  font-weight: bold;
-  margin-top: 10px;
+label{
+  font-weight:600;
+  display:block;
+  margin-top:10px;
+}
+
+input, select{
+  width:100%;
+  padding:7px;
+  border:1px solid #ccc;
+  border-radius:6px;
+  font-size:14px;
+}
+
+.badge{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:20px;
+  color:#fff;
+  font-size:12px;
+  font-weight:700;
+}
+
+.badge.clcb{ background:var(--clcb); }
+.badge.pts{ background:var(--pts); }
+.badge.pt{ background:var(--pt); }
+.badge.ct{ background:var(--ct); }
+
+.status{
+  font-size:12px;
+  font-weight:700;
+  margin-left:10px;
+}
+
+.titulo-modulo{
+  font-size:22px;
+  font-weight:700;
+  color:var(--primary);
+  margin-bottom:20px;
+}
+
+.painel-item{
+  margin-bottom:15px;
+}
+
+hr{
+  border:none;
+  border-top:1px solid #eee;
+  margin:15px 0;
 }
 </style>
 </head>
 
 <body>
 
+<div class="layout">
+
+<!-- 🔹 ÁREA PRINCIPAL -->
+<div class="main">
+
+<div class="titulo-modulo">🧱 Cadastro da Edificação</div>
+
+<details class="card" open>
+<summary>
+🏢 Edificação A
+<span class="status">🟡 Parcial</span>
+<span id="badgeProcesso" class="badge clcb">CLCB</span>
+</summary>
+
+<div class="grid2">
+
+<div>
+<label>Referência:</label>
+<input type="text" id="ref">
+
+<label>Grupo de Ocupação:</label>
+<select id="grupo">
+<option value="">-- Selecionar --</option>
+<option value="C">Comercial</option>
+<option value="F">Local de Reunião</option>
+<option value="J">Depósito</option>
+</select>
+
+<label>Descrição:</label>
+<input type="text" id="descricao">
+
+</div>
+
+<div>
+<label>Altura Total (m):</label>
+<input type="number" id="altura">
+
+<label>Possui Subsolo?</label>
+<select id="subsolo">
+<option value="nao">Não</option>
+<option value="sim">Sim</option>
+</select>
+
+<label>Quantidade Pavimentos:</label>
+<input type="number" id="pavimentos">
+</div>
+
+</div>
+
+<hr>
+
+<h4>📐 Áreas</h4>
+
+<div class="grid2">
+
+<div>
+<label>Área Construída (m²):</label>
+<input type="number" id="areaTotal">
+</div>
+
+<div>
+<label>Desconto Estrutural (m²):</label>
+<input type="number" id="descontoEstrutural">
+</div>
+
+<div>
+<label>Desconto permitido para CLCB (m²):</label>
+<input type="number" id="descontoCLCB">
+</div>
+
+<div>
+<label>Área Computada (m²):</label>
+<input type="number" id="areaComputada" readonly>
+</div>
+
+</div>
+
+</details>
+
+</div>
+
+<!-- 🔹 PAINEL LATERAL -->
+<div class="sidebar">
+
+<h3>📊 Análise Técnica</h3>
+
+<div class="painel-item">
+<strong>Área Total:</strong>
+<div id="painelAreaTotal">0,00 m²</div>
+</div>
+
+<div class="painel-item">
+<strong>Área Computada Real:</strong>
+<div id="painelAreaReal">0,00 m²</div>
+</div>
+
+<div class="painel-item">
+<strong>Área válida p/ CLCB:</strong>
+<div id="painelAreaCLCB">0,00 m²</div>
+</div>
+
+<hr>
+
+<div class="painel-item">
+<strong>Processo Provisório:</strong><br>
+<span id="painelBadge" class="badge clcb">CLCB</span>
+</div>
+
+</div>
+
+</div>
+
 <script>
-if (sessionStorage.getItem("logado") !== "true") {
-    window.location.href = "/index.html";
-}
-</script>
 
-<div class="topo">
-  <h1>SAR – Sistema Avançado de Resposta</h1>
-  <button onclick="logout()">Sair</button>
-</div>
+// Estrutura interna correta
+const lote = {
+  edificacoes: [
+    {
+      area_total:0,
+      desconto_estrutural:0,
+      desconto_clcb:0,
+      area_real:0,
+      area_para_clcb:0,
+      processo_provisorio:"CLCB"
+    }
+  ]
+};
 
-<!-- 🔵 BLOCO 1 – LOTE -->
-<div class="card">
-  <div class="card-header" onclick="toggle(this)">
-    🔵 LOTE
-  </div>
-  <div class="card-content">
-    Quantidade de edificações no lote: <strong>1</strong> (Versão 1.0 travada)
-  </div>
-</div>
+const areaTotal = document.getElementById("areaTotal");
+const descontoEstrutural = document.getElementById("descontoEstrutural");
+const descontoCLCB = document.getElementById("descontoCLCB");
 
-<!-- 🔵 BLOCO 2 – CONSTRUÇÃO DA EDIFICAÇÃO -->
-<div class="card">
-  <div class="card-header" onclick="toggle(this)">
-    🔵 CONSTRUÇÃO DA EDIFICAÇÃO
-  </div>
-  <div class="card-content">
-    Área total construída:<br>
-    <input type="number"><br>
+function atualizarCalculos(){
 
-    Altura estimada da edificação:<br>
-    <input type="number"><br>
-  </div>
-</div>
+  const total = parseFloat(areaTotal.value)||0;
+  const estrut = parseFloat(descontoEstrutural.value)||0;
+  const clcb = parseFloat(descontoCLCB.value)||0;
 
-<!-- 🔵 BLOCO 3 – PAVIMENTOS -->
-<div class="card">
-  <div class="card-header" onclick="toggle(this)">
-    🔵 PAVIMENTOS
-  </div>
-  <div class="card-content">
-    (Aqui será construído o motor dinâmico de pavimentos)
-  </div>
-</div>
+  const areaReal = total - estrut;
+  const areaCLCB = total - estrut - clcb;
 
-<!-- 🔵 BLOCO 4 – CONSOLIDAÇÃO -->
-<div class="card">
-  <div class="card-header" onclick="toggle(this)">
-    🔵 CONSOLIDAÇÃO DA OCUPAÇÃO
-  </div>
-  <div class="card-content">
-    Área total por ocupação<br>
-    Predominância<br>
-    Regra de ocupação mista (750 m² / 10%)<br>
-  </div>
-</div>
+  document.getElementById("areaComputada").value = areaReal.toFixed(2);
 
-<!-- 🔵 BLOCO 5 – POTENCIAL DE RISCO -->
-<div class="card">
-  <div class="card-header" onclick="toggle(this)">
-    🔵 POTENCIAL DE RISCO
-  </div>
-  <div class="card-content">
-    Carga de incêndio<br>
-    Classificação de risco: Baixo / Médio / Alto
-  </div>
-</div>
+  document.getElementById("painelAreaTotal").innerText = total.toFixed(2)+" m²";
+  document.getElementById("painelAreaReal").innerText = areaReal.toFixed(2)+" m²";
+  document.getElementById("painelAreaCLCB").innerText = areaCLCB.toFixed(2)+" m²";
 
-<!-- 🔵 BLOCO 6 – PROCESSO BASE -->
-<div class="card">
-  <div class="card-header" onclick="toggle(this)">
-    🔵 PROCESSO BASE
-  </div>
-  <div class="card-content">
-    Determinação inicial: CLCB / PTS / PT / CT
-  </div>
-</div>
+  // Processo provisório simples (apenas por área por enquanto)
+  let processo = "CLCB";
 
-<!-- 🔵 BLOCO 7 – CRITÉRIOS TÉCNICOS -->
-<div class="card">
-  <div class="card-header" onclick="toggle(this)">
-    🔵 CRITÉRIOS TÉCNICOS
-  </div>
-  <div class="card-content">
-    GLP<br>
-    Líquidos inflamáveis<br>
-    Gases<br>
-    Classe K<br>
-    Outros critérios elevatórios
-  </div>
-</div>
+  if(areaCLCB > 750){
+    processo = "PTS";
+  }
 
-<!-- 🔵 BLOCO 8 – RESULTADO FINAL -->
-<div class="card">
-  <div class="card-header" onclick="toggle(this)">
-    🔵 RESULTADO FINAL
-  </div>
-  <div class="card-content resultado">
-    Processo final será exibido aqui.
-  </div>
-</div>
+  atualizarBadge(processo);
 
-<script>
-function toggle(header) {
-  const content = header.nextElementSibling;
-  content.style.display =
-    content.style.display === "none" ? "block" : "none";
 }
 
-function logout() {
-  sessionStorage.clear();
-  window.location.href = "/index.html";
+function atualizarBadge(processo){
+
+  const badge = document.getElementById("painelBadge");
+  const badgeCard = document.getElementById("badgeProcesso");
+
+  badge.className = "badge";
+  badgeCard.className = "badge";
+
+  if(processo==="CLCB"){
+    badge.classList.add("clcb");
+    badgeCard.classList.add("clcb");
+  }
+  if(processo==="PTS"){
+    badge.classList.add("pts");
+    badgeCard.classList.add("pts");
+  }
+
+  badge.innerText = processo;
+  badgeCard.innerText = processo;
 }
+
+areaTotal.addEventListener("input", atualizarCalculos);
+descontoEstrutural.addEventListener("input", atualizarCalculos);
+descontoCLCB.addEventListener("input", atualizarCalculos);
+
 </script>
 
 </body>
