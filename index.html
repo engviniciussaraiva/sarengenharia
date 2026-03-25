@@ -1527,17 +1527,30 @@ if(erro.style.display === "block") return
 
     let inputs = document.querySelectorAll("#modalAreasDescontadas input")
 
-    let total = 0
+    let totalCLCB = 0
+let totalPTS = 0
 
-    inputs.forEach(inp=>{
-        let val = parseFloat(inp.value) || 0
-        total += val
-    })
+inputs.forEach(inp => {
+
+let val = parseFloat(inp.value) || 0
+
+if(inp.classList.contains("clcb-ok")){
+totalCLCB += val
+}
+
+if(inp.classList.contains("clcb-no")){
+totalPTS += val
+}
+
+})
+pavimentoAtual.dataset.descClcb = totalCLCB
+pavimentoAtual.dataset.descPts = totalPTS
 
     // joga no campo do pavimento correto
     let campoDescontada = pavimentoAtual.querySelector(".area-descontada")
 
-    campoDescontada.value = formatarBR(total)
+ let total = totalCLCB + totalPTS
+campoDescontada.value = formatarBR(total)
 
     // recalcula área
     calcularArea(pavimentoAtual.querySelector(".area-coberta"))
