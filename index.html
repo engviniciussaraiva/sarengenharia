@@ -1175,10 +1175,9 @@ div.innerHTML = `
 <div class="form-row">
 <label>Pé-direito (m)</label>
 <input class="input-altura"
-placeholder="Ex: 3,00"
+value="3,00"
 oninput="calcularAltura(this)"
 onblur="formatarAltura(this)">
-</div>
 `
 
 alturaContainer.appendChild(div)
@@ -1981,9 +1980,13 @@ function formatarAltura(input){
 
 let valor = parseNumeroBR(input.value)
 
+// 🔥 se vazio ou zero → assume padrão
+if(!valor || valor === 0){
+valor = 3
+}
+
 input.value = formatarBR(valor)
 
-// 🔥 só recalcula altura depois de formatar
 calcularAltura(input)
 
 }
