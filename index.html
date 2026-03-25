@@ -1177,7 +1177,7 @@ div.innerHTML = `
 <input class="input-altura"
 placeholder="Ex: 3,00"
 oninput="calcularAltura(this)"
-onblur="formatarNumero(this)">
+onblur="formatarAltura(this)">
 </div>
 `
 
@@ -1936,9 +1936,9 @@ ativo: col[11]?.trim().toUpperCase() === "TRUE"
 
 function calcularAltura(input){
 
-let card = input.closest(".edificacao-card")
+let blocoAltura = input.closest(".altura-pavimentos")
 
-let inputs = card.querySelectorAll(".input-altura")
+let inputs = blocoAltura.querySelectorAll(".input-altura")
 
 let total = 0
 
@@ -1949,9 +1949,11 @@ total += val
 
 })
 
+// 🔥 ATUALIZA TOTAL
+let card = input.closest(".edificacao-card")
 card.querySelector(".altura-total").innerText = formatarBR(total)
 
-// 🔁 atualizar tabela
+// 🔁 ATUALIZA TABELA
 
 let tbody = card.querySelector(".tabela-altura-body")
 tbody.innerHTML = ""
@@ -1975,6 +1977,16 @@ tbody.appendChild(tr)
 
 }
 
+function formatarAltura(input){
+
+let valor = parseNumeroBR(input.value)
+
+input.value = formatarBR(valor)
+
+// 🔥 só recalcula altura depois de formatar
+calcularAltura(input)
+
+}
 
 
 </script>
