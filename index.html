@@ -1722,7 +1722,9 @@ tr.innerHTML = `
 
 
     // 🔥 CLASSIFICAÇÃO VIA PLANILHA
-let resultado = classificarArea(totalComp)
+let opcoes = classificarArea(totalComp)
+
+let resultado = null
 
 let descontoCLCB = 0
 let descontoPTS = 0
@@ -1739,14 +1741,19 @@ descontoPTS += parseFloat(pav.dataset.descPts || 0)
 if(totalComp <= 750){
 
 if(descontoPTS > 0){
-// ❌ usou desconto NÃO permitido → força PTS
-resultado = BD_AREA.find(r => r.processo === "PTS")
+// remove CLCB
+resultado = opcoes.find(r => r.processo === "PTS")
 }
 
-else if(descontoCLCB > 0){
-// ✔ só desconto permitido → mantém CLCB
-resultado = BD_AREA.find(r => r.processo === "CLCB")
+else{
+// pega menor nível (CLCB primeiro)
+resultado = opcoes.sort((a,b)=> a.nivel_processo - b.nivel_processo)[0]
 }
+
+}else{
+
+// fora de 750, banco decide
+resultado = opcoes.sort((a,b)=> a.nivel_processo - b.nivel_processo)[0]
 
 }
 
@@ -1802,15 +1809,16 @@ window.onload = () => {
 
 function classificarArea(valor){
 
-let resultado = BD_AREA.find(r =>
+let opcoes = BD_AREA.filter(r =>
 r.criterio?.trim().toLowerCase() === "area" &&
 r.ativo === true &&
 valor >= r.min &&
 valor <= r.max
 )
 
-return resultado
+return opcoes
 }
+
 
 
 let BD_AREA = []
@@ -1835,8 +1843,10 @@ let col = l.split("\t")
 return {
 criterio: col[2]?.trim().toLowerCase(),
 
-min: parseFloat(col[5]?.trim()),
-max: parseFloat(col[6]?.trim()),
+min: parseFloat(col[5]?.trim().replace(",", ".")),
+max: parseFloat(col[6]?.trim().replace(",", ".")),
+
+nivel_processo: parseInt(col[7]?.trim()),
 
 processo: col[8]?.trim(),
 descricao: col[9]?.trim(),
