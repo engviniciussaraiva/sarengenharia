@@ -1012,7 +1012,8 @@ ${pavimentosHTML}
 <tr style="background:#f0f0f0;">
 <th style="border:1px solid #ccc; padding:6px;">Descrição</th>
 <th style="border:1px solid #ccc; padding:6px;">Área do pavimento</th>
-<th style="border:1px solid #ccc; padding:6px;">Área descontada</th>
+<th style="border:1px solid #ccc; padding:6px;">Área descontada (CLCB)</th>
+<th style="border:1px solid #ccc; padding:6px;">Área descontada (não CLCB)</th>
 <th style="border:1px solid #ccc; padding:6px;">Área computada</th>
 </tr>
 </thead>
@@ -1679,7 +1680,8 @@ function atualizarQuadroAreas(){
         tbody.innerHTML = ""
 
         let totalCoberta = 0
-        let totalDesc = 0
+        let totalDescCLCB = 0
+        let totalDescPTS = 0
         let totalComp = 0
 
         card.querySelectorAll(".pavimento-bloco").forEach(pav => {
@@ -1689,17 +1691,21 @@ function atualizarQuadroAreas(){
             let cob = parseNumeroBR(pav.querySelector(".area-coberta")?.value)
             let des = parseNumeroBR(pav.querySelector(".area-descontada")?.value)
             let com = parseNumeroBR(pav.querySelector(".area-computada")?.value)
+let descClcb = parseFloat(pav.dataset.descClcb || 0)
+let descPts = parseFloat(pav.dataset.descPts || 0)
 
             totalCoberta += cob
-            totalDesc += des
+            totalDescCLCB += descClcb
+            totalDescPTS += descPts
             totalComp += com
 
             let tr = document.createElement("tr")
 
-            tr.innerHTML = `
+tr.innerHTML = `
 <td style="border:1px solid #ccc; padding:6px;text-align:center;">${nome}</td>
 <td style="border:1px solid #ccc; padding:6px;text-align:center;">${formatarBR(cob)}</td>
-<td style="border:1px solid #ccc; padding:6px;text-align:center;">${formatarBR(des)}</td>
+<td style="border:1px solid #ccc; padding:6px;text-align:center; color:#2e7d32;">${formatarBR(descClcb)}</td>
+<td style="border:1px solid #ccc; padding:6px;text-align:center; color:#c62828;">${formatarBR(descPts)}</td>
 <td style="border:1px solid #ccc; padding:6px;text-align:center;">${formatarBR(com)}</td>
 `
 
@@ -1708,7 +1714,8 @@ function atualizarQuadroAreas(){
         })
 
         card.querySelector(".total-coberta").innerText = formatarBR(totalCoberta)
-        card.querySelector(".total-descontada").innerText = formatarBR(totalDesc)
+        card.querySelector(".total-desc-clcb").innerText = formatarBR(totalDescCLCB)
+   card.querySelector(".total-desc-pts").innerText = formatarBR(totalDescPTS)
         card.querySelector(".total-computada").innerText = formatarBR(totalComp)
 
 
