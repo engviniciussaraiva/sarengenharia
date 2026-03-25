@@ -31,13 +31,20 @@ font-weight:bold;
 display:flex;
 justify-content:space-between;
 align-items:center;
+
+/* 🔥 FIXAR NO TOPO */
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+z-index: 9999;
 }
 
 /* LAYOUT */
 
 .container{
 display:flex;
-padding:20px;
+padding:90px 20px 20px 20px; /* 🔥 espaço para topbar */
 gap:20px;
 }
 
@@ -615,7 +622,7 @@ linha.className="edificacao"
 
 linha.innerHTML = `
 <span class="indice">${i}</span>
-<input placeholder="Bloco A" oninput="atualizarNomeEdificacao(this); atualizarLegenda(); salvarProjeto()">
+<input placeholder="Bloco Principal" oninput="atualizarNomeEdificacao(this); atualizarLegenda(); salvarProjeto()">
 <input placeholder="Nº Pavimentos" oninput="salvarProjeto()">
 <input placeholder="Nº Subsolos" oninput="salvarProjeto()">
 <input placeholder="Pé-direito (m)" oninput="salvarProjeto()">
@@ -791,17 +798,14 @@ pavimentosHTML += `
 <div class="pavimento-bloco" data-tipo="superior" data-num="${p}">
 
 <div class="subtitulo">
-Pavimento ${p}
+📦 Pavimento ${p}
 </div>
 
 <!-- ÁREA -->
 
 <div style="border:1px solid #ddd; border-radius:8px; padding:12px; background:#fff; margin-top:10px;">
 
-  <div style="font-weight:600; margin-bottom:10px;">
-    🧱 Quadro de Áreas do Pavimento
-  </div>
-
+  
   <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
 
     <div>
@@ -852,16 +856,13 @@ pavimentosHTML += `
 <div class="pavimento-bloco" data-tipo="terreo">
 
 <div class="subtitulo">
-Pavimento Térreo
+📦 Pavimento Térreo
 </div>
 
 <!-- ÁREA -->
 
 <div style="border:1px solid #ddd; border-radius:8px; padding:12px; background:#fff; margin-top:10px;">
 
-  <div style="font-weight:600; margin-bottom:10px;">
-    🧱 Quadro de Áreas do Pavimento
-  </div>
 
   <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
 
@@ -912,16 +913,13 @@ pavimentosHTML += `
 <div class="pavimento-bloco" data-tipo="subsolo" data-num="${s}">
 
 <div class="subtitulo">
-Subsolo -${s}
+📦 Subsolo -${s}
 </div>
 
 <!-- ÁREA -->
 
 <div style="border:1px solid #ddd; border-radius:8px; padding:12px; background:#fff; margin-top:10px;">
 
-  <div style="font-weight:600; margin-bottom:10px;">
-    🧱 Quadro de Áreas do Pavimento
-  </div>
 
   <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
 
@@ -1022,7 +1020,7 @@ ${pavimentosHTML}
 </tbody>
 
 <tfoot>
-<tr style="background:#fafafa;">
+<tr style="background:#fafafa; font-weight:bold;">
 <td style="border:1px solid #ccc; padding:6px;text-align:center;">TOTAL</td>
 <td style="border:1px solid #ccc; padding:6px; text-align:center;" class="total-coberta">0,00</td>
 <td style="border:1px solid #ccc; padding:6px; text-align:center;" class="total-desc-clcb">0,00</td>
