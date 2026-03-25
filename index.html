@@ -1060,9 +1060,41 @@ display:none;
 </div>
 
 <div class="modulo-conteudo">
-<p style="font-size:13px; color:#777;">
-Módulo em desenvolvimento
-</p>
+
+<!-- CAMPOS POR PAVIMENTO -->
+
+<div class="altura-pavimentos"></div>
+
+<!-- TABELA FINAL -->
+
+<div class="modulo-bloco" style="margin-top:12px;">
+
+<div class="subtitulo" style="font-size:14px;">
+📊 Quadro de Altura da Edificação
+</div>
+
+<table style="width:100%; border-collapse:collapse; font-size:13px;">
+
+<thead>
+<tr style="background:#f0f0f0;">
+<th style="border:1px solid #ccc; padding:6px;">Descrição</th>
+<th style="border:1px solid #ccc; padding:6px;">Pé-direito (m)</th>
+</tr>
+</thead>
+
+<tbody class="tabela-altura-body"></tbody>
+
+<tfoot>
+<tr style="background:#fafafa; font-weight:bold;">
+<td style="border:1px solid #ccc; padding:6px; text-align:center;">ALTURA TOTAL</td>
+<td style="border:1px solid #ccc; padding:6px; text-align:center;" class="altura-total">0,00</td>
+</tr>
+</tfoot>
+
+</table>
+
+</div>
+
 </div>
 
 </div>
@@ -1120,6 +1152,36 @@ Resumo técnico será gerado automaticamente
 `
 
 conteudo.appendChild(box)
+
+// 🔥 GERAR ALTURA AUTOMATICAMENTE
+
+let alturaContainer = box.querySelector(".altura-pavimentos")
+
+let pavs = box.querySelectorAll(".pavimento-bloco")
+
+pavs.forEach(pav => {
+
+let nome = pav.querySelector(".subtitulo")?.innerText || "Pavimento"
+
+let div = document.createElement("div")
+div.className = "pavimento-bloco"
+
+div.innerHTML = `
+<div class="subtitulo">${nome}</div>
+
+<div class="form-row">
+<label>Pé-direito (m)</label>
+<input class="input-altura"
+placeholder="Ex: 3,00"
+oninput="calcularAltura(this)"
+onblur="formatarNumero(this)">
+</div>
+`
+
+alturaContainer.appendChild(div)
+
+})
+
 
 // 🔁 RESTAURA DADOS
 if(dadosAntigos[i]){
@@ -1859,6 +1921,48 @@ ativo: col[11]?.trim().toUpperCase() === "TRUE"
     console.log("BD_AREA carregado:", BD_AREA)
 
 }
+
+function calcularAltura(input){
+
+let card = input.closest(".edificacao-card")
+
+let inputs = card.querySelectorAll(".input-altura")
+
+let total = 0
+
+inputs.forEach(inp => {
+
+let val = parseNumeroBR(inp.value)
+total += val
+
+})
+
+card.querySelector(".altura-total").innerText = formatarBR(total)
+
+// 🔁 atualizar tabela
+
+let tbody = card.querySelector(".tabela-altura-body")
+tbody.innerHTML = ""
+
+inputs.forEach(inp => {
+
+let nome = inp.closest(".pavimento-bloco").querySelector(".subtitulo").innerText
+
+let val = parseNumeroBR(inp.value)
+
+let tr = document.createElement("tr")
+
+tr.innerHTML = `
+<td style="border:1px solid #ccc; padding:6px; text-align:center;">${nome}</td>
+<td style="border:1px solid #ccc; padding:6px; text-align:center;">${formatarBR(val)}</td>
+`
+
+tbody.appendChild(tr)
+
+})
+
+}
+
 
 
 </script>
