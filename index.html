@@ -1157,9 +1157,12 @@ conteudo.appendChild(box)
 
 let alturaContainer = box.querySelector(".altura-pavimentos")
 
-let pavs = box.querySelectorAll(".pavimento-bloco")
+let pavs = box.querySelectorAll("[data-tipo]")
+
 
 pavs.forEach(pav => {
+
+if(pav.closest(".altura-pavimentos")) return
 
 let nome = pav.querySelector(".subtitulo")?.innerText || "Pavimento"
 
@@ -1186,7 +1189,7 @@ alturaContainer.appendChild(div)
 // 🔁 RESTAURA DADOS
 if(dadosAntigos[i]){
 
-    let pavs = box.querySelectorAll(".pavimento-bloco")
+    let pavs = box.querySelectorAll("[data-tipo]")
 
     pavs.forEach((pav)=>{
 
@@ -1578,8 +1581,17 @@ function formatarNumero(input){
 
     input.value = formatarBR(valor)
 
-    calcularArea(input)
+    // 🔥 só recalcula se for área
+    if(input.classList.contains("area-coberta")){
+        calcularArea(input)
+    }
+
+    // 🔥 se for altura
+    if(input.classList.contains("input-altura")){
+        calcularAltura(input)
+    }
 }
+
 
 function aplicarAreas(){
 
