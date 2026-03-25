@@ -1716,6 +1716,32 @@ function atualizarQuadroAreas(){
     // 🔥 CLASSIFICAÇÃO VIA PLANILHA
 let resultado = classificarArea(totalComp)
 
+let descontoCLCB = 0
+let descontoPTS = 0
+
+card.querySelectorAll(".pavimento-bloco").forEach(pav => {
+
+descontoCLCB += parseFloat(pav.dataset.descClcb || 0)
+descontoPTS += parseFloat(pav.dataset.descPts || 0)
+
+})
+
+// 🔥 REGRA DE DESCONTO (CRÍTICA)
+
+if(totalComp <= 750){
+
+if(descontoPTS > 0){
+// ❌ usou desconto NÃO permitido → força PTS
+resultado = BD_AREA.find(r => r.processo === "PTS")
+}
+
+else if(descontoCLCB > 0){
+// ✔ só desconto permitido → mantém CLCB
+resultado = BD_AREA.find(r => r.processo === "CLCB")
+}
+
+}
+
 console.log("TOTAL COMPUTADA:", totalComp)
 console.log("RESULTADO:", resultado)
 
