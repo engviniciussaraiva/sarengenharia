@@ -131,6 +131,11 @@ background:#fafafa;
 overflow:hidden;
 }
 
+.resultado-processo{
+font-weight: bold;
+font-size: 15px;
+margin-top: 8px;
+}
 
 .edificacao-header{
 background:#f7f7f7;
@@ -1708,11 +1713,18 @@ if(resultado){
 
 box.style.display = "block"
 
+let cor = "#333"
+
+if(resultado.processo === "CLCB") cor = "#2e7d32"
+if(resultado.processo === "PTS") cor = "#4169E1"
+if(resultado.processo === "PT") cor = "#c62828"
+
 box.innerHTML = `
-<strong>Classificação pela Área Construída:</strong><br>
-${resultado.processo} - ${resultado.descricao}<br><br>
+<div style="font-weight:bold; font-size:15px; color:${cor};">
 ${resultado.texto}
+</div>
 `
+
 
 } else {
 
