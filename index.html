@@ -1012,8 +1012,8 @@ ${pavimentosHTML}
 <tr style="background:#f0f0f0;">
 <th style="border:1px solid #ccc; padding:6px;">Descrição</th>
 <th style="border:1px solid #ccc; padding:6px;">Área do pavimento</th>
-<th style="border:1px solid #ccc; padding:6px;">Área descontada (CLCB)</th>
-<th style="border:1px solid #ccc; padding:6px;">Área descontada (não CLCB)</th>
+<th style="border:1px solid #ccc; padding:6px;">Área descontada (permitido para CLCB)</th>
+<th style="border:1px solid #ccc; padding:6px;">Área descontada (não permitido para CLCB)</th>
 <th style="border:1px solid #ccc; padding:6px;">Área computada</th>
 </tr>
 </thead>
@@ -1705,8 +1705,8 @@ let descPts = parseFloat(pav.dataset.descPts || 0)
 tr.innerHTML = `
 <td style="border:1px solid #ccc; padding:6px;text-align:center;">${nome}</td>
 <td style="border:1px solid #ccc; padding:6px;text-align:center;">${formatarBR(cob)}</td>
-<td style="border:1px solid #ccc; padding:6px;text-align:center; color:#2e7d32;">${formatarBR(descClcb)}</td>
-<td style="border:1px solid #ccc; padding:6px;text-align:center; color:#c62828;">${formatarBR(descPts)}</td>
+<td style="border:1px solid #ccc; padding:6px;text-align:center;">${formatarBR(descClcb)}</td>
+<td style="border:1px solid #ccc; padding:6px;text-align:center;">${formatarBR(descPts)}</td>
 <td style="border:1px solid #ccc; padding:6px;text-align:center;">${formatarBR(com)}</td>
 `
 
