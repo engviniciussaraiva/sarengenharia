@@ -424,7 +424,9 @@ background:#c8c8c8;
 
 <div class="linha-topo">
 <label>Quantidade de edificações:</label>
-<input type="number" id="qtdEdificacoes" placeholder="Digite a quantidade" max="10">
+<input type="text" id="qtdEdificacoes" placeholder="Digite a quantidade" maxlength="2"
+oninput="this.value = this.value.replace(/[^0-9]/g,'')">
+
 </div>
 
 <div class="edificacao-header-grid">
@@ -551,7 +553,14 @@ let avisoQtdMostrado = false
 const qtdInput = document.getElementById("qtdEdificacoes")
 let lista = document.getElementById("listaEdificacoes")
 
-qtdInput.addEventListener("focus", avisarReset)
+qtdInput.addEventListener("click", function(){
+
+setTimeout(()=>{
+avisarReset()
+}, 100)
+
+})
+
 
 qtdInput.addEventListener("input", function(){
 gerarEdificacoes()
