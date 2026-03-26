@@ -552,7 +552,13 @@ const qtdInput = document.getElementById("qtdEdificacoes")
 let lista = document.getElementById("listaEdificacoes")
 
 qtdInput.addEventListener("click", avisarReset)
+
+// mantém o comportamento atual
 qtdInput.addEventListener("change", gerarEdificacoes)
+
+// 🔥 CORREÇÃO: dispara ao sair do campo
+qtdInput.addEventListener("blur", gerarEdificacoes)
+
 
 
 
