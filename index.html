@@ -1200,13 +1200,19 @@ div.innerHTML = `
         onblur="formatarAltura(this)">
       </div>
 
+      <div class="field-row">
+        <label>Área do pavimento (m²)</label>
+        <input class="input-area-pavimento"
+        placeholder="0,00">
+      </div>
+
     </div>
 
     <!-- 🟨 COLUNA 2 — CLASSIFICAÇÃO -->
     <div>
 
       <div class="field-row">
-        <label>Tipo do nível</label>
+        <label>Tipo</label>
         <select class="tipo-nivel">
           <option value="pavimento">Pavimento</option>
           <option value="mezanino">Mezanino</option>
@@ -1214,14 +1220,14 @@ div.innerHTML = `
       </div>
 
       <div class="field-row">
-        <label>
+        <label style="display:flex; align-items:center; gap:6px;">
           <input type="checkbox" class="chk-habitado" checked>
           Possui permanência de pessoas
         </label>
       </div>
 
       <div class="field-row">
-        <label>
+        <label style="display:flex; align-items:center; gap:6px;">
           <input type="checkbox" class="chk-tecnico">
           Pavimento de uso técnico
         </label>
