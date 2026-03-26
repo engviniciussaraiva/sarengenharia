@@ -623,11 +623,29 @@ linha.className="edificacao"
 
 linha.innerHTML = `
 <span class="indice">${i}</span>
-<input placeholder="Bloco Principal" oninput="atualizarNomeEdificacao(this); atualizarLegenda(); salvarProjeto()">
-<input placeholder="Nº Pavimentos" oninput="salvarProjeto()">
-<input placeholder="Nº Subsolos" oninput="salvarProjeto()">
-<input placeholder="Pé-direito (m)" oninput="salvarProjeto()">
+
+<input placeholder="Bloco Principal"
+oninput="atualizarNomeEdificacao(this); atualizarLegenda(); salvarProjeto()">
+
+<input placeholder="Nº Pavimentos"
+type="number"
+step="1"
+min="1"
+oninput="this.value = this.value.replace(/[^0-9]/g,''); salvarProjeto()">
+
+<input placeholder="Nº Subsolos"
+type="number"
+step="1"
+min="0"
+value="0"
+oninput="this.value = this.value.replace(/[^0-9]/g,''); salvarProjeto()">
+
+<input placeholder="Pé-direito (m)"
+value="3,00"
+oninput="salvarProjeto()"
+onblur="formatarAltura(this)">
 `
+
 
 
 lista.appendChild(linha)
@@ -761,6 +779,26 @@ seta.innerHTML = "▼"
 function gerarModuloEdificacoes(){
 
 let qtd = parseInt(document.getElementById("qtdEdificacoes").value);
+
+let linhas = document.querySelectorAll("#listaEdificacoes .edificacao")
+
+for(let i=0;i<linhas.length;i++){
+
+let pav = linhas[i].children[2].value
+
+if(!pav || pav === "0"){
+
+abrirModal(
+"Preencha corretamente o número de pavimentos para todas as edificações.",
+function(){}
+)
+
+return
+}
+
+}
+
+
 let dadosAntigos = capturarDadosEdificacoes()
 
 if(!qtd || qtd <= 0){
@@ -2119,7 +2157,7 @@ class="m-input clcb-ok" data-nome="residencial" step="0.01" oninput="validarArea
 
     <div style="max-height:400px; overflow-y:auto; margin-top:10px;">
 
-      <p>Parágrafo 1 - editar aqui...</p>
+      <p>Campo padrão altura do pavimento</p>
       <p>Parágrafo 2 - editar aqui...</p>
       <p>Parágrafo 3 - editar aqui...</p>
       <p>Parágrafo 4 - editar aqui...</p>
