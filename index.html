@@ -1185,11 +1185,11 @@ div.innerHTML = `
 <div class="subtitulo">${nome}</div>
 
 <!-- 🔲 CAIXA INTERNA -->
-<div style="border:1px solid #ddd; border-radius:8px; padding:12px; background:#fff; margin-top:10px;">
+<div style="border:1px solid #ddd; border-radius:8px; padding:14px; background:#fff; margin-top:10px;">
 
-  <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; align-items:start;">
+  <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px; align-items:start;">
 
-    <!-- 🟩 COLUNA 1 — DADOS FÍSICOS -->
+    <!-- 🟩 COLUNA ESQUERDA -->
     <div>
 
       <div class="field-row">
@@ -1206,17 +1206,20 @@ div.innerHTML = `
         placeholder="0,00">
       </div>
 
-    </div>
-
-    <!-- 🟨 COLUNA 2 — CLASSIFICAÇÃO -->
-    <div>
-
       <div class="field-row">
         <label>Tipo</label>
-        <select class="tipo-nivel">
-          <option value="pavimento">Pavimento</option>
-          <option value="mezanino">Mezanino</option>
-        </select>
+        <div style="color:#c62828; font-size:13px;">
+          Aqui aparece automático se pavimento ou mezanino
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 🟨 COLUNA CENTRAL -->
+    <div>
+
+      <div style="font-weight:600; margin-bottom:8px;">
+        Indicar
       </div>
 
       <div class="field-row">
@@ -1235,16 +1238,17 @@ div.innerHTML = `
 
     </div>
 
-    <!-- 🟦 COLUNA 3 — RESULTADO -->
+    <!-- 🟦 COLUNA DIREITA -->
     <div>
 
       <div style="
-        padding:12px;
-        border-radius:6px;
+        padding:14px;
+        border-radius:8px;
         background:#e8f5e9;
-        border-left:5px solid #2e7d32;
-        font-size:13px;
+        border-left:6px solid #2e7d32;
+        font-size:14px;
         font-weight:600;
+        line-height:1.4;
       ">
         ✔ Este nível está sendo considerado na altura da edificação
       </div>
@@ -1255,6 +1259,7 @@ div.innerHTML = `
 
 </div>
 `
+
 
 
 alturaContainer.appendChild(div)
