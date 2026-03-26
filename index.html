@@ -1991,6 +1991,14 @@ calcularAltura(input)
 
 }
 
+function abrirConfig(){
+  document.getElementById("modalConfig").style.display = "flex";
+}
+
+function fecharConfig(){
+  document.getElementById("modalConfig").style.display = "none";
+}
+
 
 </script>
 
@@ -2101,6 +2109,47 @@ class="m-input clcb-ok" data-nome="residencial" step="0.01" oninput="validarArea
   </div>
 </div>
 
+<div id="modalConfig" class="modal-bg" style="display:none;">
+
+  <div class="modal-box-small">
+
+    <div class="subtitulo">
+      ⚙️ Configurações do Sistema
+    </div>
+
+    <div style="max-height:400px; overflow-y:auto; margin-top:10px;">
+
+      <p>Parágrafo 1 - editar aqui...</p>
+      <p>Parágrafo 2 - editar aqui...</p>
+      <p>Parágrafo 3 - editar aqui...</p>
+      <p>Parágrafo 4 - editar aqui...</p>
+      <p>Parágrafo 5 - editar aqui...</p>
+      <p>Parágrafo 6 - editar aqui...</p>
+      <p>Parágrafo 7 - editar aqui...</p>
+      <p>Parágrafo 8 - editar aqui...</p>
+      <p>Parágrafo 9 - editar aqui...</p>
+      <p>Parágrafo 10 - editar aqui...</p>
+
+      <p>Parágrafo 11 - editar aqui...</p>
+      <p>Parágrafo 12 - editar aqui...</p>
+      <p>Parágrafo 13 - editar aqui...</p>
+      <p>Parágrafo 14 - editar aqui...</p>
+      <p>Parágrafo 15 - editar aqui...</p>
+      <p>Parágrafo 16 - editar aqui...</p>
+      <p>Parágrafo 17 - editar aqui...</p>
+      <p>Parágrafo 18 - editar aqui...</p>
+      <p>Parágrafo 19 - editar aqui...</p>
+      <p>Parágrafo 20 - editar aqui...</p>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" onclick="fecharConfig()">Fechar</button>
+    </div>
+
+  </div>
+
+</div>
 
 
 
