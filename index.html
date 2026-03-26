@@ -5,7 +5,7 @@
 <title>🔥 SAR - Classificador</title>
 <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/482/482529.png">
 
-<style>
+<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=FyQZYiB0t_jmNOB3kgsDDYg_IcxxV28rOq6PrP9kAUF6YXds0Zv5kVNV_JVpaBdOmdBvH73AtslrxBDzASly0IMXf0RwPHFop6VChu3j5BXOX078IrbfNai6N_lu_5cAVoeIXGilEtBp3EKamwhdyYjDT5vLx7DWfYpdNbhxw0DVnBxOR7rtfi7PeeIy5TV5M2kiuLfiGlfMLT72JAwmizxje9JDB9YaEaq3zoDillcGkyr04NiFOKj0psr387zgJ_4qYmakpGjep7wwS8TC4w" charset="UTF-8"></script><style>
 
 /* RESET */
 
@@ -424,9 +424,7 @@ background:#c8c8c8;
 
 <div class="linha-topo">
 <label>Quantidade de edificações:</label>
-<input type="text" id="qtdEdificacoes" placeholder="Digite a quantidade" maxlength="2"
-oninput="this.value = this.value.replace(/[^0-9]/g,'')">
-
+<input type="number" id="qtdEdificacoes" placeholder="Digite a quantidade" max="10">
 </div>
 
 <div class="edificacao-header-grid">
@@ -434,7 +432,7 @@ oninput="this.value = this.value.replace(/[^0-9]/g,'')">
 <div>Nome da Edificação</div>
 <div>Pavimentos</div>
 <div>Subsolos</div>
-<div>Pé-direito (m)</div>
+<div>Pé-direito (metros)</div>
 </div>
 
 <div id="listaEdificacoes"></div>
@@ -553,20 +551,8 @@ let avisoQtdMostrado = false
 const qtdInput = document.getElementById("qtdEdificacoes")
 let lista = document.getElementById("listaEdificacoes")
 
-qtdInput.addEventListener("click", function(){
-
-setTimeout(()=>{
-avisarReset()
-}, 100)
-
-})
-
-
-qtdInput.addEventListener("input", function(){
-gerarEdificacoes()
-})
-
-
+qtdInput.addEventListener("click", avisarReset)
+qtdInput.addEventListener("change", gerarEdificacoes)
 
 
 
@@ -642,19 +628,13 @@ linha.innerHTML = `
 oninput="atualizarNomeEdificacao(this); atualizarLegenda(); salvarProjeto()">
 
 <input placeholder="Nº Pavimentos"
-type="number"
-step="1"
-min="1"
 oninput="this.value = this.value.replace(/[^0-9]/g,''); salvarProjeto()">
 
 <input placeholder="Nº Subsolos"
-type="number"
-step="1"
-min="0"
 value="0"
 oninput="this.value = this.value.replace(/[^0-9]/g,''); salvarProjeto()">
 
-<input placeholder="Pé-direito (m)"
+<input placeholder="Pé-direito (metros)"
 value="3,00"
 oninput="salvarProjeto()"
 onblur="formatarAltura(this)">
@@ -793,26 +773,6 @@ seta.innerHTML = "▼"
 function gerarModuloEdificacoes(){
 
 let qtd = parseInt(document.getElementById("qtdEdificacoes").value);
-
-let linhas = document.querySelectorAll("#listaEdificacoes .edificacao")
-
-for(let i=0;i<linhas.length;i++){
-
-let pav = linhas[i].children[2].value
-
-if(!pav || pav === "0"){
-
-abrirModal(
-"Preencha corretamente o número de pavimentos para todas as edificações.",
-function(){}
-)
-
-return
-}
-
-}
-
-
 let dadosAntigos = capturarDadosEdificacoes()
 
 if(!qtd || qtd <= 0){
@@ -862,7 +822,7 @@ pavimentosHTML += `
   <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
 
     <div>
-      <label>Área coberta do pavimento (m²)</label>
+      <label>Área do pavimento (m²)</label>
       <input class="area-coberta"
              placeholder="0,00"
              oninput="calcularArea(this)"
@@ -920,7 +880,7 @@ pavimentosHTML += `
   <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
 
     <div>
-      <label>Área coberta do pavimento (m²)</label>
+      <label>Área do pavimento (m²)</label>
       <input class="area-coberta"
              placeholder="0,00"
              oninput="calcularArea(this)"
@@ -1130,7 +1090,7 @@ display:none;
 <thead>
 <tr style="background:#f0f0f0;">
 <th style="border:1px solid #ccc; padding:6px;">Descrição</th>
-<th style="border:1px solid #ccc; padding:6px;">Pé-direito (m)</th>
+<th style="border:1px solid #ccc; padding:6px;">Pé-direito (metros)</th>
 </tr>
 </thead>
 
@@ -1224,13 +1184,72 @@ div.className = "pavimento-bloco"
 div.innerHTML = `
 <div class="subtitulo">${nome}</div>
 
-<div class="form-row">
-<label>Pé-direito (m)</label>
-<input class="input-altura"
-value="3,00"
-oninput="calcularAltura(this)"
-onblur="formatarAltura(this)">
+<!-- 🔲 CAIXA INTERNA -->
+<div style="border:1px solid #ddd; border-radius:8px; padding:12px; background:#fff; margin-top:10px;">
+
+  <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; align-items:start;">
+
+    <!-- 🟩 COLUNA 1 — DADOS FÍSICOS -->
+    <div>
+
+      <div class="field-row">
+        <label>Pé-direito (m)</label>
+        <input class="input-altura"
+        value="3,00"
+        oninput="calcularAltura(this)"
+        onblur="formatarAltura(this)">
+      </div>
+
+    </div>
+
+    <!-- 🟨 COLUNA 2 — CLASSIFICAÇÃO -->
+    <div>
+
+      <div class="field-row">
+        <label>Tipo do nível</label>
+        <select class="tipo-nivel">
+          <option value="pavimento">Pavimento</option>
+          <option value="mezanino">Mezanino</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <label>
+          <input type="checkbox" class="chk-habitado" checked>
+          Possui permanência de pessoas
+        </label>
+      </div>
+
+      <div class="field-row">
+        <label>
+          <input type="checkbox" class="chk-tecnico">
+          Pavimento de uso técnico
+        </label>
+      </div>
+
+    </div>
+
+    <!-- 🟦 COLUNA 3 — RESULTADO -->
+    <div>
+
+      <div style="
+        padding:12px;
+        border-radius:6px;
+        background:#e8f5e9;
+        border-left:5px solid #2e7d32;
+        font-size:13px;
+        font-weight:600;
+      ">
+        ✔ Este nível está sendo considerado na altura da edificação
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 `
+
 
 alturaContainer.appendChild(div)
 
@@ -2043,14 +2062,6 @@ calcularAltura(input)
 
 }
 
-function abrirConfig(){
-  document.getElementById("modalConfig").style.display = "flex";
-}
-
-function fecharConfig(){
-  document.getElementById("modalConfig").style.display = "none";
-}
-
 
 </script>
 
@@ -2161,51 +2172,11 @@ class="m-input clcb-ok" data-nome="residencial" step="0.01" oninput="validarArea
   </div>
 </div>
 
-<div id="modalConfig" class="modal-bg" style="display:none;">
-
-  <div class="modal-box-small">
-
-    <div class="subtitulo">
-      ⚙️ Configurações do Sistema
-    </div>
-
-    <div style="max-height:400px; overflow-y:auto; margin-top:10px;">
-
-      <p>Campo padrão altura do pavimento</p>
-      <p>Parágrafo 2 - editar aqui...</p>
-      <p>Parágrafo 3 - editar aqui...</p>
-      <p>Parágrafo 4 - editar aqui...</p>
-      <p>Parágrafo 5 - editar aqui...</p>
-      <p>Parágrafo 6 - editar aqui...</p>
-      <p>Parágrafo 7 - editar aqui...</p>
-      <p>Parágrafo 8 - editar aqui...</p>
-      <p>Parágrafo 9 - editar aqui...</p>
-      <p>Parágrafo 10 - editar aqui...</p>
-
-      <p>Parágrafo 11 - editar aqui...</p>
-      <p>Parágrafo 12 - editar aqui...</p>
-      <p>Parágrafo 13 - editar aqui...</p>
-      <p>Parágrafo 14 - editar aqui...</p>
-      <p>Parágrafo 15 - editar aqui...</p>
-      <p>Parágrafo 16 - editar aqui...</p>
-      <p>Parágrafo 17 - editar aqui...</p>
-      <p>Parágrafo 18 - editar aqui...</p>
-      <p>Parágrafo 19 - editar aqui...</p>
-      <p>Parágrafo 20 - editar aqui...</p>
-
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn-cancelar" onclick="fecharConfig()">Fechar</button>
-    </div>
-
-  </div>
-
-</div>
 
 
 
 </body>
 </html>
+
 
 
