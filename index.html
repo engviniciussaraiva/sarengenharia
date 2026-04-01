@@ -2025,8 +2025,18 @@ let total = 0
 
 inputs.forEach(inp => {
 
+let bloco = inp.closest(".pavimento-bloco")
+
+let chkHabitado = bloco.querySelector(".chk-habitado")?.checked
+let chkTecnico = bloco.querySelector(".chk-tecnico")?.checked
+
+// 🔥 REGRA: só entra se tiver permanência e NÃO for técnico
+if(chkHabitado && !chkTecnico){
+
 let val = parseNumeroBR(inp.value)
 total += val
+
+}
 
 })
 
@@ -2041,8 +2051,14 @@ tbody.innerHTML = ""
 
 inputs.forEach(inp => {
 
-let nome = inp.closest(".pavimento-bloco").querySelector(".subtitulo").innerText
+let bloco = inp.closest(".pavimento-bloco")
 
+let chkHabitado = bloco.querySelector(".chk-habitado")?.checked
+let chkTecnico = bloco.querySelector(".chk-tecnico")?.checked
+
+if(!(chkHabitado && !chkTecnico)) return
+
+let nome = bloco.querySelector(".subtitulo")?.innerText || "-"
 let val = parseNumeroBR(inp.value)
 
 let tr = document.createElement("tr")
@@ -2055,6 +2071,7 @@ tr.innerHTML = `
 tbody.appendChild(tr)
 
 })
+
 
 }
 
