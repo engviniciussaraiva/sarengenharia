@@ -814,110 +814,169 @@ pavimentosHTML += `
 📦 Pavimento ${p}
 </div>
 
-<!-- ÁREA -->
+<div style="border:1px solid #ddd; border-radius:8px; padding:14px; background:#fff; margin-top:10px;">
 
-<div style="border:1px solid #ddd; border-radius:8px; padding:12px; background:#fff; margin-top:10px;">
+<div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px;">
 
-  
-  <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
+<!-- 🟩 ÁREA -->
+<div>
 
-    <div>
-      <label>Área do pavimento (m²)</label>
-      <input class="area-coberta"
-             placeholder="0,00"
-             oninput="calcularArea(this)"
-             onblur="formatarNumero(this)">
-    </div>
+<label>Área do pavimento (m²)</label>
+<input class="area-coberta"
+placeholder="0,00"
+oninput="calcularArea(this)"
+onblur="formatarNumero(this)">
 
-    <div>
-      <label>Área descontada (m²)</label>
-      <input class="area-descontada"
-             value="0,00"
-             disabled>
-    </div>
+<label style="margin-top:8px;">Área descontada (m²)</label>
+<input class="area-descontada" value="0,00" disabled>
 
-    <div>
-      <label>Área computada (m²)</label>
-      <input class="area-computada"
-             value="0,00"
-             disabled>
-    </div>
+<label style="margin-top:8px;">Área computada (m²)</label>
+<input class="area-computada" value="0,00" disabled>
 
-  </div>
+<div style="text-align:center; margin-top:10px;">
+<button class="btn" onclick="abrirModalAreas(this)">
+Indicar áreas descontadas
+</button>
+</div>
 
-  <div style="text-align:center; margin-top:12px;">
-    <button class="btn" onclick="abrirModalAreas(this)">
-      Indicar áreas descontadas
-    </button>
-  </div>
+</div>
 
-  <div class="alerta-area"
-       style="display:none; margin-top:10px; color:#a91616; font-size:13px; text-align:center;">
-    <strong>Nota técnica:</strong>Área próxima ao limite de enquadramento CLCB. Avaliar descontos permitidos pela Instrução Técnica 42.
-  </div>
+<!-- 🟨 ALTURA + FLAGS -->
+<div>
+
+<label>Pé-direito (m)</label>
+<input class="input-altura"
+value="3,00"
+oninput="calcularAltura(this)"
+onblur="formatarAltura(this)">
+
+<div style="margin-top:10px; font-weight:600;">Indicar</div>
+
+<label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+<input type="checkbox" class="chk-habitado" checked>
+Possui permanência de pessoas?
+</label>
+
+<label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+<input type="checkbox" class="chk-tecnico">
+Pavimento de uso técnico
+</label>
+
+</div>
+
+<!-- 🟦 OCUPAÇÃO -->
+<div>
+
+<label>Ocupação (até 5)</label>
+
+<div class="ocupacoes-container">
+
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+
+</div>
+
+<label style="margin-top:10px;">Carga de incêndio (MJ/m²)</label>
+<input class="carga-incendio" placeholder="Automático futuramente" disabled>
 
 </div>
 
 </div>
 
-`;
+</div>
+
+</div>
+`
 }
 
-/* TERREO */
+/* TÉRREO */
 
 pavimentosHTML += `
+
 <div class="pavimento-bloco" data-ed="${i}" data-tipo="terreo">
 
 <div class="subtitulo">
 📦 Pavimento Térreo
 </div>
 
-<!-- ÁREA -->
+<div style="border:1px solid #ddd; border-radius:8px; padding:14px; background:#fff; margin-top:10px;">
 
-<div style="border:1px solid #ddd; border-radius:8px; padding:12px; background:#fff; margin-top:10px;">
+<div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px;">
 
+<div>
 
-  <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
+<label>Área do pavimento (m²)</label>
+<input class="area-coberta"
+placeholder="0,00"
+oninput="calcularArea(this)"
+onblur="formatarNumero(this)">
 
-    <div>
-      <label>Área do pavimento (m²)</label>
-      <input class="area-coberta"
-             placeholder="0,00"
-             oninput="calcularArea(this)"
-             onblur="formatarNumero(this)">
-    </div>
+<label style="margin-top:8px;">Área descontada (m²)</label>
+<input class="area-descontada" value="0,00" disabled>
 
-    <div>
-      <label>Área descontada (m²)</label>
-      <input class="area-descontada"
-             value="0,00"
-             disabled>
-    </div>
+<label style="margin-top:8px;">Área computada (m²)</label>
+<input class="area-computada" value="0,00" disabled>
 
-    <div>
-      <label>Área computada (m²)</label>
-      <input class="area-computada"
-             value="0,00"
-             disabled>
-    </div>
+<div style="text-align:center; margin-top:10px;">
+<button class="btn" onclick="abrirModalAreas(this)">
+Indicar áreas descontadas
+</button>
+</div>
 
-  </div>
+</div>
 
-  <div style="text-align:center; margin-top:12px;">
-    <button class="btn" onclick="abrirModalAreas(this)">
-      Indicar áreas descontadas
-    </button>
-  </div>
+<div>
 
-  <div class="alerta-area"
-       style="display:none; margin-top:10px; color:#a91616; font-size:13px; text-align:center;">
-    <strong>Nota técnica:</strong> Área próxima ao limite de enquadramento CLCB.
-  </div>
+<label>Pé-direito (m)</label>
+<input class="input-altura"
+value="3,00"
+oninput="calcularAltura(this)"
+onblur="formatarAltura(this)">
+
+<div style="margin-top:10px; font-weight:600;">Indicar</div>
+
+<label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+<input type="checkbox" class="chk-habitado" checked>
+Possui permanência de pessoas?
+</label>
+
+<label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+<input type="checkbox" class="chk-tecnico">
+Pavimento de uso técnico
+</label>
+
+</div>
+
+<div>
+
+<label>Ocupação (até 5)</label>
+
+<div class="ocupacoes-container">
+
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+
+</div>
+
+<label style="margin-top:10px;">Carga de incêndio (MJ/m²)</label>
+<input class="carga-incendio" disabled>
 
 </div>
 
 </div>
-`;
+
+</div>
+
+</div>
+`
+
+/* SUBSOLOS */
 
 for(let s=1;s<=sub;s++){
 
@@ -929,52 +988,78 @@ pavimentosHTML += `
 📦 Subsolo -${s}
 </div>
 
-<!-- ÁREA -->
+<div style="border:1px solid #ddd; border-radius:8px; padding:14px; background:#fff; margin-top:10px;">
 
-<div style="border:1px solid #ddd; border-radius:8px; padding:12px; background:#fff; margin-top:10px;">
+<div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px;">
 
+<div>
 
-  <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
+<label>Área do pavimento (m²)</label>
+<input class="area-coberta"
+placeholder="0,00"
+oninput="calcularArea(this)"
+onblur="formatarNumero(this)">
 
-    <div>
-      <label>Área coberta do pavimento (m²)</label>
-      <input class="area-coberta"
-             placeholder="0,00"
-             oninput="calcularArea(this)"
-             onblur="formatarNumero(this)">
-    </div>
+<label style="margin-top:8px;">Área descontada (m²)</label>
+<input class="area-descontada" value="0,00" disabled>
 
-    <div>
-      <label>Área descontada (m²)</label>
-      <input class="area-descontada"
-             value="0,00"
-             disabled>
-    </div>
+<label style="margin-top:8px;">Área computada (m²)</label>
+<input class="area-computada" value="0,00" disabled>
 
-    <div>
-      <label>Área computada (m²)</label>
-      <input class="area-computada"
-             value="0,00"
-             disabled>
-    </div>
+<div style="text-align:center; margin-top:10px;">
+<button class="btn" onclick="abrirModalAreas(this)">
+Indicar áreas descontadas
+</button>
+</div>
 
-  </div>
+</div>
 
-  <div style="text-align:center; margin-top:12px;">
-    <button class="btn" onclick="abrirModalAreas(this)">
-      Indicar áreas descontadas
-    </button>
-  </div>
+<div>
 
-  <div class="alerta-area"
-       style="display:none; margin-top:10px; color:#a91616; font-size:13px; text-align:center;">
-    <strong>Nota técnica:</strong> Área próxima ao limite de enquadramento.
-  </div>
+<label>Pé-direito (m)</label>
+<input class="input-altura"
+value="3,00"
+oninput="calcularAltura(this)"
+onblur="formatarAltura(this)">
+
+<div style="margin-top:10px; font-weight:600;">Indicar</div>
+
+<label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+<input type="checkbox" class="chk-habitado" checked>
+Possui permanência de pessoas?
+</label>
+
+<label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+<input type="checkbox" class="chk-tecnico">
+Pavimento de uso técnico
+</label>
+
+</div>
+
+<div>
+
+<label>Ocupação (até 5)</label>
+
+<div class="ocupacoes-container">
+
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+
+</div>
+
+<label style="margin-top:10px;">Carga de incêndio (MJ/m²)</label>
+<input class="carga-incendio" disabled>
 
 </div>
 
 </div>
 
+</div>
+
+</div>
 `
 }
 
