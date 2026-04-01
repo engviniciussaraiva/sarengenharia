@@ -1762,7 +1762,7 @@ function capturarDadosEdificacoes(){
 
         let pavimentos = {}
 
-        getPavimentosArea(card)
+        getPavimentosArea(card).forEach((pav)=>{
 
             let tipo = pav.dataset.tipo
             let num = pav.dataset.num || "0"
@@ -1838,7 +1838,8 @@ function atualizarQuadroAreas(){
         let totalDescPTS = 0
         let totalComp = 0
 
-        getPavimentosArea(card)
+        getPavimentosArea(card).forEach(pav => {
+
 
             let nome = pav.querySelector(".subtitulo")?.innerText || "-"
 
