@@ -808,7 +808,7 @@ for(let p=pav;p>=2;p--){
 
 pavimentosHTML += `
 
-<div class="pavimento-bloco" data-tipo="superior" data-num="${p}">
+<div class="pavimento-bloco" data-ed="${i}" data-tipo="superior" data-num="${p}">
 
 <div class="subtitulo">
 📦 Pavimento ${p}
@@ -866,7 +866,7 @@ pavimentosHTML += `
 /* TERREO */
 
 pavimentosHTML += `
-<div class="pavimento-bloco" data-tipo="terreo">
+<div class="pavimento-bloco" data-ed="${i}" data-tipo="terreo">
 
 <div class="subtitulo">
 📦 Pavimento Térreo
@@ -923,7 +923,7 @@ for(let s=1;s<=sub;s++){
 
 pavimentosHTML += `
 
-<div class="pavimento-bloco" data-tipo="subsolo" data-num="${s}">
+<div class="pavimento-bloco" data-ed="${i}" data-tipo="subsolo" data-num="${s}">
 
 <div class="subtitulo">
 📦 Subsolo -${s}
@@ -1762,7 +1762,7 @@ function capturarDadosEdificacoes(){
 
         let pavimentos = {}
 
-        card.querySelectorAll(".modulo-bloco:first-of-type .pavimento-bloco").forEach((pav)=>{
+        getPavimentosArea(card)
 
             let tipo = pav.dataset.tipo
             let num = pav.dataset.num || "0"
@@ -1838,7 +1838,7 @@ function atualizarQuadroAreas(){
         let totalDescPTS = 0
         let totalComp = 0
 
-        card.querySelectorAll(".modulo-bloco:first-of-type .pavimento-bloco").forEach(pav => {
+        getPavimentosArea(card)
 
             let nome = pav.querySelector(".subtitulo")?.innerText || "-"
 
@@ -1882,7 +1882,7 @@ let resultado = null
 let descontoCLCB = 0
 let descontoPTS = 0
 
-card.querySelectorAll(".pavimento-bloco").forEach(pav => {
+card.querySelectorAll(".modulo-bloco:first-of-type .pavimento-bloco").forEach(pav => {
 
 descontoCLCB += parseFloat(pav.dataset.descClcb || 0)
 descontoPTS += parseFloat(pav.dataset.descPts || 0)
@@ -2072,6 +2072,13 @@ calcularAltura(input)
 
 }
 
+function getPavimentosArea(card){
+return card.querySelectorAll(".modulo-bloco:first-of-type .pavimento-bloco")
+}
+
+function getPavimentosAltura(card){
+return card.querySelectorAll(".altura-pavimentos .pavimento-bloco")
+}
 
 </script>
 
