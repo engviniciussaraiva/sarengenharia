@@ -1876,7 +1876,7 @@ function validarAreasDescontadas(){
     )
 
     const erro = document.getElementById("errorMsg")
-    const btnAplicar = document.querySelector("#modalAreasDescontadas .btn")
+    const btnAplicar = document.getElementById("btnAplicarAreas")
 
     if(totalDescontado > areaCoberta){
 
@@ -1941,7 +1941,7 @@ function limparModalAreas(){
     erro.style.display = "none"
 
     // reativar botão aplicar
-    const btnAplicar = document.querySelector("#modalAreasDescontadas .btn")
+    const btnAplicar = document.getElementById("btnAplicarAreas")
     btnAplicar.disabled = false
     btnAplicar.style.opacity = "1"
     btnAplicar.style.cursor = "pointer"
@@ -2346,7 +2346,7 @@ class="m-input clcb-ok" data-nome="residencial" step="0.01" oninput="validarArea
 
     <div class="modal-footer">
      <button class="btn-cancelar" onclick="cancelarAreas()">Cancelar</button>
-<button class="btn" onclick="aplicarAreas()">Aplicar</button>
+<button class="btn" id="btnAplicarAreas" onclick="aplicarAreas()">Aplicar</button>
     </div>
 
   </div>
