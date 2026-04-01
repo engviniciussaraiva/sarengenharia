@@ -1813,43 +1813,50 @@ function formatarNumero(input){
 
 function aplicarAreas(){
 
-const erro = document.getElementById("errorMsg")
-if(erro.style.display === "block") return
-
     if(!pavimentoAtual) return
+
+    const erro = document.getElementById("errorMsg")
+
+    // 🔥 se erro visível → NÃO aplica
+    if(erro.style.display === "block"){
+        return
+    }
 
     let inputs = document.querySelectorAll("#modalAreasDescontadas input")
 
     let totalCLCB = 0
-let totalPTS = 0
+    let totalPTS = 0
 
-inputs.forEach(inp => {
+    inputs.forEach(inp => {
 
-let val = parseFloat(inp.value) || 0
+        let val = parseFloat(inp.value) || 0
 
-if(inp.classList.contains("clcb-ok")){
-totalCLCB += val
-}
+        if(inp.classList.contains("clcb-ok")){
+            totalCLCB += val
+        }
 
-if(inp.classList.contains("clcb-no")){
-totalPTS += val
-}
+        if(inp.classList.contains("clcb-no")){
+            totalPTS += val
+        }
 
-})
-pavimentoAtual.dataset.descClcb = totalCLCB
-pavimentoAtual.dataset.descPts = totalPTS
+    })
 
-    // joga no campo do pavimento correto
+    pavimentoAtual.dataset.descClcb = totalCLCB
+    pavimentoAtual.dataset.descPts = totalPTS
+
     let campoDescontada = pavimentoAtual.querySelector(".area-descontada")
 
- let total = totalCLCB + totalPTS
-campoDescontada.value = formatarBR(total)
+    let total = totalCLCB + totalPTS
+    campoDescontada.value = formatarBR(total)
 
-    // recalcula área
     calcularArea(pavimentoAtual.querySelector(".area-coberta"))
 
-    fecharModalAreas()
+    // 🔥 GARANTIA DE FECHAMENTO
+    document.getElementById("modalAreasDescontadas").style.display = "none"
+
 }
+
+
 
 function validarAreasDescontadas(){
 
