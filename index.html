@@ -1262,70 +1262,6 @@ display:none;
 
 </div>
 
-<!-- 📏 ALTURA -->
-
-<div class="modulo-bloco">
-
-<div class="subtitulo" onclick="toggleModulo(this)" style="cursor:pointer;">
-<span>▼</span> 📏 Altura da Edificação
-</div>
-
-<div class="modulo-conteudo">
-
-<!-- CAMPOS POR PAVIMENTO -->
-
-<div class="altura-pavimentos"></div>
-
-<!-- TABELA FINAL -->
-
-<div class="modulo-bloco" style="margin-top:12px;">
-
-<div class="subtitulo" style="font-size:14px;">
-📊 Quadro de Altura da Edificação
-</div>
-
-<table style="width:100%; border-collapse:collapse; font-size:13px;">
-
-<thead>
-<tr style="background:#f0f0f0;">
-<th style="border:1px solid #ccc; padding:6px;">Descrição</th>
-<th style="border:1px solid #ccc; padding:6px;">Pé-direito (metros)</th>
-</tr>
-</thead>
-
-<tbody class="tabela-altura-body"></tbody>
-
-<tfoot>
-<tr style="background:#fafafa; font-weight:bold;">
-<td style="border:1px solid #ccc; padding:6px; text-align:center;">ALTURA TOTAL</td>
-<td style="border:1px solid #ccc; padding:6px; text-align:center;" class="altura-total">0,00</td>
-</tr>
-</tfoot>
-
-</table>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- 🔥 OCUPAÇÃO -->
-
-<div class="modulo-bloco">
-
-<div class="subtitulo" onclick="toggleModulo(this)" style="cursor:pointer;">
-<span>▼</span> 🔥 Ocupação / Uso / Carga de Incêndio
-</div>
-
-<div class="modulo-conteudo">
-<p style="font-size:13px; color:#777;">
-Módulo em desenvolvimento
-</p>
-</div>
-
-</div>
-
 <!-- ⚠️ RISCOS -->
 
 <div class="modulo-bloco">
@@ -1370,105 +1306,6 @@ box.querySelectorAll(".input-altura").forEach(inp=>{
     inp.value = formatarBR(peDireito)
 })
 
-// 🔥 GERAR ALTURA AUTOMATICAMENTE
-
-let alturaContainer = box.querySelector(".altura-pavimentos")
-
-let pavs = box.querySelectorAll("[data-tipo]")
-
-
-pavs.forEach(pav => {
-
-if(pav.closest(".altura-pavimentos")) return
-
-let nome = pav.querySelector(".subtitulo")?.innerText || "Pavimento"
-
-let div = document.createElement("div")
-div.className = "pavimento-bloco"
-
-div.innerHTML = `
-<div class="subtitulo">${nome}</div>
-
-<!-- 🔲 CAIXA INTERNA -->
-<div style="border:1px solid #ddd; border-radius:8px; padding:14px; background:#fff; margin-top:10px;">
-
-  <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px; align-items:start;">
-
-    <!-- 🟩 COLUNA ESQUERDA -->
-    <div>
-
-      <div class="field-row">
-        <label>Pé-direito (m)</label>
-        <input class="input-altura"
-        value="3,00"
-        oninput="calcularAltura(this)"
-        onblur="formatarAltura(this)">
-      </div>
-
-      <div class="field-row">
-        <label>Área do pavimento (m²)</label>
-        <input class="input-area-pavimento"
-        placeholder="0,00">
-      </div>
-
-      <div class="field-row">
-        <label>Tipo</label>
-        <div style="color:#c62828; font-size:13px;">
-          Aqui aparece automático se pavimento ou mezanino
-        </div>
-      </div>
-
-    </div>
-
-    <!-- 🟨 COLUNA CENTRAL -->
-    <div>
-
-<div style="display:flex; flex-direction:column; align-items:flex-start; gap:6px;">
-
-<div style="font-weight:600; margin-bottom:4px;">
-Indicar
-</div>
-<label style="display:flex; align-items:center; gap:6px; font-weight:normal; white-space:nowrap;">
-<input type="checkbox" class="chk-habitado" checked style="margin:0;">
-Possui permanência de pessoas?
-</label>
-
-<label style="display:flex; align-items:center; gap:6px; font-weight:normal; white-space:nowrap;">
-<input type="checkbox" class="chk-tecnico" style="margin:0;">
-Pavimento de uso técnico
-</label>
-
-</div>
-
-    </div>
-
-    <!-- 🟦 COLUNA DIREITA -->
-    <div>
-
-      <div style="
-        padding:14px;
-        border-radius:8px;
-        background:#e8f5e9;
-        border-left:6px solid #2e7d32;
-        font-size:14px;
-        font-weight:600;
-        line-height:1.4;
-      ">
-        ✔ Este nível está sendo considerado na altura da edificação
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-`
-
-
-
-alturaContainer.appendChild(div)
-
-})
 
 
 // 🔁 RESTAURA DADOS
@@ -2085,8 +1922,15 @@ function atualizarQuadroAreas(){
             let cob = parseNumeroBR(pav.querySelector(".area-coberta")?.value)
             let des = parseNumeroBR(pav.querySelector(".area-descontada")?.value)
             let com = parseNumeroBR(pav.querySelector(".area-computada")?.value)
+let desTotal = parseNumeroBR(pav.querySelector(".area-descontada")?.value)
+
 let descClcb = parseFloat(pav.dataset.descClcb || 0)
 let descPts = parseFloat(pav.dataset.descPts || 0)
+
+// 🔥 se não tiver dataset, usa tudo como "não permitido"
+if(descClcb === 0 && descPts === 0){
+descPts = desTotal
+}
 
             totalCoberta += cob
             totalDescCLCB += descClcb
