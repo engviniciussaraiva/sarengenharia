@@ -1737,7 +1737,7 @@ let pavimentoAtual = null
 
 function abrirModalAreas(btn){
 
-pavimentoAtual = btn.closest(".pavimento-bloco")
+pavimentoAtual = btn.closest("[data-tipo]")
 
 document.getElementById("modalAreasDescontadas").style.display = "flex"
 }
