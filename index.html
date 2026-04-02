@@ -891,14 +891,8 @@ onblur="formatarAltura(this)">
 <div style="display:flex; flex-direction:column; align-items:flex-start; gap:6px; margin-top:6px;">
 
 <label style="display:flex; align-items:center; gap:6px; font-weight:normal; cursor:pointer;">
-<input type="radio" name="tipoOcupacao_${i}_${p}" class="tipo-ocupacao" value="habitavel" checked>
-Com permanência de pessoas
-</label>
-
-<label style="display:flex; align-items:center; gap:6px; font-weight:normal; cursor:pointer;">
-<input type="radio" name="tipoOcupacao_${i}_${p}" class="tipo-ocupacao" value="tecnico">
-Pavimento de uso técnico
-</label>
+<input type="radio" name="tipoOcupacao_${i}_${p}" class="tipo-ocupacao" value="habitavel" checked onchange="calcularAltura(this)">
+<input type="radio" name="tipoOcupacao_${i}_${p}" class="tipo-ocupacao" value="tecnico" onchange="calcularAltura(this)">
 
 </div>
 
@@ -2113,63 +2107,59 @@ ativo: col[11]?.trim().toUpperCase() === "TRUE"
 
 function calcularAltura(input){
 
-let blocoAltura = input.closest(".altura-pavimentos")
+    let card = input.closest(".edificacao-card")
 
-let inputs = blocoAltura.querySelectorAll(".input-altura")
+    if(!card) return
 
-let total = 0
+    let total = 0
 
-inputs.forEach(inp => {
+    let pavimentos = card.querySelectorAll(".pavimento-bloco")
 
-let bloco = inp.closest(".pavimento-bloco")
+    let tbody = card.querySelector(".tabela-altura-body")
 
-let chkHabitado = bloco.querySelector(".chk-habitado")?.checked
-let chkTecnico = bloco.querySelector(".chk-tecnico")?.checked
+    if(tbody) tbody.innerHTML = ""
 
-// 🔥 REGRA: só entra se tiver permanência e NÃO for técnico
-if(chkHabitado && !chkTecnico){
+    pavimentos.forEach(pav => {
 
-let val = parseNumeroBR(inp.value)
-total += val
+        let tipo = pav.querySelector(".tipo-ocupacao:checked")?.value
 
-}
+        // 🔥 só entra se for habitável
+        if(tipo !== "habitavel") return
 
-})
+        let alturaInput = pav.querySelector(".input-altura")
 
-// 🔥 ATUALIZA TOTAL
-let card = input.closest(".edificacao-card")
-card.querySelector(".altura-total").innerText = formatarBR(total)
+        if(!alturaInput) return
 
-// 🔁 ATUALIZA TABELA
+        let val = parseNumeroBR(alturaInput.value)
 
-let tbody = card.querySelector(".tabela-altura-body")
-tbody.innerHTML = ""
+        total += val
 
-inputs.forEach(inp => {
+        // 🔁 monta tabela (se existir)
+        if(tbody){
 
-let bloco = inp.closest(".pavimento-bloco")
+            let nome = pav.querySelector(".subtitulo")?.innerText || "-"
 
-let chkHabitado = bloco.querySelector(".chk-habitado")?.checked
-let chkTecnico = bloco.querySelector(".chk-tecnico")?.checked
+            let tr = document.createElement("tr")
 
-if(!(chkHabitado && !chkTecnico)) return
+            tr.innerHTML = `
+            <td style="border:1px solid #ccc; padding:6px; text-align:center;">${nome}</td>
+            <td style="border:1px solid #ccc; padding:6px; text-align:center;">${formatarBR(val)}</td>
+            `
 
-let nome = bloco.querySelector(".subtitulo")?.innerText || "-"
-let val = parseNumeroBR(inp.value)
+            tbody.appendChild(tr)
+        }
 
-let tr = document.createElement("tr")
+    })
 
-tr.innerHTML = `
-<td style="border:1px solid #ccc; padding:6px; text-align:center;">${nome}</td>
-<td style="border:1px solid #ccc; padding:6px; text-align:center;">${formatarBR(val)}</td>
-`
+    // 🔥 atualiza total
+    let totalBox = card.querySelector(".altura-total")
 
-tbody.appendChild(tr)
-
-})
-
+    if(totalBox){
+        totalBox.innerText = formatarBR(total)
+    }
 
 }
+
 
 function formatarAltura(input){
 
