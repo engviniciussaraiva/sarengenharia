@@ -635,8 +635,8 @@ value="0"
 oninput="this.value = this.value.replace(/[^0-9]/g,''); salvarProjeto()">
 
 <input placeholder="Pé-direito (metros)"
-value="3,00"
-oninput="salvarProjeto()"
+value=""
+oninput="salvarProjeto(); sincronizarPeDireito(this)"
 onblur="formatarAltura(this)">
 `
 
@@ -800,6 +800,12 @@ let sub = parseInt(linhas[i].children[3].value) || 0
 let box = document.createElement("div")
 box.className = "edificacao-card"
 
+let peDireito = getPeDireitoEdificacao(i)
+
+box.querySelectorAll(".input-altura").forEach(inp=>{
+    inp.value = formatarBR(peDireito)
+})
+
 let pavimentosHTML = ""
 
 /* PAVIMENTOS SUPERIORES */
@@ -874,7 +880,7 @@ Altura da Edificação
 
 <label>Pé-direito (m)</label>
 <input class="input-altura"
-value="3,00"
+value=""
 oninput="calcularAltura(this)"
 onblur="formatarAltura(this)">
 
@@ -990,7 +996,7 @@ Altura da Edificação
 
 <label>Pé-direito (m)</label>
 <input class="input-altura"
-value="3,00"
+value=""
 oninput="calcularAltura(this)"
 onblur="formatarAltura(this)">
 
@@ -2318,6 +2324,30 @@ return card.querySelectorAll(".modulo-bloco:first-of-type .pavimento-bloco")
 
 function getPavimentosAltura(card){
 return card.querySelectorAll(".altura-pavimentos .pavimento-bloco")
+}
+
+function getPeDireitoEdificacao(index){
+
+    let linhas = document.querySelectorAll("#listaEdificacoes .edificacao")
+
+    if(!linhas[index]) return 3
+
+    let valor = linhas[index].children[3].value
+
+    return parseNumeroBR(valor) || 3
+}
+
+function sincronizarPeDireito(input){
+
+let linha = input.closest(".edificacao")
+let index = [...linha.parentNode.children].indexOf(linha)
+
+let novoValor = parseNumeroBR(input.value)
+
+document.querySelectorAll(`#conteudoEd${index} .input-altura`).forEach(inp=>{
+inp.value = formatarBR(novoValor)
+calcularAltura(inp)
+})
 }
 
 </script>
