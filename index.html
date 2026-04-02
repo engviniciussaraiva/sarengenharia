@@ -835,8 +835,14 @@ Quadro de Áreas
 <label>Área do pavimento (m²)</label>
 <input class="area-coberta"
 placeholder="0,00"
-oninput="calcularArea(this)"
+oninput="
+this.value = this.value
+.replace(/[^0-9,]/g,'')
+.replace(/(,.*),/g,'$1');
+calcularArea(this)
+"
 onblur="formatarNumero(this)">
+
 
 <label style="margin-top:8px;">Área descontada (m²)</label>
 <input class="area-descontada" value="0,00" disabled>
@@ -946,8 +952,14 @@ Quadro de Áreas
 <label>Área do pavimento (m²)</label>
 <input class="area-coberta"
 placeholder="0,00"
-oninput="calcularArea(this)"
+oninput="
+this.value = this.value
+.replace(/[^0-9,]/g,'')
+.replace(/(,.*),/g,'$1');
+calcularArea(this)
+"
 onblur="formatarNumero(this)">
+
 
 <label style="margin-top:8px;">Área descontada (m²)</label>
 <input class="area-descontada" value="0,00" disabled>
@@ -1074,8 +1086,14 @@ Quadro de Áreas
 <label>Área do pavimento (m²)</label>
 <input class="area-coberta"
 placeholder="0,00"
-oninput="calcularArea(this)"
+oninput="
+this.value = this.value
+.replace(/[^0-9,]/g,'')
+.replace(/(,.*),/g,'$1');
+calcularArea(this)
+"
 onblur="formatarNumero(this)">
+
 
 <label style="margin-top:8px;">Área descontada (m²)</label>
 <input class="area-descontada" value="0,00" disabled>
