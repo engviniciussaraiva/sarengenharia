@@ -2330,7 +2330,9 @@ calcularAltura(input)
 }
 
 function getPavimentosArea(card){
-return card.querySelectorAll("[data-tipo]")
+return [...card.querySelectorAll("[data-tipo]")].filter(pav =>
+pav.querySelector(".area-coberta")
+)
 }
 
 function getPavimentosAltura(card){
