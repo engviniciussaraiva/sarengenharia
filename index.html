@@ -1813,51 +1813,71 @@ function formatarNumero(input){
 
 function aplicarAreas(){
 
-    if(!pavimentoAtual) return
+    try {
 
-    const erro = document.getElementById("errorMsg")
+        if(!pavimentoAtual){
+            console.warn("pavimentoAtual está null")
+            fecharModalAreas()
+            return
+        }
 
-    // 🔴 Se houver erro, não aplica
-    if(erro.style.display === "block"){
-        return
+        const erro = document.getElementById("errorMsg")
+
+        if(erro && erro.style.display === "block"){
+            return
+        }
+
+        let inputs = document.querySelectorAll("#modalAreasDescontadas input")
+
+        let totalCLCB = 0
+        let totalPTS = 0
+
+        inputs.forEach(inp => {
+
+            let val = parseFloat(inp.value) || 0
+
+            if(inp.classList.contains("clcb-ok")){
+                totalCLCB += val
+            }
+
+            if(inp.classList.contains("clcb-no")){
+                totalPTS += val
+            }
+
+        })
+
+        // 🔒 proteção extra
+        if(!pavimentoAtual.querySelector){
+            console.error("pavimentoAtual inválido")
+            fecharModalAreas()
+            return
+        }
+
+        pavimentoAtual.dataset.descClcb = totalCLCB
+        pavimentoAtual.dataset.descPts = totalPTS
+
+        let campoDescontada = pavimentoAtual.querySelector(".area-descontada")
+
+        let total = totalCLCB + totalPTS
+        campoDescontada.value = formatarBR(total)
+
+        let areaInput = pavimentoAtual.querySelector(".area-coberta")
+
+        if(areaInput){
+            calcularArea(areaInput)
+        }
+
+    } catch(e) {
+
+        console.error("Erro ao aplicar áreas:", e)
+
+    } finally {
+
+        // 🔥 GARANTE FECHAMENTO SEMPRE
+        fecharModalAreas()
+
     }
-
-    let inputs = document.querySelectorAll("#modalAreasDescontadas input")
-
-    let totalCLCB = 0
-    let totalPTS = 0
-
-    inputs.forEach(inp => {
-
-        let val = parseFloat(inp.value) || 0
-
-        if(inp.classList.contains("clcb-ok")){
-            totalCLCB += val
-        }
-
-        if(inp.classList.contains("clcb-no")){
-            totalPTS += val
-        }
-
-    })
-
-    // 🔥 salva no dataset
-    pavimentoAtual.dataset.descClcb = totalCLCB
-    pavimentoAtual.dataset.descPts = totalPTS
-
-    let campoDescontada = pavimentoAtual.querySelector(".area-descontada")
-
-    let total = totalCLCB + totalPTS
-    campoDescontada.value = formatarBR(total)
-
-    // 🔄 recalcula área
-    calcularArea(pavimentoAtual.querySelector(".area-coberta"))
-
-
-    // 🔥 FECHAMENTO GARANTIDO
-    fecharModalAreas()
 }
-
 
 
 
