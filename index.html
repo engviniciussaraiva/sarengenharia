@@ -890,8 +890,6 @@ onblur="formatarAltura(this)">
 
 <div style="display:flex; flex-direction:column; align-items:flex-start; gap:6px; margin-top:6px;">
 
-<div style="display:flex; flex-direction:column; align-items:flex-start; gap:6px; margin-top:6px;">
-
 <label style="display:flex; align-items:center; gap:6px; font-weight:normal; cursor:pointer;">
 <input type="radio" name="tipoOcupacao_${i}_${p}" class="tipo-ocupacao" value="habitavel" checked onchange="calcularAltura(this)">
 Com permanência de pessoas
@@ -1866,17 +1864,28 @@ function capturarDadosEdificacoes(){
 
         let pavimentos = {}
 
-        getPavimentosArea(card).forEach((pav)=>{
+        let pavs = getPavimentosArea(card)
+
+        if(!pavs || pavs.length === 0){
+            dados.push({})
+            return
+        }
+
+        pavs.forEach((pav)=>{
 
             let tipo = pav.dataset.tipo
             let num = pav.dataset.num || "0"
 
             let chave = tipo + "_" + num
 
+            let areaCoberta = pav.querySelector(".area-coberta")
+            let areaDesc = pav.querySelector(".area-descontada")
+            let areaComp = pav.querySelector(".area-computada")
+
             pavimentos[chave] = {
-                areaCoberta: pav.querySelector(".area-coberta")?.value || "",
-                areaDesc: pav.querySelector(".area-descontada")?.value || "",
-                areaComp: pav.querySelector(".area-computada")?.value || ""
+                areaCoberta: areaCoberta ? areaCoberta.value : "",
+                areaDesc: areaDesc ? areaDesc.value : "",
+                areaComp: areaComp ? areaComp.value : ""
             }
 
         })
@@ -2198,9 +2207,9 @@ calcularAltura(input)
 }
 
 function getPavimentosArea(card){
-return [...card.querySelectorAll("[data-tipo]")].filter(pav =>
-pav.querySelector(".area-coberta")
-)
+   return [...card.querySelectorAll("[data-tipo]")].filter(pav =>
+       pav && pav.querySelector && pav.querySelector(".area-coberta")
+   )
 }
 
 function getPavimentosAltura(card){
@@ -2230,6 +2239,9 @@ inp.value = formatarBR(novoValor)
 calcularAltura(inp)
 })
 }
+
+
+
 
 </script>
 
