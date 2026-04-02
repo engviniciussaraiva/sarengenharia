@@ -807,12 +807,6 @@ let sub = parseInt(linhas[i].children[3].value) || 0
 let box = document.createElement("div")
 box.className = "edificacao-card"
 
-let peDireito = getPeDireitoEdificacao(i)
-
-box.querySelectorAll(".input-altura").forEach(inp=>{
-    inp.value = formatarBR(peDireito)
-})
-
 let pavimentosHTML = ""
 
 /* PAVIMENTOS SUPERIORES */
@@ -1369,6 +1363,12 @@ Resumo técnico será gerado automaticamente
 `
 
 conteudo.appendChild(box)
+
+let peDireito = getPeDireitoEdificacao(i)
+
+box.querySelectorAll(".input-altura").forEach(inp=>{
+    inp.value = formatarBR(peDireito)
+})
 
 // 🔥 GERAR ALTURA AUTOMATICAMENTE
 
@@ -2326,7 +2326,7 @@ calcularAltura(input)
 }
 
 function getPavimentosArea(card){
-return card.querySelectorAll(".modulo-bloco:first-of-type .pavimento-bloco")
+return card.querySelectorAll("[data-tipo]")
 }
 
 function getPavimentosAltura(card){
