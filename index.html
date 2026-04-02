@@ -1324,8 +1324,13 @@ if(dadosAntigos[i]){
 
         if(d){
 
-            if(pav.querySelector(".area-coberta")){
-                pav.querySelector(".area-coberta").value = d.areaCoberta
+            let areaInput = pav.querySelector(".area-coberta")
+
+            if(areaInput){
+                areaInput.value = d.areaCoberta
+
+                // 🔥 AQUI ESTÁ A CORREÇÃO
+                calcularArea(areaInput)
             }
 
             if(pav.querySelector(".area-descontada")){
@@ -1340,6 +1345,7 @@ if(dadosAntigos[i]){
 
     })
 }
+
 
 
 
@@ -1690,12 +1696,14 @@ function calcularArea(input){
     container.querySelector(".area-computada").value = formatarBR(computada)
 
     // 🔴 ALERTA INTELIGENTE (pré CLBC)
-    const alerta = container.querySelector(".alerta-area")
+const alerta = container.querySelector(".alerta-area")
 
-    if(computada >= 750 && computada <= 765){
+if(alerta){
+if(computada >= 750 && computada <= 765){
 alerta.style.display = "block"
 }else{
 alerta.style.display = "none"
+}
 }
 atualizarQuadroAreas()
 }
