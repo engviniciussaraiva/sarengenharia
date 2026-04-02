@@ -1817,7 +1817,6 @@ function aplicarAreas(){
 
     const erro = document.getElementById("errorMsg")
 
-    // 🔥 se erro visível → NÃO aplica
     if(erro.style.display === "block"){
         return
     }
@@ -1851,10 +1850,14 @@ function aplicarAreas(){
 
     calcularArea(pavimentoAtual.querySelector(".area-coberta"))
 
-    // 🔥 GARANTIA DE FECHAMENTO
-    document.getElementById("modalAreasDescontadas").style.display = "none"
+    // 🔥 FECHA E LIMPA (CORREÇÃO REAL)
+    const modal = document.getElementById("modalAreasDescontadas")
+    modal.style.display = "none"
 
+    limparModalAreas()
+    pavimentoAtual = null
 }
+
 
 
 
