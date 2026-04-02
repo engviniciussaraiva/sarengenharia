@@ -1817,6 +1817,7 @@ function aplicarAreas(){
 
     const erro = document.getElementById("errorMsg")
 
+    // 🔴 Se houver erro, não aplica
     if(erro.style.display === "block"){
         return
     }
@@ -1840,6 +1841,7 @@ function aplicarAreas(){
 
     })
 
+    // 🔥 salva no dataset
     pavimentoAtual.dataset.descClcb = totalCLCB
     pavimentoAtual.dataset.descPts = totalPTS
 
@@ -1848,11 +1850,14 @@ function aplicarAreas(){
     let total = totalCLCB + totalPTS
     campoDescontada.value = formatarBR(total)
 
+    // 🔄 recalcula área
     calcularArea(pavimentoAtual.querySelector(".area-coberta"))
 
-   
+    // 🧹 limpa inputs do modal (boa prática)
+    limparModalAreas()
+
+    // 🔥 FECHAMENTO GARANTIDO
     fecharModalAreas()
- 
 }
 
 
