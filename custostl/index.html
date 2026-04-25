@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Custo STL</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #0f0f0f;
+  color: #ddd;
+  margin: 0;
+}
+
+.header {
+  background: #1b5e20;
+  padding: 15px;
+  font-weight: bold;
+}
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+}
+
+h2 {
+  margin-top: 25px;
+  color: #4caf50;
+}
+
+
+/* TABELA */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #333;
+}
+
+th {
+  text-align: left;
+  color: #aaa;
+}
+
+td:last-child {
+  text-align: left;
+}
+
+/* INPUT */
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 16px;
+  text-align: right;
+  margin-top: 4px;
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  margin-top: 10px;
+}
+
+.label {
+  font-size: 13px;
+  color: #aaa;
+}
+
+/* RESULTADO */
+.result {
+  font-weight: bold;
+  color: #fff;
+}
+
+table input {
+  width: 120px;
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+  text-align: right;
+  font-size: 16px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+💰 Custo de Impressão 3D
+</div>
+
+<div class="container">
+
+
+<!-- PARTE FIXA -->
+<h2>Parâmetros Fixos</h2>
+
+<table>
+<tr>
+<th>Item</th>
+<th>Cálculo</th>
+<th>Valor</th>
+</tr>
+
+<tr>
+<td>Filamento</td>
+<td>Valor fixo por kg</td>
+<td><input id="filamento" value="100,00" onblur="formatarMoeda(this)"></td>
+</tr>
+
+<tr>
+<td>Energia</td>
+<td id="energia-info">0,3 kWh × R$ 0,90</td>
+<td><input id="energia" value="0,27" onblur="formatarMoeda(this)"></td>
+</tr>
+
+<tr>
+<td>Máquina</td>
+<td>Valor total equipamento</td>
+<td><input id="maquina" value="18.000,00" onblur="formatarMoeda(this)"></td>
+</tr>
+
+<tr>
+<td>Depreciação</td>
+<td>(18000 / 10000h)</td>
+<td><input id="depreciacao" value="1,80" onblur="formatarMoeda(this)"></td>
+</tr>
+
+<tr>
+<td>Insumos</td>
+<td>Valor fixo</td>
+<td><input id="insumos" value="1,00" onblur="formatarMoeda(this)"></td>
+</tr>
+
+</table>
+
+
+<!-- PARTE INPUT -->
+<h2>Parâmetros Variáveis</h2>
+
+<div class="grid">
+
+<div>
+<div class="label">Peso (g)</div>
+<input id="peso" value="">
+</div>
+
+<div>
+<div class="label">Tempo (h)</div>
+<input id="tempo" value="">
+</div>
+
+<div>
+<div class="label">Embalagem (R$)</div>
+<input id="embalagem" value="" onblur="formatarMoeda(this)">
+</div>
+
+<div>
+<div class="label">Frete (R$)</div>
+<input id="frete" value="" onblur="formatarMoeda(this)">
+</div>
+
+<div>
+<div class="label">Margem (%)</div>
+<input id="margem" value="50,00" onblur="formatarMoeda(this)">
+</div>
+
+<div>
+<div class="label">Imposto (%)</div>
+<input id="imposto" value="">
+</div>
+
+</div>
+
+<!-- RESULTADO -->
+<h2>Resultado</h2>
+
+<table>
+<tr>
+<td>Custo produção</td>
+<td class="result" id="custoProducao">R$ 0,00</td>
+</tr>
+
+<tr>
+<td>Custo final</td>
+<td class="result" id="custoFinal">R$ 0,00</td>
+</tr>
+
+</table>
+
+</div>
+
+
+<script>
+function formatarMoeda(input){
+  let valor = parseFloat(input.value.replace(",", "."));
+  if(isNaN(valor)) return;
+
+  input.value = valor.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function limparNumero(valor){
+  if(!valor) return 0;
+  return parseFloat(valor.replace(/\./g,"").replace(",", ".")) || 0;
+}
+
+function formatarBR(valor){
+  return valor.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function calcular(){
+
+  // FIXOS
+  let filamentoKg = limparNumero(document.getElementById("filamento").value);
+  let energiaHora = limparNumero(document.getElementById("energia").value);
+  let depreciacaoHora = limparNumero(document.getElementById("depreciacao").value);
+  let insumos = limparNumero(document.getElementById("insumos").value);
+
+  // VARIÁVEIS
+  let peso = limparNumero(document.getElementById("peso").value);
+  let tempo = limparNumero(document.getElementById("tempo").value);
+  let embalagem = limparNumero(document.getElementById("embalagem").value);
+  let frete = limparNumero(document.getElementById("frete").value);
+  let margem = limparNumero(document.getElementById("margem").value);
+  let imposto = limparNumero(document.getElementById("imposto").value);
+
+  // CÁLCULOS
+let custoMaterial = (peso / 1000) * filamentoKg;
+let custoEnergia = tempo * energiaHora;
+let custoDepreciacao = tempo * depreciacaoHora;
+
+let custoProducao = custoMaterial + custoEnergia + custoDepreciacao + insumos + embalagem + frete;
+
+// 👉 MARGEM
+let custoComMargem;
+
+if(margem >= 100){
+  custoComMargem = custoProducao * (1 + margem/100);
+} else {
+  custoComMargem = custoProducao / (1 - margem/100);
+}
+
+// 👉 IMPOSTO
+let custoFinal;
+
+if(imposto >= 100){
+  custoFinal = custoComMargem * (1 + imposto/100);
+} else {
+  custoFinal = custoComMargem / (1 - imposto/100);
+}
+
+  // SAÍDA
+  document.getElementById("custoProducao").innerText = "R$ " + formatarBR(custoProducao);
+  document.getElementById("custoFinal").innerText = "R$ " + formatarBR(custoFinal);
+}
+
+// ATUALIZA AUTOMÁTICO
+setInterval(calcular, 500);
+
+</script>
+
+</body>
+</html>
