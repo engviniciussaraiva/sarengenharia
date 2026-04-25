@@ -44,7 +44,7 @@ body {
   gap: 20px;
 }
 
-/* CARD */
+/* CARD BASE */
 .card {
   background: var(--card);
   height: 140px;
@@ -52,7 +52,6 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   cursor: pointer;
   transition: 0.2s;
-  border-left: 6px solid var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,10 +59,24 @@ body {
   padding: 10px;
   font-weight: bold;
   color: #444;
+  border-left: 6px solid #ccc;
 }
 
 .card:hover {
   transform: translateY(-5px);
+}
+
+/* STATUS CORES */
+.card.red {
+  border-left: 6px solid #d32f2f;
+}
+
+.card.yellow {
+  border-left: 6px solid #f9a825;
+}
+
+.card.green {
+  border-left: 6px solid #2e7d32;
 }
 
 /* FOOTER */
@@ -86,21 +99,25 @@ SAR Engenharia
 
 <div class="grid">
 
-<div class="card" onclick="ir('/f1/')">Ferramenta 01</div>
-<div class="card" onclick="ir('/f2/')">Ferramenta 02</div>
-<div class="card" onclick="ir('/f3/')">Ferramenta 03</div>
-<div class="card" onclick="ir('/f4/')">Ferramenta 04</div>
-<div class="card" onclick="ir('/f5/')">Ferramenta 05</div>
-<div class="card" onclick="ir('/f6/')">Ferramenta 06</div>
-<div class="card" onclick="ir('/f7/')">Ferramenta 07</div>
-<div class="card" onclick="ir('/f8/')">Ferramenta 08</div>
-<div class="card" onclick="ir('/f9/')">Ferramenta 09</div>
-<div class="card" onclick="ir('/f10/')">Ferramenta 10</div>
-<div class="card" onclick="ir('/f11/')">Ferramenta 11</div>
-<div class="card" onclick="ir('/f12/')">Ferramenta 12</div>
-<div class="card" onclick="ir('/f13/')">Ferramenta 13</div>
-<div class="card" onclick="ir('/f14/')">Ferramenta 14</div>
-<div class="card" onclick="ir('/f15/')">Ferramenta 15</div>
+<!-- PRINCIPAIS -->
+<div class="card red" onclick="ir('/f1/')">🔥 SAR</div>
+<div class="card red" onclick="ir('/f2/')">💧 Calha</div>
+<div class="card red" onclick="ir('/f3/')">🚒 Hidrantes</div>
+<div class="card yellow" onclick="ir('/f4/')">💰 Custo STL</div>
+<div class="card yellow" onclick="ir('/f5/')">📦 Biblioteca</div>
+<div class="card green" onclick="ir('/f6/')">📐 Área</div>
+
+<!-- SECUNDÁRIOS -->
+<div class="card red" onclick="ir('/f7/')">Ferramenta 07</div>
+<div class="card red" onclick="ir('/f8/')">Ferramenta 08</div>
+<div class="card red" onclick="ir('/f9/')">Ferramenta 09</div>
+<div class="card red" onclick="ir('/f10/')">Ferramenta 10</div>
+<div class="card red" onclick="ir('/f11/')">Ferramenta 11</div>
+<div class="card red" onclick="ir('/f12/')">Ferramenta 12</div>
+
+<div class="card red" onclick="ir('/f13/')">Ferramenta 13</div>
+<div class="card red" onclick="ir('/f14/')">Ferramenta 14</div>
+<div class="card red" onclick="ir('/f15/')">Ferramenta 15</div>
 
 </div>
 
