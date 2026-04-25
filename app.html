@@ -2,260 +2,528 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>SAR 1.0 – Sistema Avançado de Resposta</title>
+<title>🔥 SAR - Classificador</title>
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/482/482529.png">
 
-<style>
-:root{
-  --primary:#176f3d;
-  --bg:#f4f6f8;
-  --card:#ffffff;
-  --text:#222;
+<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=FyQZYiB0t_jmNOB3kgsDDYg_IcxxV28rOq6PrP9kAUF6YXds0Zv5kVNV_JVpaBdOmdBvH73AtslrxBDzASly0IMXf0RwPHFop6VChu3j5BXOX078IrbfNai6N_lu_5cAVoeIXGilEtBp3EKamwhdyYjDT5vLx7DWfYpdNbhxw0DVnBxOR7rtfi7PeeIy5TV5M2kiuLfiGlfMLT72JAwmizxje9JDB9YaEaq3zoDillcGkyr04NiFOKj0psr387zgJ_4qYmakpGjep7wwS8TC4w" charset="UTF-8"></script><style>
 
-  --clcb:#2e7d32;
-  --pts:#ef6c00;
-  --pt:#d32f2f;
-  --ct:#6a1b9a;
+/* RESET */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
 }
 
 body{
-  margin:0;
-  font-family:'Segoe UI', Arial, sans-serif;
-  background:var(--bg);
-  color:var(--text);
+background:#f2f2f2;
+font-size:14px;
+color:#333;
+
+zoom:1.20;
 }
 
-/* ===== BARRA SUPERIOR ===== */
+/* evita quebra lateral */
+html{
+overflow-x:hidden;
+}
+
+/* BARRA SUPERIOR */
+
 .topbar{
-  height:60px;
-  background:var(--primary);
-  display:flex;
-  align-items:center;
-  padding:0 25px;
-  color:#fff;
-  font-weight:600;
-  font-size:18px;
+background:#1f6f3c;
+color:white;
+padding:15px;
+font-weight:bold;
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+/* 🔥 FIXAR NO TOPO */
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+z-index: 9999;
 }
 
-/* ===== LAYOUT ===== */
-.layout{
-  display:flex;
-  min-height:calc(100vh - 60px);
+/* LAYOUT */
+
+.container{
+display:flex;
+padding:90px 20px 20px 20px; /* 🔥 espaço para topbar */
+gap:20px;
 }
+
+/* CONTEUDO CENTRAL */
 
 .main{
-  flex:1;
-  padding:30px;
+flex:1;
 }
+
+/* MENU LATERAL DIREITO */
 
 .sidebar{
-  width:340px;
-  background:#fff;
-  border-left:1px solid #ddd;
-  padding:20px;
-  position:sticky;
-  top:60px;
-  height:calc(100vh - 60px);
-  box-shadow:-3px 0 8px rgba(0,0,0,0.04);
+width:280px;
 }
 
-.sidebar h3{
-  margin-top:0;
-  color:var(--primary);
-}
+/* CARDS */
 
-/* ===== CARDS ===== */
 .card{
-  background:var(--card);
-  border-radius:10px;
-  padding:20px;
-  margin-bottom:25px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.05);
+background:#fff;
+border:1px solid #dcdcdc;
+border-radius:8px;
+margin-bottom:20px;
+box-shadow:0 2px 6px rgba(0,0,0,0.08);
 }
 
-details.card summary{
-  font-weight:700;
-  font-size:18px;
-  cursor:pointer;
-  color:var(--primary);
+.input-area{
+width:120px;
 }
 
-.grid2{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
-  margin-top:15px;
+.center-box{
+text-align:center;
+margin-top:12px;
 }
 
-.grid3{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:20px;
-  margin-top:15px;
+.card-header{
+background:#f7f7f7;
+padding:12px 14px;
+cursor:pointer;
+font-weight:600;
+font-size:16px;
+
+border-top-left-radius:8px;
+border-top-right-radius:8px;
+
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+.card-content{
+padding:16px;
+border-top:1px solid #e5e5e5;
+}
+
+/* IMPLANTAÇÃO */
+
+.implantacao-container{
+display:flex;
+gap:16px;
+}
+
+.implantacao-form{
+flex:1;
+}
+
+.linha-topo{
+display:flex;
+flex-direction:column;
+gap:4px;
+margin-bottom:14px;
+}
+
+.edificacao{
+display:grid;
+grid-template-columns:40px 1fr 150px 150px 150px;
+gap:10px;
+margin-bottom:8px;
+}
+
+.indice{
+padding-top:6px;
+font-weight:bold;
+}
+
+.edificacao-card{
+padding:14px;
+border:1px solid #ddd;
+border-radius:6px;
+margin-bottom:10px;
+background:#fafafa;
+overflow:hidden;
+}
+
+.resultado-processo{
+font-weight: bold;
+font-size: 15px;
+margin-top: 8px;
+}
+
+.edificacao-header{
+background:#f7f7f7;
+padding:10px;
+font-weight:600;
+cursor:pointer;
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+.edificacao-content{
+padding:12px;
+border-top:1px solid #eee;
+display:none;
+}
+
+.edificacao-header-grid{
+display:grid;
+grid-template-columns:40px 1fr 150px 150px 150px;
+gap:10px;
+margin-bottom:6px;
+font-size:12px;
+font-weight:600;
+color:#555;
+}
+
+.pavimento-linha{
+display:flex;
+justify-content:space-between;
+margin-bottom:6px;
+font-size:14px;
+}
+
+
+/* CAMPOS */
+
+.modal-body {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 30px;
+}
+
+.field-row {
+ display: flex;
+ flex-direction: column;
+ margin-bottom: 12px;
+}
+
+.field-row label {
+ font-size: 13px;
+ margin-bottom: 4px;
+}
+
+.m-input {
+ height: 36px;
+ padding: 6px 10px;
+ border-radius: 6px;
+ border: 1px solid #ccc;
+}
+
+.modal-footer {
+display: flex;
+justify-content: flex-end;
+gap: 10px;
+margin-top: 20px;
+}
+
+.modal-box-small {
+width: 800px;
+max-width: 95%;
+background: #fff;
+border-radius: 10px;
+padding: 20px;
 }
 
 label{
-  font-weight:600;
-  display:block;
-  margin-top:10px;
+font-size:13px;
+font-weight:600;
+color:#444;
 }
 
-input, select{
-  width:100%;
-  padding:7px;
-  border:1px solid #ccc;
-  border-radius:6px;
-  font-size:14px;
+input{
+padding:6px;
+border:1px solid #ccc;
+border-radius:4px;
+width:100%;
+font-size:13px;
 }
 
-/* ===== BADGES ===== */
+/* TABELA */
+
+.fachadas-container{
+width:280px;
+}
+
+.tabela-fachadas{
+border-collapse:collapse;
+width:100%;
+margin-top:10px;
+}
+
+.tabela-fachadas th,
+.tabela-fachadas td{
+border:1px solid #ccc;
+padding:6px;
+text-align:center;
+}
+
+.tabela-fachadas th{
+background:#eee;
+}
+
+.form-row{
+display:flex;
+gap:10px;
+margin-bottom:8px;
+align-items:center;
+}
+.pavimento-bloco{
+border:1px solid #eee;
+padding:10px;
+border-radius:6px;
+margin-bottom:8px;
+background:#fafafa;
+}
+
+.modulo-bloco{
+border:1px solid #eee;
+padding:12px;
+border-radius:6px;
+margin-bottom:10px;
+background:#fafafa;
+}
+
+.resultado-linha{
+display:flex;
+justify-content:space-between;
+padding:6px 0;
+border-bottom:1px solid #eee;
+}
+
+
+/* SIDEBAR */
+
+.sidebar .card-content p{
+margin-bottom:10px;
+}
+
 .badge{
-  display:inline-block;
-  padding:4px 10px;
-  border-radius:20px;
-  color:#fff;
-  font-size:12px;
-  font-weight:700;
+background:#2e7d32;
+color:white;
+padding:4px 10px;
+border-radius:15px;
+font-size:12px;
 }
 
-.badge.clcb{ background:var(--clcb); }
-.badge.pts{ background:var(--pts); }
-.badge.pt{ background:var(--pt); }
-.badge.ct{ background:var(--ct); }
-
-.status{
-  font-size:12px;
-  font-weight:700;
-  margin-left:10px;
-}
+/* BOTÃO PADRÃO */
 
 .btn{
-  background:var(--primary);
-  color:#fff;
-  border:none;
-  padding:8px 14px;
-  border-radius:6px;
-  font-weight:600;
-  cursor:pointer;
-  margin-top:15px;
+background:#1f6f3c;
+color:white;
+border:none;
+padding:10px 18px;
+border-radius:6px;
+font-weight:600;
+cursor:pointer;
+font-size:13px;
 }
 
 .btn:hover{
-  background:#1c8046;
+background:#185a30;
 }
 
-hr{
-  border:none;
-  border-top:1px solid #eee;
-  margin:20px 0;
+
+/* TITULOS DE MODULO */
+
+
+/* SUBTITULOS */
+
+.subtitulo{
+font-size:18px;
+font-weight:700;
+margin-bottom:10px;
 }
+
+.modal-bg{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.35);
+display:none;
+align-items:center;
+justify-content:center;
+z-index:9999;
+}
+
+.modal-titulo{
+font-weight:bold;
+font-size:16px;
+margin-bottom:10px;
+}
+
+.modal-texto{
+margin-bottom:20px;
+line-height:1.4;
+}
+
+.modal-botoes{
+display:flex;
+justify-content:center;
+gap:10px;
+}
+
+.btn-cancelar{
+background:#d9d9d9;
+border:none;
+padding:10px 18px;
+border-radius:6px;
+cursor:pointer;
+font-weight:600;
+}
+
+.btn-cancelar:hover{
+background:#c8c8c8;
+}
+
+
+
 </style>
 </head>
 
 <body>
 
+<!-- BARRA SUPERIOR -->
+
 <div class="topbar">
-SAR – Sistema Avançado de Resposta
+
+<span>SAR – Sistema Avançado de Resposta</span>
+
+<div style="display:flex; gap:14px; font-size:18px; cursor:pointer;">
+
+<span title="Limpar projeto" onclick="limparProjeto()">🧹</span>
+
+<span title="Configurações" onclick="abrirConfig()">🛠️</span>
+
 </div>
 
-<div class="layout">
+</div>
 
-<!-- ===== MAIN ===== -->
+<div class="container">
+
+<!-- CONTEUDO CENTRAL -->
+
 <div class="main">
 
-<!-- 🧱 LOTE -->
+<!-- CARD IMPLANTAÇÃO -->
+
 <div class="card">
-<h3>🧱 Lote</h3>
 
-<label>Quantidade de Edificações:</label>
-<input type="number" value="1" min="1">
+<div class="card-header" onclick="toggleImplantacao()">
 
-<label>Nome da Edificação:</label>
-<input type="text" id="nomeEdificacao" value="Bloco Principal">
+<div style="display:flex; align-items:center; gap:8px;">
+<span id="setaImplantacao">▼</span>
+<span>📦 Implantação Geral</span>
+</div>
+</div>
+
+<div class="card-content" id="boxImplantacao">
+
+<div class="implantacao-container">
+
+<!-- FORMULÁRIO -->
+
+<div class="implantacao-form">
+
+<div class="linha-topo">
+<label>Quantidade de edificações:</label>
+<input type="number" id="qtdEdificacoes" placeholder="Digite a quantidade" max="10">
+</div>
+
+<div class="edificacao-header-grid">
+<div></div>
+<div>Nome da Edificação</div>
+<div>Pavimentos</div>
+<div>Subsolos</div>
+<div>Pé-direito (metros)</div>
+</div>
+
+<div id="listaEdificacoes"></div>
 
 </div>
 
-<!-- 🏢 EDIFICAÇÃO -->
-<details class="card" open>
-<summary>
-🏢 Edificação – <span id="tituloEdificacao">Bloco Principal</span>
-<span class="status">🟡 Parcial</span>
-<span id="badgeProcesso" class="badge clcb">CLCB</span>
-</summary>
+<!-- FACHADAS -->
 
-<div class="grid2">
+<div class="fachadas-container" id="fachadasContainer" style="display:none;">
 
-<div>
-<label>Grupo de Ocupação:</label>
-<select>
-<option>-- Selecionar --</option>
-</select>
-
-<label>Altura Total (m):</label>
-<input type="number">
+<div class="subtitulo">
+Fachadas coincidentes
 </div>
 
-<div>
-<label>Possui Subsolo?</label>
-<select>
-<option>Não</option>
-<option>Sim</option>
-</select>
+<table class="tabela-fachadas" id="tabelaFachadas"></table>
 
-<label>Pavimentos:</label>
-<input type="number">
-</div>
+<div id="legendaFachadas" style="margin-top:8px; font-size:12px;"></div>
 
-</div>
-
-<hr>
-
-<h4>📐 Áreas</h4>
-
-<div class="grid3">
-
-<div>
-<label>Área Total Edificada (m²)</label>
-<input type="number" id="areaTotal">
-</div>
-
-<div>
-<label>Área Descontada (m²)</label>
-<input type="number" id="areaDescontada">
-</div>
-
-<div>
-<label>Área Computada (m²)</label>
-<input type="number" id="areaComputada" readonly>
 </div>
 
 </div>
 
-<button class="btn">Indicar Áreas Descontadas</button>
+<div class="center-box">
 
-</details>
+<button class="btn" onclick="gerarModuloEdificacoes()" id="btnGerarEdificacoes">
+Gerar Edificações
+</button>
 
 </div>
 
-<!-- ===== SIDEBAR ===== -->
+
+</div>
+
+</div>
+
+<div class="card" id="cardEdificacoes" style="display:none; margin-top:20px;">
+
+<div class="card-header" onclick="toggleEdificacoes()">
+
+<div style="display:flex; align-items:center; gap:8px;">
+<span id="setaEdificacoes">▼</span>
+<span>🏢 Edificações</span>
+</div>
+
+</div>
+
+
+<div class="card-content" id="boxEdificacoes">
+
+<div id="conteudoEdificacoes"></div>
+
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- SIDEBAR -->
+
 <div class="sidebar">
 
-<h3>📊 Análise do Lote</h3>
+<div class="card">
 
-<div>
-<strong>Área Total:</strong>
-<div id="painelAreaTotal">0,00 m²</div>
+<div class="card-header">
+📊 Análise do Lote
 </div>
 
-<div style="margin-top:15px;">
-<strong>Área Computada:</strong>
-<div id="painelAreaComp">0,00 m²</div>
+<div class="card-content">
+
+<p><b>Área Total</b><br>0,00 m²</p>
+
+<p><b>Área Computada</b><br>0,00 m²</p>
+
+<hr style="margin:10px 0">
+
+<p><b>Processo Provisório</b></p>
+
+<span class="badge">CLCB</span>
+
 </div>
 
-<hr>
-
-<div style="margin-top:15px;">
-<strong>Processo Provisório:</strong><br>
-<span id="painelBadge" class="badge clcb">CLCB</span>
 </div>
 
 </div>
@@ -264,44 +532,1828 @@ SAR – Sistema Avançado de Resposta
 
 <script>
 
-document.getElementById("nomeEdificacao").addEventListener("input", function(){
-  document.getElementById("tituloEdificacao").innerText =
-    this.value || "Bloco Principal";
-});
+let AUTO_SAVE = false
 
-function atualizar(){
-  const total = parseFloat(document.getElementById("areaTotal").value)||0;
-  const desc = parseFloat(document.getElementById("areaDescontada").value)||0;
+function toggleImplantacao(){
 
-  const comp = total - desc;
+var box = document.getElementById("boxImplantacao")
+var seta = document.getElementById("setaImplantacao")
 
-  document.getElementById("areaComputada").value = comp.toFixed(2);
+if(box.style.display === "none"){
 
-  document.getElementById("painelAreaTotal").innerText = total.toFixed(2)+" m²";
-  document.getElementById("painelAreaComp").innerText = comp.toFixed(2)+" m²";
+box.style.display="block"
+seta.innerHTML="▼"
 
-  let processo = comp <= 750 ? "CLCB" : "PTS";
-  atualizarBadge(processo);
+}else{
+
+box.style.display="none"
+seta.innerHTML="▶"
+
 }
 
-function atualizarBadge(processo){
-  const badge = document.getElementById("painelBadge");
-  const badgeCard = document.getElementById("badgeProcesso");
-
-  badge.className="badge";
-  badgeCard.className="badge";
-
-  if(processo==="CLCB"){badge.classList.add("clcb"); badgeCard.classList.add("clcb");}
-  if(processo==="PTS"){badge.classList.add("pts"); badgeCard.classList.add("pts");}
-
-  badge.innerText=processo;
-  badgeCard.innerText=processo;
 }
 
-document.getElementById("areaTotal").addEventListener("input", atualizar);
-document.getElementById("areaDescontada").addEventListener("input", atualizar);
+let avisoQtdMostrado = false
+
+const qtdInput = document.getElementById("qtdEdificacoes")
+let lista = document.getElementById("listaEdificacoes")
+
+qtdInput.addEventListener("click", avisarReset)
+qtdInput.addEventListener("change", gerarEdificacoes)
+
+
+
+function toggleEdificacoes(){
+
+var box = document.getElementById("boxEdificacoes")
+var seta = document.getElementById("setaEdificacoes")
+
+if(box.style.display === "none"){
+
+box.style.display="block"
+seta.innerHTML="▼"
+
+}else{
+
+box.style.display="none"
+seta.innerHTML="▶"
+
+}
+
+}
+
+function gerarEdificacoes(){
+
+document.getElementById("btnGerarEdificacoes").disabled = false
+
+let qtd = parseInt(document.getElementById("qtdEdificacoes").value) || 0
+
+if(qtd > 10){
+
+abrirModal(
+"A versão atual do sistema suporta no máximo 10 edificações por lote.",
+function(){
+
+document.getElementById("qtdEdificacoes").value = 10
+document.getElementById("qtdEdificacoes").focus()
+
+gerarEdificacoes()
+
+}
+)
+
+return
+}
+
+
+document.getElementById("cardEdificacoes").style.display = "none"
+document.getElementById("conteudoEdificacoes").innerHTML = ""
+
+
+const fachadaBox = document.getElementById("fachadasContainer")
+const tabela = document.getElementById("tabelaFachadas")
+
+lista.innerHTML=""
+
+if(!qtd || qtd <=0){
+
+fachadaBox.style.display="none"
+tabela.innerHTML=""
+return
+
+}
+
+for(let i=1;i<=qtd;i++){
+
+let linha = document.createElement("div")
+linha.className="edificacao"
+
+linha.innerHTML = `
+<span class="indice">${i}</span>
+
+<input placeholder="Bloco Principal"
+oninput="atualizarNomeEdificacao(this); atualizarLegenda(); salvarProjeto()">
+
+<input placeholder="Nº Pavimentos"
+oninput="this.value = this.value.replace(/[^0-9]/g,''); salvarProjeto()">
+
+<input placeholder="Nº Subsolos"
+value="0"
+oninput="this.value = this.value.replace(/[^0-9]/g,''); salvarProjeto()">
+
+<input placeholder="Pé-direito (metros)"
+value="3,00"
+oninput="salvarProjeto(); sincronizarPeDireito(this)"
+onblur="formatarAltura(this)">
+`
+
+
+
+lista.appendChild(linha)
+
+}
+
+/* MATRIZ DE FACHADAS */
+
+if(qtd <=1){
+
+fachadaBox.style.display="none"
+tabela.innerHTML=""
+return
+
+}
+
+fachadaBox.style.display="block"
+
+let html=""
+
+html+="<tr><th></th>"
+
+for(let i=1;i<=qtd;i++){
+html+=`<th>${i}</th>`
+}
+
+html+="</tr>"
+
+for(let i=1;i<=qtd;i++){
+
+html+=`<tr><td>${i}</td>`
+
+for(let j=1;j<=qtd;j++){
+
+if(i===j){
+html+="<td>X</td>"
+}else{
+html+=`<td><input type="checkbox" data-i="${i}" data-j="${j}" onchange="espelhar(this)"></td>`
+}
+
+}
+
+html+="</tr>"
+
+}
+
+tabela.innerHTML = html
+
+atualizarLegenda()
+
+/* GERAR LEGENDA */
+
+let legenda = document.getElementById("legendaFachadas")
+
+let nomes = document.querySelectorAll("#listaEdificacoes .edificacao input:first-of-type")
+
+let textoLegenda = ""
+
+nomes.forEach((inp, index)=>{
+
+let nome = inp.value || "Edificação " + (index+1)
+
+textoLegenda += (index+1) + " — " + nome + "<br>"
+
+})
+
+legenda.innerHTML = textoLegenda
+
+
+}
+
+function espelhar(cb){
+
+let i = cb.dataset.i
+let j = cb.dataset.j
+
+let outro = document.querySelector(
+`input[data-i="${j}"][data-j="${i}"]`
+)
+
+if(outro){
+outro.checked = cb.checked
+}
+
+}
+
+
+function atualizarLegenda(){
+
+let legenda = document.getElementById("legendaFachadas")
+
+if(!legenda) return
+
+let nomes = document.querySelectorAll("#listaEdificacoes .edificacao input:first-of-type")
+
+let textoLegenda = ""
+
+nomes.forEach((inp, index)=>{
+
+let nome = inp.value || "Edificação " + (index+1)
+
+textoLegenda += (index+1) + " — " + nome + "<br>"
+
+})
+
+legenda.innerHTML = textoLegenda
+
+}
+
+
+
+function toggleEdificacao(id){
+
+let box = document.getElementById("conteudoEd"+id)
+let seta = document.getElementById("setaEd"+id)
+
+if(box.style.display === "block"){
+
+box.style.display = "none"
+seta.innerHTML = "▶"
+
+}else{
+
+box.style.display = "block"
+seta.innerHTML = "▼"
+
+}
+
+}
+
+function gerarModuloEdificacoes(){
+
+let qtd = parseInt(document.getElementById("qtdEdificacoes").value);
+let dadosAntigos = capturarDadosEdificacoes()
+
+if(!qtd || qtd <= 0){
+abrirModal(
+"Informe a quantidade de edificações.",
+function(){}
+)
+
+return
+}
+
+const card = document.getElementById("cardEdificacoes")
+const conteudo = document.getElementById("conteudoEdificacoes")
+
+conteudo.innerHTML = ""
+
+let linhas = document.querySelectorAll("#listaEdificacoes .edificacao")
+
+for(let i=0;i<linhas.length;i++){
+
+let nome = linhas[i].children[1].value || `Edificação ${i+1}`
+let pav = parseInt(linhas[i].children[2].value) || 0
+let sub = parseInt(linhas[i].children[3].value) || 0
+
+let box = document.createElement("div")
+box.className = "edificacao-card"
+
+let pavimentosHTML = ""
+
+/* PAVIMENTOS SUPERIORES */
+
+for(let p=pav;p>=2;p--){
+
+pavimentosHTML += `
+
+<div class="pavimento-bloco" data-ed="${i}" data-tipo="superior" data-num="${p}">
+
+<div class="subtitulo">
+📦 Pavimento ${p}
+</div>
+
+<div style="border:1px solid #ddd; border-radius:8px; padding:14px; background:#fff; margin-top:10px;">
+
+<div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:16px;">
+
+<!-- 🟩 ÁREA -->
+<div>
+
+<div style="
+font-weight:700;
+font-size:14px;
+margin-bottom:6px;
+color:#333;
+border-bottom:2px solid #ddd;
+padding-bottom:4px;
+">
+Quadro de Áreas
+</div>
+
+<label>Área do pavimento (m²)</label>
+<input class="area-coberta"
+placeholder="0,00"
+oninput="
+this.value = this.value
+.replace(/[^0-9,]/g,'')
+.replace(/(,.*),/g,'$1');
+calcularArea(this)
+"
+onblur="formatarNumero(this)">
+
+
+<label style="margin-top:8px;">Área descontada (m²)</label>
+<input class="area-descontada" value="0,00" disabled>
+
+<label style="margin-top:8px;">Área computada (m²)</label>
+<input class="area-computada" value="0,00" disabled>
+
+<div style="text-align:center; margin-top:10px;">
+<button class="btn" onclick="abrirModalAreas(this)">
+Indicar áreas descontadas
+</button>
+</div>
+
+</div>
+
+<!-- 🟨 ALTURA + FLAGS -->
+<div>
+
+<div style="
+font-weight:700;
+font-size:14px;
+margin-bottom:6px;
+color:#333;
+border-bottom:2px solid #ddd;
+padding-bottom:4px;
+">
+Altura da Edificação
+</div>
+
+<label>Pé-direito (m)</label>
+<input class="input-altura"
+value=""
+oninput="calcularAltura(this)"
+onblur="formatarAltura(this)">
+
+
+<div style="margin-top:10px; font-weight:600;">Tipo de ocupação do pavimento</div>
+
+<div style="display:flex; flex-direction:column; align-items:flex-start; gap:6px; margin-top:6px;">
+
+<label style="display:flex; align-items:center; gap:6px; font-weight:normal; cursor:pointer;">
+<input type="radio" name="tipoOcupacao_${i}_${p}" class="tipo-ocupacao" value="habitavel" checked onchange="calcularAltura(this)">
+Com permanência de pessoas
+</label>
+
+<label style="display:flex; align-items:center; gap:6px; font-weight:normal; cursor:pointer;">
+<input type="radio" name="tipoOcupacao_${i}_${p}" class="tipo-ocupacao" value="tecnico" onchange="calcularAltura(this)">
+Pavimento de uso técnico
+</label>
+
+</div>
+
+
+</div>
+
+
+</div>
+
+<!-- 🟦 OCUPAÇÃO -->
+<div>
+
+<label>Ocupação (até 5)</label>
+
+<div class="ocupacoes-container">
+
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+
+</div>
+
+<label style="margin-top:10px;">Carga de incêndio (MJ/m²)</label>
+<input class="carga-incendio" placeholder="Automático futuramente" disabled>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+`
+}
+
+/* TÉRREO */
+
+pavimentosHTML += `
+
+<div class="pavimento-bloco" data-ed="${i}" data-tipo="terreo">
+
+<div class="subtitulo">
+📦 Pavimento Térreo
+</div>
+
+<div style="border:1px solid #ddd; border-radius:8px; padding:14px; background:#fff; margin-top:10px;">
+
+<div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:16px;">
+
+<div>
+
+<div style="
+font-weight:700;
+font-size:14px;
+margin-bottom:6px;
+color:#333;
+border-bottom:2px solid #ddd;
+padding-bottom:4px;
+">
+Quadro de Áreas
+</div>
+
+
+<label>Área do pavimento (m²)</label>
+<input class="area-coberta"
+placeholder="0,00"
+oninput="
+this.value = this.value
+.replace(/[^0-9,]/g,'')
+.replace(/(,.*),/g,'$1');
+calcularArea(this)
+"
+onblur="formatarNumero(this)">
+
+
+<label style="margin-top:8px;">Área descontada (m²)</label>
+<input class="area-descontada" value="0,00" disabled>
+
+<label style="margin-top:8px;">Área computada (m²)</label>
+<input class="area-computada" value="0,00" disabled>
+
+<div style="text-align:center; margin-top:10px;">
+<button class="btn" onclick="abrirModalAreas(this)">
+Indicar áreas descontadas
+</button>
+</div>
+
+</div>
+
+<div>
+
+<div style="
+font-weight:700;
+font-size:14px;
+margin-bottom:6px;
+color:#333;
+border-bottom:2px solid #ddd;
+padding-bottom:4px;
+">
+Altura da Edificação
+</div>
+
+<label>Pé-direito (m)</label>
+<input class="input-altura"
+value=""
+oninput="calcularAltura(this)"
+onblur="formatarAltura(this)">
+
+
+<div style="margin-top:10px; font-weight:600;">Indicar</div>
+
+<div style="display:flex; flex-direction:column; align-items:flex-start; gap:6px; margin-top:6px;">
+
+<label style="display:flex; align-items:center; gap:6px; font-weight:normal; cursor:pointer;">
+<input type="radio" name="tipoOcupacao_${i}_${p}" class="tipo-ocupacao" value="habitavel" checked onchange="calcularAltura(this)">
+Com permanência de pessoas
+</label>
+
+<label style="display:flex; align-items:center; gap:6px; font-weight:normal; cursor:pointer;">
+<input type="radio" name="tipoOcupacao_${i}_${p}" class="tipo-ocupacao" value="tecnico" onchange="calcularAltura(this)">
+Pavimento de uso técnico
+</label>
+
+</div>
+
+
+</div>
+
+<div>
+
+<label>Ocupação (até 5)</label>
+
+<div class="ocupacoes-container">
+
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+
+</div>
+
+<label style="margin-top:10px;">Carga de incêndio (MJ/m²)</label>
+<input class="carga-incendio" disabled>
+
+</div>
+
+<!-- 🟥 NOVA 4ª COLUNA (COLE AQUI) -->
+<div>
+
+<div style="
+padding:14px;
+border-radius:8px;
+background:#e8f5e9;
+border-left:6px solid #2e7d32;
+font-size:14px;
+font-weight:600;
+line-height:1.4;
+">
+
+✔ Pavimento considerado na altura
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+`
+
+/* SUBSOLOS */
+
+for(let s=1;s<=sub;s++){
+
+pavimentosHTML += `
+
+<div class="pavimento-bloco" data-ed="${i}" data-tipo="subsolo" data-num="${s}">
+
+<div class="subtitulo">
+📦 Subsolo -${s}
+</div>
+
+<div style="border:1px solid #ddd; border-radius:8px; padding:14px; background:#fff; margin-top:10px;">
+
+<div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:16px;">
+
+<div>
+
+<div style="
+font-weight:700;
+font-size:14px;
+margin-bottom:6px;
+color:#333;
+border-bottom:2px solid #ddd;
+padding-bottom:4px;
+">
+Quadro de Áreas
+</div>
+
+<label>Área do pavimento (m²)</label>
+<input class="area-coberta"
+placeholder="0,00"
+oninput="
+this.value = this.value
+.replace(/[^0-9,]/g,'')
+.replace(/(,.*),/g,'$1');
+calcularArea(this)
+"
+onblur="formatarNumero(this)">
+
+
+<label style="margin-top:8px;">Área descontada (m²)</label>
+<input class="area-descontada" value="0,00" disabled>
+
+<label style="margin-top:8px;">Área computada (m²)</label>
+<input class="area-computada" value="0,00" disabled>
+
+<div style="text-align:center; margin-top:10px;">
+<button class="btn" onclick="abrirModalAreas(this)">
+Indicar áreas descontadas
+</button>
+</div>
+
+</div>
+
+<div>
+
+<div style="
+font-weight:700;
+font-size:14px;
+margin-bottom:6px;
+color:#333;
+border-bottom:2px solid #ddd;
+padding-bottom:4px;
+">
+Altura da Edificação
+</div>
+
+<label>Pé-direito (m)</label>
+<input class="input-altura"
+value=""
+oninput="calcularAltura(this)"
+onblur="formatarAltura(this)">
+
+
+<div style="margin-top:10px; font-weight:600;">Indicar</div>
+
+<div style="display:flex; flex-direction:column; align-items:flex-start; gap:6px; margin-top:6px;">
+
+<label style="display:flex; align-items:center; gap:6px; font-weight:normal; cursor:pointer;">
+<input type="radio" name="tipoOcupacao_${i}_${p}" class="tipo-ocupacao" value="habitavel" checked onchange="calcularAltura(this)">
+Com permanência de pessoas
+</label>
+
+<label style="display:flex; align-items:center; gap:6px; font-weight:normal; cursor:pointer;">
+<input type="radio" name="tipoOcupacao_${i}_${p}" class="tipo-ocupacao" value="tecnico" onchange="calcularAltura(this)">
+Pavimento de uso técnico
+</label>
+
+</div>
+
+
+</div>
+
+<div>
+
+<label>Ocupação (até 5)</label>
+
+<div class="ocupacoes-container">
+
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+<select class="ocupacao"><option>-- Selecionar --</option></select>
+
+</div>
+
+<label style="margin-top:10px;">Carga de incêndio (MJ/m²)</label>
+<input class="carga-incendio" disabled>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+`
+}
+
+
+box.innerHTML = `
+
+<div class="edificacao-header">
+
+<span onclick="toggleEdificacao(${i})" style="flex:1; cursor:pointer;">
+<span id="setaEd${i}">▶</span>
+<span id="nomeEd${i}">${nome}</span>
+</span>
+
+<span title="Limpar edificação" onclick="limparEdificacao(${i})" style="cursor:pointer;">🧹</span>
+
+<span title="Excluir edificação" onclick="excluirEdificacao(${i})" style="cursor:pointer;">🗑</span>
+
+</div>
+
+
+<div class="edificacao-content" id="conteudoEd${i}">
+
+<!-- 🧱 ÁREAS -->
+
+<div class="modulo-bloco">
+
+<div class="subtitulo" onclick="toggleModulo(this)" style="cursor:pointer;">
+<span>▼</span> 🧱 Dados da Edificação
+</div>
+
+<div class="modulo-conteudo">
+
+${pavimentosHTML}
+
+<!-- 📊 TABELA FINAL -->
+
+<div class="modulo-bloco" style="margin-top:12px;">
+
+<div class="subtitulo" style="font-size:14px;">
+📊 Quadro de Áreas da Edificação
+</div>
+
+<table style="width:100%; border-collapse:collapse; font-size:13px;">
+
+<thead>
+<tr style="background:#f0f0f0;">
+<th style="border:1px solid #ccc; padding:6px;">Descrição</th>
+<th style="border:1px solid #ccc; padding:6px;">Área do pavimento</th>
+<th style="border:1px solid #ccc; padding:6px;">Área descontada<br>(permitido para CLCB)</th>
+<th style="border:1px solid #ccc; padding:6px;">Área descontada<br>(não permitido para CLCB)</th>
+<th style="border:1px solid #ccc; padding:6px;">Área computada</th>
+</tr>
+</thead>
+
+<tbody class="tabela-areas-body">
+</tbody>
+
+<tfoot>
+<tr style="background:#fafafa; font-weight:bold;">
+<td style="border:1px solid #ccc; padding:6px;text-align:center;">TOTAL</td>
+<td style="border:1px solid #ccc; padding:6px; text-align:center;" class="total-coberta">0,00</td>
+<td style="border:1px solid #ccc; padding:6px; text-align:center;" class="total-desc-clcb">0,00</td>
+<td style="border:1px solid #ccc; padding:6px; text-align:center;" class="total-desc-pts">0,00</td>
+<td style="border:1px solid #ccc; padding:6px; text-align:center; font-weight:bold;" class="total-computada">0,00</td>
+</tr>
+</tfoot>
+
+</table>
+
+<div class="resultado-area" style="
+margin-top:10px;
+padding:10px;
+background:#fff3e0;
+border-left:4px solid #ef6c00;
+border-right:4px solid #ef6c00;
+font-size:13px;
+display:none;
+">
+</div>
+
+
+</div>
+
+</div>
+
+
+</div>
+
+<!-- ⚠️ RISCOS -->
+
+<div class="modulo-bloco">
+
+<div class="subtitulo" onclick="toggleModulo(this)" style="cursor:pointer;">
+<span>▼</span> ⚠️ Riscos Especiais
+</div>
+
+<div class="modulo-conteudo">
+<p style="font-size:13px; color:#777;">
+Módulo em desenvolvimento
+</p>
+</div>
+
+</div>
+
+<!-- 📋 RESUMO -->
+
+<div class="modulo-bloco">
+
+<div class="subtitulo" onclick="toggleModulo(this)" style="cursor:pointer;">
+<span>▼</span> 📋 Resumo da Edificação
+</div>
+
+<div class="modulo-conteudo">
+<p style="font-size:13px; color:#777;">
+Resumo técnico será gerado automaticamente
+</p>
+</div>
+
+</div>
+
+</div>
+
+`
+
+conteudo.appendChild(box)
+
+let peDireito = getPeDireitoEdificacao(i)
+
+box.querySelectorAll(".input-altura").forEach(inp=>{
+    inp.value = formatarBR(peDireito)
+})
+
+
+
+// 🔁 RESTAURA DADOS
+if(dadosAntigos[i]){
+
+    let pavs = box.querySelectorAll("[data-tipo]")
+
+    pavs.forEach((pav)=>{
+
+        let tipo = pav.dataset.tipo
+        let num = pav.dataset.num || "0"
+
+        let chave = tipo + "_" + num
+
+        let d = dadosAntigos[i][chave]
+
+        if(d){
+
+            let areaInput = pav.querySelector(".area-coberta")
+
+            if(areaInput){
+                areaInput.value = d.areaCoberta
+
+                // 🔥 AQUI ESTÁ A CORREÇÃO
+                calcularArea(areaInput)
+            }
+
+            if(pav.querySelector(".area-descontada")){
+                pav.querySelector(".area-descontada").value = d.areaDesc
+            }
+
+            if(pav.querySelector(".area-computada")){
+                pav.querySelector(".area-computada").value = d.areaComp
+            }
+
+        }
+
+    })
+}
+
+
+
+card.style.display = "block"
+
+card.scrollIntoView({behavior:"smooth"})
+
+// 🔥 FORÇA ATUALIZAÇÃO INICIAL
+setTimeout(() => {
+    atualizarQuadroAreas()
+}, 0)
+
+
+avisoQtdMostrado = false
+}
+
+
+
+
+function avisarReset(){
+
+if(avisoQtdMostrado) return
+
+let card = document.getElementById("cardEdificacoes")
+
+if(card.style.display === "block"){
+
+avisoQtdMostrado = true
+
+document.getElementById("modalTexto").innerHTML =
+"Alterar a quantidade de edificações irá apagar todas as edificações já geradas.<br><br>Após alterar o número, será necessário gerar novamente."
+
+document.getElementById("modalConfirmacao").style.display = "flex"
+
+/* botão único */
+
+document.querySelector(".btn-cancelar").style.display = "none"
+document.querySelector(".btn").innerText = "Ciente"
+
+acaoConfirmacao = function(){
+
+avisoQtdMostrado = true
+
+setTimeout(()=>{
+document.getElementById("qtdEdificacoes").focus()
+},100)
+
+}
+
+}
+
+}
+
+
+
+
+function limparEdificacao(id){
+
+let bloco = document.getElementById("conteudoEd"+id)
+
+if(!bloco) return
+
+let inputs = bloco.querySelectorAll("input")
+
+inputs.forEach(inp => inp.value = "")
+
+}
+
+function excluirEdificacao(id){
+
+abrirModal(
+"Deseja excluir esta edificação?",
+function(){
+
+/* REMOVE CARD DO MÓDULO */
+
+let card = document.querySelector(`#conteudoEd${id}`).closest(".edificacao-card")
+if(card) card.remove()
+
+/* REMOVE DA LISTA DA IMPLANTAÇÃO */
+
+let linhas = document.querySelectorAll("#listaEdificacoes .edificacao")
+if(linhas[id]) linhas[id].remove()
+
+/* ATUALIZA QUANTIDADE */
+
+let novaQtd = document.querySelectorAll("#listaEdificacoes .edificacao").length
+document.getElementById("qtdEdificacoes").value = novaQtd
+
+/* RENUMEIA AS EDIFICAÇÕES */
+
+renumerarEdificacoes()
+
+/* RECONSTRÓI MATRIZ DE FACHADAS */
+
+atualizarMatrizFachadas()
+
+/* ATUALIZA LEGENDA */
+
+atualizarLegenda()
+
+}
+)
+
+}
+
+
+
+
+
+
+
+
+function salvarProjeto(){
+
+if(!AUTO_SAVE) return
+
+let projeto = {}
+
+let edificacoes = []
+
+document.querySelectorAll("#listaEdificacoes .edificacao").forEach((linha)=>{
+
+let inputs = linha.querySelectorAll("input")
+
+edificacoes.push({
+
+nome: inputs[0].value,
+pavimentos: inputs[1].value,
+subsolos: inputs[2].value,
+pedireito: inputs[3].value
+
+})
+
+})
+
+projeto.edificacoes = edificacoes
+
+localStorage.setItem("SAR_PROJETO", JSON.stringify(projeto))
+
+}
+
+function carregarProjeto(){
+
+let dados = localStorage.getItem("SAR_PROJETO")
+
+if(!dados) return
+
+let projeto = JSON.parse(dados)
+
+if(!projeto.edificacoes) return
+
+document.getElementById("qtdEdificacoes").value = projeto.edificacoes.length
+
+gerarEdificacoes()
+
+let linhas = document.querySelectorAll("#listaEdificacoes .edificacao")
+
+projeto.edificacoes.forEach((ed,i)=>{
+
+let inputs = linhas[i].querySelectorAll("input")
+
+inputs[0].value = ed.nome
+inputs[1].value = ed.pavimentos
+inputs[2].value = ed.subsolos
+inputs[3].value = ed.pedireito
+
+})
+
+atualizarLegenda()
+
+}
+
+
+
+
+let acaoConfirmacao = null
+
+function abrirModal(mensagem, callback){
+
+document.getElementById("modalTexto").innerHTML = mensagem
+document.getElementById("modalConfirmacao").style.display = "flex"
+
+acaoConfirmacao = callback
+
+}
+
+function fecharModal(confirmado){
+
+document.getElementById("modalConfirmacao").style.display = "none"
+
+/* restaurar botões */
+
+document.querySelector(".btn-cancelar").style.display = "inline-block"
+document.getElementById("btnGerarEdificacoes").innerText = "Gerar Edificações"
+
+if(confirmado && acaoConfirmacao){
+acaoConfirmacao()
+}
+
+acaoConfirmacao = null
+
+avisoQtdMostrado = false
+
+}
+
+function renumerarEdificacoes(){
+
+let linhas = document.querySelectorAll("#listaEdificacoes .edificacao")
+
+linhas.forEach((linha,index)=>{
+
+let indice = linha.querySelector(".indice")
+
+if(indice){
+indice.innerText = index + 1
+}
+
+})
+
+}
+
+function atualizarMatrizFachadas(){
+
+let qtd = document.querySelectorAll("#listaEdificacoes .edificacao").length
+
+const fachadaBox = document.getElementById("fachadasContainer")
+const tabela = document.getElementById("tabelaFachadas")
+
+if(qtd <= 1){
+fachadaBox.style.display="none"
+tabela.innerHTML=""
+return
+}
+
+fachadaBox.style.display="block"
+
+let html=""
+
+html+="<tr><th></th>"
+
+for(let i=1;i<=qtd;i++){
+html+=`<th>${i}</th>`
+}
+
+html+="</tr>"
+
+for(let i=1;i<=qtd;i++){
+
+html+=`<tr><td>${i}</td>`
+
+for(let j=1;j<=qtd;j++){
+
+if(i===j){
+html+="<td>X</td>"
+}else{
+html+=`<td><input type="checkbox" data-i="${i}" data-j="${j}" onchange="espelhar(this)"></td>`
+}
+
+}
+
+html+="</tr>"
+
+}
+
+tabela.innerHTML = html
+
+}
+
+function limparProjeto(){
+
+abrirModal(
+"Todos os dados do projeto serão apagados. Deseja continuar?",
+function(){
+
+localStorage.clear()
+location.reload()
+
+}
+)
+
+}
+
+function atualizarNomeEdificacao(input){
+
+let linha = input.closest(".edificacao")
+
+let indice = linha.querySelector(".indice").innerText
+
+let nome = input.value || "Edificação " + indice
+
+let destino = document.getElementById("nomeEd" + (indice-1))
+
+if(destino){
+destino.innerText = nome
+}
+
+}
+
+let pavimentoAtual = null
+
+function abrirModalAreas(btn){
+
+pavimentoAtual = btn.closest("[data-tipo]")
+
+document.getElementById("modalAreasDescontadas").style.display = "flex"
+}
+
+function fecharModalAreas(){
+document.getElementById("modalAreasDescontadas").style.display = "none";
+}
+
+function parseNumeroBR(valor){
+
+if(!valor) return 0
+
+return parseFloat(
+valor
+.replace(/\./g, "") // remove milhar
+.replace(",", ".") // troca decimal
+)
+}
+
+function formatarBR(valor){
+
+    if(isNaN(valor)) return "0,00"
+
+    return valor.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    })
+}
+
+
+function calcularArea(input){
+
+    let container = input.closest(".pavimento-bloco")
+
+    let coberta = parseNumeroBR(container.querySelector(".area-coberta").value)
+    let descontada = parseNumeroBR(container.querySelector(".area-descontada").value)
+
+    let computada = coberta - descontada
+
+    if(computada < 0) computada = 0
+
+    container.querySelector(".area-computada").value = formatarBR(computada)
+
+    // 🔴 ALERTA INTELIGENTE (pré CLBC)
+const alerta = container.querySelector(".alerta-area")
+
+if(alerta){
+if(computada >= 750 && computada <= 765){
+alerta.style.display = "block"
+}else{
+alerta.style.display = "none"
+}
+}
+atualizarQuadroAreas()
+}
+
+
+function formatarNumero(input){
+
+    let valor = parseNumeroBR(input.value)
+
+    input.value = formatarBR(valor)
+
+    // 🔥 só recalcula se for área
+    if(input.classList.contains("area-coberta")){
+        calcularArea(input)
+    }
+
+    // 🔥 se for altura
+    if(input.classList.contains("input-altura")){
+        calcularAltura(input)
+    }
+}
+
+
+function aplicarAreas(){
+
+    try {
+
+        if(!pavimentoAtual){
+            console.warn("pavimentoAtual está null")
+            fecharModalAreas()
+            return
+        }
+
+        const erro = document.getElementById("errorMsg")
+
+        if(erro && erro.style.display === "block"){
+            return
+        }
+
+        let inputs = document.querySelectorAll("#modalAreasDescontadas input")
+
+        let totalCLCB = 0
+        let totalPTS = 0
+
+        inputs.forEach(inp => {
+
+            let val = parseFloat(inp.value) || 0
+
+            if(inp.classList.contains("clcb-ok")){
+                totalCLCB += val
+            }
+
+            if(inp.classList.contains("clcb-no")){
+                totalPTS += val
+            }
+
+        })
+
+        // 🔒 proteção extra
+        if(!pavimentoAtual.querySelector){
+            console.error("pavimentoAtual inválido")
+            fecharModalAreas()
+            return
+        }
+
+        pavimentoAtual.dataset.descClcb = totalCLCB
+        pavimentoAtual.dataset.descPts = totalPTS
+
+        let campoDescontada = pavimentoAtual.querySelector(".area-descontada")
+
+        let total = totalCLCB + totalPTS
+        campoDescontada.value = formatarBR(total)
+
+        let areaInput = pavimentoAtual.querySelector(".area-coberta")
+
+        if(areaInput){
+            calcularArea(areaInput)
+        }
+
+    } catch(e) {
+
+        console.error("Erro ao aplicar áreas:", e)
+
+    } finally {
+
+        // 🔥 GARANTE FECHAMENTO SEMPRE
+        fecharModalAreas()
+
+    }
+}
+
+
+
+function validarAreasDescontadas(){
+
+    if(!pavimentoAtual) return
+
+    let inputs = document.querySelectorAll("#modalAreasDescontadas input")
+
+    let totalDescontado = 0
+
+    inputs.forEach(inp=>{
+        let val = parseFloat(inp.value) || 0
+        totalDescontado += val
+    })
+
+    let areaCoberta = parseNumeroBR(
+        pavimentoAtual.querySelector(".area-coberta").value
+    )
+
+    const erro = document.getElementById("errorMsg")
+    const btnAplicar = document.getElementById("btnAplicarAreas")
+
+    if(totalDescontado > areaCoberta){
+
+        erro.style.display = "block"
+
+        // 🔴 BLOQUEIA BOTÃO APLICAR
+        btnAplicar.disabled = true
+        btnAplicar.style.opacity = "0.5"
+        btnAplicar.style.cursor = "not-allowed"
+
+    }else{
+
+        erro.style.display = "none"
+
+        // 🟢 LIBERA BOTÃO
+        btnAplicar.disabled = false
+        btnAplicar.style.opacity = "1"
+        btnAplicar.style.cursor = "pointer"
+    }
+}
+
+
+function capturarDadosEdificacoes(){
+
+    let dados = []
+
+    document.querySelectorAll(".edificacao-card").forEach((card)=>{
+
+        let pavimentos = {}
+
+        let pavs = getPavimentosArea(card)
+
+        if(!pavs || pavs.length === 0){
+            dados.push({})
+            return
+        }
+
+        pavs.forEach((pav)=>{
+
+            let tipo = pav.dataset.tipo
+            let num = pav.dataset.num || "0"
+
+            let chave = tipo + "_" + num
+
+            let areaCoberta = pav.querySelector(".area-coberta")
+            let areaDesc = pav.querySelector(".area-descontada")
+            let areaComp = pav.querySelector(".area-computada")
+
+            pavimentos[chave] = {
+                areaCoberta: areaCoberta ? areaCoberta.value : "",
+                areaDesc: areaDesc ? areaDesc.value : "",
+                areaComp: areaComp ? areaComp.value : ""
+            }
+
+        })
+
+        dados.push(pavimentos)
+    })
+
+    return dados
+}
+
+function limparModalAreas(){
+
+    let inputs = document.querySelectorAll("#modalAreasDescontadas input")
+
+    inputs.forEach(inp => {
+        inp.value = ""
+    })
+
+    // resetar erro
+    const erro = document.getElementById("errorMsg")
+    erro.style.display = "none"
+
+    // reativar botão aplicar
+    const btnAplicar = document.getElementById("btnAplicarAreas")
+    btnAplicar.disabled = false
+    btnAplicar.style.opacity = "1"
+    btnAplicar.style.cursor = "pointer"
+
+}
+
+function cancelarAreas(){
+
+    limparModalAreas()
+    fecharModalAreas()
+
+}
+function toggleModulo(el){
+
+    let conteudo = el.nextElementSibling
+    let seta = el.querySelector("span")
+
+    if(conteudo.style.display === "none"){
+        conteudo.style.display = "block"
+        seta.innerHTML = "▼"
+    }else{
+        conteudo.style.display = "none"
+        seta.innerHTML = "▶"
+    }
+}
+
+function atualizarQuadroAreas(){
+
+    document.querySelectorAll(".edificacao-card").forEach(card => {
+
+        let tbody = card.querySelector(".tabela-areas-body")
+
+        if(!tbody) return
+
+        tbody.innerHTML = ""
+
+        let totalCoberta = 0
+        let totalDescCLCB = 0
+        let totalDescPTS = 0
+        let totalComp = 0
+
+        getPavimentosArea(card).forEach(pav => {
+
+
+            let nome = pav.querySelector(".subtitulo")?.innerText || "-"
+
+            let cob = parseNumeroBR(pav.querySelector(".area-coberta")?.value)
+            let des = parseNumeroBR(pav.querySelector(".area-descontada")?.value)
+            let com = parseNumeroBR(pav.querySelector(".area-computada")?.value)
+let desTotal = parseNumeroBR(pav.querySelector(".area-descontada")?.value)
+
+let descClcb = parseFloat(pav.dataset.descClcb || 0)
+let descPts = parseFloat(pav.dataset.descPts || 0)
+
+// 🔥 se não tiver dataset, usa tudo como "não permitido"
+if(descClcb === 0 && descPts === 0){
+descPts = desTotal
+}
+
+            totalCoberta += cob
+            totalDescCLCB += descClcb
+            totalDescPTS += descPts
+            totalComp += com
+
+            let tr = document.createElement("tr")
+
+tr.innerHTML = `
+<td style="border:1px solid #ccc; padding:6px;text-align:center;">${nome}</td>
+<td style="border:1px solid #ccc; padding:6px;text-align:center;">${formatarBR(cob)}</td>
+<td style="border:1px solid #ccc; padding:6px;text-align:center;">${formatarBR(descClcb)}</td>
+<td style="border:1px solid #ccc; padding:6px;text-align:center;">${formatarBR(descPts)}</td>
+<td style="border:1px solid #ccc; padding:6px;text-align:center;">${formatarBR(com)}</td>
+`
+
+            tbody.appendChild(tr)
+
+        })
+
+        card.querySelector(".total-coberta").innerText = formatarBR(totalCoberta)
+        card.querySelector(".total-desc-clcb").innerText = formatarBR(totalDescCLCB)
+   card.querySelector(".total-desc-pts").innerText = formatarBR(totalDescPTS)
+        card.querySelector(".total-computada").innerText = formatarBR(totalComp)
+
+
+
+    // 🔥 CLASSIFICAÇÃO VIA PLANILHA
+let opcoes = classificarArea(totalComp)
+
+let resultado = null
+
+let descontoCLCB = 0
+let descontoPTS = 0
+
+card.querySelectorAll(".modulo-bloco:first-of-type .pavimento-bloco").forEach(pav => {
+
+descontoCLCB += parseFloat(pav.dataset.descClcb || 0)
+descontoPTS += parseFloat(pav.dataset.descPts || 0)
+
+})
+
+// 🔥 REGRA DE DESCONTO (CRÍTICA)
+
+if(totalComp <= 750){
+
+if(descontoPTS > 0){
+// remove CLCB
+resultado = opcoes.find(r => r.processo === "PTS")
+}
+
+else{
+// pega menor nível (CLCB primeiro)
+resultado = opcoes.sort((a,b)=> a.nivel_processo - b.nivel_processo)[0]
+}
+
+}else{
+
+// fora de 750, banco decide
+resultado = opcoes.sort((a,b)=> a.nivel_processo - b.nivel_processo)[0]
+
+}
+
+console.log("TOTAL COMPUTADA:", totalComp)
+console.log("RESULTADO:", resultado)
+
+let box = card.querySelector(".resultado-area")
+
+if(box){
+
+if(resultado){
+
+box.style.display = "block"
+
+let cor = "#333"
+
+if(resultado.processo === "CLCB") cor = "#2e7d32"
+if(resultado.processo === "PTS") cor = "#4169E1"
+if(resultado.processo === "PT") cor = "#c62828"
+
+box.innerHTML = `
+<div style="font-weight:bold; font-size:15px; color:${cor};">
+${resultado.texto}
+</div>
+`
+
+
+} else {
+
+box.style.display = "block"
+
+box.innerHTML = `
+⚠️ Nenhuma regra encontrada para a área computada: ${formatarBR(totalComp)}
+`
+
+console.warn("SEM REGRA:", totalComp, BD_AREA)
+
+}
+
+}
+})
+
+}
+
+window.onload = () => {
+
+    if(AUTO_SAVE){
+        carregarProjeto()
+    }
+
+    carregarBD_AREA()
+}
+
+function classificarArea(valor){
+
+let opcoes = BD_AREA.filter(r =>
+r.criterio?.trim().toLowerCase() === "area" &&
+r.ativo === true &&
+valor >= r.min &&
+valor <= r.max
+)
+
+return opcoes
+}
+
+
+
+let BD_AREA = []
+
+async function carregarBD_AREA(){
+
+    const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSkjQTPqgAd0-hu9LgaReBC4TYeclVt0FUOqaonzn5To7rFNO8iY69SGqrNCGtIld0A5uC5cgIKiVpz/pub?output=tsv";
+
+    const res = await fetch(url)
+    const text = await res.text()
+
+   const linhas = text
+.replace(/\r/g, "")
+.split("\n")
+.slice(1)
+.filter(l => l.trim() !== "")
+
+   BD_AREA = linhas.map(l => {
+
+let col = l.split("\t")
+
+return {
+criterio: col[2]?.trim().toLowerCase(),
+
+min: parseFloat(col[5]?.trim().replace(",", ".")),
+max: parseFloat(col[6]?.trim().replace(",", ".")),
+
+nivel_processo: parseInt(col[7]?.trim()),
+
+processo: col[8]?.trim(),
+descricao: col[9]?.trim(),
+texto: col[10]?.trim(),
+
+ativo: col[11]?.trim().toUpperCase() === "TRUE"
+}
+
+}).filter(r => r.criterio && !isNaN(r.min) && !isNaN(r.max))
+
+    console.log("BD_AREA carregado:", BD_AREA)
+
+}
+
+function calcularAltura(input){
+
+    let card = input.closest(".edificacao-card")
+
+    if(!card) return
+
+    let total = 0
+
+    let pavimentos = card.querySelectorAll(".pavimento-bloco")
+
+    let tbody = card.querySelector(".tabela-altura-body")
+
+    if(tbody) tbody.innerHTML = ""
+
+    pavimentos.forEach(pav => {
+
+        let tipo = pav.querySelector(".tipo-ocupacao:checked")?.value
+
+        // 🔥 só entra se for habitável
+        if(tipo !== "habitavel") return
+
+        let alturaInput = pav.querySelector(".input-altura")
+
+        if(!alturaInput) return
+
+        let val = parseNumeroBR(alturaInput.value)
+
+        total += val
+
+        // 🔁 monta tabela (se existir)
+        if(tbody){
+
+            let nome = pav.querySelector(".subtitulo")?.innerText || "-"
+
+            let tr = document.createElement("tr")
+
+            tr.innerHTML = `
+            <td style="border:1px solid #ccc; padding:6px; text-align:center;">${nome}</td>
+            <td style="border:1px solid #ccc; padding:6px; text-align:center;">${formatarBR(val)}</td>
+            `
+
+            tbody.appendChild(tr)
+        }
+
+    })
+
+    // 🔥 atualiza total
+    let totalBox = card.querySelector(".altura-total")
+
+    if(totalBox){
+        totalBox.innerText = formatarBR(total)
+    }
+
+}
+
+
+function formatarAltura(input){
+
+let valor = parseNumeroBR(input.value)
+
+// 🔥 se vazio ou zero → assume padrão
+if(!valor || valor === 0){
+valor = 3
+}
+
+input.value = formatarBR(valor)
+
+calcularAltura(input)
+
+}
+
+function getPavimentosArea(card){
+   return [...card.querySelectorAll("[data-tipo]")].filter(pav =>
+       pav && pav.querySelector && pav.querySelector(".area-coberta")
+   )
+}
+
+function getPavimentosAltura(card){
+return card.querySelectorAll(".altura-pavimentos .pavimento-bloco")
+}
+
+function getPeDireitoEdificacao(index){
+
+    let linhas = document.querySelectorAll("#listaEdificacoes .edificacao")
+
+    if(!linhas[index]) return 3
+
+    let valor = linhas[index].children[3].value
+
+    return parseNumeroBR(valor) || 3
+}
+
+function sincronizarPeDireito(input){
+
+let linha = input.closest(".edificacao")
+let index = [...linha.parentNode.children].indexOf(linha)
+
+let novoValor = parseNumeroBR(input.value)
+
+document.querySelectorAll(`#conteudoEd${index} .input-altura`).forEach(inp=>{
+inp.value = formatarBR(novoValor)
+calcularAltura(inp)
+})
+}
+
+
+
 
 </script>
 
+<div id="modalConfirmacao" class="modal-bg">
+
+<div class="modal-box-small">
+
+<div class="modal-titulo">
+⚠️ Atenção ⚠️
+</div>
+
+<div class="modal-texto" id="modalTexto">
+Mensagem
+</div>
+
+<div class="modal-botoes">
+
+<button class="btn-cancelar" onclick="fecharModal(false)">
+Cancelar
+</button>
+
+<button class="btn" onclick="fecharModal(true)">
+Continuar
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div id="modalAreasDescontadas" class="modal-bg" style="display:none;">
+
+  <div class="modal-box-small">
+
+    <div class="subtitulo">⚠️ Áreas desconsideradas permitidas conforme Instrução Técnica nº 42/2025</div>
+
+    <div class="modal-body">
+      <div>
+        <div class="col-title" style="color: #2e7d32; margin-bottom: 15px;">✔ Permitidas para CLCB</div>
+
+        <div class="field-row">
+          <label>Residência unifamiliar com saída direta para via pública (m²)</label>
+          <input type="number" 
+class="m-input clcb-ok" data-nome="residencial" step="0.01" oninput="validarAreasDescontadas()">
+        </div>
+
+        <div class="field-row">
+          <label>Piscinas (m²)</label>
+          <input type="number" class="m-input clcb-ok" data-nome="piscinas" step="0.01" oninput="validarAreasDescontadas()">
+        </div>
+
+        <div class="field-row">
+          <label>Cobertura de bombas de combustível abertas lateralmente em pelo menos 50% do perímetro (m²)</label>
+          <input type="number" class="m-input clcb-ok" data-nome="cobertura de bombas" step="0.01" oninput="validarAreasDescontadas()">
+        </div>
+
+        <div class="field-row">
+          <label>Praça de pedágio abertas lateralmente em pelo menos 50% do perímetro (m²)</label>
+          <input type="number" class="m-input clcb-ok" data-nome="praça de pedágio" step="0.01" oninput="validarAreasDescontadas()">
+        </div>
+      </div>
+
+      <div>
+        <div class="col-title" style="color: #d32f2f; margin-bottom: 15px;">❌ Não permitidas para CLCB</div>
+
+        <div class="field-row">
+          <label>Telheiros - máximo 10,00 m² (m²)</label>
+          <input type="number" class="m-input clcb-no" data-nome="telheiros" step="0.01" oninput="validarAreasDescontadas()">
+        </div>
+
+        <div class="field-row">
+          <label>Platibandas/Beirais com 3,00 m de projeção em balanço (m²)</label>
+          <input type="number" class="m-input clcb-no" data-nome="platibandas" step="0.01" oninput="validarAreasDescontadas()">
+        </div>
+
+        <div class="field-row">
+          <label>Passagens cobertas, de laterais abertas, com largura máxima de 3,00 m, destinadas apenas à circulação de pessoas ou mercadorias (m²)</label>
+          <input type="number" class="m-input clcb-no" data-nome="passagens abertas" step="0.01"oninput="validarAreasDescontadas()">
+        </div>
+
+        <div class="field-row">
+          <label>Reservatórios (m²)</label>
+          <input type="number" class="m-input clcb-no" data-nome="reservatórios" step="0.01" oninput="validarAreasDescontadas()">
+        </div>
+
+        <div class="field-row">
+          <label>Escadas enclausuradas/Dutos (m²)</label>
+          <input type="number" class="m-input clcb-no" data-nome="escadas enclausuradas" step="0.01" oninput="validarAreasDescontadas()">
+        </div>
+
+        <div class="field-row">
+          <label>Banheiros/Vestiários (m²)</label>
+          <input type="number" class="m-input clcb-no" data-nome="dutos/banheiros" step="0.01" oninput="validarAreasDescontadas()">
+        </div>
+      </div>
+    </div>
+
+    <div id="errorMsg" style="color: red; display: none; padding: 10px;">
+      ❌ Soma das áreas descontadas maior que a área do pavimento!
+    </div>
+
+    <div class="modal-footer">
+     <button class="btn-cancelar" onclick="cancelarAreas()">Cancelar</button>
+<button class="btn" id="btnAplicarAreas" onclick="aplicarAreas()">Aplicar</button>
+    </div>
+
+  </div>
+</div>
+
+
+
+
 </body>
 </html>
+
+
+
