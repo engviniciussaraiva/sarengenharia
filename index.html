@@ -1,137 +1,3795 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SAR Engenharia</title>
+  <meta charset="UTF-8">
+  <title>SAR - Sistema Avançado de Resposta</title>
+  <style>
+    :root {
+      --primary: #1b5e20;
+      --bg-card: #ffffff;
+      --text: #333;
+      --clcb-bg: #e8f5e9;
+      --clcb-dot: #2e7d32;
+      --pts-bg: #fff3e0;
+      --pts-dot: #ef6c00;
+      --pt-bg: #ffebee;
+      --pt-dot: #d32f2f;
+      --alert-bg: #fff9c4;
+      --alert-text: #827717;
+      --search-green: #2e7d32;
+      --switch-off: #2e7d32; 
+      --switch-on: #d32f2f;  
+      --btn-laranja: #ef6c00;
+    }
 
-<style>
-:root {
-  --primary: #1b5e20;
-  --bg: #f5f7f6;
-  --card: #ffffff;
+    body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 10px; color: var(--text); }
+    
+    .card {
+      background: var(--bg-card);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      max-width: 900px;
+      margin: 12px auto;
+      border: 1px solid #ddd;
+    }
+
+/* ===== MATRIZ DE ENQUADRAMENTO (TOPO) ===== */
+.card-matriz{
+  margin-bottom: 24px;
+  border-top: 4px solid var(--primary);
+  border-bottom: 4px solid var(--primary);
+  border-left: none;
+  border-right: none;
+text-align: center;
 }
 
-* {
+
+  .matriz-titulo{
   margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
-}
-
-body {
-  background: var(--bg);
-}
-
-/* HEADER */
-.header {
-  background: var(--primary);
-  color: white;
-  padding: 20px;
-  font-size: 22px;
+  font-size: 28px;          /* ⬅️ maior */
+  color: var(--primary);
   font-weight: bold;
+
 }
 
-/* CONTAINER */
-.container {
-  padding: 30px;
+.matriz-subtitulo{
+  margin-top: 10px;
+  font-size: 15px;          /* ⬅️ levemente maior */
+  color: #555;
+  line-height: 1.5;
 }
 
-/* GRID */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
 }
 
-/* CARD BASE */
-.card {
-  background: var(--card);
-  height: 140px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  cursor: pointer;
-  transition: 0.2s;
+
+
+    h3 { color: var(--primary); font-size: 1.1rem; display: flex; align-items: center; gap: 8px; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .grid-main { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0 10px 0; }
+    .input-group { display: flex; flex-direction: column; min-width: 0; }
+    label { font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; color: #555; }
+    
+    input, select, textarea { padding: 8px; border: 1px solid #ccc; border-radius: 4px; background: #fdfdfd; font-size: 0.95rem; width: 100%; box-sizing: border-box; font-family: inherit; }
+
+    .result-container-padrao { margin-top: 15px; padding: 10px; border-radius: 5px; display: none; align-items: center; gap: 10px; }
+    .badge-text-padrao { font-weight: bold; font-size: 0.95rem; }
+
+    #areaOcupacaoExibicao { display: none; resize: none; background-color: #fff; cursor: pointer; overflow: hidden; line-height: 1.4; border: 2px solid var(--primary); }
+
+    input:disabled, select:disabled { background: #f0f0f0; color: #666; cursor: not-allowed; border: 1px solid #ddd; }
+    .msg-instrucao { font-size: 0.75rem; color: #d32f2f; font-style: italic; margin-top: 4px; display: none; }
+    .btn-green { background-color: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+    .grid-altura { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 10px; }
+    .sub-label { font-size: 0.75rem; color: #666; font-style: italic; margin-bottom: 5px; line-height: 1.2; }
+
+/* 🔧 Ajuste fino – Resultado GLP */
+#resumoGLP {
+  font-size: 0.85rem; /* +1 ponto visual */
+}
+
+/* 🔧 Ajuste fino – Classe GLP Revenda */
+#classeGLPRevenda {
+  min-width: 140px;   /* antes estava herdando ~140px */
+  font-size: 0.85rem; /* mantém padrão visual */
+}
+
+
+
+
+    #containerAlturaEdif { display: none; }
+
+    /* LAYOUT MÓDULO 4: CRITÉRIOS ADICIONAIS */
+   
+/* LAYOUT MÓDULO 4: CRITÉRIOS ADICIONAIS */
+.criterio-row { 
+  display: flex; 
+  justify-content: space-between;   /* texto à esquerda / respostas à direita */
+  align-items: center; 
+  padding: 12px 0; 
+  border-bottom: 1px solid #f0f0f0; 
+  min-height: 60px; 
+}
+
+.criterio-text { 
+  font-size: 0.88rem; 
+  color: #444; 
+  flex: 1;                          /* ocupa todo o espaço disponível */
+  max-width: 520px;                 /* mantém leitura confortável */
+  line-height: 1.4; 
+  padding-right: 20px; 
+}
+
+.criterio-controls { 
+  display: flex; 
+  align-items: center; 
+  gap: 6px;                         /* aproxima NÃO/SIM, caixa e botão */
+  flex-shrink: 0;                   /* não espreme o bloco */
+}
+
+
+
+    .switch-container { display: flex; background: #eee; border-radius: 20px; padding: 2px; width: 100px; position: relative; cursor: pointer; flex-shrink: 0; }
+    .switch-option { flex: 1; text-align: center; font-size: 0.7rem; font-weight: bold; padding: 6px 0; z-index: 2; color: #666; transition: color 0.3s; }
+    .switch-slider { position: absolute; width: 48px; height: 24px; background: var(--switch-off); border-radius: 18px; transition: transform 0.3s, background 0.3s; z-index: 1; }
+    .switch-active-no .switch-slider { transform: translateX(0); background: var(--switch-off); }
+    .switch-active-no .opt-no { color: white; }
+    .switch-active-yes .switch-slider { transform: translateX(48px); background: var(--switch-on); }
+    .switch-active-yes .opt-yes { color: white; }
+    .input-lateral { display: none; width: 140px; }
+    .btn-laranja-simples { background: var(--btn-laranja); color: white; border: none; padding: 8px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; cursor: pointer; white-space: nowrap; }
+
+    .memorial-card { border-top: 4px solid var(--primary); background: #fcfcfc; }
+    .memorial-header-title { font-size: 1.4rem; font-weight: bold; color: var(--primary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; justify-content: center; }
+    .memorial-row { margin-left: 28px; line-height: 1.6; font-size: 1.05rem; }
+
+    #modalContainer { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); }
+    .modal-box { background: white; margin: 2% auto; width: 90%; max-width: 850px; border-radius: 8px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .modal-header { padding: 15px 20px; border-bottom: 1px solid #eee; font-weight: bold; color: var(--primary); }
+    .modal-body { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+    .modal-footer { padding: 15px 20px; background: #f9f9f9; text-align: right; border-top: 1px solid #eee; }
+    .col-title { font-weight: bold; margin-bottom: 15px; }
+    .field-row {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.field-row label {
+  font-size: 0.8rem;
   font-weight: bold;
-  color: #444;
-  border-left: 6px solid #ccc;
+  color: #555;
 }
 
-.card:hover {
-  transform: translateY(-5px);
+
+.field-row input {
+  width: 100%;
+  max-width: 260px;
 }
 
-/* STATUS CORES */
-.card.red {
-  border-left: 6px solid #d32f2f;
+/* AJUSTE VISUAL – GLP */
+#boxGLP1 select,
+#boxGLP2 select {
+  min-width: 80px;
+  font-size: 0.85rem;
 }
 
-.card.yellow {
-  border-left: 6px solid #f9a825;
-}
-
-.card.green {
-  border-left: 6px solid #2e7d32;
-}
-
-/* FOOTER */
-.footer {
+#boxGLP1 input,
+#boxGLP2 input {
+  min-width: 70px;
+  font-size: 0.85rem;
   text-align: center;
-  padding: 20px;
-  font-size: 12px;
-  color: #777;
 }
-</style>
+
+/* melhora espaçamento interno das centrais */
+#boxGLP1,
+#boxGLP2 {
+  gap: 4px;
+}
+
+/* 👇👇👇 CONFIRMAÇÃO AQUI DO USUARIO NO CRITÉRIOS 👇👇👇 */
+
+    #criterioConfirmacaoFinal {
+      border-top: 1px dashed #ddd;
+      margin-top: 20px;
+      padding-top: 15px;
+    }
+
+    #criterioConfirmacaoFinal input[type="checkbox"] {
+      margin-top: 4px;
+    }
+
+.confirmacao-responsabilidade{
+  border:1px solid #ddd;
+  border-top:4px solid var(--primary);
+  border-radius:8px;
+  padding:20px;
+  margin:40px auto;
+  background:#fff;
+}
+
+
+.termo-confirmacao{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  font-size:15px;
+  line-height:1.5;
+  color:#222;
+  cursor:pointer;
+}
+
+.termo-confirmacao input{
+  margin-top:4px;
+  width:18px;
+  height:18px;
+  cursor:pointer;
+}
+
+.btn-confirmar-processo{
+  width:100%;
+  margin-top:20px;
+  padding:14px;
+  font-size:16px;
+  font-weight:600;
+  background:#0b5f3c;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  cursor:not-allowed;
+  opacity:0.5;
+}
+
+.btn-confirmar-processo.ativo{
+  cursor:pointer;
+  opacity:1;
+}
+
+/* ===== LAYOUT DIREITA ===== */
+.layout{
+  display:flex;
+  gap:20px;
+  align-items:flex-start;
+}
+
+.left{
+  flex:1;
+}
+
+.right{
+  width:320px;
+  position:sticky;
+  top:10px;
+}
+
+.painel{
+  background:white;
+  border-radius:8px;
+  padding:15px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.2);
+  border-left:4px solid #1b5e20;
+}
+
+.painel-item{
+  background:#e8f5e9;
+  padding:10px;
+  margin-bottom:10px;
+  border-left:4px solid #2e7d32;
+  font-size:14px;
+}
+
+/* HEADER FIXO */
+.header-fixo{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #1b5e20;
+  color: #fff;
+  padding: 12px 20px;
+  font-weight: bold;
+  z-index: 1000;
+}
+
+/* EMPURRAR CONTEÚDO PRA BAIXO */
+body{
+  padding-top: 80px;
+}
+
+.card-header{
+  font-weight:bold;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  border-bottom:1px solid #eee;
+  padding-bottom:8px;
+}
+
+.card-body{
+  margin-top:15px;
+}
+
+
+
+  </style>
 </head>
+<body onload="inicializarTudo()">
 
-<body>
-
-<div class="header">
-SAR Engenharia
+<div class="header-fixo">
+🔥 SAR – Classificador de Edificação
 </div>
 
-<div class="container">
 
-<div class="grid">
+<div class="layout">
+<div class="left">
 
-<!-- PRINCIPAIS -->
-<div class="card red" onclick="ir('/f1/')">🔥 SAR</div>
-<div class="card red" onclick="ir('/f2/')">💧 Calha</div>
-<div class="card red" onclick="ir('/f3/')">🚒 Hidrantes</div>
-<div class="card yellow" onclick="ir('/custostl/')">💰 Custo STL</div>
-<div class="card yellow" onclick="ir('/f5/')">📦 Biblioteca</div>
-<div class="card green" onclick="ir('/f6/')">📐 Área</div>
 
-<!-- SECUNDÁRIOS -->
-<div class="card yellow" onclick="ir('/classificador/')">Classisimples</div>
-<div class="card red" onclick="ir('/f8/')">Ferramenta 08</div>
-<div class="card red" onclick="ir('/f9/')">Ferramenta 09</div>
-<div class="card red" onclick="ir('/f10/')">Ferramenta 10</div>
-<div class="card red" onclick="ir('/f11/')">Ferramenta 11</div>
-<div class="card red" onclick="ir('/f12/')">Ferramenta 12</div>
 
-<div class="card red" onclick="ir('/f13/')">Ferramenta 13</div>
-<div class="card red" onclick="ir('/f14/')">Ferramenta 14</div>
-<div class="card red" onclick="ir('/f15/')">Ferramenta 15</div>
+<!-- 🧭 MATRIZ DE ENQUADRAMENTO DA EDIFICAÇÃO -->
+  <div class="card card-matriz">
+    <h1 class="matriz-titulo">
+      🧭 Matriz de Enquadramento da Edificação
+    </h1>
+    <p class="matriz-subtitulo">
+      Análise técnica preliminar para definição das exigências e do enquadramento do processo de segurança contra incêndio.
+    </p>
+  </div>
+
+
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+<span class="icone">▼</span>
+🧱 Quadro de Áreas da Edificação
+</div>
+<div class="card-body">  
+<div class="grid-main">
+    <div class="input-group">
+      <label>Área total edificada (m²)</label>
+      <input type="text" id="mainTotal" placeholder="0,00" oninput="mascaraMoeda(this); updateCalculos()">
+    </div>
+    <div class="input-group">
+      <label>Área descontada (m²)</label>
+      <input type="text" id="mainDesc" value="0,00" disabled>
+    </div>
+    <div class="input-group">
+      <label>Área computada (m²)</label>
+      <input type="text" id="mainComp" value="0,00" disabled>
+    </div>
+  </div>
+  <div style="text-align: center; margin: 20px 0;">
+    <button class="btn-green" onclick="openModal()">Indicar áreas descontadas</button>
+  </div>
+  
+<!-- ⚠️ ALERTA DE ÁREA PRÓXIMA AO LIMITE DO CLCB -->
+<div id="alertaAreaProxima"
+     style="display:none;
+            margin-top:10px;
+            color:#a91616;
+            font-size:14px;
+            text-align:center;">
+  <strong>Nota técnica:</strong>
+  Área computada próxima ao limite do CLCB.
+  Avaliar aplicação de descontos permitidos.
+</div>
+
+</div>
+</div>
+
+
+<div class="card">
+  <h3>🏗️ Altura e Pavimentos</h3>
+  <div class="grid-altura">
+    <div>
+      <div class="input-group" style="margin-bottom: 20px;">
+        <label>Quantidade de pavimentos (planos de piso existentes na edificação)</label>
+        <select id="selQtdPavimentos" onchange="travaInterfacePavimentos(); validarEnquadramentoAltura(); updateCalculos(); atualizarMemorialAltura()">
+          <option value="">-- Selecionar --</option>
+          <option value="1">Edificação térrea (1 pavimento)</option>
+          <option value="2">Térreo + 1 pavimento (2 pavimentos)</option>
+          <option value="3">Térreo + 2 pavimentos (3 pavimentos)</option>
+          <option value="4+">4 pavimentos ou mais</option>
+        </select>
+      </div>
+      <div class="input-group" id="containerAlturaEdif">
+        <label>Altura da edificação para fins de exigência das medidas de segurança (m)</label>
+        <div class="sub-label">Para fins de exigências das medidas de segurança contra incêndio: é a medida, em metros, do piso mais baixo ocupado ao piso do último pavimento.</div>
+        <input type="text" id="inputAlturaEdificacao" placeholder="Ex.: 6,00" oninput="mascaraMoeda(this); validarEnquadramentoAltura(); atualizarMemorialAltura()">
+      </div>
+    </div>
+    <div>
+      <div class="input-group" style="margin-bottom: 20px;">
+        <label>Informações de subsolo</label>
+        <select id="selSubsolo" disabled onchange="travaInterfaceSubsolo(); validarEnquadramentoAltura(); atualizarMemorialAltura()">
+          <option value="">-- Selecionar --</option>
+          <option value="nao">Não possui subsolo</option>
+          <option value="sim">Possui subsolo</option>
+        </select>
+      </div>
+      <div class="input-group" style="margin-bottom: 20px;">
+        <label>Uso do subsolo</label>
+        <select id="selUsoSubsolo" disabled onchange="travaInterfaceUsoSubsolo(); validarEnquadramentoAltura(); atualizarMemorialAltura()">
+          <option value="">-- Selecionar --</option>
+          <option value="estacionamento">Estacionamento exclusivo</option>
+          <option value="reuniao">Reunião de público (Grupo F)</option>
+          <option value="outra">Outra ocupação</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>A área do subsolo é > 50,00 m²?</label>
+        <select id="selAreaSubsolo" disabled onchange="validarEnquadramentoAltura(); atualizarMemorialAltura()">
+          <option value="">-- Selecionar --</option>
+          <option value="nao">Não, é menor que 50,00 m²</option>
+          <option value="sim">Sim, é maior que 50,00 m²</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>🏢 Ocupação / Uso</h3>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+    <div class="input-group">
+      <label>Uso</label>
+      <select id="selUso" onchange="filtrarOcupacoes()">
+        <option value="">Carregando banco...</option>
+      </select>
+    </div>
+    <div class="input-group" style="border: 1px solid var(--search-green); padding: 8px; border-radius: 6px; background: #f1f8e9;">
+      <label style="color: var(--search-green);">🔍 Busca Avançada de Ocupações</label>
+      <input type="text" id="txtBusca" placeholder="Exemplo: Açougue, fábrica..." oninput="executarBuscaAvancada()">
+    </div>
+    <div style="grid-column: 1 / span 2; display: grid; grid-template-columns: 1fr 180px; gap: 15px;">
+      <div class="input-group">
+        <label>Ocupação (Descrição)</label>
+        <select id="selOcupacao" onchange="processarSelecaoOcupacao(this)">
+          <option value="">Selecione o Uso primeiro</option>
+        </select>
+        <textarea id="areaOcupacaoExibicao" readonly onclick="voltarParaDropdown()"></textarea>
+              </div>
+      <div class="input-group">
+        <label>Altura do Armazenamento (m) Det. Carga Incêndio</label>
+        <input type="text" id="inputAltura" placeholder="0,00" disabled oninput="mascaraMoeda(this); atualizarMemorialOcupacao(); atualizarMemorialAltura()">
+        <span id="msgAltura" class="msg-instrucao">⚠️ Para depósitos, indique a altura do armazenamento.
+</span>
+      </div>
+    </div>
+  </div>
+
+<div style="margin-top:15px; display:flex; align-items:center; gap:15px;">
+  
+  <div style="width:220px;">
+    <label>Área desta ocupação (m²)</label>
+    <input type="text" id="areaOcupacao1" readonly>
+  </div>
+
+  <div style="font-weight:bold; margin-top:22px;">
+    Taxa de ocupação:
+    <span id="percOcupacao1"></span>
+  </div>
+
+</div>
+
+
+
+<div style="text-align: center; margin: 20px 0;">
+  <button class="btn-green" id="btnAddOcupacao"> + Adicionar Ocupação
+  </button>
+</div>
+
+<div id="containerOcupacoesSecundarias"></div>
+
+<div id="modeloOcupacao" style="display:none;">
+
+  <div class="card-secundaria" style="margin-top:20px;">
+    <h4 class="titulo-ocupacao">🏢 Ocupação X</h4>
+
+    <div class="input-group">
+      <label>Uso</label>
+      <select class="uso-secundario">
+        <option value="">Selecione...</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>Busca Avançada de Ocupações</label>
+      <input type="text" class="busca-secundaria" placeholder="Ex.: Açougue, fábrica...">
+    </div>
+
+    <div class="input-group">
+      <label>Ocupação (Descrição)</label>
+      <select class="descricao-secundaria">
+        <option value="">Selecione...</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>Área desta ocupação (m²)</label>
+      <input type="text" class="area-secundaria" placeholder="Ex.: 200,00">
+    </div>
+
+    <div class="input-group">
+      <label>Altura do Armazenamento (m)</label>
+      <input type="text" class="altura-secundaria" placeholder="0,00">
+    </div>
+
+  </div>
 
 </div>
 
 </div>
 
-<div class="footer">
-Desenvolvido por Vinicius Saraiva
+
+<div class="card">
+  <h3>📋 Critérios Técnicos Adicionais</h3>
+
+<!--  PERGUNTA 1 — D1 LOTAÇÃO -->
+ <div id="listaCriterios">
+
+  <div class="criterio-row" id="criterioFuncionarios" style="display:none;">
+    <div class="criterio-text">
+      Possui mais de 250 funcionários?
+      <div class="sub-label">
+        Aplicável somente para ocupações do grupo D-1.
+      </div>
+
+<!-- 🔴 ALERTA -->
+<div id="alertaFuncionarios"
+     style="display:none; font-size:0.75rem; color:#d32f2f; margin:6px 0 0 10px;">
+  ⚠️ Corrigido para 250 funcionários! Sugerido revisão na resposta!
 </div>
+
+
+    </div>
+
+
+
+
+
+    <div class="criterio-controls">
+
+
+      <div class="switch-container switch-active-no"
+           onclick="togglePerguntaFuncionarios(this)">
+        <div class="switch-slider"></div>
+        <div class="switch-option opt-no">NÃO</div>
+        <div class="switch-option opt-yes">SIM</div>
+      </div>
+
+     <div class="input-lateral" style="display:block;">
+
+  <div class="sub-label" style="margin-bottom:4px;">
+    Nº funcionários
+  </div>
+
+ <input type="number"
+       id="qtdFuncionarios"
+       placeholder="Ex.: 180"
+       style="width:100px;"
+       min="0"
+       step="1"
+       onblur="validarQtdFuncionarios()">
+
+
+</div>
+<button class="btn-laranja-simples" type="button">
+    Botão 1
+  </button>
+
+    </div>
+  </div>
+
+<!-- PERGUNTA 2 — LOTAÇÃO GRUPO F -->
+<div class="criterio-row" id="criterioLotacao" style="display:none;">
+
+ <div class="criterio-text">
+  Possui lotação total acima de 250 pessoas?
+
+  <div id="alertaLotacao"
+       style="display:none; font-size:0.75rem; color:#d32f2f; margin-top:6px;">
+    ⚠️ Corrigido para 250 pessoas! Sugerido revisar a resposta.
+  </div>
+</div>
+
+
+
+
+
+  <div class="criterio-controls">
+
+    <div class="switch-container switch-active-no"
+         onclick="togglePerguntaLotacao(this)">
+      <div class="switch-slider"></div>
+      <div class="switch-option opt-no">NÃO</div>
+      <div class="switch-option opt-yes">SIM</div>
+    </div>
+
+    <div class="input-lateral" style="display:block;">
+      <div class="sub-label" style="margin-bottom:4px;">
+        Lotação total
+      </div>
+      <input type="number"
+             id="qtdLotacao"
+             placeholder="Ex.: 180"
+             style="width:100px;"
+             min="0"
+             step="1"
+             onblur="validarQtdLotacao()">
+    </div>
+
+    <button class="btn-laranja-simples"
+            id="btnLotacao"
+            type="button"
+            disabled>
+      Botão 2
+    </button>
+
+  </div>
+</div>
+
+
+<!-- PERGUNTA 13 — LOTAÇÃO GRUPO F (PTS / PT) -->
+<div class="criterio-row" id="criterioLotacaoFPTS" style="display:none;">
+
+  <div class="criterio-text">
+    Possui lotação total acima de 250 pessoas?
+
+<div id="alertaLotacaoFPTS"
+     style="display:none; font-size:0.75rem; color:#d32f2f; margin-top:6px;">
+  ⚠️ Corrigido para 250 pessoas! Sugerido revisar a resposta.
+</div>
+  </div>
+
+  <div class="criterio-controls">
+
+    <!-- SWITCH -->
+    <div class="switch-container switch-active-no"
+         onclick="togglePerguntaLotacaoFPTS(this)">
+      <div class="switch-slider"></div>
+      <div class="switch-option opt-no">NÃO</div>
+      <div class="switch-option opt-yes">SIM</div>
+    </div>
+
+    <!-- CAMPO NUMÉRICO (habilitado por padrão) -->
+    <div class="input-lateral" style="display:block;">
+      <div class="sub-label" style="margin-bottom:4px;">
+        Lotação total
+      </div>
+      <input type="number"
+       id="qtdLotacaoFPTS"
+       placeholder="Ex.: 180"
+       min="0"
+       step="10"
+       style="width:100px;"
+       onblur="validarQtdLotacaoFPTS()">
+
+    </div>
+
+    <!-- BOTÃO FUTURO -->
+    <button class="btn-laranja-simples" type="button">
+      Ação futura
+    </button>
+
+  </div>
+</div>
+
+
+
+
+<!-- 🔥 PERGUNTA 3 — Gás Acetileno -->
+<div class="criterio-row" id="criterioAcetileno" style="display:none;">
+
+  <div class="criterio-text">
+    Utiliza gás acetileno?
+    <div class="sub-label">
+      Aplicável somente para ocupações do grupo G-4.
+    </div>
+  </div>
+
+  <div class="criterio-controls">
+
+    <div class="switch-container switch-active-no"
+         onclick="togglePerguntaAcetileno(this)">
+      <div class="switch-slider"></div>
+      <div class="switch-option opt-no">NÃO</div>
+      <div class="switch-option opt-yes">SIM</div>
+    </div>
+
+    <div class="input-lateral" id="boxQtdAcetileno">
+      <div class="sub-label" style="margin-bottom:4px;">
+        Quantidade
+      </div>
+      <input type="number"
+             id="qtdAcetileno"
+             placeholder="Ex.: 1"
+             min="0"
+             step="1"
+             disabled
+             onblur="validarQtdAcetileno()">
+    </div>
+
+    <button class="btn-laranja-simples" type="button">
+      Botão 3
+    </button>
+
+  </div>
+</div>
+
+<!-- ⚡ PERGUNTA 4 — Líquidos Classe K (Subestações) -->
+<div class="criterio-row" id="criterioClasseK" style="display:none;">
+
+  <div class="criterio-text">
+    Armazena líquidos classe K (Subestações)?
+    <div class="sub-label">
+      Aplicável somente para ocupações do grupo K-1.
+    </div>
+  </div>
+
+  <div class="criterio-controls">
+
+    <div class="switch-container switch-active-no"
+         onclick="togglePerguntaClasseK(this)">
+      <div class="switch-slider"></div>
+      <div class="switch-option opt-no">NÃO</div>
+      <div class="switch-option opt-yes">SIM</div>
+    </div>
+
+    <div class="input-lateral" id="boxQtdClasseK">
+      <div class="sub-label" style="margin-bottom:4px;">
+        Quantidade (litros)
+      </div>
+      <input type="text"
+             id="qtdClasseK"
+             placeholder="Ex.: 38.000"
+             disabled
+             oninput="mascaraMilhar(this)"
+             onblur="validarQtdClasseK()">
+    </div>
+
+    <button class="btn-laranja-simples" type="button">
+      Botão 4
+    </button>
+
+  </div>
+</div>
+
+
+<!-- 🔥 PERGUNTA 5 — GLP -->
+<div class="criterio-row" id="criterioGLP">
+
+  <div class="criterio-text">
+    Utiliza ou armazena gás liquefeito de petróleo (GLP)?
+  </div>
+
+  <div class="criterio-controls">
+
+    <!-- SWITCH -->
+    <div class="switch-container switch-active-no"
+         onclick="togglePerguntaGLP(this)">
+      <div class="switch-slider"></div>
+      <div class="switch-option opt-no">NÃO</div>
+      <div class="switch-option opt-yes">SIM</div>
+    </div>
+
+    <!-- CENTRAL 1 -->
+    <div class="input-lateral" id="boxGLP1" style="display:flex; flex-direction:column;">
+      <div class="sub-label">Central 1</div>
+
+      <select id="tipoGLP1" onchange="avaliarGLP()">
+        <option value="">Tipo</option>
+        <option value="13">P13</option>
+        <option value="45">P45</option>
+        <option value="90">P90</option>
+        <option value="190">P190</option>
+        <option value="manual">Outro (manual)</option>
+      </select>
+
+      <input type="number"
+             id="qtdGLP1"
+             placeholder="Qtd"
+             min="0"
+             step="1"
+             disabled
+             onblur="avaliarGLP()">
+
+      <input type="number"
+             id="pesoGLP1"
+             placeholder="Peso (kg)"
+             min="1"
+             step="1"
+             style="display:none;"
+             onblur="avaliarGLP()">
+    </div>
+
+    <!-- CENTRAL 2 -->
+    <div class="input-lateral" id="boxGLP2" style="display:flex; flex-direction:column;">
+      <div class="sub-label">Central 2</div>
+
+      <select id="tipoGLP2" onchange="avaliarGLP()">
+        <option value="">Tipo</option>
+        <option value="13">P13</option>
+        <option value="45">P45</option>
+        <option value="90">P90</option>
+        <option value="190">P190</option>
+        <option value="manual">Outro (manual)</option>
+      </select>
+
+      <input type="number"
+             id="qtdGLP2"
+             placeholder="Qtd"
+             min="0"
+             step="1"
+             disabled
+             onblur="avaliarGLP()">
+
+      <input type="number"
+             id="pesoGLP2"
+             placeholder="Peso (kg)"
+             min="1"
+             step="1"
+             style="display:none;"
+             onblur="avaliarGLP()">
+    </div>
+
+<div id="resumoGLP"
+     class="sub-label"
+     style="display:none; text-align:right; min-width:180px;">
+  Central 1: <b><span id="kgGLP1">0</span> kg</b><br>
+  Central 2: <b><span id="kgGLP2">0</span> kg</b><br>
+  <span style="border-top:1px solid #ddd; display:block; margin-top:4px;">
+    Total: <b><span id="kgGLPTotal">0</span> kg</b>
+  </span>
+</div>
+
+
+
+    <button class="btn-laranja-simples" type="button">
+      Botão 5
+    </button>
+
+  </div>
+</div>
+
+<!-- 🔥 PERGUNTA 6 — GLP (Revenda) -->
+<div class="criterio-row" id="criterioGLPRevenda">
+
+  <div class="criterio-text">
+    Possui comércio de Gás Liquefeito de Petróleo – GLP (Revenda)?
+  </div>
+
+  <div class="criterio-controls">
+
+    <!-- SWITCH -->
+    <div class="switch-container switch-active-no"
+         onclick="togglePerguntaGLPRevenda(this)">
+      <div class="switch-slider"></div>
+      <div class="switch-option opt-no">NÃO</div>
+      <div class="switch-option opt-yes">SIM</div>
+    </div>
+
+    <!-- CLASSE -->
+    <div class="input-lateral" id="boxClasseGLPRevenda">
+      <div class="sub-label">Classe da Revenda</div>
+      <select id="classeGLPRevenda" disabled onchange="avaliarGLPRevenda()">
+        <option value="">Carregando classes…</option>
+      </select>
+    </div>
+
+    <button class="btn-laranja-simples" type="button">
+      Botão 6
+    </button>
+
+  </div>
+</div>
+
+<!-- 🔥 PERGUNTA 7 — Líquidos Igníferos em Processo -->
+<div class="criterio-row" id="criterioLiquidosIgniferos">
+
+  <div class="criterio-text">
+    Possui líquidos igníferos (combustíveis ou inflamáveis) em processo?
+  </div>
+
+  <div class="criterio-controls">
+
+    <!-- SWITCH -->
+    <div class="switch-container switch-active-no"
+         onclick="togglePerguntaLiquidosIgniferos(this)">
+      <div class="switch-slider"></div>
+      <div class="switch-option opt-no">NÃO</div>
+      <div class="switch-option opt-yes">SIM</div>
+    </div>
+
+    <!-- QUANTIDADE -->
+    <div class="input-lateral" id="boxQtdLiquidosIgniferos">
+      <div class="sub-label">Quantidade (litros)</div>
+      <input type="text"
+             id="qtdLiquidosIgniferos"
+             placeholder="Ex.: 250"
+             disabled
+             oninput="mascaraMilhar(this)"
+             onblur="avaliarLiquidosIgniferos()">
+    </div>
+
+    <button class="btn-laranja-simples" type="button">
+      Botão 7
+    </button>
+
+  </div>
+</div>
+
+<!-- 🔥 PERGUNTA 8 — Gases Inflamáveis -->
+<div class="criterio-row" id="criterioGasesInflamaveis">
+
+  <div class="criterio-text">
+    Armazena gases inflamáveis?
+  </div>
+
+  <div class="criterio-controls">
+
+    <!-- SWITCH -->
+    <div class="switch-container switch-active-no"
+         onclick="togglePerguntaGasesInflamaveis(this)">
+      <div class="switch-slider"></div>
+      <div class="switch-option opt-no">NÃO</div>
+      <div class="switch-option opt-yes">SIM</div>
+    </div>
+
+    <!-- QUANTIDADE -->
+    <div class="input-lateral" id="boxQtdGasesInflamaveis">
+      <div class="sub-label">Quantidade (litros)</div>
+      <input type="text"
+             id="qtdGasesInflamaveis"
+             placeholder="Ex.: 10.000"
+             disabled
+             oninput="mascaraMilhar(this)"
+             onblur="avaliarGasesInflamaveis()">
+    </div>
+
+    <button class="btn-laranja-simples" type="button">
+      Botão 8
+    </button>
+
+  </div>
+</div>
+
+
+<!-- 🔥 PERGUNTA 9 — Líquidos Igníferos em Tanque Aéreo ou Fracionado -->
+<div class="criterio-row" id="criterioLiquidosTanque">
+
+  <div class="criterio-text">
+    Armazena líquidos igníferos (combustíveis ou inflamáveis) em tanque aéreo ou fracionado?
+    <div class="criterio-observacao">
+      Exceto em tanques enterrados!
+    </div>
+  </div>
+
+  <div class="criterio-controls">
+
+    <!-- SWITCH -->
+    <div class="switch-container switch-active-no"
+         onclick="togglePerguntaLiquidosTanque(this)">
+      <div class="switch-slider"></div>
+      <div class="switch-option opt-no">NÃO</div>
+      <div class="switch-option opt-yes">SIM</div>
+    </div>
+
+    <!-- QUANTIDADE -->
+    <div class="input-lateral" id="boxQtdLiquidosTanque">
+      <div class="sub-label">Quantidade (litros)</div>
+      <input type="text"
+             id="qtdLiquidosTanque"
+             placeholder="Ex.: 1.000"
+             disabled
+             oninput="mascaraMilhar(this)"
+             onblur="avaliarLiquidosTanque()">
+    </div>
+
+    <button class="btn-laranja-simples" type="button">
+      Botão 9
+    </button>
+
+  </div>
+</div>
+
+
+<!-- 🔥 PERGUNTA 10 — Materiais sólidos combustíveis em área descoberta -->
+<div class="criterio-row" id="criterioSolidosDescobertos">
+
+  <div class="criterio-text">
+    Possui armazenamento de materiais sólidos combustíveis em área descoberta (externa) acima de 2.500,00 m²?
+  </div>
+
+  <div class="criterio-controls">
+
+    <!-- SWITCH -->
+    <div class="switch-container switch-active-no"
+         onclick="togglePerguntaSolidosDescobertos(this)">
+      <div class="switch-slider"></div>
+      <div class="switch-option opt-no">NÃO</div>
+      <div class="switch-option opt-yes">SIM</div>
+    </div>
+
+    <button class="btn-laranja-simples" type="button">
+      Botão 9
+    </button>
+
+  </div>
+</div>
+
+<!-- ☣️ PERGUNTA 11 — Produtos Perigosos -->
+<div class="criterio-row" id="criterioProdutosPerigosos">
+
+  <div class="criterio-text">
+    Manipula ou armazena produtos perigosos à saúde humana, ao meio ambiente
+    ou ao patrimônio, tais como: explosivos, fogos de artifícios, peróxidos
+    orgânicos, substâncias oxidantes, substâncias tóxicas, radioativas,
+    corrosivas ou perigosas diversas?
+  </div>
+
+  <div class="criterio-controls">
+
+    <div class="switch-container switch-active-no"
+         onclick="togglePerguntaProdutosPerigosos(this)">
+      <div class="switch-slider"></div>
+      <div class="switch-option opt-no">NÃO</div>
+      <div class="switch-option opt-yes">SIM</div>
+    </div>
+
+    <button class="btn-laranja-simples" type="button">
+      Botão 11
+    </button>
+
+  </div>
+</div>
+
+<!-- ☣️ PERGUNTA 12 — Comercialização de Produtos Perigosos -->
+<div class="criterio-row" id="criterioAgrotoxicos">
+
+  <div class="criterio-text">
+    Comercializa agrotóxicos, substâncias (sólidas ou líquidas) oxidantes,
+    corrosivas e perigosas diversas, termicamente estáveis e não explosivas?
+  </div>
+
+  <div class="criterio-controls">
+
+    <!-- SWITCH -->
+    <div class="switch-container switch-active-no"
+         onclick="togglePerguntaAgrotoxicos(this)">
+      <div class="switch-slider"></div>
+      <div class="switch-option opt-no">NÃO</div>
+      <div class="switch-option opt-yes">SIM</div>
+    </div>
+
+    <!-- DROP CONDICIONAL -->
+    <div class="input-lateral" id="boxAgrotoxicos">
+      <div class="sub-label">Condição do estoque</div>
+      <select id="selectAgrotoxicos"
+              disabled
+              onchange="avaliarAgrotoxicos()">
+        <option value="">-- Selecione --</option>
+        <option value="limitado">
+          O estoque é limitado à quantidade necessária para a atividade
+        </option>
+        <option value="livre">
+          O estoque é livre, acima da quantidade necessária para a atividade
+        </option>
+      </select>
+    </div>
+
+    <button class="btn-laranja-simples" type="button">
+      Botão 12
+    </button>
+
+  </div>
+</div>
+
+</div> 
+</div> 
+
+
+<!-- 🔐 Confirmação de Responsabilidade -->
+<div class="card confirmacao-responsabilidade">
+
+  <label class="termo-confirmacao">
+    <input type="checkbox" id="chkConfirmacao">
+    <span>
+      Confirmo, para os devidos fins, que revisei integralmente todas as perguntas deste formulário
+      e que as respostas fornecidas são verdadeiras e de minha inteira responsabilidade.
+      Confirmo estar ciente de que as informações aqui registradas serão utilizadas para fins
+      jurídicos/administrativos e que não restam dúvidas sobre o conteúdo preenchido.
+    </span>
+  </label>
+
+  <button class="btn-confirmar-processo"
+          id="btnConfirmar"
+          disabled
+          onclick="confirmarEnquadramentoFinal()">
+    CONFIRMAR INFORMAÇÕES
+  </button>
+
+  <!-- STATUS FINAL -->
+  <div id="statusFinalEnquadramento"
+       style="display:none;
+              margin-top:15px;
+              padding:12px;
+              border-radius:6px;
+              font-weight:bold;
+              text-align:center;">
+  </div>
+
+  <!-- BOTÃO DE REVISÃO -->
+  <button id="btnRevisar"
+          onclick="liberarEdicao()"
+          style="display:none;margin-top:10px;"
+          class="btn-green">
+    🔁 Revisar / Alterar Informações
+  </button>
+
+</div>
+
+
+<!-- CAMADA 1 — MEMORIAL DE ENQUADRAMENTO TÉCNICO -->
+<div id="camada1Enquadramento"
+     style="display:block;
+            background:#fff;
+            border:1px solid #ddd;
+            border-radius:10px;
+            padding:20px;
+            margin-top:20px;">
+
+  <h2 style="color:var(--primary); text-align:center; margin-bottom:20px;">
+
+
+    🛡️ Relatório de Caracterização e Enquadramento Técnico
+  </h2>
+
+  <p style="font-size:17px; line-height:1.5;">
+    O presente relatório foi elaborado com base nas informações declaradas pelo usuário e conforme
+    o Regulamento de Segurança Contra Incêndios das edificações e áreas de risco no Estado de São Paulo,
+    instituído pelo Decreto Estadual nº 69.118, de 09 de dezembro de 2024, e suas respectivas Instruções
+    Técnicas do Corpo de Bombeiros da Polícia Militar do Estado de São Paulo, considerando-se os critérios
+    técnicos aplicáveis à edificação analisada.
+  </p>
+
+  <hr style="margin:20px 0;">
+
+  <h3 style="color:var(--verde);">📌 Base de Análise do Enquadramento</h3>
+  <ul style="margin-left:20px;font-size:17px;">
+    <li>🧱 Quadro de Áreas da Edificação + 🏗️ Altura e Pavimentos + 🏢 Ocupação / Uso + 📋 Critérios Técnicos Adicionais </li>
+  </ul>
+
+  <p style="margin-top:10px;font-size:17px;">
+    O enquadramento apresentado considera o critério mais restritivo dentre os módulos analisados,
+    conforme parâmetros estabelecidos na legislação e Instruções Técnicas vigentes.
+  </p>
+
+  <hr style="margin:20px 0;">
+
+  <h3 style="color:var(--verde);">🛡️ Definição do Processo de Licenciamento</h3>
+
+  <p>
+    <strong>Tipo de Enquadramento:</strong>
+    <span id="tipoEnquadramentoFinal"></span>
+  </p>
+
+  <p>
+    <strong>Instrumento de Regularização:</strong>
+    <span id="instrumentoRegularizacao"></span>
+  </p>
+
+  <p>
+    <strong>Aprovação Prévia de Projeto Técnico:</strong>
+    <span id="exigeProjetoTecnico"></span>
+  </p>
+
+<hr style="margin:25px 0;">
+
+
+
+  <div class="memorial-header-title">📜 Memorial de Enquadramento Técnico</div>
+  <div class="memorial-section">
+    <div style="font-weight: bold; color: #444; margin-bottom: 10px; font-size: 1.2rem;">🧱 Quadro de Áreas da Edificação</div>
+    <div class="memorial-row">Área total construída: <span id="outTotal">—</span><br>Área total descontada: <span id="outDesc">0,00</span><br><b>Área total computada: <span id="outComp">0,00</span></b></div>
+  </div>
+
+<div class="memorial-section" style="margin-top: 20px;">
+  <div style="font-weight: bold; color: #444; margin-bottom: 10px; font-size: 1.2rem;">
+    🏢 Ocupação / Uso / 🔥 Carga de Incêndio
+  </div>
+
+  <div id="memorialOcupacaoBox" class="memorial-row">
+    —
+  </div>
+</div>
+
+
+ 
+
+
+  <div class="memorial-section" style="margin-top: 20px;">
+  <div style="font-weight: bold; color: #444; margin-bottom: 10px; font-size: 1.2rem;">
+    🏗️ Altura da edificação
+  </div>
+
+  <div class="memorial-row">
+
+    <span style="font-weight: bold;">Classificação quanto à altura</span><br>
+    Tipo: <span id="memTipoAlt">—</span><br>
+    Denominação: <span id="memDenomAlt">—</span><br>
+    Altura: <span id="memMetrosAlt">—</span><br>
+    Tipologia: <span id="memTipologia">—</span><br>
+    Possui subsolo: <span id="memSubsolo">—</span>
+
+  </div>
+</div>
+
+
+<div id="modalContainer">
+  <div class="modal-box">
+    <div class="modal-header">⚠️ Áreas Passíveis de desconto permitidas conforme Instrução Técnica nº 42/2025</div>
+    <div class="modal-body">
+      <div>
+        <div class="col-title" style="color: #2e7d32; margin-bottom: 15px;">✔ Permitidas para CLCB</div>
+        <div class="field-row"><label>Residência unifamiliar com saída direta para via pública (m²)</label><input type="number" class="m-input clcb-ok" data-nome="residencial" step="0.01" oninput="checkValid()"></div>
+        <div class="field-row"><label>Piscinas (m²)</label><input type="number" class="m-input clcb-ok" data-nome="piscinas" step="0.01" oninput="checkValid()"></div>
+        <div class="field-row"><label>Cobertura de bombas de combustível abertas lateralmente em pelo menos 50% do perímetro (m²)</label><input type="number" class="m-input clcb-ok" data-nome="cobertura de bombas" step="0.01" oninput="checkValid()"></div>
+        <div class="field-row"><label>Praça de pedágio abertas lateralmente em pelo menos 50% do perímetro (m²)</label><input type="number" class="m-input clcb-ok" data-nome="praça de pedágio" step="0.01" oninput="checkValid()"></div>
+      </div>
+      <div>
+        <div class="col-title" style="color: #d32f2f; margin-bottom: 15px;">⚠ Não permitidas para CLCB</div>
+        <div class="field-row"><label>Telheiros - máximo 10,00 m² (m²)</label><input type="number" class="m-input clcb-no" data-nome="telheiros" step="0.01" oninput="checkValid()"></div>
+        <div class="field-row"><label>Platibandas/Beirais com 3,00 m de projeção em balanço (m²)</label><input type="number" class="m-input clcb-no" data-nome="platibandas" step="0.01" oninput="checkValid()"></div>
+        <div class="field-row"><label>Passagens cobertas, de laterais abertas, com largura máxima de 3,00 m, destinadas apenas à circulação de pessoas ou mercadorias (m²)</label><input type="number" class="m-input clcb-no" data-nome="passagens abertas" step="0.01" oninput="checkValid()"></div>
+        <div class="field-row"><label>Reservatórios (m²)</label><input type="number" class="m-input clcb-no" data-nome="reservatórios" step="0.01" oninput="checkValid()"></div>
+        <div class="field-row"><label>Escadas enclausuradas/Dutos (m²)</label><input type="number" class="m-input clcb-no" data-nome="escadas enclausuradas" step="0.01" oninput="checkValid()"></div>
+        <div class="field-row"><label>Banheiros/Vestiários (m²)</label><input type="number" class="m-input clcb-no" data-nome="dutos/banheiros" step="0.01" oninput="checkValid()"></div>
+      </div>
+    </div>
+    <div id="errorMsg" style="color: red; display: none; padding: 10px;">❌ Soma maior que a área total!</div>
+    <div class="modal-footer">
+<button class="btn-green" id="btnApply" onclick="confirmDesconto()" style="padding: 10px 20px;">Aplicar</button></div>
+  </div>
+</div>
+
+</div>
+
 
 <script>
-function ir(path){
-  window.open(path, '_blank');
+
+let BD_AREA = [];
+async function carregarBD_AREA(){
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSkjQTPqgAd0-hu9LgaReBC4TYeclVt0FUOqaonzn5To7rFNO8iY69SGqrNCGtIld0A5uC5cgIKiVpz/pub?output=tsv";
+
+  const res = await fetch(url);
+  const text = await res.text();
+
+  const linhas = text.split("\n").slice(1);
+
+  BD_AREA = linhas.map(l => {
+    const col = l.split("\t");
+
+    return {
+      area_min: parseFloat(col[3]),
+      area_max: parseFloat(col[4]),
+      nivel: parseInt(col[5]),
+      processo: col[6],
+      texto: col[8],
+      ativo: col[9] === "TRUE"
+    };
+  });
+
+  console.log("BD_AREA carregado:", BD_AREA);
 }
+
+
+
+  let bancoOcupacoes = [], dadosDivisaoJ = [], dadosRiscos = [], ocupacaoSelecionada = null, globalRestrito = false;
+
+  async function carregarBancoDeDados() {
+    const API_URL = "https://script.google.com/macros/s/AKfycbw1DYXjA08SSSMkH-Fudeb_hSQV-HbKmtr6kMiy-0Ha5FofWBTphG3hLpwpQx6qOge3/exec";
+    const TOKEN = encodeURIComponent("Sar$2026PRO");
+    try {
+      const [resOcup, resDivJ, resRiscos, resGLPRevenda] = await Promise.all([
+  fetch(`${API_URL}?token=${TOKEN}&aba=Ocupacoes`).then(r => r.json()),
+  fetch(`${API_URL}?token=${TOKEN}&aba=Tabela_Divisao_Dinamica`).then(r => r.json()),
+  fetch(`${API_URL}?token=${TOKEN}&aba=Tabela_Riscos`).then(r => r.json()),
+  fetch(`${API_URL}?token=${TOKEN}&aba=Tabela_GLP_Revenda`).then(r => r.json())
+]);
+
+bancoOcupacoes = resOcup;
+dadosDivisaoJ = resDivJ;
+dadosRiscos = resRiscos;
+bancoGLPRevenda = resGLPRevenda;
+
+const selClasse = document.getElementById("classeGLPRevenda");
+if (selClasse) {
+  selClasse.innerHTML = '<option value="">-- Selecione --</option>';
+
+  bancoGLPRevenda.forEach(item => {
+    selClasse.innerHTML += `
+      <option value="${item.Classe}">
+        ${item.Descricao}
+      </option>`;
+  });
+}
+
+
+
+      const selUso = document.getElementById('selUso');
+      const usosUnicos = [...new Set(bancoOcupacoes.map(item => item.Ocupacao_Uso))];
+      selUso.innerHTML = '<option value="">Selecione o Uso...</option>';
+      usosUnicos.forEach(uso => { if(uso) selUso.innerHTML += `<option value="${uso}">${uso}</option>`; });
+    } catch (e) { console.error("Erro banco"); }
+  }
+
+let criteriosAnalisados = false;
+let algumCriterioMarcado = false;
+
+
+function exibirResultadoCriterios() {
+  const box = document.getElementById("resultadoCriterios");
+  if (criteriosAnalisados || algumCriterioMarcado) {
+    box.style.display = "flex";
+  }
+}
+
+function atualizarPerguntaFuncionarios() {
+  const bloco = document.getElementById("criterioFuncionarios");
+
+  if (!ocupacaoSelecionada) {
+    bloco.style.display = "none";
+    return;
+  }
+
+  if (ocupacaoSelecionada.Divisao === "D-1") {
+    bloco.style.display = "flex";
+  } else {
+    bloco.style.display = "none";
+  }
+}
+
+function atualizarPerguntaLotacao() {
+  const bloco = document.getElementById("criterioLotacao");
+
+  if (!ocupacaoSelecionada || !ocupacaoSelecionada.Divisao) {
+    bloco.style.display = "none";
+    resultadoPerguntaLotacao = null;
+    return;
+  }
+
+  // Grupos F que permitem CLCB quando <= 250 pessoas
+  const gruposF_CLBC = [
+    "F-1","F-2","F-4","F-8","F-9","F-10"
+  ];
+
+  if (gruposF_CLBC.includes(ocupacaoSelecionada.Divisao)) {
+    bloco.style.display = "flex";
+  } else {
+    bloco.style.display = "none";
+    resultadoPerguntaLotacao = null; // 🔑 reset quando não aplicável
+  }
+}
+
+function atualizarPerguntaLotacaoFPTS() {
+  const bloco = document.getElementById("criterioLotacaoFPTS");
+
+  if (!ocupacaoSelecionada || !ocupacaoSelecionada.Divisao) {
+    bloco.style.display = "none";
+    resultadoPerguntaLotacaoFPTS = null;
+    return;
+  }
+
+  // Grupos F que NÃO permitem CLCB quando <= 250 pessoas
+  const gruposF_PTS = ["F-3","F-5","F-6","F-7","F-11"];
+
+  if (gruposF_PTS.includes(ocupacaoSelecionada.Divisao)) {
+    bloco.style.display = "flex";
+  } else {
+    bloco.style.display = "none";
+    resultadoPerguntaLotacaoFPTS = null; // reset quando não aplicável
+  }
+}
+
+
+
+
+function atualizarPerguntaAcetileno() {
+  const bloco = document.getElementById("criterioAcetileno");
+
+  if (!ocupacaoSelecionada || ocupacaoSelecionada.Divisao !== "G-4") {
+    bloco.style.display = "none";
+    return;
+  }
+
+  bloco.style.display = "flex";
+}
+
+
+function atualizarPerguntaClasseK() {
+  const bloco = document.getElementById("criterioClasseK");
+
+  if (!ocupacaoSelecionada || ocupacaoSelecionada.Divisao !== "K-1") {
+    bloco.style.display = "none";
+    return;
+  }
+
+  bloco.style.display = "flex";
+}
+
+function togglePerguntaLotacao(element) {
+
+  // alterna switch
+  if (element.classList.contains("switch-active-no")) {
+    element.classList.remove("switch-active-no");
+    element.classList.add("switch-active-yes");
+  } else {
+    element.classList.remove("switch-active-yes");
+    element.classList.add("switch-active-no");
+  }
+
+  avaliarResultadoLotacao();
+}
+
+function avaliarResultadoLotacao() {
+  if (!ocupacaoSelecionada || !ocupacaoSelecionada.Divisao) return;
+
+  const switchBox = document.querySelector("#criterioLotacao .switch-container");
+  if (!switchBox) return;
+
+  const acima250 = switchBox.classList.contains("switch-active-yes");
+
+  // 🔥 REGRA FINAL — PERGUNTA 2
+  // Aplicável SOMENTE a F-1, F-2, F-4, F-8, F-9, F-10
+  resultadoPerguntaLotacao = acima250 ? "PT" : "CLCB";
+
+  algumCriterioMarcado = true;
+
+  reavaliarModuloCriterios();
+}
+
+function validarQtdLotacao() {
+  const input = document.getElementById("qtdLotacao");
+  const valor = parseInt(input.value, 10);
+  if (isNaN(valor)) return;
+
+  const alerta = document.getElementById("alertaLotacao");
+  const switchBox = document.querySelector(
+    "#criterioLotacao .switch-container"
+  );
+
+  if (
+    switchBox.classList.contains("switch-active-no") &&
+    valor > 250
+  ) {
+    input.value = 250;
+    alerta.style.display = "block";
+  } else {
+    alerta.style.display = "none";
+  }
+
+  document.getElementById("btnLotacao").disabled = false;
+
+  avaliarResultadoLotacao();
+  exibirResultadoCriterios();
+}
+
+
+
+function togglePerguntaLotacaoFPTS(element) {
+
+  if (element.classList.contains("switch-active-no")) {
+    element.classList.remove("switch-active-no");
+    element.classList.add("switch-active-yes");
+  } else {
+    element.classList.remove("switch-active-yes");
+    element.classList.add("switch-active-no");
+  }
+
+  avaliarResultadoLotacaoFPTS();
+}
+
+function avaliarResultadoLotacaoFPTS() {
+
+  if (!ocupacaoSelecionada || !ocupacaoSelecionada.Divisao) return;
+
+  const switchBox = document.querySelector(
+    "#criterioLotacaoFPTS .switch-container"
+  );
+  if (!switchBox) return;
+
+  const acima250 = switchBox.classList.contains("switch-active-yes");
+
+  // 🔥 REGRA FINAL — PERGUNTA 13
+  // NÃO → PTS
+  // SIM → PT
+  resultadoPerguntaLotacaoFPTS = acima250 ? "PT" : "PTS";
+
+  algumCriterioMarcado = true;
+
+  reavaliarModuloCriterios();
+}
+
+
+
+
+function validarQtdLotacaoFPTS() {
+  const input = document.getElementById("qtdLotacaoFPTS");
+  const valor = parseInt(input.value, 10);
+  if (isNaN(valor)) return;
+
+  const alerta = document.getElementById("alertaLotacaoFPTS");
+  const switchBox = document.querySelector(
+    "#criterioLotacaoFPTS .switch-container"
+  );
+
+  if (
+    switchBox.classList.contains("switch-active-no") &&
+    valor > 250
+  ) {
+    input.value = 250;
+    alerta.style.display = "block";
+  } else {
+    alerta.style.display = "none";
+  }
+
+  avaliarResultadoLotacaoFPTS();
+}
+
+
+
+
+function togglePerguntaFuncionarios(element) {
+
+  const input = document.getElementById("qtdFuncionarios");
+
+  if (element.classList.contains("switch-active-no")) {
+    // 👉 mudou para SIM
+    element.classList.remove("switch-active-no");
+    element.classList.add("switch-active-yes");
+
+    input.removeAttribute("max");
+
+    // 🔑 resultado da pergunta
+    resultadoPerguntaFuncionarios = "PTS";
+
+  } else {
+    // 👉 mudou para NÃO
+    element.classList.remove("switch-active-yes");
+    element.classList.add("switch-active-no");
+
+    input.setAttribute("max", "250");
+
+    const valor = parseInt(input.value, 10);
+    if (!isNaN(valor) && valor > 250) {
+      input.value = 250;
+    }
+
+    // 🔑 resultado da pergunta
+    resultadoPerguntaFuncionarios = "CLCB";
+  }
+
+  algumCriterioMarcado = true;
+
+  // ✅ ÚNICA chamada de consolidação
+  reavaliarModuloCriterios();
+
+  validarQtdFuncionarios();
+}
+
+
+
+
+function validarQtdFuncionarios() {
+
+  const input = document.getElementById("qtdFuncionarios");
+  const alerta = document.getElementById("alertaFuncionarios");
+  const switchBox = document.querySelector(
+    "#criterioFuncionarios .switch-container"
+  );
+
+  const valor = parseInt(input.value, 10);
+
+  if (isNaN(valor)) {
+    alerta.style.display = "none";
+    return;
+  }
+
+  if (switchBox.classList.contains("switch-active-no")) {
+    if (valor > 250) {
+      input.value = 250;
+      alerta.style.display = "block";
+    } else {
+      alerta.style.display = "none";
+    }
+  } else {
+    alerta.style.display = "none";
+  }
+}
+
+
+
+function togglePerguntaAcetileno(element) {
+
+  const input = document.getElementById("qtdAcetileno");
+  const boxQtd = document.getElementById("boxQtdAcetileno");
+
+  const mudouParaSim = element.classList.contains("switch-active-no");
+
+  if (mudouParaSim) {
+    // SIM
+    element.classList.remove("switch-active-no");
+    element.classList.add("switch-active-yes");
+
+    boxQtd.style.display = "block";
+    input.disabled = false;
+    input.focus();
+
+    resultadoPerguntaAcetileno = null; // 🔑 ainda sem classificação
+  } 
+  else {
+    // NÃO
+    element.classList.remove("switch-active-yes");
+    element.classList.add("switch-active-no");
+
+    boxQtd.style.display = "none";
+    input.value = "";
+    input.disabled = true;
+
+    resultadoPerguntaAcetileno = "CLCB"; // NÃO → CLCB direto
+    algumCriterioMarcado = true;
+  }
+reavaliarModuloCriterios();
+}
+
+
+function validarQtdAcetileno() {
+
+  const qtd = parseInt(document.getElementById("qtdAcetileno").value, 10);
+
+  if (isNaN(qtd)) {
+    resultadoPerguntaAcetileno = null;
+    return;
+  }
+
+  // REGRA:
+  // SIM + 1 → CLCB
+  // SIM > 1 → PTS
+  resultadoPerguntaAcetileno = (qtd > 1) ? "PTS" : "CLCB";
+
+  algumCriterioMarcado = true; // 🔑 agora pode aparecer
+
+ reavaliarModuloCriterios();
+}
+
+function togglePerguntaClasseK(element) {
+
+  const input = document.getElementById("qtdClasseK");
+  const box = document.getElementById("boxQtdClasseK");
+
+  const mudouParaSim = element.classList.contains("switch-active-no");
+
+  if (mudouParaSim) {
+    // SIM
+    element.classList.remove("switch-active-no");
+    element.classList.add("switch-active-yes");
+
+    box.style.display = "block";
+    input.disabled = false;
+    input.focus();
+
+    resultadoPerguntaClasseK = null; // só decide após quantidade
+  } 
+  else {
+    // NÃO
+    element.classList.remove("switch-active-yes");
+    element.classList.add("switch-active-no");
+
+    box.style.display = "none";
+    input.value = "";
+    input.disabled = true;
+
+    resultadoPerguntaClasseK = "CLCB";
+algumCriterioMarcado = true;
+
+  }
+
+ reavaliarModuloCriterios();
+}
+
+function validarQtdClasseK() {
+
+  const raw = document.getElementById("qtdClasseK").value;
+  const qtd = parseInt(raw.replace(/\./g, ""), 10);
+
+  if (isNaN(qtd)) {
+    resultadoPerguntaClasseK = null;
+    return;
+  }
+
+  // REGRA:
+  // NÃO → CLCB
+  // SIM até 38.000 L → PTS
+  // SIM acima de 38.000 L → PT
+  if (qtd > 38000) {
+    resultadoPerguntaClasseK = "PT";
+  } else {
+    resultadoPerguntaClasseK = "PTS";
+  }
+algumCriterioMarcado = true;
+
+reavaliarModuloCriterios();
+}
+
+
+
+function togglePerguntaGLP(element) {
+
+  const mudouParaSim = element.classList.contains("switch-active-no");
+
+  // campos das duas centrais
+  const campos = [
+    "tipoGLP1","qtdGLP1","pesoGLP1",
+    "tipoGLP2","qtdGLP2","pesoGLP2"
+  ];
+
+  if (mudouParaSim) {
+    // 👉 SIM
+    element.classList.remove("switch-active-no");
+    element.classList.add("switch-active-yes");
+
+    campos.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.disabled = false;
+    });
+
+    resultadoPerguntaGLP = null; // só classifica após quantidade
+
+  } else {
+    // 👉 NÃO
+    element.classList.remove("switch-active-yes");
+    element.classList.add("switch-active-no");
+
+    campos.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.value = "";
+        el.disabled = true;
+        el.style.display = (id.includes("peso")) ? "none" : "block";
+      }
+    });
+
+    document.getElementById("resumoGLP").style.display = "none";
+
+    resultadoPerguntaGLP = "CLCB";
+    algumCriterioMarcado = true;
+  }
+
+  reavaliarModuloCriterios();
+}
+
+
+
+
+function avaliarGLP() {
+
+const FATOR_KG_M3_GLP = 0.002; // 🔧 pode ajustar no futuro
+
+
+  let pesoTotal = 0;
+  let pesos = {1:0, 2:0};
+
+  for (let i = 1; i <= 2; i++) {
+
+    const tipo = document.getElementById(`tipoGLP${i}`).value;
+    const qtd  = parseInt(document.getElementById(`qtdGLP${i}`).value, 10);
+    const pesoManual = document.getElementById(`pesoGLP${i}`);
+
+    if (!tipo || isNaN(qtd) || qtd <= 0) {
+      pesos[i] = 0;
+      continue;
+    }
+
+    let pesoUnitario = 0;
+
+    if (tipo === "manual") {
+      pesoManual.style.display = "block";
+      pesoUnitario = parseInt(pesoManual.value, 10);
+      if (isNaN(pesoUnitario)) continue;
+    } else {
+      pesoManual.style.display = "none";
+      pesoUnitario = parseInt(tipo, 10);
+    }
+
+    pesos[i] = pesoUnitario * qtd;
+    pesoTotal += pesos[i];
+  }
+
+  // 🔎 Exibição
+  const resumo = document.getElementById("resumoGLP");
+
+let html = "";
+
+if (pesos[1] > 0) {
+  const m3 = (pesos[1] * FATOR_KG_M3_GLP).toFixed(3);
+  html += `Central 1: <b>${pesos[1]} kg</b> (${m3} m³)<br>`;
+}
+
+if (pesos[2] > 0) {
+  const m3 = (pesos[2] * FATOR_KG_M3_GLP).toFixed(3);
+  html += `Central 2: <b>${pesos[2]} kg</b> (${m3} m³)<br>`;
+}
+
+if (pesoTotal > 0) {
+  const m3Total = (pesoTotal * FATOR_KG_M3_GLP).toFixed(3);
+  html += `
+    <span style="border-top:1px solid #ddd; display:block; margin-top:4px;">
+      Total: <b>${pesoTotal} kg</b> (${m3Total} m³)
+    </span>
+  `;
+}
+
+
+resumo.innerHTML = html;
+resumo.style.display = pesoTotal > 0 ? "block" : "none";
+
+
+
+  document.getElementById("resumoGLP").style.display =
+    pesoTotal > 0 ? "block" : "none";
+
+  if (pesoTotal === 0) {
+    resultadoPerguntaGLP = null;
+    return;
+  }
+
+  // REGRA
+  resultadoPerguntaGLP = (pesoTotal > 190) ? "PTS" : "CLCB";
+  algumCriterioMarcado = true;
+
+  
+reavaliarModuloCriterios();
+}
+
+function togglePerguntaGLPRevenda(element) {
+
+  const select = document.getElementById("classeGLPRevenda");
+  const box = document.getElementById("boxClasseGLPRevenda");
+
+  const mudouParaSim = element.classList.contains("switch-active-no");
+
+  if (mudouParaSim) {
+    element.classList.remove("switch-active-no");
+    element.classList.add("switch-active-yes");
+
+    box.style.display = "block";
+    select.disabled = false;
+
+    resultadoPerguntaGLPRevenda = null;
+
+  } else {
+    element.classList.remove("switch-active-yes");
+    element.classList.add("switch-active-no");
+
+    select.value = "";
+    select.disabled = true;
+    box.style.display = "none";
+
+    resultadoPerguntaGLPRevenda = "CLCB";
+    algumCriterioMarcado = true;
+  }
+
+reavaliarModuloCriterios();
+}
+
+function avaliarGLPRevenda() {
+
+  const classe = document.getElementById("classeGLPRevenda").value;
+  if (!classe) {
+    resultadoPerguntaGLPRevenda = null;
+    return;
+  }
+
+  const linha = bancoGLPRevenda.find(l => l.Classe === classe);
+  if (!linha) return;
+
+  resultadoPerguntaGLPRevenda = linha.Classificacao_Processo; // PTS ou PT
+  algumCriterioMarcado = true;
+
+
+ reavaliarModuloCriterios();
+
+}
+
+function togglePerguntaLiquidosIgniferos(element) {
+
+  const input = document.getElementById("qtdLiquidosIgniferos");
+  const box = document.getElementById("boxQtdLiquidosIgniferos");
+
+  const mudouParaSim = element.classList.contains("switch-active-no");
+
+  if (mudouParaSim) {
+    // SIM
+    element.classList.remove("switch-active-no");
+    element.classList.add("switch-active-yes");
+
+    box.style.display = "block";
+    input.disabled = false;
+    input.focus();
+
+    resultadoPerguntaLiquidosIgniferos = null; // só decide após valor
+
+  } else {
+    // NÃO
+    element.classList.remove("switch-active-yes");
+    element.classList.add("switch-active-no");
+
+    box.style.display = "none";
+    input.value = "";
+    input.disabled = true;
+
+    resultadoPerguntaLiquidosIgniferos = "CLCB";
+    algumCriterioMarcado = true;
+  }
+
+ 
+reavaliarModuloCriterios();
+}
+
+function avaliarLiquidosIgniferos() {
+
+  const raw = document.getElementById("qtdLiquidosIgniferos").value;
+  const qtd = parseInt(raw.replace(/\./g, ""), 10);
+
+  if (isNaN(qtd)) {
+    resultadoPerguntaLiquidosIgniferos = null;
+    return;
+  }
+
+  // 🔎 REGRA
+  // NÃO → CLCB
+  // SIM + < 250 → CLCB ou PTS (fica no consolidado)
+  // SIM + > 250 → PT
+  if (qtd > 250) {
+    resultadoPerguntaLiquidosIgniferos = "PT";
+  } else {
+    resultadoPerguntaLiquidosIgniferos = "CLCB";
+  }
+
+  algumCriterioMarcado = true;
+
+    reavaliarModuloCriterios();
+}
+
+
+
+
+function togglePerguntaGasesInflamaveis(element) {
+
+  const input = document.getElementById("qtdGasesInflamaveis");
+  const box = document.getElementById("boxQtdGasesInflamaveis");
+
+  const mudouParaSim = element.classList.contains("switch-active-no");
+
+  if (mudouParaSim) {
+    // SIM
+    element.classList.remove("switch-active-no");
+    element.classList.add("switch-active-yes");
+
+    box.style.display = "block";
+    input.disabled = false;
+    input.focus();
+
+    resultadoPerguntaGasesInflamaveis = null;
+
+  } else {
+    // NÃO
+    element.classList.remove("switch-active-yes");
+    element.classList.add("switch-active-no");
+
+    box.style.display = "none";
+    input.value = "";
+    input.disabled = true;
+
+    resultadoPerguntaGasesInflamaveis = "CLCB";
+    algumCriterioMarcado = true;
+  }
+
+
+reavaliarModuloCriterios();
+}
+
+function avaliarGasesInflamaveis() {
+
+  const raw = document.getElementById("qtdGasesInflamaveis").value;
+  const qtd = parseInt(raw.replace(/\./g, ""), 10);
+
+  if (isNaN(qtd)) {
+    resultadoPerguntaGasesInflamaveis = null;
+    return;
+  }
+
+  // 🔎 REGRA
+  // NÃO → CLCB
+  // SIM < 10.000 L → PTS
+  // SIM > 10.000 L → PT
+  if (qtd > 10000) {
+    resultadoPerguntaGasesInflamaveis = "PT";
+  } else {
+    resultadoPerguntaGasesInflamaveis = "PTS";
+  }
+
+  algumCriterioMarcado = true;
+
+
+reavaliarModuloCriterios();
+}
+
+
+
+function togglePerguntaLiquidosTanque(element) {
+
+  const input = document.getElementById("qtdLiquidosTanque");
+  const box = document.getElementById("boxQtdLiquidosTanque");
+
+  const mudouParaSim = element.classList.contains("switch-active-no");
+
+  if (mudouParaSim) {
+    // SIM
+    element.classList.remove("switch-active-no");
+    element.classList.add("switch-active-yes");
+
+    box.style.display = "block";
+    input.disabled = false;
+    input.focus();
+
+    resultadoPerguntaLiquidosTanque = null;
+
+  } else {
+    // NÃO
+    element.classList.remove("switch-active-yes");
+    element.classList.add("switch-active-no");
+
+    box.style.display = "none";
+    input.value = "";
+    input.disabled = true;
+
+    resultadoPerguntaLiquidosTanque = "CLCB";
+    algumCriterioMarcado = true;
+  }
+
+
+reavaliarModuloCriterios();
+}
+
+function avaliarLiquidosTanque() {
+
+  const raw = document.getElementById("qtdLiquidosTanque").value;
+  const qtd = parseInt(raw.replace(/\./g, ""), 10);
+
+  if (isNaN(qtd)) {
+    resultadoPerguntaLiquidosTanque = null;
+    return;
+  }
+
+  // 🔎 REGRA
+  // NÃO → CLCB
+  // SIM ≤ 1.000 L → CLCB
+  // SIM 1.001 a 20.000 L → PTS
+  // SIM > 20.000 L → PT
+  if (qtd <= 1000) {
+    resultadoPerguntaLiquidosTanque = "CLCB";
+  } else if (qtd <= 20000) {
+    resultadoPerguntaLiquidosTanque = "PTS";
+  } else {
+    resultadoPerguntaLiquidosTanque = "PT";
+  }
+
+  algumCriterioMarcado = true;
+
+
+reavaliarModuloCriterios();
+}
+
+function togglePerguntaSolidosDescobertos(element) {
+
+  const mudouParaSim = element.classList.contains("switch-active-no");
+
+  if (mudouParaSim) {
+    // 👉 SIM
+    element.classList.remove("switch-active-no");
+    element.classList.add("switch-active-yes");
+
+    resultadoPerguntaSolidosDescobertos = "PT";
+    algumCriterioMarcado = true;
+
+  } else {
+    // 👉 NÃO
+    element.classList.remove("switch-active-yes");
+    element.classList.add("switch-active-no");
+
+    resultadoPerguntaSolidosDescobertos = "CLCB";
+    algumCriterioMarcado = true;
+  }
+  
+reavaliarModuloCriterios();
+}
+
+function togglePerguntaProdutosPerigosos(element) {
+
+  const mudouParaSim = element.classList.contains("switch-active-no");
+
+  if (mudouParaSim) {
+    // SIM
+    element.classList.remove("switch-active-no");
+    element.classList.add("switch-active-yes");
+
+    resultadoPerguntaProdutosPerigosos = "PT";
+    algumCriterioMarcado = true;
+
+  } else {
+    // NÃO
+    element.classList.remove("switch-active-yes");
+    element.classList.add("switch-active-no");
+
+    resultadoPerguntaProdutosPerigosos = "CLCB";
+    algumCriterioMarcado = true;
+  }
+
+reavaliarModuloCriterios();
+}
+
+
+function togglePerguntaAgrotoxicos(element) {
+
+  const box = document.getElementById("boxAgrotoxicos");
+  const select = document.getElementById("selectAgrotoxicos");
+
+  const mudouParaSim = element.classList.contains("switch-active-no");
+
+  if (mudouParaSim) {
+    // SIM
+    element.classList.remove("switch-active-no");
+    element.classList.add("switch-active-yes");
+
+    box.style.display = "block";
+    select.disabled = false;
+
+    resultadoPerguntaAgrotoxicos = null; // decide no select
+
+  } else {
+    // NÃO
+    element.classList.remove("switch-active-yes");
+    element.classList.add("switch-active-no");
+
+    select.value = "";
+    select.disabled = true;
+    box.style.display = "none";
+
+    resultadoPerguntaAgrotoxicos = "CLCB";
+    algumCriterioMarcado = true;
+  }
+
+  reavaliarModuloCriterios();
+}
+
+function avaliarAgrotoxicos() {
+
+  const valor = document.getElementById("selectAgrotoxicos").value;
+
+  if (!valor) {
+    resultadoPerguntaAgrotoxicos = null;
+    return;
+  }
+
+  if (valor === "limitado") {
+    resultadoPerguntaAgrotoxicos = "PTS";
+  }
+
+  if (valor === "livre") {
+    resultadoPerguntaAgrotoxicos = "PT";
+  }
+
+  algumCriterioMarcado = true;
+
+reavaliarModuloCriterios();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function inicializarTudo() { 
+carregarBD_AREA();
+carregarBancoDeDados(); 
+updateCalculos();
+travaInterfacePavimentos(); 
+exibirResultadoCriterios();
+renderizarCamada1(); 
+}
+
+  function toggleSwitch(element, inputId) {
+    if (element.classList.contains('switch-active-no')) {
+      element.classList.remove('switch-active-no'); element.classList.add('switch-active-yes');
+      if (inputId) document.getElementById(inputId).style.display = 'block';
+    } else {
+      element.classList.remove('switch-active-yes'); element.classList.add('switch-active-no');
+      if (inputId) document.getElementById(inputId).style.display = 'none';
+    }
+  }
+
+  function mascaraMoeda(i) { let v = i.value.replace(/\D/g, ""); v = (v / 100).toFixed(2) + ""; v = v.replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, "."); i.value = v; }
+
+function mascaraMilhar(input) {
+  let v = input.value.replace(/\D/g, "");
+  v = v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  input.value = v;
+}
+
+
+  function formatarParaNumero(s) { return parseFloat(s.replace(/\./g, "").replace(",", ".")) || 0; }
+  function openModal() { document.getElementById('modalContainer').style.display = 'block'; }
+  function closeModal() { document.getElementById('modalContainer').style.display = 'none'; }
+  function checkValid() {
+    const total = formatarParaNumero(document.getElementById('mainTotal').value);
+    const inputs = document.querySelectorAll('.m-input');
+    let soma = 0; inputs.forEach(i => { soma += (parseFloat(i.value) || 0); });
+    const err = document.getElementById('errorMsg'), btn = document.getElementById('btnApply');
+    if (soma > total && total > 0) { err.style.display = 'block'; btn.disabled = true; } else { err.style.display = 'none'; btn.disabled = false; }
+  }
+
+function confirmDesconto() {
+  const inputs = document.querySelectorAll('.m-input');
+  let somaTotal = 0;
+let somaPermitidaCLCB = 0;
+
+globalRestrito = false;
+
+inputs.forEach(i => {
+  const val = parseFloat(i.value) || 0;
+
+  if (val > 0) {
+    somaTotal += val;
+
+    if (i.classList.contains('clcb-ok')) {
+      somaPermitidaCLCB += val;
+    }
+
+    if (i.classList.contains('clcb-no')) {
+      globalRestrito = true; // mantém apenas informativo
+    }
+  }
+});
+
+
+
+  // mantém exatamente como antes
+  document.getElementById('mainDesc').value =
+  somaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
+// 🔑 novo valor interno (NÃO VISUAL)
+window.descontoPermitidoCLCB = somaPermitidaCLCB;
+
+
+  closeModal();
+
+try {
+  updateCalculos();
+} catch(e){
+  console.error("Erro em updateCalculos:", e);
+}
+
+try {
+  validarEnquadramentoOcupacao();
+} catch(e){
+  console.error("Erro em validarEnquadramentoOcupacao:", e);
+}
+
+try {
+  validarEnquadramentoAltura();
+} catch(e){
+  console.error("Erro em validarEnquadramentoAltura:", e);
+}
+
+try {
+  atualizarMemorialAltura();
+} catch(e){
+  console.error("Erro em atualizarMemorialAltura:", e);
+}
+
+  
+
+
+// 🔹 monta texto detalhado dos descontos SOMENTE no memorial
+let detalhes = [];
+
+inputs.forEach(i => {
+  const val = parseFloat(i.value) || 0;
+  if (val > 0) {
+    const nome = i.getAttribute("data-nome");
+    detalhes.push(
+      `${val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} m² ${nome}`
+    );
+  }
+});
+
+// 🔹 texto final do memorial
+let textoDesconto =
+  somaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + " m²";
+
+if (detalhes.length > 0) {
+  textoDesconto += " (" + detalhes.join(" + ") + ")";
+}
+
+document.getElementById('outDesc').innerText = textoDesconto;
+
+
+
+
+}
+
+
+
+function updateCalculos() {
+
+  const t = formatarParaNumero(document.getElementById('mainTotal').value);
+
+  const rb = document.getElementById('resultBox');
+  const b  = document.getElementById('badgeText');
+
+  // 🔒 SEM ÁREA → LIMPA TUDO
+  if (t <= 0) {
+
+    rb.style.display = "none";
+    b.innerText = "";
+
+    window.areaClassificacao = 0;
+
+    const inputPrincipal = document.getElementById("areaOcupacao1");
+
+    if (inputPrincipal) {
+      inputPrincipal.value =
+        window.areaClassificacao.toLocaleString("pt-BR",{minimumFractionDigits:2});
+    }
+
+    atualizarPercentuais();
+
+    document.getElementById('outTotal').innerText = "—";
+    document.getElementById('outComp').innerText  = "—";
+
+    return;
+  }
+
+  // 🔹 DESCONTOS
+  const dTotal = formatarParaNumero(document.getElementById('mainDesc').value);
+  const dCLCB  = window.descontoPermitidoCLCB || 0;
+
+  // 🔹 ÁREAS
+  const cInformativa = Math.max(0, t - dTotal); // geral
+  const cCLCB        = Math.max(0, t - dCLCB);  // válida CLCB
+
+  // 🔹 ALERTA FAIXA LIMÍTROFE
+  const alertaArea = document.getElementById("alertaAreaProxima");
+
+  if (cCLCB >= 750 && cCLCB <= 770) {
+    alertaArea.style.display = "block";
+  } else {
+    alertaArea.style.display = "none";
+  }
+
+  // 🔹 OUTPUTS VISUAIS
+  document.getElementById('outTotal').innerText =
+    t.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + " m²";
+
+  window.areaClassificacao = cInformativa;
+
+  const inputPrincipal = document.getElementById("areaOcupacao1");
+  const secundarias = document.querySelectorAll("#containerOcupacoesSecundarias .area-secundaria");
+
+  if (inputPrincipal && secundarias.length === 0) {
+    inputPrincipal.value =
+      window.areaClassificacao.toLocaleString("pt-BR", {
+        minimumFractionDigits: 2
+      });
+  }
+
+  atualizarPercentuais();
+  atualizarMemorialOcupacao();
+
+  document.getElementById('mainComp').value =
+    cInformativa.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
+  document.getElementById('outDesc').innerText =
+    dTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + " m²";
+
+  document.getElementById('outComp').innerText =
+    cInformativa.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + " m²";
+
+  rb.style.display = "flex";
+
+const regra = buscarRegraArea(cInformativa);
+
+if(!regra){
+  console.error("Regra não encontrada para área:", cInformativa);
+  return;
+}
+
+let processo = regra.processo;
+let texto = regra.texto;
+
+// 🔥 REGRA IT-42 (única exceção fora do banco)
+if(processo === "CLCB" && window.globalRestrito){
+  processo = "PTS";
+}
+
+
+  // 🔹 GUARDA RESULTADO PARA MOTOR CENTRAL
+  resultadoArea = processo;
+  b.innerText = texto;
+  
+atualizarPainel();
+
+}
+
+function classificarOcupacaoIndividual(ocupacaoObj) {
+
+  if (!ocupacaoObj) return null;
+
+  const areaComp = window.areaClassificacao || 0;
+
+  // 🔴 PT obrigatório por natureza
+  if (ocupacaoObj.PT_Obrigatorio === "Sim") {
+    return "PT";
+  }
+
+  // 🔴 Nota técnica por área
+  if (
+    ocupacaoObj.Nota_Tecnica &&
+    ocupacaoObj.Nota_Tecnica.includes("Área > 100m²") &&
+    areaComp > 100
+  ) {
+    return "PT";
+  }
+
+  // 🟡 Não permite CLCB
+  if (ocupacaoObj.Permite_CLCB === "Não") {
+    return "PTS";
+  }
+
+  // 🟢 Permite CLCB
+  return "CLCB";
+}
+
+
+function calcularCargaIncendio(ocupObj, alturaStr) {
+
+  const normalizar = (valor) => {
+    if (!valor) return 0;
+    return Number(
+      String(valor)
+        .replace(/\./g,'')
+        .replace(',','.')
+    ) || 0;
+  };
+
+  // Divisão J (armazenamento dinâmico)
+  if (ocupObj.Divisao?.startsWith("J")) {
+
+    const alturaNum = formatarParaNumero(alturaStr || "0");
+
+    const mjAltura = parseFloat(ocupObj.MJ_por_M_H);
+
+    if (!isNaN(mjAltura) && mjAltura > 0) {
+      return alturaNum * mjAltura;
+    }
+
+    // fallback banco
+    return normalizar(ocupObj.Carga_Incendio_MJ_m2);
+  }
+
+  return normalizar(ocupObj.Carga_Incendio_MJ_m2);
+}
+
+
+function validarEnquadramentoOcupacao() {
+
+  if (!ocupacaoSelecionada) return;
+
+  const areaTotal = window.areaClassificacao || 0;
+
+  // 🔹 Monta lista de ocupações com área
+  let ocupacoes = [];
+
+  // OCUPAÇÃO PRINCIPAL
+  const areaPrincipal = formatarParaNumero(
+    document.getElementById("areaOcupacao1")?.value || "0"
+  );
+
+  ocupacoes.push({
+    obj: ocupacaoSelecionada,
+    area: areaPrincipal
+  });
+
+  // OCUPAÇÕES SECUNDÁRIAS
+  const blocos = document.querySelectorAll("#containerOcupacoesSecundarias .card-secundaria");
+
+  blocos.forEach(bloco => {
+    const descricao = bloco.querySelector(".descricao-secundaria")?.value;
+    const areaStr = bloco.querySelector(".area-secundaria")?.value;
+
+    if (!descricao) return;
+
+    const ocupObj = bancoOcupacoes.find(o => o.Descricao === descricao);
+    const area = formatarParaNumero(areaStr || "0");
+
+    if (ocupObj && area > 0) {
+      ocupacoes.push({ obj: ocupObj, area });
+    }
+  });
+
+  // 🔒 Se só tem 1 ocupação → normal
+  if (ocupacoes.length === 1) {
+    resultadoOcupacao = classificarOcupacaoIndividual(ocupacoes[0].obj);
+    atualizarResultadoVisualOcupacao(resultadoOcupacao);
+    return;
+  }
+
+  // 🔎 Verifica limite do §4º
+let limite;
+
+if (areaTotal <= 7500) {
+  limite = 750;
+} else {
+  limite = areaTotal * 0.10;
+}
+
+// 🔎 Determina ocupação predominante por maior área
+const predominante = ocupacoes.reduce((maior, atual) =>
+  atual.area > maior.area ? atual : maior
+);
+
+// 🔎 Soma das áreas subsidiárias
+let somaSub = 0;
+
+ocupacoes.forEach(o => {
+  if (o !== predominante) {
+    somaSub += o.area;
+  }
+});
+
+let caracterizaMista = somaSub > limite;
+
+// 🔥 Define ocupação mais rigorosa quando for mista
+let maisRigorosa = null;
+
+if (caracterizaMista) {
+
+maisRigorosa = ocupacoes.reduce((maior, atual) => {
+
+  const normalizar = (valor) => {
+    if (!valor) return 0;
+    return Number(
+      String(valor)
+        .replace(/\./g,'')
+        .replace(',','.')
+    ) || 0;
+  };
+
+  const calcularCarga = (ocup) => {
+
+    // Se for divisão J (armazenamento)
+    if (ocup.obj.Divisao?.startsWith("J")) {
+
+      const alturaNum = formatarParaNumero(
+        document.getElementById("inputAltura")?.value || "0"
+      );
+
+      const mjAltura = parseFloat(ocup.obj.MJ_por_M_H);
+
+      if (!isNaN(mjAltura) && mjAltura > 0) {
+        return alturaNum * mjAltura;
+      }
+
+      // fallback para banco
+      return normalizar(ocup.obj.Carga_Incendio_MJ_m2);
+    }
+
+    // Demais divisões
+    return normalizar(ocup.obj.Carga_Incendio_MJ_m2);
+  };
+
+  const cargaAtual = calcularCarga(atual);
+  const cargaMaior = calcularCarga(maior);
+
+  return cargaAtual > cargaMaior ? atual : maior;
+
+});
+
+  
+
+  window.ocupacaoMaisRigorosa = maisRigorosa.obj;
+
+} else {
+
+  window.ocupacaoMaisRigorosa = null;
+
+}
+
+
+
+// 🔥 DEFINE PREDOMINANTE SOMENTE SE NÃO FOR MISTA (§4º)
+if (!caracterizaMista) {
+  window.ocupacaoPredominante = predominante.obj;
+} else {
+  window.ocupacaoPredominante = null;
+}
+
+
+
+
+
+  // 🔥 REGRA NORMATIVA CORRETA
+  if (!caracterizaMista) {
+
+    // 👉 NÃO caracteriza mista → aplica predominante (maior área)
+
+    
+    resultadoOcupacao =
+      classificarOcupacaoIndividual(predominante.obj);
+
+  } else {
+
+    // 👉 Caracteriza mista → aplica maior rigor
+
+    let resultados = ocupacoes.map(o =>
+      classificarOcupacaoIndividual(o.obj)
+    );
+
+    resultadoOcupacao =
+      consolidarEnquadramentoFinal(resultados);
+  }
+
+  atualizarResultadoVisualOcupacao(resultadoOcupacao);
+// 🔴 FORÇA RE-RENDER DO MEMORIAL COM PREDOMINANTE ATUALIZADA
+atualizarMemorialOcupacao();
+
+}
+
+function atualizarResultadoVisualOcupacao(resultadoFinal) {
+
+  const box = document.getElementById('enquadramentoOcupacaoBox');
+  const lbl = document.getElementById('labelEnqOcup');
+
+  box.style.display = "flex";
+
+  if (resultadoFinal === "PT") {
+    lbl.innerText =
+      "Classificação pela Ocupação / Uso: PT - Projeto Técnico.";
+    box.style.background = "var(--pt-bg)";
+    lbl.style.color = "var(--pt-dot)";
+  }
+  else if (resultadoFinal === "PTS") {
+    lbl.innerText =
+      "Classificação pela Ocupação / Uso: PTS - Projeto Técnico Simplificado.";
+    box.style.background = "var(--pts-bg)";
+    lbl.style.color = "var(--pts-dot)";
+  }
+  else {
+    lbl.innerText =
+      "Classificação pela Ocupação / Uso: CLCB - Certificado de Licença.";
+    box.style.background = "var(--clcb-bg)";
+    lbl.style.color = "var(--clcb-dot)";
+  }
+}
+
+
+
+
+
+function validarEnquadramentoAltura() {
+
+  const pav = document.getElementById('selQtdPavimentos').value;
+  const subsolo = document.getElementById('selSubsolo').value;
+  const usoSub = document.getElementById('selUsoSubsolo').value;
+  const areaSub = document.getElementById('selAreaSubsolo').value;
+  const altEdif = formatarParaNumero(document.getElementById('inputAlturaEdificacao').value);
+
+  const box = document.getElementById('enquadramentoAlturaBox');
+  const lbl = document.getElementById('labelEnqAlt');
+
+  // 🔒 BLOQUEIO: não classifica se o módulo não foi acionado
+  const moduloNaoUsado =
+    !pav &&
+    !subsolo &&
+    !usoSub &&
+    !areaSub &&
+    altEdif === 0;
+
+  if (moduloNaoUsado) {
+    box.style.display = "none";
+    lbl.innerText = "";
+resultadoAltura = null;
+    return;
+  }
+
+  // 🔒 BLOQUEIO: módulo iniciado, mas ainda incompleto
+  const moduloIncompleto =
+    (pav && !subsolo) ||
+    (subsolo === "sim" && !usoSub) ||
+    (usoSub === "outra" && !areaSub) ||
+    (pav !== "1" && pav && altEdif === 0);
+
+  if (moduloIncompleto) {
+    box.style.display = "none";
+    lbl.innerText = "";
+resultadoAltura = null;    
+return;
+  }
+
+
+ 
+  // A partir daqui, o módulo passa a atuar
+  box.style.display = "flex";
+
+  let exigePT = false;
+  let motivo = "";
+
+  // 🔴 REGRA 1 — 4 pavimentos ou mais
+  if (pav === "4+") {
+    exigePT = true;
+    motivo = "4 pavimentos ou mais";
+  }
+
+  // 🔴 REGRA 2 — Subsolo com reunião de público
+  else if (subsolo === "sim" && usoSub === "reuniao") {
+    exigePT = true;
+    motivo = "Subsolo com reunião de público";
+  }
+
+  // 🔴 REGRA 3 — Subsolo com outra ocupação e área > 50 m²
+  else if (subsolo === "sim" && usoSub === "outra" && areaSub === "sim") {
+    exigePT = true;
+    motivo = "Subsolo com outra ocupação e área superior a 50 m²";
+  }
+
+  // 🔴 REGRA 4 — Altura superior a 6,00 m
+  else if (altEdif > 6) {
+    exigePT = true;
+    motivo = "Altura da edificação superior a 6,00 metros";
+  }
+
+  // 🔴 SAÍDA — PT
+  if (exigePT) {
+    lbl.innerText = "Classificação quanto à Altura e Pavimentos: PT - Projeto Técnico. Obrigatória aprovação prévia de planta das medidas de segurança contra incêndio";
+    box.style.background = "var(--pt-bg)";
+    lbl.style.color = "var(--pt-dot)";
+
+resultadoAltura = "PT";
+  }
+
+  // 🟢 SAÍDA — CLCB (ocupação permite CLCB)
+else {
+  lbl.innerText =
+    "Classificação pela Ocupação / Uso: CLCB - Certificado de Licença do Corpo de Bombeiros";
+  box.style.background = "var(--clcb-bg)";
+  lbl.style.color = "var(--clcb-dot)";
+  resultadoOcupacao = "CLCB";
+}
+
+}
+
+
+  
+
+  function travaInterfacePavimentos() {
+  const pav = document.getElementById('selQtdPavimentos').value;
+  const sub = document.getElementById('selSubsolo');
+  const containerAltura = document.getElementById('containerAlturaEdif');
+
+  if (!pav) {
+    sub.disabled = true;
+    sub.value = "";
+    containerAltura.style.display = "none";
+    travaInterfaceSubsolo();
+    return;
+  }
+
+  sub.disabled = false;
+
+  // 🔑 REGRA OFICIAL
+ if (pav === "1") {
+  containerAltura.style.display = "none";   // térrea → não mostra altura
+
+  // 🔑 RESET COMPLETO DA ALTURA
+  document.getElementById("inputAlturaEdificacao").value = "";
+  resultadoAltura = null;
+
+} else {
+  containerAltura.style.display = "block";  // 2+ pavimentos → mostra altura
+}
+
+}
+
+
+  function travaInterfaceSubsolo() { const subValue = document.getElementById('selSubsolo').value; const uso = document.getElementById('selUsoSubsolo'); if (subValue === "sim") { uso.disabled = false; } else { uso.disabled = true; uso.value = ""; travaInterfaceUsoSubsolo(); } }
+  function travaInterfaceUsoSubsolo() { const usoValue = document.getElementById('selUsoSubsolo').value; const areaSub = document.getElementById('selAreaSubsolo'); if (usoValue === "outra") { areaSub.disabled = false; } else { areaSub.disabled = true; areaSub.value = ""; } }
+
+  function atualizarMemorialAltura() {
+    const selPav = document.getElementById('selQtdPavimentos');
+    document.getElementById('memTipologia').innerText = selPav.value ? selPav.options[selPav.selectedIndex].text : "—";
+    const subVal = document.getElementById('selSubsolo').value;
+    let subInfo = "Não possui subsolo";
+    if (subVal === "sim") { const usoSel = document.getElementById('selUsoSubsolo'); subInfo = "Sim - " + (usoSel.value ? usoSel.options[usoSel.selectedIndex].text : "Uso não definido"); }
+    document.getElementById('memSubsolo').innerText = subVal ? subInfo : "—";
+    const h = formatarParaNumero(document.getElementById('inputAlturaEdificacao').value);
+    const pavValue = document.getElementById('selQtdPavimentos').value;
+    let tipo = "—", denom = "—", metros = h.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + " m";
+    if (pavValue === "1") { tipo = "I"; denom = "Edificação Térrea"; metros = "Um pavimento"; }
+    else if (h > 0) {
+      if (h <= 6.00) { tipo = "II"; denom = "Edificação Baixa"; } else if (h <= 12.00) { tipo = "III"; denom = "Edificação de Baixa-Média Altura"; } else if (h <= 23.00) { tipo = "IV"; denom = "Edificação de Média Altura"; } else if (h <= 30.00) { tipo = "V"; denom = "Edificação Medianamente Alta"; } else { tipo = "VI"; denom = "Edificação Alta"; }
+    }
+    document.getElementById('memTipoAlt').innerText = tipo; document.getElementById('memDenomAlt').innerText = denom; document.getElementById('memMetrosAlt').innerText = pavValue ? metros : "—";
+  }
+
+  function processarSelecaoOcupacao(select) { if (!select.value) return; const opt = select.options[select.selectedIndex]; const usoPai = opt.getAttribute('data-uso'); if (usoPai) document.getElementById('selUso').value = usoPai; ocupacaoSelecionada = bancoOcupacoes.find(o => o.Descricao === select.value); const inAlt = document.getElementById('inputAltura'), msg = document.getElementById('msgAltura'); if (ocupacaoSelecionada.Divisao === "J") { inAlt.disabled = false; inAlt.style.background = "#fff"; msg.style.display = "block"; } else { inAlt.disabled = true; inAlt.value = "0,00"; inAlt.style.background = "#f0f0f0"; msg.style.display = "none"; } validarEnquadramentoOcupacao();
+ exibirOcupacaoExpandida(select);
+ atualizarMemorialOcupacao();
+ atualizarPerguntaFuncionarios();
+ atualizarPerguntaLotacao();
+ atualizarPerguntaLotacaoFPTS();
+ atualizarPerguntaAcetileno();
+ atualizarPerguntaClasseK();
+ definirClassificacaoBasePorOcupacao();
+reavaliarModuloCriterios();
+
+ }
+
+
+  function atualizarMemorialOcupacao() {
+
+  const container = document.getElementById("memorialOcupacaoBox");
+  if (!container) return;
+
+  let html = "";
+  let contador = 1;
+
+
+if (window.ocupacaoMaisRigorosa) {
+  html += `
+    <div style="background:#ffebee;padding:10px;border-left:4px solid #d32f2f;margin-bottom:15px;">
+      ⚠ Edificação caracteriza ocupação mista nos termos do §4º do Art. 4º do Decreto Estadual nº 69.118/2024.
+      As medidas de segurança serão definidas pelo critério mais rigoroso.
+    </div>
+  `;
+}
+
+if (window.ocupacaoPredominante) {
+  html += `
+    <div style="background:#e8f5e9;padding:10px;border-left:4px solid #2e7d32;margin-bottom:15px;">
+      ✔ As medidas de segurança serão definidas com base na ocupação predominante abaixo indicada.
+    </div>
+  `;
+}
+
+
+  function montarBloco(ocupObj, alturaStr, numero) {
+
+    if (!ocupObj) return "";
+
+    let divFinal = ocupObj.Divisao;
+let riscoFinal = ocupObj.Risco;
+let descFinal = ocupObj.Descricao;
+
+// 🔥 USA A MESMA FUNÇÃO GLOBAL DO SISTEMA
+const cargaFinal = calcularCargaIncendio(ocupObj, alturaStr);
+
+// 🔥 Se for divisão J, ainda precisa tratar divisão dinâmica
+if (divFinal?.startsWith("J")) {
+
+  const fDiv = dadosDivisaoJ.find(f =>
+    cargaFinal > f.Carga_Min && cargaFinal <= f.Carga_Max
+  );
+
+  if (fDiv) divFinal = fDiv.Divisao_Resultante;
+
+  const fRis = dadosRiscos.find(r => {
+    const min = r.Limite_Min ?? r['Limite_Min (MJ/m²)'];
+    const max = r.Limite_Max ?? r['Limite_Max (MJ/m²)'];
+    return cargaFinal > min && cargaFinal <= max;
+  });
+
+  if (fRis) riscoFinal = fRis.Classificacao_Risco;
+}
+
+    // 🔥 Tratamento Divisão J (armazenamento)
+    if (divFinal?.startsWith("J")) {
+
+      const alturaNum = formatarParaNumero(alturaStr);
+
+      descFinal += ` (Considerado altura de ${alturaStr} metros de armazenamento)`;
+
+      cargaFinal = alturaNum * (parseFloat(ocupObj.MJ_por_M_H) || 0);
+
+      const fDiv = dadosDivisaoJ.find(f =>
+        cargaFinal > f.Carga_Min && cargaFinal <= f.Carga_Max
+      );
+
+      if (fDiv) divFinal = fDiv.Divisao_Resultante;
+
+      const fRis = dadosRiscos.find(r => {
+        const min = r.Limite_Min ?? r['Limite_Min (MJ/m²)'];
+        const max = r.Limite_Max ?? r['Limite_Max (MJ/m²)'];
+        return cargaFinal > min && cargaFinal <= max;
+      });
+
+      if (fRis) riscoFinal = fRis.Classificacao_Risco;
+    }
+
+    const riscoFormatado = riscoFinal
+      ? riscoFinal.charAt(0).toUpperCase() + riscoFinal.slice(1).toLowerCase()
+      : "-";
+
+   const ehPredominante =
+  window.ocupacaoPredominante &&
+  String(window.ocupacaoPredominante.Descricao).trim() ===
+  String(ocupObj.Descricao).trim();
+
+let ehMaisRigorosa = false;
+
+if (window.ocupacaoMaisRigorosa) {
+
+  const normalizar = (valor) => {
+    if (!valor) return 0;
+    return Number(
+      String(valor)
+        .replace(/\./g,'')
+        .replace(',','.')
+    ) || 0;
+  };
+
+  const calcularCarga = (ocup) => {
+
+    if (ocup.Divisao?.startsWith("J")) {
+
+      const alturaNum = formatarParaNumero(
+        document.getElementById("inputAltura")?.value || "0"
+      );
+
+      return alturaNum * (parseFloat(ocup.MJ_por_M_H) || 0);
+    }
+
+    return normalizar(ocup.Carga_Incendio_MJ_m2);
+  };
+
+  const cargaGlobal = calcularCarga(window.ocupacaoMaisRigorosa);
+  const cargaAtual  = calcularCarga(ocupObj);
+
+  ehMaisRigorosa =
+    window.ocupacaoMaisRigorosa.Divisao === ocupObj.Divisao &&
+    cargaGlobal === cargaAtual;
+}
+
+
+const areaTotal = window.areaClassificacao || 0;
+
+let area = 0;
+
+if (numero === 1) {
+
+  area = formatarParaNumero(
+    document.getElementById("areaOcupacao1")?.value || "0"
+  );
+
+} else {
+
+  // 🔥 pega a área real digitada na secundária
+  const blocoAtual = document.querySelectorAll(
+    "#containerOcupacoesSecundarias .card-secundaria"
+  )[numero - 2];
+
+  if (blocoAtual) {
+    const inputArea = blocoAtual.querySelector(".area-secundaria");
+    area = formatarParaNumero(inputArea?.value || "0");
+  }
+
+}
+
+
+
+const percentual = areaTotal > 0 ? (area / areaTotal) * 100 : 0;
+
+return `
+  <div style="margin-bottom:20px;">
+    
+<strong>Ocupação ${numero}</strong>
+${ehPredominante ? 
+  '<span style="color:#d32f2f;font-weight:bold;"> ⬅ Ocupação Predominante</span>' 
+  : ''}
+
+${ehMaisRigorosa ? 
+  '<span style="color:#d32f2f;font-weight:bold;"> ⬅ Mais rigorosa aplicada às medidas</span>' 
+  : ''}
+
+<br>
+
+
+    Uso: ${ocupObj.Ocupacao_Uso || "-"}<br>
+    Ocupação: ${ocupObj.Descricao || "-"}<br>
+    Divisão: ${divFinal || "-"}<br>
+    Área: ${area.toLocaleString("pt-BR",{minimumFractionDigits:2})} m² (${percentual.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}%)<br>
+    Carga de Incêndio: ${cargaFinal.toLocaleString("pt-BR",{minimumFractionDigits:2})} MJ/m²<br>
+    Potencial de Risco: ${riscoFormatado}
+  </div>
+`;
+
+
+
+
+  }
+
+  // 🔹 OCUPAÇÃO PRINCIPAL
+  if (ocupacaoSelecionada) {
+    const alturaPrincipal = document.getElementById("inputAltura")?.value || "0,00";
+    html += montarBloco(ocupacaoSelecionada, alturaPrincipal, contador);
+    contador++;
+  }
+
+  // 🔹 OCUPAÇÕES SECUNDÁRIAS
+  const blocos = document.querySelectorAll("#containerOcupacoesSecundarias .card-secundaria");
+
+  blocos.forEach(bloco => {
+
+    const descricao = bloco.querySelector(".descricao-secundaria")?.value;
+    const altura = bloco.querySelector(".altura-secundaria")?.value || "0,00";
+
+    if (!descricao) return;
+
+    const ocupObj = bancoOcupacoes.find(o => o.Descricao === descricao);
+    if (!ocupObj) return;
+
+    html += montarBloco(ocupObj, altura, contador);
+    contador++;
+  });
+
+  container.innerHTML = html || "—";
+}
+
+
+  function exibirOcupacaoExpandida(select) { const area = document.getElementById('areaOcupacaoExibicao'); select.style.display = 'none'; area.style.display = 'block'; area.value = select.options[select.selectedIndex].text; area.style.height = 'auto'; area.style.height = area.scrollHeight + 'px'; }
+  function voltarParaDropdown() { document.getElementById('areaOcupacaoExibicao').style.display = 'none'; const sel = document.getElementById('selOcupacao'); sel.style.display = 'block'; sel.focus(); }
+  function filtrarOcupacoes() { const uso = document.getElementById('selUso').value, sel = document.getElementById('selOcupacao'); sel.innerHTML = '<option value="">Selecione...</option>'; bancoOcupacoes.filter(o => o.Ocupacao_Uso === uso).forEach(o => { sel.innerHTML += `<option value="${o.Descricao}" data-uso="${o.Ocupacao_Uso}">${o.Descricao} (${o.Divisao})</option>`; }); }
+  function executarBuscaAvancada() { const termo = document.getElementById('txtBusca').value.toLowerCase(), sel = document.getElementById('selOcupacao'); if (termo.length < 2) return; const filtrados = bancoOcupacoes.filter(o => o.Descricao.toLowerCase().includes(termo)); sel.innerHTML = '<option value="">Resultados...</option>'; filtrados.forEach(o => { sel.innerHTML += `<option value="${o.Descricao}" data-uso="${o.Ocupacao_Uso}">${o.Descricao} (${o.Divisao})</option>`; }); }
+
+
+let resultadoModuloCriterios = "CLCB";
+let resultadoPerguntaFuncionarios = null;
+let resultadoPerguntaLotacao = null;
+let resultadoPerguntaLotacaoFPTS = null;
+let resultadoPerguntaAcetileno = null;
+let resultadoPerguntaClasseK = null;
+let resultadoPerguntaGLP = null;
+let resultadoPerguntaGLPRevenda = null;
+let resultadoPerguntaLiquidosIgniferos = null;
+let resultadoPerguntaGasesInflamaveis = null;
+let resultadoPerguntaLiquidosTanque = null;
+let resultadoPerguntaSolidosDescobertos = null;
+let resultadoPerguntaProdutosPerigosos = null;
+let resultadoPerguntaAgrotoxicos = null;
+let classificacaoModuloCriterios = null;
+let classificacaoBaseOcupacao = null;
+let resultadoArea = null;
+let resultadoOcupacao = null;
+let resultadoAltura = null;
+let resultadoFinalSistema = null;
+
+
+
+
+
+let bancoGLPRevenda = [];
+
+// ✅ CONFIRMAÇÃO FINAL DO USUÁRIO
+let confirmacaoUsuario = false;
+
+
+
+const chkConfirmacao = document.getElementById('chkConfirmacao');
+const btnConfirmar   = document.querySelector('.btn-confirmar-processo');
+
+chkConfirmacao.addEventListener('change', () => {
+  if (chkConfirmacao.checked) {
+    btnConfirmar.classList.add('ativo');
+    btnConfirmar.disabled = false;
+  } else {
+    btnConfirmar.classList.remove('ativo');
+    btnConfirmar.disabled = true;
+  }
+});
+
+function definirClassificacaoBasePorOcupacao() {
+
+  if (!ocupacaoSelecionada || !ocupacaoSelecionada.Divisao) {
+    classificacaoBaseOcupacao = null;
+    resultadoModuloCriterios = null;
+    return;
+  }
+
+  const divisao = ocupacaoSelecionada.Divisao;
+  const gruposF_PTS = ["F-3","F-5","F-6","F-7","F-11"];
+
+  classificacaoBaseOcupacao = gruposF_PTS.includes(divisao)
+    ? "PTS"
+    : "CLCB";
+
+  criteriosAnalisados = true;
+
+  reavaliarModuloCriterios();
+
+  // 🔑 CORREÇÃO CRÍTICA
+  exibirResultadoCriterios();
+}
+
+
+
+
+
+
+
+
+
+
+function atualizarResultadoCriterios() {
+  const box = document.getElementById("resultadoCriterios");
+  const label = document.getElementById("labelResultadoCriterios");
+
+  if (resultadoModuloCriterios === "PT") {
+    label.innerText =
+      "Classificação por critério técnico: PT - Projeto Técnico. Obrigatória aprovação prévia de planta das medidas de segurança contra incêndio";
+    box.style.background = "var(--pt-bg)";
+    label.style.color = "var(--pt-dot)";
+  } 
+  else if (resultadoModuloCriterios === "PTS") {
+    label.innerText =
+      "Classificação por critério técnico: PTS - Projeto Técnico Simplificado. Não obrigatória a aprovação prévia de planta das medidas de segurança contra incêndio";
+    box.style.background = "var(--pts-bg)";
+    label.style.color = "var(--pts-dot)";
+  } 
+  else {
+    label.innerText =
+      "Classificação por critério técnico: CLCB - Certificado de Licença do Corpo de Bombeiros";
+    box.style.background = "var(--clcb-bg)";
+    label.style.color = "var(--clcb-dot)";
+  }
+}
+
+function nivelMaisGrave(a, b) {
+  const ordem = ["CLCB", "PTS", "PT"];
+  return ordem.indexOf(b) > ordem.indexOf(a) ? b : a;
+}
+
+
+function reavaliarModuloCriterios() {
+
+  // Se ainda não há base definida pela ocupação, não classifica
+  if (!classificacaoBaseOcupacao) {
+    resultadoModuloCriterios = null;
+    atualizarResultadoCriterios();
+    return;
+  }
+
+  // Começa sempre da base da ocupação
+  let resultadoFinal = classificacaoBaseOcupacao;
+
+  // Lista de resultados das perguntas (as que existem)
+  const resultados = [
+    resultadoPerguntaFuncionarios,
+    resultadoPerguntaLotacao,
+    resultadoPerguntaLotacaoFPTS,
+    resultadoPerguntaAcetileno,
+    resultadoPerguntaClasseK,
+    resultadoPerguntaGLP,
+    resultadoPerguntaGLPRevenda,
+    resultadoPerguntaLiquidosIgniferos,
+    resultadoPerguntaGasesInflamaveis,
+    resultadoPerguntaLiquidosTanque,
+    resultadoPerguntaSolidosDescobertos,
+    resultadoPerguntaProdutosPerigosos,
+    resultadoPerguntaAgrotoxicos
+  ];
+
+  // Agrava conforme severidade
+  if (resultados.includes("PT")) {
+    resultadoFinal = "PT";
+  } else if (resultados.includes("PTS") && resultadoFinal !== "PT") {
+    resultadoFinal = "PTS";
+  }
+
+  resultadoModuloCriterios = resultadoFinal;
+
+  atualizarResultadoCriterios();
+  exibirResultadoCriterios();
+}
+
+
+function validarEnquadramentoCompleto() {
+
+  // lista mínima de classificações obrigatórias
+  const checks = [
+    window.areaClassificacao,
+    ocupacaoSelecionada,
+    document.getElementById('labelEnqOcup')?.innerText,
+    document.getElementById('labelEnqAlt')?.innerText,
+    resultadoModuloCriterios
+  ];
+
+  // se algum estiver vazio, null ou undefined → falha
+  const invalido = checks.some(v =>
+    v === null ||
+    v === undefined ||
+    v === "" ||
+    v === "—"
+  );
+
+  return !invalido;
+}
+
+function confirmarEnquadramentoFinal() {
+
+  const statusBox = document.getElementById("statusFinalEnquadramento");
+  statusBox.style.display = "block";
+
+  if (!validarEnquadramentoCompleto()) {
+    statusBox.innerText =
+      "❌ Enquadramento não realizado — revisar as informações dos módulos";
+    statusBox.style.background = "var(--alert-bg)";
+    statusBox.style.color = "var(--alert-text)";
+    return;
+  }
+
+  // ✅ sucesso
+  statusBox.innerText = "✅ Enquadramento concluído";
+  statusBox.style.background = "var(--clcb-bg)";
+  statusBox.style.color = "var(--clcb-dot)";
+
+  travarTodosOsModulos();
+
+  // 🔁 MOSTRA O BOTÃO DE REVISÃO (ESSENCIAL)
+  document.getElementById("btnRevisar").style.display = "inline-block";
+
+const resultadosParaConsolidar = [
+  resultadoArea,
+  resultadoOcupacao,
+  resultadoAltura,
+  resultadoModuloCriterios
+];
+
+resultadoFinalSistema = consolidarEnquadramentoFinal(resultadosParaConsolidar);
+
+if (!resultadoFinalSistema) {
+  resultadoFinalSistema = resultadoModuloCriterios;
+}
+
+
+
+renderizarCamada1();
+
+}
+
+
+
+function travarTodosOsModulos() {
+
+  // 🔒 Inputs nativos
+  document
+    .querySelectorAll("input, select, textarea, button")
+    .forEach(el => {
+
+      if (el.id === "btnRevisar") return;
+
+      el.disabled = true;
+    });
+
+  // 🔒 Switches customizados
+  document
+    .querySelectorAll(".switch-container")
+    .forEach(sw => {
+      sw.style.pointerEvents = "none";
+      sw.style.opacity = "0.6";
+      sw.style.cursor = "not-allowed";
+    });
+}
+
+
+
+function liberarEdicao() {
+
+  document
+    .querySelectorAll("input, select, textarea, button")
+    .forEach(el => {
+      el.disabled = false;
+    });
+
+  document
+    .querySelectorAll(".switch-container")
+    .forEach(sw => {
+      sw.style.pointerEvents = "auto";
+      sw.style.opacity = "1";
+      sw.style.cursor = "pointer";
+    });
+
+  document.getElementById("statusFinalEnquadramento").style.display = "none";
+  document.getElementById("btnRevisar").style.display = "none";
+}
+
+
+
+
+function renderizarCamada1() {
+
+  const classificacaoFinal = resultadoFinalSistema;
+  if (!classificacaoFinal) return;
+
+  const tipoEl  = document.getElementById("tipoEnquadramentoFinal");
+  const instrEl = document.getElementById("instrumentoRegularizacao");
+  const projEl  = document.getElementById("exigeProjetoTecnico");
+  const camada  = document.getElementById("camada1Enquadramento");
+
+  // limpa
+  tipoEl.textContent  = "";
+  instrEl.textContent = "";
+  projEl.textContent  = "";
+
+  if (classificacaoFinal === "CLCB") {
+    tipoEl.textContent  = "PTS - PROJETO TÉCNICO SIMPLIFICADO LICENCIADO ATRAVÉS DE CLCB";
+    tipoEl.style.color  = "var(--clcb-dot)";
+    tipoEl.style.fontWeight = "bold";
+
+    instrEl.textContent = "CLCB - Certificado de Licença do Corpo de Bombeiros";
+    projEl.textContent  = "Não exigida → Dispensada a aprovação prévia";
+  }
+
+  if (classificacaoFinal === "PTS") {
+    tipoEl.textContent  = "PTS - PROJETO TÉCNICO SIMPLIFICADO COM EMISSÃO DE AVCB";
+    tipoEl.style.color  = "var(--pts-dot)";
+    tipoEl.style.fontWeight = "bold";
+
+    instrEl.textContent = "AVCB - AUTO DE VISTORIA DO CORPO DE BOMBEIROS";
+    projEl.textContent  = "Não exigida → Dispensada a aprovação prévia";
+  }
+
+  if (classificacaoFinal === "PT") {
+    tipoEl.textContent  = "PT - PROJETO TÉCNICO COMPLETO COM AS MEDIDAS DE SEGURANÇA";
+    tipoEl.style.color  = "var(--pt-dot)";
+    tipoEl.style.fontWeight = "bold";
+
+    instrEl.textContent = "AVCB - AUTO DE VISTORIA DO CORPO DE BOMBEIROS";
+    projEl.textContent =
+      "Obrigatória aprovação prévia de Projeto Técnico das medidas de segurança contra incêndio";
+  }
+
+  camada.style.display = "block";
+}
+
+
+function consolidarEnquadramentoFinal(resultadosDosModulos) {
+  // resultadosDosModulos = array com valores "CLCB", "PTS", "PT" ou null
+
+  // remove módulos ainda não publicados
+  const validos = resultadosDosModulos.filter(r =>
+    r === "CLCB" || r === "PTS" || r === "PT"
+  );
+
+  if (validos.length === 0) {
+    return null; // ainda não há enquadramento
+  }
+
+  if (validos.includes("PT")) {
+    return "PT";
+  }
+
+  if (validos.includes("PTS")) {
+    return "PTS";
+  }
+
+  return "CLCB";
+}
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  let contadorOcupacoes = 1;
+
+  const botao = document.getElementById("btnAddOcupacao");
+
+  if (!botao) {
+    console.log("Botão não encontrado.");
+    return;
+  }
+
+  botao.addEventListener("click", function () {
+
+    if (contadorOcupacoes >= 4) {
+      alert("Máximo de 4 ocupações permitidas.");
+      return;
+    }
+
+    contadorOcupacoes++;
+
+    const container = document.getElementById("containerOcupacoesSecundarias");
+
+    const novoBloco = document.createElement("div");
+novoBloco.classList.add("card-secundaria");
+
+
+    novoBloco.style.marginTop = "15px";
+    novoBloco.style.padding = "15px";
+    novoBloco.style.border = "1px solid #ddd";
+    novoBloco.style.borderRadius = "6px";
+    novoBloco.style.background = "#fafafa";
+
+    novoBloco.innerHTML = `
+  <h4 style="margin-bottom:15px;">🏢 Ocupação ${contadorOcupacoes}</h4>
+
+  <!-- Linha 1: Uso + Busca -->
+  <div style="display:grid; grid-template-columns: 1fr 320px; gap:15px;">
+
+    <div class="input-group">
+      <label>Uso</label>
+      <select class="uso-secundario">
+        <option value="">Selecione o Uso...</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>Busca Avançada de Ocupações</label>
+     <input type="text" class="busca-secundaria">
+
+
+
+
+    </div>
+
+  </div>
+
+  <!-- Linha 2: Ocupação + Altura -->
+  <div style="margin-top:15px; display:grid; grid-template-columns: 1fr 180px; gap:15px;">
+
+    <div class="input-group">
+      <label>Ocupação (Descrição)</label>
+      <select class="descricao-secundaria">
+        <option value="">Selecione o Uso primeiro</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>Altura do Armazenamento (m)</label>
+      <input type="text" class="altura-secundaria" placeholder="0,00">
+    </div>
+
+  </div>
+
+<!-- Linha 3: Área -->
+<div style="margin-top:15px; display:flex; align-items:center; gap:15px;">
+
+  <div style="width:220px;">
+    <label>Área desta ocupação (m²)</label>
+    <input type="text" class="area-secundaria" placeholder="Ex.: 200,00">
+  </div>
+
+  <div style="font-weight:bold; margin-top:22px;">
+    Taxa de ocupação:
+    <span class="perc-secundaria"></span>
+  </div>
+
+</div>
+
+
+
+  <hr style="margin:20px 0;">
+`;
+
+container.appendChild(novoBloco);
+
+// 🔥 ATUALIZA ÁREA AUTOMATICAMENTE
+const inputAreaSec = novoBloco.querySelector(".area-secundaria");
+
+if (inputAreaSec) {
+  inputAreaSec.addEventListener("input", function() {
+    recalcularAreasOcupacao();
+  });
+}
+
+
+
+// 🔹 POPULAR SELECT USO DO BLOCO SECUNDÁRIO
+const selectUso = novoBloco.querySelector(".uso-secundario");
+const selectDesc = novoBloco.querySelector(".descricao-secundaria");
+const inputBusca = novoBloco.querySelector(".busca-secundaria");
+
+// carrega usos únicos
+const usosUnicos = [...new Set(bancoOcupacoes.map(item => item.Ocupacao_Uso))];
+
+selectUso.innerHTML = '<option value="">Selecione o Uso...</option>';
+usosUnicos.forEach(uso => {
+  if (uso) {
+    selectUso.innerHTML += `<option value="${uso}">${uso}</option>`;
+  }
+});
+
+// 🔹 QUANDO MUDAR USO → FILTRA DESCRIÇÃO
+selectUso.addEventListener("change", function() {
+  const usoSelecionado = this.value;
+
+  selectDesc.innerHTML = '<option value="">Selecione...</option>';
+
+  bancoOcupacoes
+    .filter(o => o.Ocupacao_Uso === usoSelecionado)
+    .forEach(o => {
+      selectDesc.innerHTML += `
+        <option value="${o.Descricao}">
+          ${o.Descricao} (${o.Divisao})
+        </option>`;
+    });
+});
+
+
+
+
+// 🔹 QUANDO ESCOLHER A DESCRIÇÃO → REVALIDA CLASSIFICAÇÃO + MEMORIAL
+selectDesc.addEventListener("change", function() {
+
+  const descricao = this.value;
+  if (!descricao) return;
+
+  const ocupObj = bancoOcupacoes.find(o => o.Descricao === descricao);
+  if (!ocupObj) return;
+
+  validarEnquadramentoOcupacao();
+  definirClassificacaoBasePorOcupacao();
+  reavaliarModuloCriterios();
+
+  atualizarMemorialOcupacao(); // 🔥 ESSENCIAL
+});
+
+
+
+
+
+// 🔹 BUSCA AVANÇADA
+inputBusca.addEventListener("input", function() {
+  const termo = this.value.toLowerCase();
+
+  if (termo.length < 2) return;
+
+  selectDesc.innerHTML = '<option value="">Resultados...</option>';
+
+  bancoOcupacoes
+    .filter(o => o.Descricao.toLowerCase().includes(termo))
+    .forEach(o => {
+      selectDesc.innerHTML += `
+        <option value="${o.Descricao}">
+          ${o.Descricao} (${o.Divisao})
+        </option>`;
+    });
+});
+
+// 🔹 QUANDO ALTERAR ALTURA → ATUALIZA MEMORIAL
+const inputAlturaSec = novoBloco.querySelector(".altura-secundaria");
+
+inputAlturaSec.addEventListener("input", function() {
+  atualizarMemorialOcupacao();
+});
+
+
+    });
+});
+
+function recalcularAreasOcupacao() {
+
+  const areaTotal = window.areaClassificacao || 0;
+
+  let somaSecundarias = 0;
+
+  const blocos = document.querySelectorAll("#containerOcupacoesSecundarias .card-secundaria");
+
+  blocos.forEach(bloco => {
+
+    const inputArea = bloco.querySelector(".area-secundaria");
+    if (!inputArea) return;
+
+    const valor = formatarParaNumero(inputArea.value || "0");
+    somaSecundarias += valor;
+
+  });
+
+  let areaPrincipal = areaTotal - somaSecundarias;
+
+  if (areaPrincipal < 0) areaPrincipal = 0;
+
+  const inputPrincipal = document.getElementById("areaOcupacao1");
+
+  if (inputPrincipal) {
+    inputPrincipal.value =
+      areaPrincipal.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+  }
+
+ atualizarPercentuais();
+validarEnquadramentoOcupacao();
+atualizarMemorialOcupacao();
+
+}
+
+function atualizarPercentuais() {
+
+  const areaTotal = window.areaClassificacao || 0;
+
+  function calcularPercentual(area) {
+    if (areaTotal === 0) return 0;
+    return (area / areaTotal) * 100;
+  }
+
+  // Principal
+  const areaPrincipal =
+    formatarParaNumero(document.getElementById("areaOcupacao1")?.value || "0");
+
+  const percPrincipal = calcularPercentual(areaPrincipal);
+
+  const spanPrincipal = document.getElementById("percOcupacao1");
+  if (spanPrincipal) {
+    spanPrincipal.innerText =      
+spanPrincipal.innerText =
+  `${percPrincipal.toLocaleString("pt-BR",{minimumFractionDigits:2})}%`;
+
+
+  }
+
+  // Secundárias
+  const blocos = document.querySelectorAll("#containerOcupacoesSecundarias .card-secundaria");
+
+  blocos.forEach(bloco => {
+
+    const inputArea = bloco.querySelector(".area-secundaria");
+    const spanPerc = bloco.querySelector(".perc-secundaria");
+
+    if (!inputArea || !spanPerc) return;
+
+    const area = formatarParaNumero(inputArea.value || "0");
+    const perc = calcularPercentual(area);
+
+    spanPerc.innerText = spanPerc.innerText =
+  `(${perc.toLocaleString("pt-BR",{minimumFractionDigits:2})}%)`
+
+;
+
+  });
+}
+
+function toggleCard(header){
+  const body = header.nextElementSibling;
+  const icon = header.querySelector(".icone");
+
+  if(body.style.display === "none"){
+    body.style.display = "block";
+    icon.innerText = "▼";
+  } else {
+    body.style.display = "none";
+    icon.innerText = "▶";
+  }
+}
+
+function buscarRegraArea(area){
+
+  return BD_AREA.find(linha =>
+    linha.ativo &&
+    area >= linha.area_min &&
+    area <= linha.area_max
+  );
+
+}
+
+function atualizarPainel(){
+
+  // 🔹 ÁREA
+  if(typeof resultadoArea !== "undefined"){
+    document.getElementById("resArea").innerText = resultadoArea;
+  }
+
+  // 🔹 (futuro)
+  if(typeof resultadoAltura !== "undefined"){
+    document.getElementById("resAltura").innerText = resultadoAltura;
+  }
+
+  if(typeof resultadoOcupacao !== "undefined"){
+    document.getElementById("resOcupacao").innerText = resultadoOcupacao;
+  }
+
+  if(typeof resultadoCriterios !== "undefined"){
+    document.getElementById("resCriterios").innerText = resultadoCriterios;
+  }
+
+  // 🔥 RESULTADO FINAL (por enquanto só área)
+  document.getElementById("resFinal").innerText = resultadoArea || "--";
+}
+
+ 
+
+
 </script>
+
+
+
+
+
+</div>
+
+<div class="right">
+
+<div class="painel">
+
+  <h3 style="margin-top:0;">📄 Classificação Final</h3>
+
+  <!-- 🔎 ANÁLISE POR CRITÉRIO -->
+  <div class="painel-item">
+    Área:<br>
+    <b id="resArea">--</b>
+  </div>
+
+  <div class="painel-item">
+    Altura:<br>
+    <b id="resAltura">--</b>
+  </div>
+
+  <div class="painel-item">
+    Ocupação:<br>
+    <b id="resOcupacao">--</b>
+  </div>
+
+  <div class="painel-item">
+    Critérios:<br>
+    <b id="resCriterios">--</b>
+  </div>
+
+  <hr>
+
+  <!-- 🔥 RESULTADO FINAL -->
+  <div class="painel-item">
+    <strong>Processo Final:</strong><br>
+    <b id="resFinal">--</b>
+  </div>
+
+</div>
+
+
+</div>
+
+</div>
+
+</div>
+
+
+
+
+
+
 
 </body>
 </html>
+
+
+
+
+
