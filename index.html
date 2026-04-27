@@ -2436,10 +2436,13 @@ if(processo === "CLCB" && window.globalRestrito){
 
   // 🔹 GUARDA RESULTADO PARA MOTOR CENTRAL
   resultadoArea = processo;
+const el = document.getElementById("resArea");
+if(el){
+  el.innerText = resultadoArea || "--";
+}
+
   b.innerText = texto;
   
-atualizarPainel();
-
 }
 
 function classificarOcupacaoIndividual(ocupacaoObj) {
@@ -3732,9 +3735,7 @@ if(el){
 el.innerText = "FUNCIONOU 🔥";
 }
 }
-document.addEventListener("DOMContentLoaded", function(){
-  atualizarPainelTeste();
-});
+
 
 
 
