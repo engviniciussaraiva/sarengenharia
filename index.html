@@ -269,6 +269,54 @@ font-weight: 500;
 <div class="card">
 
   <div class="card-title toggle" onclick="toggleCard(this)">
+    <span class="arrow">▶</span> 📄 Referência da Edificação
+  </div>
+
+  <div class="card-content">
+
+    <div class="grid-areas" style="grid-template-columns: 1fr 1fr 1fr;">
+
+      <!-- ESTADO -->
+      <div>
+        <label>Estado</label>
+        <select id="estado">
+          <option value="SP">São Paulo</option>
+        </select>
+      </div>
+
+      <!-- CLIENTE -->
+      <div>
+        <label>Cliente</label>
+        <input type="text" placeholder="Nome do cliente">
+      </div>
+
+      <!-- CNPJ -->
+      <div>
+        <label>CNPJ</label>
+        <input type="text" placeholder="00.000.000/0000-00">
+      </div>
+
+      <!-- ENDEREÇO -->
+      <div>
+        <label>Endereço</label>
+        <input type="text" placeholder="Rua / Avenida">
+      </div>
+
+      <!-- MUNICÍPIO -->
+      <div>
+        <label>Município</label>
+        <input type="text" placeholder="Cidade">
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<div class="card">
+  <div class="card-title toggle" onclick="toggleCard(this)">
     <span class="arrow">▶</span> 📐 Quadro de Áreas da Edificação
 <small style="font-weight:normal; color:#666;">(Base para enquadramento técnico)</small>
 
