@@ -257,6 +257,31 @@ font-weight: 500;
   font-size: 13px;
 }
 
+.municipio-box {
+  position: relative;
+}
+
+.municipio-lista {
+  position: absolute;
+  width: 100%;
+  max-height: 180px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-top: 2px;
+  display: none;
+  z-index: 1000;
+}
+
+.municipio-lista div {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.municipio-lista div:hover {
+  background: #f0f0f0;
+}
 
 
 
@@ -300,9 +325,10 @@ font-weight: 500;
 
   <div>
     <label>Município</label>
-    <select id="municipio">
-  <option value="">Carregando...</option>
-</select>
+    <div class="municipio-box">
+  <input type="text" id="municipioInput" placeholder="Digite o município">
+  <div id="municipioLista" class="municipio-lista"></div>
+</div>
 
   </div>
 
@@ -661,6 +687,8 @@ function formatarDocumento(valor) {
   return valor;
 }
 
+let municipios = [];
+
 async function carregarMunicipios() {
 
   const estado = document.getElementById("estado").value;
@@ -670,18 +698,48 @@ async function carregarMunicipios() {
   const res = await fetch(url);
   const dados = await res.json();
 
-  const select = document.getElementById("municipio");
-
-  select.innerHTML = "<option value=''>Selecione...</option>";
-
-  dados.forEach(cidade => {
-    const option = document.createElement("option");
-    option.value = cidade.nome;
-    option.textContent = cidade.nome;
-    select.appendChild(option);
-  });
+  municipios = dados.map(c => c.nome);
 
 }
+
+document.getElementById("municipioInput").addEventListener("input", function() {
+
+  const valor = this.value.toLowerCase();
+  const lista = document.getElementById("municipioLista");
+
+  lista.innerHTML = "";
+
+  if (!valor) {
+    lista.style.display = "none";
+    return;
+  }
+
+  const filtrados = municipios.filter(m =>
+    m.toLowerCase().includes(valor)
+  ).slice(0, 20);
+
+  filtrados.forEach(nome => {
+    const item = document.createElement("div");
+    item.textContent = nome;
+
+    item.onclick = () => {
+      document.getElementById("municipioInput").value = nome;
+      lista.style.display = "none";
+    };
+
+    lista.appendChild(item);
+  });
+
+  lista.style.display = "block";
+});
+
+document.addEventListener("click", function(e) {
+
+  if (!e.target.closest(".municipio-box")) {
+    document.getElementById("municipioLista").style.display = "none";
+  }
+
+});
 
 
 </script>
