@@ -314,15 +314,26 @@ font-weight: 500;
   </div>
 
   <!-- LINHA 3 -->
-  <div>
-    <label>Cliente</label>
-    <input type="text" placeholder="Nome do cliente">
-  </div>
+  <!-- CLIENTE ocupa 2 colunas -->
+<div style="grid-column: span 2;">
+  <label>Cliente</label>
+  <input type="text" placeholder="Nome do cliente">
+</div>
+
+<!-- COLUNA DIVIDIDA -->
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
 
   <div>
     <label>CNPJ / CPF</label>
     <input type="text" placeholder="00.000.000/0000-00">
   </div>
+
+  <div>
+    <label>Data</label>
+    <input type="date" id="dataProjeto">
+  </div>
+
+</div>
 
 </div>
 
@@ -612,6 +623,11 @@ function aplicarDescontos() {
 
 calcularAreaComputada(); 
 }
+
+window.addEventListener("load", () => {
+  const hoje = new Date().toISOString().split("T")[0];
+  document.getElementById("dataProjeto").value = hoje;
+});
 
 
 
