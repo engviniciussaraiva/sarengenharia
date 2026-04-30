@@ -235,6 +235,14 @@ font-size: 13px;
 font-weight: 500;
 } 
 
+.grid-ref {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 15px;
+  align-items: end;
+}
+
+
 #alertaArea {
   display: none;
   margin-top: 10px;
@@ -274,41 +282,45 @@ font-weight: 500;
 
   <div class="card-content">
 
-    <div class="grid-areas" style="grid-template-columns: 1fr 1fr 1fr;">
+<div class="grid-ref" style="grid-template-columns: 1fr 1fr 1fr;">
 
-      <!-- ESTADO -->
-      <div>
-        <label>Estado</label>
-        <select id="estado">
-          <option value="SP">São Paulo</option>
-        </select>
-      </div>
+  <!-- LINHA 1 -->
+  <div>
+    <label>Estado</label>
+    <select id="estado">
+      <option value="SP">São Paulo</option>
+    </select>
+  </div>
 
-      <!-- CLIENTE -->
-      <div>
-        <label>Cliente</label>
-        <input type="text" placeholder="Nome do cliente">
-      </div>
+  <div>
+    <label>Município</label>
+    <input type="text" placeholder="Cidade">
+  </div>
 
-      <!-- CNPJ -->
-      <div>
-        <label>CNPJ</label>
-        <input type="text" placeholder="00.000.000/0000-00">
-      </div>
+  <div>
+    <label>Referência</label>
+    <input type="text" placeholder="Nome da edificação">
+  </div>
 
-      <!-- ENDEREÇO -->
-      <div>
-        <label>Endereço</label>
-        <input type="text" placeholder="Rua / Avenida">
-      </div>
+  <!-- LINHA 2 (OCUPA 3 COLUNAS) -->
+  <div style="grid-column: span 3;">
+    <label>Endereço</label>
+    <input type="text" placeholder="Rua / Avenida">
+  </div>
 
-      <!-- MUNICÍPIO -->
-      <div>
-        <label>Município</label>
-        <input type="text" placeholder="Cidade">
-      </div>
+  <!-- LINHA 3 -->
+  <div>
+    <label>Cliente</label>
+    <input type="text" placeholder="Nome do cliente">
+  </div>
 
-    </div>
+  <div>
+    <label>CNPJ / CPF</label>
+    <input type="text" placeholder="00.000.000/0000-00">
+  </div>
+
+</div>
+
 
   </div>
 
