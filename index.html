@@ -170,9 +170,10 @@ button:hover {
   display: none;
 }
 
-input[type="text"] {
+.input-numero {
   text-align: right;
 }
+
 
 .modal-overlay {
   position: fixed;
@@ -359,6 +360,7 @@ font-weight: 500;
     <label>Total edificada (m²)</label>
     <input type="text"
 id="areaTotal"
+class="input-numero" 
 value="0,00"
 placeholder="Digite a área total"
 onblur="this.value = formatarNumeroBR(this.value); calcularAreaComputada();"/> 
@@ -374,7 +376,8 @@ onblur="this.value = formatarNumeroBR(this.value); calcularAreaComputada();"/>
   <div>
     <label>Descontada Permitida CLCB (m²)</label>
     <input type="text"
-id="descontoCLCB" 
+id="descontoCLCB"
+class="input-numero"  
 value="0,00"
 placeholder="Automático"
 readonly> 
@@ -384,6 +387,7 @@ readonly>
   <label>Descontada Geral (m²)</label>
   <input type="text"
   id="descontoGeral"
+class="input-numero" 
   value="0,00"
   placeholder="Automático"
   readonly> 
@@ -395,6 +399,7 @@ readonly>
     <label>Computada Final (m²)</label>
     <input type="text"
 id="areaComputada"
+class="input-numero" 
 value="0,00"
 placeholder="Automático"
 readonly>
