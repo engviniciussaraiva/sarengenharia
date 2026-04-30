@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>SAR – Sistema Avançado de Resposta</title>
+
+<style>
+:root {
+  --primary: #1b5e20;
+  --primary-light: #2e7d32;
+  --bg: #f5f7f6;
+  --card: #ffffff;
+  --text: #333;
+  --border: #e0e0e0;
+}
+
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: var(--bg);
+}
+
+/* HEADER */
+.header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 60px;
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 1000;
+}
+
+.header h1 {
+  font-size: 18px;
+}
+
+.header .user {
+  font-size: 14px;
+}
+
+/* CONTEÚDO PRINCIPAL */
+.main {
+  margin-top: 60px;
+  margin-right: 320px; /* espaço do painel direito */
+  padding: 20px;
+}
+
+/* PAINEL DIREITO */
+.panel-right {
+  position: fixed;
+  top: 60px;
+  right: 0;
+  width: 320px;
+  height: calc(100vh - 60px);
+  background: #ffffff;
+  border-left: 1px solid var(--border);
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* TÍTULO DO PAINEL */
+.panel-title {
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: var(--primary);
+}
+
+/* CARDS */
+.card {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 15px;
+  border: 1px solid var(--border);
+}
+
+/* TÍTULO */
+.card-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: var(--primary);
+}
+
+/* GRID */
+.grid-areas {
+  display: grid;
+  grid-template-columns: 1fr 0.8fr 1fr 1fr 1fr;
+  gap: 15px;
+  align-items: end;
+}
+
+
+/* INPUT */
+input, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-size: 14px;
+}
+
+input[readonly] {
+  background-color: #eeeeee;
+  color: #555;
+  cursor: not-allowed;
+  user-select: none;
+}
+
+input[readonly]:focus {
+outline: none;
+} 
+
+/* BOTÃO */
+button {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--primary-light);
+}
+
+/* RESULTADO */
+.result {
+  margin-top: 15px;
+  padding: 15px;
+  background: #e8f5e9;
+  border-radius: 6px;
+  display: none;
+}
+
+/* LINHA DO PAINEL */
+.panel-item {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.toggle {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.arrow {
+  transition: transform 0.2s;
+}
+
+.card.collapsed .arrow {
+  transform: rotate(-90deg);
+}
+
+.card.collapsed .card-content {
+  display: none;
+}
+
+input[type="text"] {
+  text-align: right;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-box {
+  background: #fff;
+  width: 800px;
+  max-width: 95%;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.modal-header {
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.modal-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.col label {
+  font-size: 13px;
+  display: block;
+  margin-top: 10px;
+}
+
+.col input {
+  width: 100%;
+  margin-top: 5px;
+  text-align: right;
+}
+
+.ok { color: green; }
+.no { color: red; }
+
+.modal-total {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.modal-footer {
+  text-align: right;
+  margin-top: 15px;
+}
+
+.grid-areas label {
+font-size: 13px;
+font-weight: 500;
+} 
+
+#alertaArea {
+  display: none;
+  margin-top: 10px;
+  color: #7b1f1f;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+
+
+
+</style>
+
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>🔥 SAR – Sistema Avançado de Resposta</h1>
+  <div class="user">Vinicius Saraiva</div>
+</div>
+
+<!-- CONTEÚDO -->
+<div class="main">
+
+  <div class="card">
+    <div class="card-title">🧱 Bem-vindo ao SAR</div>
+    <p>Sistema de classificação técnica de segurança contra incêndio.</p>
+  </div>
+
+<div class="card">
+
+  <div class="card-title toggle" onclick="toggleCard(this)">
+    <span class="arrow">▶</span> 📐 Quadro de Áreas da Edificação
+<small style="font-weight:normal; color:#666;">(Base para enquadramento técnico)</small>
+
+  </div>
+
+  <div class="card-content">
+
+<div class="grid-areas">
+
+  <!-- ÁREA TOTAL -->
+  <div>
+    <label>Total edificada (m²)</label>
+    <input type="text"
+id="areaTotal"
+value="0,00"
+placeholder="Digite a área total"
+onblur="this.value = formatarNumeroBR(this.value); calcularAreaComputada();"/> 
+
+  </div>
+
+  <!-- BOTÃO -->
+  <div>
+    <button onclick="abrirModal()">Indicar áreas descontadas</button> 
+  </div>
+
+  <!-- ÁREA DESCONTADA -->
+  <div>
+    <label>Descontada Permitida CLCB (m²)</label>
+    <input type="text"
+id="descontoCLCB" 
+value="0,00"
+placeholder="Automático"
+readonly> 
+  </div>
+
+<div>
+  <label>Descontada Geral (m²)</label>
+  <input type="text"
+  id="descontoGeral"
+  value="0,00"
+  placeholder="Automático"
+  readonly> 
+</div>
+
+
+  <!-- ÁREA COMPUTADA -->
+  <div>
+    <label>Computada Final (m²)</label>
+    <input type="text"
+id="areaComputada"
+value="0,00"
+placeholder="Automático"
+readonly>
+  </div>
+
+</div>
+
+<div id="alertaArea"> 
+</div> 
+
+</div>
+
+<!-- PAINEL DIREITO -->
+<div class="panel-right">
+
+  <div class="panel-title">📊 Painel Técnico</div>
+
+  <div class="panel-item">Área: —</div>
+  <div class="panel-item">Ocupação: —</div>
+  <div class="panel-item">Altura: —</div>
+
+  <hr style="margin:15px 0;">
+
+  <div class="panel-title">📄 Classificação Final</div>
+
+  <div class="panel-item"><strong>Processo:</strong> —</div>
+  <div class="panel-item"><strong>Nível:</strong> —</div>
+
+</div>
+
+
+
+<script>
+
+window.onload = async () => {
+
+  await carregarRegrasArea();
+
+  document.querySelectorAll("input[type='text']").forEach(el => {
+    el.value = formatarNumeroBR(el.value);
+  });
+
+}
+
+
+function toggleCard(el) {
+  const card = el.closest(".card");
+  card.classList.toggle("collapsed");
+}
+
+
+function formatarNumeroBR(valor) {
+
+  if (!valor) return "0,00";
+
+  // troca vírgula por ponto para cálculo
+  valor = valor.replace(/\./g, "").replace(",", ".");
+
+  let numero = parseFloat(valor);
+
+  if (isNaN(numero)) return "0,00";
+
+  // formata padrão brasileiro
+  return numero.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+let regrasArea = [];
+
+async function carregarRegrasArea() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSkjQTPqgAd0-hu9LgaReBC4TYeclVt0FUOqaonzn5To7rFNO8iY69SGqrNCGtIld0A5uC5cgIKiVpz/pub?output=csv";
+
+  const resposta = await fetch(url);
+  const texto = await resposta.text();
+
+  const linhas = texto.split("\n").slice(1); // remove cabeçalho
+
+  regrasArea = linhas.map(linha => {
+
+    const col = linha.split(",");
+
+    return {
+      estado: col[1],
+      criterio: col[2],
+      area_min: parseFloat(col[3]),
+      area_max: parseFloat(col[4]),
+      tipo: col[6],
+      mensagem: col[7],
+      cor: col[8],
+      ativo: col[9] === "TRUE"
+    };
+
+  });
+
+  console.log("Regras carregadas:", regrasArea);
+}
+
+
+
+function calcularAreaComputada() {
+
+  function parseBR(v) {
+    return parseFloat(v.replace(/\./g, "").replace(",", ".")) || 0;
+  }
+
+  let total = parseBR(document.getElementById("areaTotal").value);
+  let clcb = parseBR(document.getElementById("descontoCLCB").value);
+  let geral = parseBR(document.getElementById("descontoGeral").value);
+
+  let resultado = total - clcb - geral;
+
+  document.getElementById("areaComputada").value =
+    resultado.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+
+// 🔥 ALERTA
+let alerta = document.getElementById("alertaArea");
+
+// limpa primeiro
+alerta.style.display = "none";
+
+// percorre as regras (motor)
+if (regrasArea && regrasArea.length) {
+  regrasArea.forEach(regra => {
+
+
+  if (
+    resultado >= regra.area_min &&
+    resultado <= regra.area_max &&
+    regra.tipo === "alerta"
+  ) {
+    alerta.style.display = "block";
+    alerta.innerText = regra.mensagem;
+    alerta.style.color = regra.cor;
+  }
+
+});
+}
+}
+
+function abrirModal() {
+document.getElementById("modalDescontos").style.display = "flex";
+}
+
+function fecharModal() {
+document.getElementById("modalDescontos").style.display = "none";
+} 
+
+document.addEventListener("input", function(e) {
+
+  function parseBR(v) {
+    return parseFloat(v.replace(/\./g, "").replace(",", ".")) || 0;
+  }
+
+  let totalCLCB = 0;
+  let totalGeral = 0;
+
+  document.querySelectorAll(".desconto-clcb").forEach(input => {
+    totalCLCB += parseBR(input.value);
+  });
+
+  document.querySelectorAll(".desconto-geral").forEach(input => {
+    totalGeral += parseBR(input.value);
+  });
+
+  let total = totalCLCB + totalGeral;
+
+  // Atualiza o total
+  document.getElementById("totalDescontos").innerText =
+    total.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+
+  // 🔥 VALIDAÇÃO PRINCIPAL
+  let areaTotal = parseBR(document.getElementById("areaTotal").value);
+
+  if (total > areaTotal) {
+
+    // mostra alerta
+    document.getElementById("alertaDesconto").style.display = "block";
+
+    // bloqueia botão
+    document.getElementById("btnAplicar").disabled = true;
+    document.getElementById("btnAplicar").style.opacity = "0.5";
+
+  } else {
+
+    // esconde alerta
+    document.getElementById("alertaDesconto").style.display = "none";
+
+    // libera botão
+    document.getElementById("btnAplicar").disabled = false;
+    document.getElementById("btnAplicar").style.opacity = "1";
+  }
+
+});
+
+
+
+function aplicarDescontos() {
+
+  let totalCLCB = 0;
+  let totalGeral = 0;
+
+  document.querySelectorAll(".desconto-clcb").forEach(input => {
+    let valor = input.value.replace(/\./g, "").replace(",", ".");
+    let num = parseFloat(valor);
+    if (!isNaN(num)) totalCLCB += num;
+  });
+
+  document.querySelectorAll(".desconto-geral").forEach(input => {
+    let valor = input.value.replace(/\./g, "").replace(",", ".");
+    let num = parseFloat(valor);
+    if (!isNaN(num)) totalGeral += num;
+  });
+
+  // 👉 JOGA NOS CAMPOS CERTOS
+  document.getElementById("descontoCLCB").value =
+    totalCLCB.toLocaleString("pt-BR", {minimumFractionDigits: 2});
+
+  document.getElementById("descontoGeral").value =
+    totalGeral.toLocaleString("pt-BR", {minimumFractionDigits: 2});
+
+  // 🔥 FECHA MODAL
+  document.getElementById("modalDescontos").style.display = "none";
+
+calcularAreaComputada(); 
+}
+
+
+
+</script>
+
+<!-- MODAL DESCONTOS -->
+<div id="modalDescontos" class="modal-overlay">
+
+  <div class="modal-box">
+
+    <div class="modal-header">
+      ⚠️  Áreas permitidas de desconto conforme Instrução Técnica nº 42/2025
+    </div>
+
+    <div class="modal-content">
+
+      <!-- COLUNA ESQUERDA -->
+      <div class="col">
+        <h3 class="ok">✔ Permitidas para CLCB</h3>
+
+        <label>Residência unifamiliar com saída direta (m²)</label>
+        <input type="text" class="desconto-clcb"> 
+
+        <label>Piscinas (m²)</label>
+        <input type="text" class="desconto-clcb"> 
+
+        <label>Cobertura de bombas (m²)</label>
+        <input type="text" class="desconto-clcb"> 
+
+        <label>Praça de pedágio (m²)</label>
+        <input type="text" class="desconto-clcb"> 
+      </div>
+
+      <!-- COLUNA DIREITA -->
+      <div class="col">
+        <h3 class="no">❌ Não permitidas para CLCB</h3>
+
+        <label>Telheiros (m²)</label>
+        <input type="text" class="desconto-geral"> 
+
+        <label>Platibandas/Beirais (m²)</label>
+        <input type="text" class="desconto-geral"> 
+
+        <label>Passagens cobertas (m²)</label>
+        <input type="text" class="desconto-geral"> 
+
+        <label>Reservatórios (m²)</label>
+        <input type="text" class="desconto-geral"> 
+
+        <label>Escadas/Dutos (m²)</label>
+        <input type="text" class="desconto-geral"> 
+
+        <label>Banheiros/Vestiários (m²)</label>
+        <input type="text" class="desconto-geral"> 
+      </div>
+
+    </div>
+
+    <!-- TOTAL -->
+    <div class="modal-total">
+  Total de áreas descontadas: <strong id="totalDescontos">0,00</strong> m²
+</div>
+
+<div id="alertaDesconto" style="
+  display:none;
+  margin-top:10px;
+  color:#b71c1c;
+  font-weight:bold;
+">
+❌ ERRO! Desconto maior que a área total edificada, revise!
+</div>
+
+
+    <!-- BOTÃO -->
+    <div class="modal-footer">
+      <button id="btnAplicar" onclick="aplicarDescontos()">Aplicar</button>
+    </div>
+
+  </div>
+
+</div>
+
+
+</body>
+</html>
+
