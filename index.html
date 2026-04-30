@@ -468,14 +468,19 @@ readonly>
 
 window.onload = async () => {
 
-  await carregarRegrasArea();
-await carregarMunicipios(); 
+await carregarRegrasArea();
+await carregarMunicipios();
 
-  document.querySelectorAll("input[type='text']").forEach(el => {
-    el.value = formatarNumeroBR(el.value);
-  });
+// FORMATA CAMPOS
+document.querySelectorAll("input[type='text']").forEach(el => {
+el.value = formatarNumeroBR(el.value);
+});
 
-}
+// 🔥 DATA AUTOMÁTICA
+const hoje = new Date().toISOString().split("T")[0];
+document.getElementById("dataProjeto").value = hoje;
+
+} 
 
 
 function toggleCard(el) {
@@ -662,10 +667,6 @@ function aplicarDescontos() {
 calcularAreaComputada(); 
 }
 
-window.addEventListener("load", () => {
-  const hoje = new Date().toISOString().split("T")[0];
-  document.getElementById("dataProjeto").value = hoje;
-});
 
 function formatarDocumento(valor) {
 
@@ -709,16 +710,12 @@ document.getElementById("municipioInput").addEventListener("input", function() {
 
   lista.innerHTML = "";
 
- let filtrados = valor
+let filtrados = valor
   ? municipios.filter(m => m.toLowerCase().includes(valor))
   : municipios;
 
 filtrados = filtrados.slice(0, 20);
 
-
-  const filtrados = municipios.filter(m =>
-    m.toLowerCase().includes(valor)
-  ).slice(0, 20);
 
   filtrados.forEach(nome => {
     const item = document.createElement("div");
