@@ -293,14 +293,17 @@ font-weight: 500;
   <!-- LINHA 1 -->
   <div>
     <label>Estado</label>
-    <select id="estado">
+    <select id="estado" onchange="carregarMunicipios()"> 
       <option value="SP">São Paulo</option>
     </select>
   </div>
 
   <div>
     <label>Município</label>
-    <input type="text" placeholder="Cidade">
+    <select id="municipio">
+  <option value="">Carregando...</option>
+</select>
+
   </div>
 
   <div>
@@ -440,6 +443,7 @@ readonly>
 window.onload = async () => {
 
   await carregarRegrasArea();
+await carregarMunicipios(); 
 
   document.querySelectorAll("input[type='text']").forEach(el => {
     el.value = formatarNumeroBR(el.value);
@@ -655,6 +659,28 @@ function formatarDocumento(valor) {
   }
 
   return valor;
+}
+
+async function carregarMunicipios() {
+
+  const estado = document.getElementById("estado").value;
+
+  const url = `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estado}/municipios`;
+
+  const res = await fetch(url);
+  const dados = await res.json();
+
+  const select = document.getElementById("municipio");
+
+  select.innerHTML = "<option value=''>Selecione...</option>";
+
+  dados.forEach(cidade => {
+    const option = document.createElement("option");
+    option.value = cidade.nome;
+    option.textContent = cidade.nome;
+    select.appendChild(option);
+  });
+
 }
 
 
