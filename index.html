@@ -472,9 +472,10 @@ await carregarRegrasArea();
 await carregarMunicipios();
 
 // FORMATA CAMPOS
-document.querySelectorAll("input[type='text']").forEach(el => {
-el.value = formatarNumeroBR(el.value);
+document.querySelectorAll(".input-numero").forEach(el => {
+  el.value = formatarNumeroBR(el.value);
 });
+
 
 // 🔥 DATA AUTOMÁTICA
 const hoje = new Date().toISOString().split("T")[0];
@@ -739,6 +740,32 @@ document.addEventListener("click", function(e) {
   }
 
 });
+
+document.getElementById("municipioInput").addEventListener("focus", function() {
+
+  const lista = document.getElementById("municipioLista");
+
+  lista.innerHTML = "";
+
+  municipios.slice(0, 20).forEach(nome => {
+
+    const item = document.createElement("div");
+    item.textContent = nome;
+
+    item.onclick = () => {
+      document.getElementById("municipioInput").value = nome;
+      lista.style.display = "none";
+    };
+
+    lista.appendChild(item);
+
+  });
+
+  lista.style.display = "block";
+
+});
+
+
 
 
 </script>
