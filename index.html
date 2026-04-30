@@ -326,7 +326,10 @@ font-weight: 500;
 
   <div>
     <label>CNPJ / CPF</label>
-    <input type="text" placeholder="00.000.000/0000-00">
+    <input type="text"
+ id="doc" 
+placeholder="CPF ou CNPJ"
+oninput="this.value = formatarDocumento(this.value)">
   </div>
 
   <div>
@@ -634,6 +637,25 @@ window.addEventListener("load", () => {
   document.getElementById("dataProjeto").value = hoje;
 });
 
+function formatarDocumento(valor) {
+
+  valor = valor.replace(/\D/g, "");
+
+  if (valor.length <= 11) {
+    // CPF
+    valor = valor.replace(/(\d{3})(\d)/, "$1.$2");
+    valor = valor.replace(/(\d{3})(\d)/, "$1.$2");
+    valor = valor.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+  } else {
+    // CNPJ
+    valor = valor.replace(/^(\d{2})(\d)/, "$1.$2");
+    valor = valor.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+    valor = valor.replace(/\.(\d{3})(\d)/, ".$1/$2");
+    valor = valor.replace(/(\d{4})(\d)/, "$1-$2");
+  }
+
+  return valor;
+}
 
 
 </script>
