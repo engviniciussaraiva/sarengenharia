@@ -709,10 +709,12 @@ document.getElementById("municipioInput").addEventListener("input", function() {
 
   lista.innerHTML = "";
 
-  if (!valor) {
-    lista.style.display = "none";
-    return;
-  }
+ let filtrados = valor
+  ? municipios.filter(m => m.toLowerCase().includes(valor))
+  : municipios;
+
+filtrados = filtrados.slice(0, 20);
+
 
   const filtrados = municipios.filter(m =>
     m.toLowerCase().includes(valor)
