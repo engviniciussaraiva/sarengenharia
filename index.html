@@ -469,47 +469,70 @@ readonly>
     <div class="grid-altura"> 
 
       <!-- ESQUERDA -->
-      <div>
+    <div>
 
-        <label>Quantidade de pavimentos (planos de piso existentes na edificação)</label>
-        <select id="pavimentos">
-          <option value="">-- Selecionar --</option>
-          <option value="1">Edificação térrea (1 pavimento)</option>
-          <option value="2">Térreo + 1 pavimento (2 pavimentos)</option>
-          <option value="3">Térreo + 2 pavimentos (3 pavimentos)</option>
-          <option value="4">4 pavimentos ou mais</option>
-        </select>
+  <label>Quantidade de pavimentos (planos de piso existentes na edificação)</label>
+  <select id="pavimentos">
+    <option value="">-- Selecionar --</option>
+    <option value="1">Edificação térrea (1 pavimento)</option>
+    <option value="2">Térreo + 1 pavimento (2 pavimentos)</option>
+    <option value="3">Térreo + 2 pavimentos (3 pavimentos)</option>
+    <option value="4">4 pavimentos ou mais</option>
+  </select>
 
+  <!-- 🔥 ALTURA FICA AQUI (ABAIXO DO PAVIMENTO) -->
+  <div id="blocoAltura" style="display:none; margin-top:10px;">
 
+    <div style="
+      border:1px solid #ccc;
+      padding:10px;
+      border-radius:6px;
+      background:#fafafa;
+    ">
 
+      <div style="font-weight:bold; margin-bottom:5px;">
+        Altura da edificação para fins de exigência das medidas de segurança (m)
       </div>
 
+      <div style="font-size:12px; color:#666; margin-bottom:8px;">
+        Para fins de exigências das medidas de segurança contra incêndio: é a medida, em metros, do piso mais baixo ocupado ao piso do último pavimento.
+      </div>
+
+      <input type="text" id="alturaEdificacao" placeholder="Ex.: 6,00">
+
+    </div>
+
+  </div>
+
+</div>
+
+ 
       <!-- DIREITA -->
       <div>
 
-        <label>Edificação possui subsolo?</label>
-        <select id="temSubsolo">
-          <option value="">-- Selecionar --</option>
-          <option value="SIM">Sim</option>
-          <option value="NAO">Não</option>
-        </select>
+  <label>Edificação possui subsolo?</label>
+  <select id="temSubsolo">
+    <option value="">-- Selecionar --</option>
+    <option value="SIM">Sim</option>
+    <option value="NAO">Não</option>
+  </select>
 
-        <label style="margin-top:10px;">Uso do subsolo</label>
-        <select id="usoSubsolo" disabled>
-          <option value="">-- Selecionar --</option>
-          <option value="estacionamento">Estacionamento exclusivo</option>
-          <option value="reuniao_publico">Reunião de público (Grupo F)</option>
-          <option value="outra">Outra ocupação</option>
-        </select>
+  <label style="margin-top:10px;">Uso do subsolo</label>
+  <select id="usoSubsolo" disabled>
+    <option value="">-- Selecionar --</option>
+    <option value="estacionamento">Estacionamento exclusivo</option>
+    <option value="reuniao_publico">Reunião de público (Grupo F)</option>
+    <option value="outra">Outra ocupação</option>
+  </select>
 
-        <label style="margin-top:10px;">A área do subsolo é &gt; 50,00 m²?</label>
-        <select id="areaSubsolo" disabled>
-          <option value="">-- Selecionar --</option>
-          <option value="NAO">Não, é menor que 50,00 m²</option>
-          <option value="SIM">Sim, é maior que 50,00 m²</option>
-        </select>
+  <label style="margin-top:10px;">A área do subsolo é &gt; 50,00 m²?</label>
+  <select id="areaSubsolo" disabled>
+    <option value="">-- Selecionar --</option>
+    <option value="NAO">Não, é menor que 50,00 m²</option>
+    <option value="SIM">Sim, é maior que 50,00 m²</option>
+  </select>
 
-      </div>
+</div>
 
     </div>
 
