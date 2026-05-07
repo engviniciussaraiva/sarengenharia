@@ -582,18 +582,14 @@ if (regrasArea && regrasArea.length) {
 
 });
 }
-function calcularAreaComputada() {
 
-  ... cálculo ...
+// 👇 AQUI ENTRA
+const processo = classificarProcesso(resultado);
+const certificacao = classificarCertificacao(resultado, clcb, geral);
 
-  ... alerta ...
+document.getElementById("procFinal").innerText = processo;
+document.getElementById("certFinal").innerText = certificacao;
 
-  // 👇 AQUI
-  const processo = classificarProcesso(resultado);
-  const certificacao = classificarCertificacao(resultado, clcb, geral);
-
-  document.getElementById("procFinal").innerText = processo;
-  document.getElementById("certFinal").innerText = certificacao;
 
 }
 
