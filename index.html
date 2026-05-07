@@ -283,6 +283,11 @@ font-weight: 500;
   background: #f0f0f0;
 }
 
+.divisor-criterio {
+  margin: 12px 0;
+  border: none;
+  border-top: 1px solid #e0e0e0;
+}
 
 
 </style>
@@ -460,10 +465,10 @@ readonly>
 
 <div class="panel-item">
 <strong>Certificação:</strong> 
-<span id="certFinal">—</span>
+<span id="certFinal" style="font-weight: bold;">—</span>
 </div>
 
-
+<hr class="divisor-criterio">
 
 
 <script>
@@ -600,7 +605,17 @@ let certTexto = certificacao === "CLCB"
 
 // joga no painel
 document.getElementById("procFinal").innerText = procTexto;
-document.getElementById("certFinal").innerText = certTexto;
+const elCert = document.getElementById("certFinal");
+
+elCert.innerText = certTexto;
+
+// 🔥 COR TEMP (depois vai vir da tabela)
+if (certificacao === "CLCB") {
+  elCert.style.color = "#2e7d32"; // verde
+} else {
+  elCert.style.color = "#c62828"; // vermelho
+}
+
 
 
 }
