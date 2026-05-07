@@ -490,9 +490,25 @@ readonly>
       background:#fafafa;
     ">
 
-      <div style="font-weight:bold; margin-bottom:5px; font-size:13px;">
-        Indique altura da edificação em metros.
-      </div>
+<div style="display:flex; justify-content:space-between; align-items:center;">
+
+  <div style="font-weight:600; margin-bottom:5px; font-size:13px;">
+    Indique altura da edificação em metros.
+  </div>
+
+  <button onclick="abrirModalAltura()" style="
+    background:none;
+    border:none;
+    color:#1b5e20;
+    font-size:14px;
+    cursor:pointer;
+  ">
+    📘
+  </button>
+
+</div>
+
+      
 
       <div style="font-size:12px; color:#666; margin-bottom:8px;">
         Para fins de exigências das medidas de segurança contra incêndio, a altura da edificação é a medida, em metros, do piso mais baixo ocupado ao piso do último pavimento.
@@ -565,7 +581,8 @@ readonly>
 window.onload = async () => {
 
 await carregarRegrasArea();
-await carregarAlertasArea(); 
+await carregarAlertasArea();
+await carregarNotasAltura(); 
 await carregarMunicipios();
 
 // FORMATA CAMPOS
@@ -620,7 +637,8 @@ function formatarNumeroBR(valor) {
 }
 
 let regrasArea = [];
-let regrasAlertaArea = []; 
+let regrasAlertaArea = [];
+let notasAltura = []; 
 
 async function carregarRegrasArea() {
 
@@ -937,6 +955,34 @@ document.getElementById("municipioInput").addEventListener("focus", function() {
   lista.style.display = "block";
 
 });
+
+async function carregarNotasAltura() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR1G1-4bEzewHWhSSkqZOuvs_BO-jaIIORCgEV0speW1xvic089VXHF-BlbwO_UhS9CycYGke2HbXF3/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split("\n").slice(1);
+
+  notasAltura = linhas.map(l => {
+
+    const col = l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+
+    return {
+      estado: col[1],
+      criterio: col[2],
+      tipo: col[3],
+      chave: col[4],
+      titulo: col[5],
+      texto: col[6],
+      ativo: col[7] === "TRUE"
+    };
+
+  });
+
+}
+
 
 
 function buscarClassificacaoArea(area, descontoCLCB, descontoGeral) {
