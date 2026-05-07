@@ -609,6 +609,40 @@ if (valor !== "" && valor !== "1") {
 
 });
 
+// 🔥 CONTROLE SUBSOLO → HABILITA USO
+document.getElementById("temSubsolo").addEventListener("change", function () {
+
+  const uso = document.getElementById("usoSubsolo");
+  const area = document.getElementById("areaSubsolo");
+
+  if (this.value === "SIM") {
+    uso.disabled = false;
+  } else {
+    uso.disabled = true;
+    area.disabled = true;
+
+    uso.value = "";
+    area.value = "";
+  }
+
+});
+
+
+// 🔥 CONTROLE USO → HABILITA ÁREA
+document.getElementById("usoSubsolo").addEventListener("change", function () {
+
+  const area = document.getElementById("areaSubsolo");
+
+  if (this.value !== "") {
+    area.disabled = false;
+  } else {
+    area.disabled = true;
+    area.value = "";
+  }
+
+});
+
+
 } 
 
 
