@@ -531,19 +531,14 @@ async function carregarRegrasArea() {
     const col = linha.split(",");
 
     return {
-estado: col[1],
-criterio: col[2],
-area_min: parseFloat(col[3]),
-area_max: parseFloat(col[4]),
-nivel: col[5],
-tipo: col[6],
-processo: col[7],
-certificacao: col[8],
-texto_processo: col[9],
-texto_certificacao: col[10],
-cor: col[11],
-resumo: col[12],
-ativo: col[13] === "TRUE" 
+      estado: col[1],
+      criterio: col[2],
+      area_min: parseFloat(col[3]),
+      area_max: parseFloat(col[4]),
+      tipo: col[6],
+      mensagem: col[7],
+      cor: col[8],
+      ativo: col[9] === "TRUE"
     };
 
   });
