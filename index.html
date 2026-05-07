@@ -449,21 +449,20 @@ readonly>
 <!-- PAINEL DIREITO -->
 <div class="panel-right">
 
-  <div class="panel-title">📊 Painel Técnico</div>
+  <div class="panel-title">📊 Classificação por Critério</div>
 
-  <div class="panel-item">Área: —</div>
-  <div class="panel-item">Ocupação: —</div>
-  <div class="panel-item">Altura: —</div>
+<div class="panel-item"><strong>Área Computada:</strong> <span id="areaPainel">—</span></div>
 
-  <hr style="margin:15px 0;">
-
-  <div class="panel-title">📄 Classificação Final</div>
-
-  <div class="panel-item"><strong>Processo:</strong> <span id="procFinal">—</span></div>
-<div class="panel-item"><strong>Certificação:</strong> <span id="certFinal">—</span></div>
-
-
+<div class="panel-item">
+<strong>Tipo do Processo:</strong> 
+<span id="procFinal">—</span>
 </div>
+
+<div class="panel-item">
+<strong>Certificação:</strong> 
+<span id="certFinal">—</span>
+</div>
+
 
 
 
@@ -559,6 +558,9 @@ function calcularAreaComputada() {
   document.getElementById("areaComputada").value =
     resultado.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
 
+document.getElementById("areaPainel").innerText =
+resultado.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) + " m²"; 
+
 // 🔥 ALERTA
 let alerta = document.getElementById("alertaArea");
 
@@ -587,8 +589,18 @@ if (regrasArea && regrasArea.length) {
 const processo = classificarProcesso(resultado);
 const certificacao = classificarCertificacao(resultado, clcb, geral);
 
-document.getElementById("procFinal").innerText = processo;
-document.getElementById("certFinal").innerText = certificacao;
+// 🔥 TEXTO COMPLETO
+let procTexto = processo === "PTS"
+  ? "PTS (Projeto Técnico Simplificado)"
+  : "PT (Projeto Técnico)";
+
+let certTexto = certificacao === "CLCB"
+  ? "CLCB (Certificado de Licença do Corpo de Bombeiros)"
+  : "AVCB (Auto de Vistoria do Corpo de Bombeiros)";
+
+// joga no painel
+document.getElementById("procFinal").innerText = procTexto;
+document.getElementById("certFinal").innerText = certTexto;
 
 
 }
