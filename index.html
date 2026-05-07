@@ -526,11 +526,14 @@ async function carregarRegrasArea() {
   const resposta = await fetch(url);
   const texto = await resposta.text();
 
-  const linhas = texto.split("\n").slice(1); // remove cabeçalho
+  const linhas = texto.split(/\r?\n/).slice(1);
 
   regrasArea = linhas.map(linha => {
 
-    const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+    const col = linha
+  .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+  .map(c => c.replace(/\r/g, "").trim());
+
 
     return {
   estado: col[1],
