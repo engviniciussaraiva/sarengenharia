@@ -1034,7 +1034,7 @@ function abrirModalAltura() {
     document.getElementById("tituloAltura").innerText = nota.titulo;
 
     document.getElementById("textoAltura").innerHTML =
-      nota.texto.replace(/\n/g, "<br>");
+      nota.texto.replace(/\\n/g, "<br>");
 
   } else {
 
