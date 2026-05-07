@@ -459,8 +459,9 @@ readonly>
 
   <div class="panel-title">📄 Classificação Final</div>
 
-  <div class="panel-item"><strong>Processo:</strong> —</div>
-  <div class="panel-item"><strong>Nível:</strong> —</div>
+  <div class="panel-item"><strong>Processo:</strong> <span id="procFinal">—</span></div>
+<div class="panel-item"><strong>Certificação:</strong> <span id="certFinal">—</span></div>
+
 
 </div>
 
@@ -581,6 +582,19 @@ if (regrasArea && regrasArea.length) {
 
 });
 }
+function calcularAreaComputada() {
+
+  ... cálculo ...
+
+  ... alerta ...
+
+  // 👇 AQUI
+  const processo = classificarProcesso(resultado);
+  const certificacao = classificarCertificacao(resultado, clcb, geral);
+
+  document.getElementById("procFinal").innerText = processo;
+  document.getElementById("certFinal").innerText = certificacao;
+
 }
 
 function abrirModal() {
@@ -767,6 +781,37 @@ document.getElementById("municipioInput").addEventListener("focus", function() {
 
 });
 
+// ⚠️ TEMP - classificação base (será migrado para motor) 
+function classificarProcesso(area) {
+
+  if (area <= 1500) {
+    return "PTS";
+  }
+
+  return "PT";
+}
+
+// ⚠️ TEMP - certificação (será migrado para motor)
+function classificarCertificacao(area, descontoCLCB, descontoGeral) {
+
+ // acima de 750 → sempre AVCB
+ if (area > 750) {
+   return "AVCB";
+ }
+
+ // até 750 → depende dos descontos
+ if (descontoGeral > 0) {
+   return "AVCB";
+ }
+
+ if (descontoCLCB > 0) {
+   return "CLCB";
+ }
+
+ // sem desconto
+ return "CLCB";
+}
+
 
 
 
@@ -852,4 +897,5 @@ document.getElementById("municipioInput").addEventListener("focus", function() {
 
 </body>
 </html>
+
 
