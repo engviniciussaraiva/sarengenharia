@@ -476,6 +476,7 @@ readonly>
 window.onload = async () => {
 
 await carregarRegrasArea();
+await carregarAlertasArea(); 
 await carregarMunicipios();
 
 // FORMATA CAMPOS
@@ -516,6 +517,7 @@ function formatarNumeroBR(valor) {
 }
 
 let regrasArea = [];
+let regrasAlertaArea = []; 
 
 async function carregarRegrasArea() {
 
@@ -546,6 +548,35 @@ async function carregarRegrasArea() {
   console.log("Regras carregadas:", regrasArea);
 }
 
+async function carregarAlertasArea() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQivYR2D5IRyG6Nqj1WCMuKtXH-faLsvCkX391yOAOrp2lZwhVMUFPi-w12esjG-ofurGOicnJWJvO4/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split("\n").slice(1);
+
+  regrasAlertaArea = linhas.map(l => {
+
+    const col = l.split(";");
+
+    return {
+      estado: col[1],
+      criterio: col[2],
+      area_min: parseFloat(col[3]),
+      area_max: parseFloat(col[4]),
+      tipo: col[6],
+      mensagem: col[7],
+      cor: col[8],
+      ativo: col[9] === "TRUE"
+    };
+
+  });
+
+}
+
+
 
 
 function calcularAreaComputada() {
@@ -573,8 +604,8 @@ let alerta = document.getElementById("alertaArea");
 alerta.style.display = "none";
 
 // percorre as regras (motor)
-if (regrasArea && regrasArea.length) {
-  regrasArea.forEach(regra => {
+if (regrasAlertaArea && regrasAlertaArea.length) {
+regrasAlertaArea.forEach(regra => { 
 
 
   if (
@@ -590,31 +621,23 @@ if (regrasArea && regrasArea.length) {
 });
 }
 
-// 👇 AQUI ENTRA
-const processo = classificarProcesso(resultado);
-const certificacao = classificarCertificacao(resultado, clcb, geral);
+// 🔥 BUSCA NO MOTOR (BANCO)
+const regra = buscarClassificacaoArea(resultado, clcb, geral);
 
-// 🔥 TEXTO COMPLETO
-let procTexto = processo === "PTS"
-  ? "PTS (Projeto Técnico Simplificado)"
-  : "PT (Projeto Técnico)";
+if (regra) {
 
-let certTexto = certificacao === "CLCB"
-  ? "CLCB (Certificado de Licença do Corpo de Bombeiros)"
-  : "AVCB (Auto de Vistoria do Corpo de Bombeiros)";
+  // processo (já vem pronto da tabela)
+  document.getElementById("procFinal").innerText = regra.texto_processo;
 
-// joga no painel
-document.getElementById("procFinal").innerText = procTexto;
-const elCert = document.getElementById("certFinal");
+  // certificação
+  const elCert = document.getElementById("certFinal");
+  elCert.innerText = regra.texto_certificacao;
 
-elCert.innerText = certTexto;
+  // cor vinda da tabela
+  elCert.style.color = regra.cor;
 
-// 🔥 COR TEMP (depois vai vir da tabela)
-if (certificacao === "CLCB") {
-  elCert.style.color = "#2e7d32"; // verde
-} else {
-  elCert.style.color = "#c62828"; // vermelho
 }
+
 
 
 
@@ -804,37 +827,39 @@ document.getElementById("municipioInput").addEventListener("focus", function() {
 
 });
 
-// ⚠️ TEMP - classificação base (será migrado para motor) 
-function classificarProcesso(area) {
 
-  if (area <= 1500) {
-    return "PTS";
+function buscarClassificacaoArea(area, descontoCLCB, descontoGeral) {
+
+  const estado = document.getElementById("estado").value;
+
+  // define qual tipo de regra usar
+  let tipoBusca = "classificacao";
+
+  if (area <= 750) {
+    if (descontoGeral > 0) {
+      tipoBusca = "classificacao"; // linha AVCB
+    } else {
+      tipoBusca = "classificacao"; // linha CLCB
+    }
   }
 
-  return "PT";
+  const regra = regrasArea.find(r =>
+    r.estado === estado &&
+    r.criterio === "area" &&
+    r.tipo === tipoBusca &&
+    r.ativo &&
+    area >= r.area_min &&
+    area <= r.area_max &&
+    (
+      // diferencia CLCB vs AVCB
+      (descontoGeral > 0 && r.certificacao === "AVCB") ||
+      (descontoGeral === 0 && r.certificacao === "CLCB") ||
+      (area > 750 && r.certificacao === "AVCB")
+    )
+  );
+
+  return regra || null;
 }
-
-// ⚠️ TEMP - certificação (será migrado para motor)
-function classificarCertificacao(area, descontoCLCB, descontoGeral) {
-
- // acima de 750 → sempre AVCB
- if (area > 750) {
-   return "AVCB";
- }
-
- // até 750 → depende dos descontos
- if (descontoGeral > 0) {
-   return "AVCB";
- }
-
- if (descontoCLCB > 0) {
-   return "CLCB";
- }
-
- // sem desconto
- return "CLCB";
-}
-
 
 
 
