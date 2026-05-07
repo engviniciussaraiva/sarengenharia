@@ -498,7 +498,7 @@ readonly>
         Para fins de exigências das medidas de segurança contra incêndio, a altura da edificação é a medida, em metros, do piso mais baixo ocupado ao piso do último pavimento.
       </div>
 
-      <input type="text" id="alturaEdificacao" placeholder="Ex.: 6,00">
+      <input type="text" id="alturaEdificacao" placeholder="Indique a altura">
 
     </div>
 
@@ -584,7 +584,7 @@ document.getElementById("pavimentos").addEventListener("change", function () {
   const valor = this.value;
   const bloco = document.getElementById("blocoAltura");
 
-  if (valor === "2" || valor === "3") {
+if (valor !== "" && valor !== "1") {
     bloco.style.display = "block";
   } else {
     bloco.style.display = "none";
