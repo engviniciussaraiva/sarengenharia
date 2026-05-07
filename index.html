@@ -530,7 +530,7 @@ async function carregarRegrasArea() {
 
   regrasArea = linhas.map(linha => {
 
-    const col = linha.split(",");
+    const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
 
     return {
   estado: col[1],
@@ -564,7 +564,7 @@ async function carregarAlertasArea() {
 
   regrasAlertaArea = linhas.map(l => {
 
-    const col = l.split(",");
+    const col = l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
 
     return {
       estado: col[1],
