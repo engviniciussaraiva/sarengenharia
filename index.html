@@ -633,11 +633,21 @@ document.getElementById("usoSubsolo").addEventListener("change", function () {
 
   const area = document.getElementById("areaSubsolo");
 
-  if (this.value !== "") {
-    area.disabled = false;
-  } else {
+  // 🔥 REGRA: reunião de público → não habilita área
+  if (this.value === "reuniao_publico") {
+
     area.disabled = true;
     area.value = "";
+
+  } else if (this.value !== "") {
+
+    area.disabled = false;
+
+  } else {
+
+    area.disabled = true;
+    area.value = "";
+
   }
 
 });
