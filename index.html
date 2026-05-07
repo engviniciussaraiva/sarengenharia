@@ -837,33 +837,33 @@ function buscarClassificacaoArea(area, descontoCLCB, descontoGeral) {
 
   const estado = document.getElementById("estado").value;
 
-  // define qual tipo de regra usar
-  let tipoBusca = "classificacao";
+  return regrasArea.find(r => {
 
-  if (area <= 750) {
-    if (descontoGeral > 0) {
-      tipoBusca = "classificacao"; // linha AVCB
-    } else {
-      tipoBusca = "classificacao"; // linha CLCB
+    // 🔹 filtros básicos
+    if (
+      r.estado !== estado ||
+      r.criterio !== "area" ||
+      r.tipo !== "classificacao" ||
+      !r.ativo ||
+      area < r.area_min ||
+      area > r.area_max
+    ) return false;
+
+    // 🔥 REGRA DE CERTIFICAÇÃO
+
+    // até 750
+    if (area <= 750) {
+      if (descontoGeral > 0 && r.certificacao !== "AVCB") return false;
+      if (descontoGeral === 0 && r.certificacao !== "CLCB") return false;
     }
-  }
 
-  const regra = regrasArea.find(r =>
-    r.estado === estado &&
-    r.criterio === "area" &&
-    r.tipo === tipoBusca &&
-    r.ativo &&
-    area >= r.area_min &&
-    area <= r.area_max &&
-    (
-      // diferencia CLCB vs AVCB
-      (descontoGeral > 0 && r.certificacao === "AVCB") ||
-      (descontoGeral === 0 && r.certificacao === "CLCB") ||
-      (area > 750 && r.certificacao === "AVCB")
-    )
-  );
+    // acima de 750
+    if (area > 750 && r.certificacao !== "AVCB") return false;
 
-  return regra || null;
+    return true;
+
+  });
+
 }
 
 
