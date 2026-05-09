@@ -592,6 +592,7 @@ style="text-align:right;">
 window.onload = async () => {
 
 await carregarRegrasArea();
+await carregarRegrasAltura();
 await carregarAlertasArea();
 await carregarNotasAltura(); 
 await carregarMunicipios();
@@ -693,6 +694,7 @@ function formatarNumeroBR(valor) {
 
 let regrasArea = [];
 let regrasAlertaArea = [];
+let regrasAltura = [];
 let notasAltura = []; 
 
 async function carregarRegrasArea() {
@@ -760,6 +762,40 @@ async function carregarAlertasArea() {
 
 }
 
+async function carregarRegrasAltura() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJP_HO-NLAWpUiRFk5ifqR9Jo_zgISf1uZfszA-eKBwdTmcUMwKcSN5IPrW8MK7abJUN7kisY0AE65/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split("\n").slice(1);
+
+  regrasAltura = linhas.map(l => {
+
+    const col = l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+
+    return {
+      estado: col[1],
+      criterio: col[2],
+      pav_min: parseInt(col[3]),
+      pav_max: parseInt(col[4]),
+      tem_subsolo: col[5],
+      uso_subsolo: col[6],
+      area_subsolo_min: col[7] === "NA" ? null : parseFloat(col[7]),
+      area_subsolo_max: col[8] === "NA" ? null : parseFloat(col[8]),
+      processo: col[9],
+      certificacao: col[10],
+      texto: col[11],
+      cor: col[12],
+      ativo: col[13] === "TRUE"
+    };
+
+  });
+
+  console.log("Altura carregada:", regrasAltura);
+
+}
 
 
 
