@@ -290,11 +290,13 @@ font-weight: 500;
 }
 
 .grid-altura {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  align-items: end;
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ gap: 15px;
+ align-items: start;
 }
+
+
 
 .grid-altura label {
   font-size: 13px;
@@ -475,7 +477,7 @@ readonly>
     <div class="grid-altura"> 
 
       <!-- ESQUERDA -->
-    <div> 
+    <div style="display:flex; flex-direction:column;">  
 
   <label style="margin-bottom:5px;">Quantidade de pavimentos (planos de piso existentes na edificação)</label>
   <select id="pavimentos" style="margin-bottom:10px;" >
@@ -487,7 +489,7 @@ readonly>
   </select>
 
   <!-- 🔥 ALTURA FICA AQUI (ABAIXO DO PAVIMENTO) -->
-  <div id="blocoAltura" style="display:none; margin-top:10px;">
+  <div id="blocoAltura" style="display:none; margin-top:10px; width:100%;">
 
     <div style="
   border:1px solid #e0e0e0;
