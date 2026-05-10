@@ -882,6 +882,50 @@ function buscarClassificacaoAlturaCompleta(pav, temSubsolo, usoSubsolo, areaSubs
 
 }
 
+function atualizarClassificacaoAltura() {
+
+  const pav = parseInt(document.getElementById("pavimentos").value);
+
+  const temSubsolo =
+    document.getElementById("temSubsolo").value;
+
+  const usoSubsolo =
+    document.getElementById("usoSubsolo").value;
+
+  let areaSubsolo = 0;
+
+  if (document.getElementById("areaSubsolo").value === "SIM") {
+    areaSubsolo = 100;
+
+  } else if (document.getElementById("areaSubsolo").value === "NAO") {
+    areaSubsolo = 25;
+  }
+
+  if (!pav) return;
+
+  const regra = buscarClassificacaoAlturaCompleta(
+    pav,
+    temSubsolo,
+    usoSubsolo,
+    areaSubsolo
+  );
+
+  if (regra) {
+
+    document.getElementById("alturaPainel").innerText =
+      pav + " pavimento(s)";
+
+    document.getElementById("procAltura").innerText =
+      regra.processo;
+
+    document.getElementById("certAltura").innerText =
+      regra.certificacao;
+
+  }
+
+}
+
+
 
 function calcularAreaComputada() {
 
