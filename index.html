@@ -815,22 +815,25 @@ async function carregarRegrasAltura() {
         .map(c => c.replace(/\r/g, "").trim());
 
       return {
-        estado: col[1],
-        criterio: col[2],
-        pav_min: parseInt(col[3]),
-        pav_max: parseInt(col[4]),
-        tem_subsolo: col[5],
-        uso_subsolo: col[6],
-        area_subsolo_min: col[7] === "NA" ? null : parseFloat(col[7]),
-        area_subsolo_max: col[8] === "NA" ? null : parseFloat(col[8]),
-        processo: col[9],
-        certificacao: col[10],
-        texto: col[11],
-        cor: col[12],
-        ativo: col[13] === "TRUE"
-      };
+  estado: col[1],
+  criterio: col[2],
+  pav_min: parseInt(col[3]),
+  pav_max: parseInt(col[4]),
+  tem_subsolo: col[5],
+  uso_subsolo: col[6],
+  area_subsolo_min: col[7] === "NA" ? null : parseFloat(col[7]),
+  area_subsolo_max: col[8] === "NA" ? null : parseFloat(col[8]),
 
-    });
+  processo: col[9],
+  certificacao: col[10],
+
+  texto_processo: col[11],
+  texto_certificacao: col[12],
+
+  texto: col[13],
+  cor: col[14],
+  ativo: col[15] === "TRUE"
+};
 
   console.log("Altura carregada:", regrasAltura);
 
@@ -905,24 +908,30 @@ function atualizarClassificacaoAltura() {
 
     document.getElementById("alturaPainel").innerText =
       pav + " pavimento(s)";
+document.getElementById("procAltura").innerText =
+  regra.texto_processo;
 
-    document.getElementById("procAltura").innerText =
-      regra.processo;
+document.getElementById("certAltura").innerText =
+  regra.texto_certificacao;
 
-    document.getElementById("certAltura").innerText =
-      regra.certificacao;
+document.getElementById("certAltura").style.fontWeight =
+  "bold";
 
-    document.getElementById("certAltura").style.color =
-      regra.cor;
+document.getElementById("certAltura").style.color =
+  regra.cor;
 
-  } else {
+    
 
-    document.getElementById("alturaPainel").innerText = "—";
-    document.getElementById("procAltura").innerText = "—";
-    document.getElementById("certAltura").innerText = "—";
-    document.getElementById("certAltura").style.color = "#333";
+} else {
 
-  }
+  document.getElementById("alturaPainel").innerText = "—";
+  document.getElementById("procAltura").innerText = "—";
+  document.getElementById("certAltura").innerText = "—";
+  document.getElementById("certAltura").style.color = "#333";
+  document.getElementById("certAltura").style.fontWeight = "normal";
+
+}
+
 
 }
 
