@@ -572,6 +572,8 @@ style="text-align:right;">
 
   <div class="panel-title">📊 Classificação por Critério</div>
 
+<hr class="divisor-criterio">
+
 <div class="panel-item"><strong>Área Computada:</strong> <span id="areaPainel">—</span></div>
 
 <div class="panel-item">
@@ -582,6 +584,13 @@ style="text-align:right;">
 <div class="panel-item">
 <strong>Certificação:</strong> 
 <span id="certFinal" style="font-weight: bold;">—</span>
+</div>
+
+<hr class="divisor-criterio">
+
+<div class="panel-item">
+  <strong>Altura:</strong>
+  <span id="alturaPainel">—</span>
 </div>
 
 <hr class="divisor-criterio">
@@ -619,7 +628,39 @@ if (valor !== "" && valor !== "1") {
     bloco.style.display = "none";
   }
 
+const pav = parseInt(valor);
+
+const temSubsolo = document.getElementById("temSubsolo").value;
+const usoSubsolo = document.getElementById("usoSubsolo").value;
+
+let areaSubsolo = 0;
+if (document.getElementById("areaSubsolo").value === "SIM") {
+areaSubsolo = 100;
+} else if (document.getElementById("areaSubsolo").value === "NAO") {
+areaSubsolo = 25;
+}
+
+const regra = buscarClassificacaoAlturaCompleta(
+pav,
+temSubsolo,
+usoSubsolo,
+areaSubsolo
+);
+
+if (regra) {
+document.getElementById("alturaPainel").innerText =
+regra.processo + " (" + regra.certificacao + ")";
+}
+
 });
+
+const regra = buscarClassificacaoAlturaCompleta(
+pav,
+temSubsolo,
+usoSubsolo,
+areaSubsolo
+); 
+
 
 // 🔥 CONTROLE SUBSOLO → HABILITA USO
 document.getElementById("temSubsolo").addEventListener("change", function () {
@@ -797,6 +838,36 @@ async function carregarRegrasAltura() {
 
 }
 
+function buscarClassificacaoAlturaCompleta(pav, temSubsolo, usoSubsolo, areaSubsolo) {
+
+  const estado = document.getElementById("estado").value;
+
+  return regrasAltura.find(r => {
+
+    if (!r.ativo) return false;
+
+    // estado e critério
+    if (r.estado !== estado || r.criterio !== "altura") return false;
+
+    // pavimentos
+    if (pav < r.pav_min || pav > r.pav_max) return false;
+
+    // subsolo
+    if (r.tem_subsolo !== "NA" && r.tem_subsolo !== temSubsolo) return false;
+
+    // uso do subsolo
+    if (r.uso_subsolo !== "NA" && r.uso_subsolo !== usoSubsolo) return false;
+
+    // área do subsolo
+    if (r.area_subsolo_min !== null && r.area_subsolo_max !== null) {
+      if (areaSubsolo < r.area_subsolo_min || areaSubsolo > r.area_subsolo_max) return false;
+    }
+
+    return true;
+
+  });
+
+}
 
 
 function calcularAreaComputada() {
