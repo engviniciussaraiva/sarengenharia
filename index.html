@@ -639,39 +639,8 @@ if (valor !== "" && valor !== "1") {
     bloco.style.display = "none";
   }
 
-const pav = parseInt(valor);
-
-const temSubsolo = document.getElementById("temSubsolo").value;
-const usoSubsolo = document.getElementById("usoSubsolo").value;
-
-let areaSubsolo = 0;
-if (document.getElementById("areaSubsolo").value === "SIM") {
-areaSubsolo = 100;
-} else if (document.getElementById("areaSubsolo").value === "NAO") {
-areaSubsolo = 25;
-}
-
-const regra = buscarClassificacaoAlturaCompleta(
-pav,
-temSubsolo,
-usoSubsolo,
-areaSubsolo
-);
-
-if (regra) {
-document.getElementById("alturaPainel").innerText =
-pav + " pavimento(s)";
-
-document.getElementById("procAltura").innerText =
-regra.processo;
-
-document.getElementById("certAltura").innerText =
-regra.certificacao;
-
-}
-
+atualizarClassificacaoAltura(); 
 });
-
 
 
 
@@ -690,6 +659,8 @@ document.getElementById("temSubsolo").addEventListener("change", function () {
     uso.value = "";
     area.value = "";
   }
+
+atualizarClassificacaoAltura(); 
 
 });
 
@@ -715,6 +686,8 @@ document.getElementById("usoSubsolo").addEventListener("change", function () {
     area.value = "";
 
   }
+
+atualizarClassificacaoAltura(); 
 
 });
 
