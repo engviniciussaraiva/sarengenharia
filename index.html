@@ -593,6 +593,17 @@ style="text-align:right;">
   <span id="alturaPainel">—</span>
 </div>
 
+<div class="panel-item">
+  <strong>Tipo do Processo:</strong>
+  <span id="procAltura">—</span>
+</div>
+
+<div class="panel-item">
+  <strong>Certificação:</strong>
+  <span id="certAltura">—</span>
+</div>
+
+
 <hr class="divisor-criterio">
 
 
@@ -649,8 +660,14 @@ areaSubsolo
 
 if (regra) {
 document.getElementById("alturaPainel").innerText =
-regra.processo + " (" + regra.certificacao + ")";
-}
+pav + " pavimento(s)";
+
+document.getElementById("procAltura").innerText =
+regra.processo;
+
+document.getElementById("certAltura").innerText =
+regra.certificacao;
+
 
 });
 
