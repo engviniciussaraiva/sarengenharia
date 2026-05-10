@@ -815,30 +815,32 @@ async function carregarRegrasAltura() {
         .map(c => c.replace(/\r/g, "").trim());
 
       return {
-  estado: col[1],
-  criterio: col[2],
-  pav_min: parseInt(col[3]),
-  pav_max: parseInt(col[4]),
-  tem_subsolo: col[5],
-  uso_subsolo: col[6],
-  area_subsolo_min: col[7] === "NA" ? null : parseFloat(col[7]),
-  area_subsolo_max: col[8] === "NA" ? null : parseFloat(col[8]),
+        estado: col[1],
+        criterio: col[2],
+        pav_min: parseInt(col[3]),
+        pav_max: parseInt(col[4]),
+        tem_subsolo: col[5],
+        uso_subsolo: col[6],
+        area_subsolo_min: col[7] === "NA" ? null : parseFloat(col[7]),
+        area_subsolo_max: col[8] === "NA" ? null : parseFloat(col[8]),
 
-  processo: col[9],
-  certificacao: col[10],
+        processo: col[9],
+        certificacao: col[10],
 
-  texto_processo: col[11],
-  texto_certificacao: col[12],
+        texto_processo: col[11],
+        texto_certificacao: col[12],
 
-  texto: col[13],
-  cor: col[14],
-  ativo: col[15] === "TRUE"
-}
-};
+        texto: col[13],
+        cor: col[14],
+        ativo: col[15] === "TRUE"
+      };
+
+    });
 
   console.log("Altura carregada:", regrasAltura);
 
 }
+
 
 
 function buscarClassificacaoAlturaCompleta(pav, temSubsolo, usoSubsolo, areaSubsolo) {
