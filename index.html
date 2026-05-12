@@ -648,10 +648,12 @@ window.onload = async () => {
 
 await carregarRegrasArea();
 await carregarRegrasAltura();
-await carregarClassificacaoAltura(); 
+await carregarClassificacaoAltura();
+await carregarPrioridades();
 await carregarAlertasArea();
 await carregarNotasAltura(); 
 await carregarMunicipios();
+
 
 // FORMATA CAMPOS
 document.querySelectorAll(".input-numero").forEach(el => {
@@ -792,8 +794,14 @@ function formatarNumeroBR(valor) {
 let regrasArea = [];
 let regrasAlertaArea = [];
 let regrasAltura = [];
-let classificacaoAltura = []; 
-let notasAltura = []; 
+let classificacaoAltura = [];
+let regrasPrioridade = [];
+
+let resultadoArea = null;
+let resultadoAltura = null;
+
+let notasAltura = [];
+ 
 
 async function carregarRegrasArea() {
 
@@ -938,6 +946,63 @@ async function carregarClassificacaoAltura() {
 
 }
 
+async function carregarPrioridades() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ31PUvGm7h8iOZID66YJVqgacwKUmnjUfGxJEE5cVvuizXylOBdoT9JTkjRCnc3mBTDcueiz54DKG1/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  regrasPrioridade = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        processo: col[2],
+        certificacao: col[3],
+        peso: parseInt(col[4]),
+        texto_processo: col[5],
+        texto_certificacao: col[6],
+        cor: col[7],
+        ativo: col[8] === "TRUE"
+      };
+
+    });
+
+  console.log("Prioridades carregadas:", regrasPrioridade);
+
+}
+
+
+function buscarPrioridade(processo, certificacao) {
+
+  const estado = document.getElementById("estado").value;
+
+  return regrasPrioridade.find(r => {
+
+    if (!r.ativo) return false;
+
+    if (r.estado !== estado) return false;
+
+    if (r.processo !== processo) return false;
+
+    if (r.certificacao !== certificacao) return false;
+
+    return true;
+
+  });
+
+}
+
+
 
 function buscarClassificacaoFisicaAltura(altura) {
 
@@ -1066,6 +1131,9 @@ if (classAltura) {
     document.getElementById("certAltura").style.color = "#333";
     document.getElementById("certAltura").style.fontWeight = "normal";
 
+resultadoAltura = null;
+atualizarPreviaFinal(); 
+
     return;
   }
 
@@ -1086,16 +1154,24 @@ if (classAltura) {
     }
 
     document.getElementById("procAltura").innerText =
-      regra.texto_processo;
+  regra.texto_processo;
 
-    document.getElementById("certAltura").innerText =
-      regra.texto_certificacao;
+document.getElementById("certAltura").innerText =
+  regra.texto_certificacao;
 
-    document.getElementById("certAltura").style.fontWeight =
-      "bold";
+document.getElementById("certAltura").style.fontWeight =
+  "bold";
 
-    document.getElementById("certAltura").style.color =
-      regra.cor;
+document.getElementById("certAltura").style.color =
+  regra.cor;
+
+// 🔥 GUARDA RESULTADO DA ALTURA PARA A PRÉVIA FINAL
+resultadoAltura = {
+  criterio: "Altura",
+  processo: regra.processo,
+  certificacao: regra.certificacao
+};
+
 
   } else {
 
@@ -1108,10 +1184,94 @@ if (classAltura) {
     document.getElementById("certAltura").style.color = "#333";
     document.getElementById("certAltura").style.fontWeight = "normal";
 
+resultadoAltura = null; 
+
   }
+
+atualizarPreviaFinal(); 
 
 }
 
+function atualizarPreviaFinal() {
+
+  const resultados = [];
+
+  if (resultadoArea) resultados.push(resultadoArea);
+  if (resultadoAltura) resultados.push(resultadoAltura);
+
+  // Se ainda não tem nenhum critério preenchido
+  if (resultados.length === 0) {
+
+    document.getElementById("procPreviaFinal").innerText = "—";
+    document.getElementById("certPreviaFinal").innerText = "—";
+    document.getElementById("criterioPreviaFinal").innerText = "—";
+
+    document.getElementById("certPreviaFinal").style.color = "#333";
+    document.getElementById("certPreviaFinal").style.fontWeight = "normal";
+
+    return;
+  }
+
+  // Enriquecer cada resultado com peso da tabela PROC_PRIORIDADE
+  const resultadosComPeso = resultados
+    .map(res => {
+
+      const prioridade = buscarPrioridade(res.processo, res.certificacao);
+
+      if (!prioridade) return null;
+
+      return {
+        criterio: res.criterio,
+        processo: res.processo,
+        certificacao: res.certificacao,
+        peso: prioridade.peso,
+        texto_processo: prioridade.texto_processo,
+        texto_certificacao: prioridade.texto_certificacao,
+        cor: prioridade.cor
+      };
+
+    })
+    .filter(r => r !== null);
+
+  if (resultadosComPeso.length === 0) {
+
+    document.getElementById("procPreviaFinal").innerText = "—";
+    document.getElementById("certPreviaFinal").innerText = "—";
+    document.getElementById("criterioPreviaFinal").innerText = "—";
+
+    return;
+  }
+
+  // Pega o maior peso
+  const maiorPeso = Math.max(...resultadosComPeso.map(r => r.peso));
+
+  const maisRestritivos = resultadosComPeso.filter(r => r.peso === maiorPeso);
+
+  const resultadoFinal = maisRestritivos[0];
+
+  // Critério determinante
+  const criterios = maisRestritivos
+    .map(r => r.criterio)
+    .join(" + ");
+
+  document.getElementById("procPreviaFinal").innerText =
+    resultadoFinal.texto_processo;
+
+  const certFinal = document.getElementById("certPreviaFinal");
+
+  certFinal.innerText =
+    resultadoFinal.texto_certificacao;
+
+  certFinal.style.color =
+    resultadoFinal.cor;
+
+  certFinal.style.fontWeight =
+    "bold";
+
+  document.getElementById("criterioPreviaFinal").innerText =
+    criterios;
+
+}
 
 
 
@@ -1163,17 +1323,29 @@ const regra = buscarClassificacaoArea(resultado, clcb, geral);
 
 if (regra) {
 
-  // processo (já vem pronto da tabela)
+  // processo
   document.getElementById("procFinal").innerText = regra.texto_processo;
 
   // certificação
   const elCert = document.getElementById("certFinal");
   elCert.innerText = regra.texto_certificacao;
-
-  // cor vinda da tabela
   elCert.style.color = regra.cor;
 
+  // 🔥 GUARDA RESULTADO DA ÁREA PARA A PRÉVIA FINAL
+  resultadoArea = {
+    criterio: "Área",
+    processo: regra.processo,
+    certificacao: regra.certificacao
+  };
+
+} else {
+
+  resultadoArea = null;
+
 }
+
+atualizarPreviaFinal();
+
 
 
 
