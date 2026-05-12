@@ -1286,31 +1286,40 @@ atualizarPreviaFinal();
 
 function atualizarPreviaFinal() {
 
-// 🔥 PRIMEIRO VERIFICA REGRAS COMBINADAS DA CONSOLIDAÇÃO
-const regraConsolidacao = buscarRegraConsolidacao();
+  const resultados = [];
 
-if (regraConsolidacao) {
+  if (resultadoArea) resultados.push(resultadoArea);
+  if (resultadoAltura) resultados.push(resultadoAltura);
 
-  document.getElementById("procPreviaFinal").innerText =
-    regraConsolidacao.texto_processo;
+  // 🔥 PRIMEIRO VERIFICA REGRAS COMBINADAS DA CONSOLIDAÇÃO
+  // Só verifica se já existir pelo menos um resultado preenchido
+  if (resultados.length > 0) {
 
-  const certFinal = document.getElementById("certPreviaFinal");
+    const regraConsolidacao = buscarRegraConsolidacao();
 
-  certFinal.innerText =
-    regraConsolidacao.texto_certificacao;
+    if (regraConsolidacao) {
 
-  certFinal.style.color =
-    regraConsolidacao.cor;
+      document.getElementById("procPreviaFinal").innerText =
+        regraConsolidacao.texto_processo;
 
-  certFinal.style.fontWeight =
-    "bold";
+      const certFinal = document.getElementById("certPreviaFinal");
 
-  document.getElementById("criterioPreviaFinal").innerText =
-    regraConsolidacao.criterio_determinante;
+      certFinal.innerText =
+        regraConsolidacao.texto_certificacao;
 
-  return;
-}
+      certFinal.style.color =
+        regraConsolidacao.cor;
 
+      certFinal.style.fontWeight =
+        "bold";
+
+      document.getElementById("criterioPreviaFinal").innerText =
+        regraConsolidacao.criterio_determinante;
+
+      return;
+    }
+
+  }
 
   // Se ainda não tem nenhum critério preenchido
   if (resultados.length === 0) {
@@ -1352,6 +1361,9 @@ if (regraConsolidacao) {
     document.getElementById("certPreviaFinal").innerText = "—";
     document.getElementById("criterioPreviaFinal").innerText = "—";
 
+    document.getElementById("certPreviaFinal").style.color = "#333";
+    document.getElementById("certPreviaFinal").style.fontWeight = "normal";
+
     return;
   }
 
@@ -1385,6 +1397,7 @@ if (regraConsolidacao) {
     criterios;
 
 }
+
 
 
 
