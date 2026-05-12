@@ -669,11 +669,27 @@ document.getElementById("pavimentos").addEventListener("change", function () {
   const valor = this.value;
   const bloco = document.getElementById("blocoAltura");
 
+const campoAltura = document.getElementById("alturaEdificacao");
+
 if (valor !== "") {
   bloco.style.display = "block";
 } else {
   bloco.style.display = "none";
 }
+
+if (valor === "1") {
+  campoAltura.value = "";
+  campoAltura.readOnly = true;
+  campoAltura.placeholder = "Não aplicável para edificação térrea";
+  campoAltura.style.backgroundColor = "#eeeeee";
+  campoAltura.style.cursor = "not-allowed";
+} else {
+  campoAltura.readOnly = false;
+  campoAltura.placeholder = "Indique a altura";
+  campoAltura.style.backgroundColor = "#ffffff";
+  campoAltura.style.cursor = "text";
+}
+
 
 
 atualizarClassificacaoAltura(); 
@@ -1017,7 +1033,7 @@ if (classAltura) {
       altura.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) + " m";
   } else {
     document.getElementById("alturaPainel").innerText =
-      pav + " pavimento(s)";
+      pav === 1 ? "1 pavimento" : pav + " pavimentos"; 
   }
 
   document.getElementById("tipoAlturaPainel").innerText =
@@ -1066,7 +1082,7 @@ if (classAltura) {
     // Se ainda não informou altura em metros, mostra pavimentos
     if (altura <= 0) {
       document.getElementById("alturaPainel").innerText =
-        pav + " pavimento(s)";
+        pav === 1 ? "1 pavimento" : pav + " pavimentos"; 
     }
 
     document.getElementById("procAltura").innerText =
