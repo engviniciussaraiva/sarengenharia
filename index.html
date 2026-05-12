@@ -902,8 +902,10 @@ async function carregarRegrasAltura() {
         texto_certificacao: col[12],
 
         texto: col[13],
-        cor: col[14],
-        ativo: col[15] === "TRUE"
+       criterio_determinante: col[14],
+       cor: col[15],
+       ativo: col[16] === "TRUE"
+
       };
 
     });
@@ -1167,10 +1169,11 @@ document.getElementById("certAltura").style.color =
 
 // 🔥 GUARDA RESULTADO DA ALTURA PARA A PRÉVIA FINAL
 resultadoAltura = {
-  criterio: "Altura",
+  criterio: regra.criterio_determinante || "Altura",
   processo: regra.processo,
   certificacao: regra.certificacao
 };
+
 
 
   } else {
