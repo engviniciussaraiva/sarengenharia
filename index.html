@@ -650,6 +650,7 @@ await carregarRegrasArea();
 await carregarRegrasAltura();
 await carregarClassificacaoAltura();
 await carregarPrioridades();
+await carregarRegrasConsolidacao(); 
 await carregarAlertasArea();
 await carregarNotasAltura(); 
 await carregarMunicipios();
@@ -796,6 +797,7 @@ let regrasAlertaArea = [];
 let regrasAltura = [];
 let classificacaoAltura = [];
 let regrasPrioridade = [];
+let regrasConsolidacao = []; 
 
 let resultadoArea = null;
 let resultadoAltura = null;
@@ -982,6 +984,93 @@ async function carregarPrioridades() {
   console.log("Prioridades carregadas:", regrasPrioridade);
 
 }
+
+
+async function carregarRegrasConsolidacao() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjHgzSaOi9GqOPQDGlpA9YU1paSqfjGTasHDr9fRRDr5d54ulOWo4BeVMEqp6wCTMmWaEIt_vW5-_d/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  regrasConsolidacao = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        criterio_regra: col[2],
+
+        area_min: col[3] === "NA" ? null : parseFloat(col[3]),
+        area_max: col[4] === "NA" ? null : parseFloat(col[4]),
+
+        altura_min: col[5] === "NA" ? null : parseFloat(col[5]),
+        altura_max: col[6] === "NA" ? null : parseFloat(col[6]),
+
+        pav_min: col[7] === "NA" ? null : parseInt(col[7]),
+        pav_max: col[8] === "NA" ? null : parseInt(col[8]),
+
+        processo_resultado: col[9],
+        certificacao_resultado: col[10],
+
+        texto_processo: col[11],
+        texto_certificacao: col[12],
+
+        criterio_determinante: col[13],
+        texto: col[14],
+        cor: col[15],
+        ativo: col[16] === "TRUE"
+      };
+
+    });
+
+  console.log("Regras de consolidação carregadas:", regrasConsolidacao);
+
+}
+
+function buscarRegraConsolidacao() {
+
+  const estado = document.getElementById("estado").value;
+
+  function parseBR(v) {
+    return parseFloat(String(v).replace(/\./g, "").replace(",", ".")) || 0;
+  }
+
+  const areaComputada = parseBR(document.getElementById("areaComputada").value);
+  const altura = parseBR(document.getElementById("alturaEdificacao").value);
+  const pav = parseInt(document.getElementById("pavimentos").value) || 0;
+
+  return regrasConsolidacao.find(r => {
+
+    if (!r.ativo) return false;
+
+    if (r.estado !== estado) return false;
+
+    // Área
+    if (r.area_min !== null && areaComputada < r.area_min) return false;
+    if (r.area_max !== null && areaComputada > r.area_max) return false;
+
+    // Altura
+    if (r.altura_min !== null && altura < r.altura_min) return false;
+    if (r.altura_max !== null && altura > r.altura_max) return false;
+
+    // Pavimentos
+    if (r.pav_min !== null && pav < r.pav_min) return false;
+    if (r.pav_max !== null && pav > r.pav_max) return false;
+
+    return true;
+
+  });
+
+}
+
 
 
 function buscarPrioridade(processo, certificacao) {
@@ -1197,10 +1286,31 @@ atualizarPreviaFinal();
 
 function atualizarPreviaFinal() {
 
-  const resultados = [];
+// 🔥 PRIMEIRO VERIFICA REGRAS COMBINADAS DA CONSOLIDAÇÃO
+const regraConsolidacao = buscarRegraConsolidacao();
 
-  if (resultadoArea) resultados.push(resultadoArea);
-  if (resultadoAltura) resultados.push(resultadoAltura);
+if (regraConsolidacao) {
+
+  document.getElementById("procPreviaFinal").innerText =
+    regraConsolidacao.texto_processo;
+
+  const certFinal = document.getElementById("certPreviaFinal");
+
+  certFinal.innerText =
+    regraConsolidacao.texto_certificacao;
+
+  certFinal.style.color =
+    regraConsolidacao.cor;
+
+  certFinal.style.fontWeight =
+    "bold";
+
+  document.getElementById("criterioPreviaFinal").innerText =
+    regraConsolidacao.criterio_determinante;
+
+  return;
+}
+
 
   // Se ainda não tem nenhum critério preenchido
   if (resultados.length === 0) {
