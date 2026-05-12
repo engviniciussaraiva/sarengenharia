@@ -594,6 +594,21 @@ style="text-align:right;">
 </div>
 
 <div class="panel-item">
+  <strong>Tipo:</strong>
+  <span id="tipoAlturaPainel">—</span>
+</div>
+
+<div class="panel-item">
+  <strong>Denominação:</strong>
+  <span id="denominacaoAlturaPainel">—</span>
+</div>
+
+<div class="panel-item">
+  <strong>Critério:</strong>
+  <span id="criterioAlturaPainel">—</span>
+</div>
+
+<div class="panel-item">
   <strong>Tipo do Processo:</strong>
   <span id="procAltura">—</span>
 </div>
@@ -633,6 +648,7 @@ window.onload = async () => {
 
 await carregarRegrasArea();
 await carregarRegrasAltura();
+await carregarClassificacaoAltura(); 
 await carregarAlertasArea();
 await carregarNotasAltura(); 
 await carregarMunicipios();
@@ -653,11 +669,12 @@ document.getElementById("pavimentos").addEventListener("change", function () {
   const valor = this.value;
   const bloco = document.getElementById("blocoAltura");
 
-if (valor !== "" && valor !== "1") {
-    bloco.style.display = "block";
-  } else {
-    bloco.style.display = "none";
-  }
+if (valor !== "") {
+  bloco.style.display = "block";
+} else {
+  bloco.style.display = "none";
+}
+
 
 atualizarClassificacaoAltura(); 
 });
@@ -719,6 +736,15 @@ atualizarClassificacaoAltura();
 });
 
 
+// 🔥 CONTROLE ALTURA EM METROS → CLASSIFICA TIPO E DENOMINAÇÃO
+document.getElementById("alturaEdificacao").addEventListener("blur", function () {
+
+  this.value = formatarNumeroBR(this.value);
+
+  atualizarClassificacaoAltura();
+
+});
+
 
 } 
 
@@ -750,6 +776,7 @@ function formatarNumeroBR(valor) {
 let regrasArea = [];
 let regrasAlertaArea = [];
 let regrasAltura = [];
+let classificacaoAltura = []; 
 let notasAltura = []; 
 
 async function carregarRegrasArea() {
@@ -861,6 +888,59 @@ async function carregarRegrasAltura() {
 
 }
 
+async function carregarClassificacaoAltura() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTW5hZ6TPNgHxPKFBqI8PHPWFeQdSKLhHju5s4qS4CnxtNdJMIo6RQSWm22HLkAQCQFfoGQ-VCSvegq/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  classificacaoAltura = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        altura_min: parseFloat(col[2]),
+        altura_max: parseFloat(col[3]),
+        tipo_altura: col[4],
+        denominacao: col[5],
+        texto_altura: col[6],
+        ativo: col[7] === "TRUE"
+      };
+
+    });
+
+  console.log("Classificação de altura carregada:", classificacaoAltura);
+
+}
+
+
+function buscarClassificacaoFisicaAltura(altura) {
+
+  const estado = document.getElementById("estado").value;
+
+  return classificacaoAltura.find(r => {
+
+    if (!r.ativo) return false;
+
+    if (r.estado !== estado) return false;
+
+    if (altura < r.altura_min || altura > r.altura_max) return false;
+
+    return true;
+
+  });
+
+}
+
 
 
 function buscarClassificacaoAlturaCompleta(pav, temSubsolo, usoSubsolo, areaSubsolo) {
@@ -896,6 +976,7 @@ function buscarClassificacaoAlturaCompleta(pav, temSubsolo, usoSubsolo, areaSubs
 
 function atualizarClassificacaoAltura() {
 
+
   const pav = parseInt(document.getElementById("pavimentos").value);
 
   const temSubsolo =
@@ -913,13 +994,66 @@ function atualizarClassificacaoAltura() {
     areaSubsolo = 25;
   }
 
+  // 🔥 ALTURA EM METROS
+  const alturaTexto = document.getElementById("alturaEdificacao").value;
+
+  const altura = parseFloat(
+    alturaTexto.replace(/\./g, "").replace(",", ".")
+  ) || 0;
+
+  // 🔥 BUSCA CLASSIFICAÇÃO FÍSICA DA ALTURA
+let classAltura = null;
+
+if (altura > 0) {
+  classAltura = buscarClassificacaoFisicaAltura(altura);
+} else if (pav === 1) {
+  classAltura = buscarClassificacaoFisicaAltura(0);
+}
+
+if (classAltura) {
+
+  if (altura > 0) {
+    document.getElementById("alturaPainel").innerText =
+      altura.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) + " m";
+  } else {
+    document.getElementById("alturaPainel").innerText =
+      pav + " pavimento(s)";
+  }
+
+  document.getElementById("tipoAlturaPainel").innerText =
+    classAltura.tipo_altura;
+
+  document.getElementById("denominacaoAlturaPainel").innerText =
+    classAltura.denominacao;
+
+  document.getElementById("criterioAlturaPainel").innerText =
+    classAltura.texto_altura;
+
+} else {
+
+  document.getElementById("tipoAlturaPainel").innerText = "—";
+  document.getElementById("denominacaoAlturaPainel").innerText = "—";
+  document.getElementById("criterioAlturaPainel").innerText = "—";
+
+}
+
+
+  // 🔥 SE NÃO TIVER PAVIMENTO, LIMPA PROCESSO/CERTIFICAÇÃO
   if (!pav) {
-    document.getElementById("alturaPainel").innerText = "—";
+
+    if (altura <= 0) {
+      document.getElementById("alturaPainel").innerText = "—";
+    }
+
     document.getElementById("procAltura").innerText = "—";
     document.getElementById("certAltura").innerText = "—";
+    document.getElementById("certAltura").style.color = "#333";
+    document.getElementById("certAltura").style.fontWeight = "normal";
+
     return;
   }
 
+  // 🔥 BUSCA REGRA DE PROCESSO PELA ALTURA/PAVIMENTO/SUBSOLO
   const regra = buscarClassificacaoAlturaCompleta(
     pav,
     temSubsolo,
@@ -929,34 +1063,39 @@ function atualizarClassificacaoAltura() {
 
   if (regra) {
 
-    document.getElementById("alturaPainel").innerText =
-      pav + " pavimento(s)";
-document.getElementById("procAltura").innerText =
-  regra.texto_processo;
+    // Se ainda não informou altura em metros, mostra pavimentos
+    if (altura <= 0) {
+      document.getElementById("alturaPainel").innerText =
+        pav + " pavimento(s)";
+    }
 
-document.getElementById("certAltura").innerText =
-  regra.texto_certificacao;
+    document.getElementById("procAltura").innerText =
+      regra.texto_processo;
 
-document.getElementById("certAltura").style.fontWeight =
-  "bold";
+    document.getElementById("certAltura").innerText =
+      regra.texto_certificacao;
 
-document.getElementById("certAltura").style.color =
-  regra.cor;
+    document.getElementById("certAltura").style.fontWeight =
+      "bold";
 
-    
+    document.getElementById("certAltura").style.color =
+      regra.cor;
 
-} else {
+  } else {
 
-  document.getElementById("alturaPainel").innerText = "—";
-  document.getElementById("procAltura").innerText = "—";
-  document.getElementById("certAltura").innerText = "—";
-  document.getElementById("certAltura").style.color = "#333";
-  document.getElementById("certAltura").style.fontWeight = "normal";
+    if (altura <= 0) {
+      document.getElementById("alturaPainel").innerText = "—";
+    }
+
+    document.getElementById("procAltura").innerText = "—";
+    document.getElementById("certAltura").innerText = "—";
+    document.getElementById("certAltura").style.color = "#333";
+    document.getElementById("certAltura").style.fontWeight = "normal";
+
+  }
 
 }
 
-
-}
 
 
 
