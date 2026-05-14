@@ -633,12 +633,18 @@ style="text-align:right;">
       </select>
     </div>
 
-    <div>
-      <label style="font-size:13px; font-weight:500;">Ocupação / Descrição</label>
-      <select id="descricaoOcupacaoUnica" style="margin-bottom:12px;" disabled>
-        <option value="">-- Selecione o uso primeiro --</option>
-      </select>
-    </div>
+  <div class="ocupacao-box" style="position:relative;">
+  <label style="font-size:13px; font-weight:500;">Ocupação / Descrição</label>
+
+  <input type="text"
+    id="descricaoOcupacaoUnica"
+    placeholder="Digite para buscar a ocupação..."
+    autocomplete="off"
+    style="margin-bottom:12px;">
+
+  <div id="listaOcupacaoUnica" class="municipio-lista"></div>
+</div>
+
 
   </div>
 
@@ -1935,17 +1941,13 @@ function criarLinhaOcupacaoPavimento(pavimento, indice) {
           </select>
         </div>
 
-        <div class="ocupacao-box" style="position:relative;">
+    <div>
   <label style="font-size:13px; font-weight:500;">Ocupação / Descrição</label>
-
-  <input type="text"
-    id="descricaoOcupacaoUnica"
-    placeholder="Digite para buscar a ocupação..."
-    autocomplete="off"
-    style="margin-bottom:12px;">
-
-  <div id="listaOcupacaoUnica" class="municipio-lista"></div>
+  <select class="descricao-ocupacao-pavimento" disabled>
+    <option value="">-- Selecione o uso primeiro --</option>
+  </select>
 </div>
+
 
 
         <div>
