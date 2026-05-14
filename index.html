@@ -832,10 +832,12 @@ await carregarRegrasArea();
 await carregarRegrasAltura();
 await carregarClassificacaoAltura();
 await carregarPrioridades();
-await carregarRegrasConsolidacao(); 
+await carregarRegrasConsolidacao();
+await carregarOcupacoesBase();
 await carregarAlertasArea();
 await carregarNotasAltura(); 
 await carregarMunicipios();
+
 
 
 // FORMATA CAMPOS
@@ -952,6 +954,15 @@ document.getElementById("alturaEdificacao").addEventListener("blur", function ()
 
 });
 
+
+// 🔥 CONTROLE DO USO — OCUPAÇÃO ÚNICA
+document.getElementById("usoOcupacaoUnica").addEventListener("change", function () {
+
+  popularDescricoesOcupacaoUnica(this.value);
+
+});
+
+
 // 🔥 CONTROLE DO MODO DE OCUPAÇÃO
 document.getElementById("ocupacaoUnica").addEventListener("change", function () {
 
@@ -1008,12 +1019,14 @@ let regrasAlertaArea = [];
 let regrasAltura = [];
 let classificacaoAltura = [];
 let regrasPrioridade = [];
-let regrasConsolidacao = []; 
+let regrasConsolidacao = [];
+let ocupacoesBase = [];
 
 let resultadoArea = null;
 let resultadoAltura = null;
 
 let notasAltura = [];
+
  
 
 async function carregarRegrasArea() {
@@ -1245,6 +1258,110 @@ async function carregarRegrasConsolidacao() {
   console.log("Regras de consolidação carregadas:", regrasConsolidacao);
 
 }
+
+async function carregarOcupacoesBase() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS3h5boEUUE_Crwj8euHnv4eD4kn7ashvUGJAMKrgApGvDI_-5RpFiQ4NexL8UhBBWugwQVaiOvcKAu/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  ocupacoesBase = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        grupo: col[2],
+        ocupacao_macro: col[3],
+        descricao: col[4],
+        divisao: col[5],
+        tipo_carga: col[6],
+        carga_fixa_mj_m2: col[7],
+        carga_por_metro_mj_m2: col[8],
+        permite_clcb: col[9],
+        pt_obrigatorio: col[10],
+        nota_tecnica: col[11],
+        ativo: col[12] === "TRUE"
+      };
+
+    });
+
+  console.log("Ocupações carregadas:", ocupacoesBase);
+
+  popularUsosOcupacaoUnica();
+
+}
+
+function popularUsosOcupacaoUnica() {
+
+  const selectUso = document.getElementById("usoOcupacaoUnica");
+
+  selectUso.innerHTML = '<option value="">-- Selecione o uso --</option>';
+
+  const estado = document.getElementById("estado").value;
+
+  const usos = [...new Set(
+    ocupacoesBase
+      .filter(o => o.ativo && o.estado === estado)
+      .map(o => o.ocupacao_macro)
+      .filter(v => v !== "")
+  )].sort();
+
+  usos.forEach(uso => {
+
+    const option = document.createElement("option");
+    option.value = uso;
+    option.textContent = uso;
+
+    selectUso.appendChild(option);
+
+  });
+
+}
+
+function popularDescricoesOcupacaoUnica(usoSelecionado) {
+
+  const selectDescricao = document.getElementById("descricaoOcupacaoUnica");
+
+  selectDescricao.innerHTML = '<option value="">-- Selecione a ocupação --</option>';
+
+  if (!usoSelecionado) {
+    selectDescricao.disabled = true;
+    return;
+  }
+
+  const estado = document.getElementById("estado").value;
+
+  const descricoes = ocupacoesBase
+    .filter(o =>
+      o.ativo &&
+      o.estado === estado &&
+      o.ocupacao_macro === usoSelecionado
+    )
+    .sort((a, b) => a.descricao.localeCompare(b.descricao));
+
+  descricoes.forEach(item => {
+
+    const option = document.createElement("option");
+    option.value = item.id;
+    option.textContent = item.descricao;
+
+    selectDescricao.appendChild(option);
+
+  });
+
+  selectDescricao.disabled = false;
+
+}
+
 
 function buscarRegraConsolidacao() {
 
