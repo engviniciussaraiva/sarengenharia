@@ -618,29 +618,6 @@ style="text-align:right;">
     <!-- BLOCO OCUPAÇÃO ÚNICA -->
 <div id="blocoOcupacaoUnica">
 
-  <!-- BUSCA AVANÇADA -->
-  <div style="
-    border:1px solid #2e7d32;
-    background:#f1f8e9;
-    padding:12px;
-    border-radius:8px;
-    margin-bottom:15px;
-  ">
-
-    <label style="
-      font-size:14px;
-      font-weight:600;
-      color:#1b5e20;
-    ">
-      🔍 Busca Avançada de Ocupações
-    </label>
-
-    <input type="text"
-      id="buscaOcupacaoUnica"
-      placeholder="Exemplo: Açougue, fábrica, escritório..."
-      style="margin-top:8px;">
-
-  </div>
 
   <div style="
     display:grid;
@@ -1308,12 +1285,12 @@ function popularUsosOcupacaoUnica() {
 
   const estado = document.getElementById("estado").value;
 
-  const usos = [...new Set(
-    ocupacoesBase
-      .filter(o => o.ativo && o.estado === estado)
-      .map(o => o.ocupacao_macro)
-      .filter(v => v !== "")
-  )].sort();
+const usos = [...new Set(
+  ocupacoesBase
+    .filter(o => o.ativo && o.estado === estado)
+    .map(o => o.ocupacao_macro)
+    .filter(v => v !== "")
+)];
 
   usos.forEach(uso => {
 
@@ -1781,31 +1758,7 @@ function gerarPavimentosOcupacao() {
         ${nomePavimento}
       </div>
 
-      <!-- BUSCA AVANÇADA DO PAVIMENTO -->
-      <div style="
-        border:1px solid #2e7d32;
-        background:#f1f8e9;
-        padding:12px;
-        border-radius:8px;
-        margin-bottom:12px;
-      ">
-
-        <label style="
-          font-size:14px;
-          font-weight:600;
-          color:#1b5e20;
-        ">
-          🔍 Busca Avançada de Ocupações
-        </label>
-
-        <input type="text"
-          class="busca-ocupacao-pavimento"
-          data-pavimento="${i}"
-          placeholder="Exemplo: Açougue, fábrica, escritório..."
-          style="margin-top:8px;">
-
-      </div>
-
+   
       <div class="ocupacoes-pavimento" data-pavimento="${i}">
         ${criarLinhaOcupacaoPavimento(i, 1)}
       </div>
