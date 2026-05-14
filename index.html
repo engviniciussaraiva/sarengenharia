@@ -953,6 +953,13 @@ document.getElementById("descricaoOcupacaoUnica").addEventListener("input", func
 
 });
 
+// 🔥 AO CLICAR NO CAMPO, LISTA AS OCUPAÇÕES DO USO SELECIONADO
+document.getElementById("descricaoOcupacaoUnica").addEventListener("focus", function () {
+
+  buscarOcupacoesUnica(this.value, true);
+
+});
+
 
 // 🔥 CONTROLE DO MODO DE OCUPAÇÃO
 document.getElementById("ocupacaoUnica").addEventListener("change", function () {
@@ -1318,7 +1325,7 @@ const usos = [...new Set(
 
 }
 
-function buscarOcupacoesUnica(termo) {
+function buscarOcupacoesUnica(termo, listarTudo = false) {
 
   const lista = document.getElementById("listaOcupacaoUnica");
   const usoSelecionado = document.getElementById("usoOcupacaoUnica").value;
@@ -1328,8 +1335,14 @@ function buscarOcupacoesUnica(termo) {
 
   const termoBusca = termo.toLowerCase().trim();
 
-  if (termoBusca.length < 2) {
-    lista.style.display = "none";
+  // Se não tiver uso selecionado e não digitou nada, não abre o banco inteiro
+  if (!usoSelecionado && termoBusca.length < 2) {
+    lista.innerHTML = `
+      <div style="padding:8px; color:#777;">
+        Digite pelo menos 2 caracteres para buscar em todas as ocupações.
+      </div>
+    `;
+    lista.style.display = "block";
     return;
   }
 
@@ -1341,6 +1354,9 @@ function buscarOcupacoesUnica(termo) {
     // Se o uso foi escolhido, filtra dentro dele
     if (usoSelecionado && o.ocupacao_macro !== usoSelecionado) return false;
 
+    // Se for para listar tudo dentro do uso selecionado
+    if (listarTudo && usoSelecionado) return true;
+
     const textoBusca = [
       o.ocupacao_macro,
       o.descricao,
@@ -1351,8 +1367,6 @@ function buscarOcupacoesUnica(termo) {
     return textoBusca.includes(termoBusca);
 
   });
-
-  resultados = resultados.slice(0, 20);
 
   if (resultados.length === 0) {
     lista.innerHTML = `
