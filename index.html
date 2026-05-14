@@ -1656,12 +1656,37 @@ function gerarPavimentosOcupacao() {
     bloco.innerHTML = `
 
       <div style="
-        font-size:14px;
-        font-weight:600;
+        font-size:15px;
+        font-weight:700;
         color:#1b5e20;
-        margin-bottom:10px;
+        margin-bottom:12px;
       ">
         ${nomePavimento}
+      </div>
+
+      <!-- BUSCA AVANÇADA DO PAVIMENTO -->
+      <div style="
+        border:1px solid #2e7d32;
+        background:#f1f8e9;
+        padding:12px;
+        border-radius:8px;
+        margin-bottom:12px;
+      ">
+
+        <label style="
+          font-size:14px;
+          font-weight:600;
+          color:#1b5e20;
+        ">
+          🔍 Busca Avançada de Ocupações
+        </label>
+
+        <input type="text"
+          class="busca-ocupacao-pavimento"
+          data-pavimento="${i}"
+          placeholder="Exemplo: Açougue, fábrica, escritório..."
+          style="margin-top:8px;">
+
       </div>
 
       <div class="ocupacoes-pavimento" data-pavimento="${i}">
@@ -1681,6 +1706,7 @@ function gerarPavimentosOcupacao() {
   }
 
 }
+
 
 function criarLinhaOcupacaoPavimento(pavimento, indice) {
 
