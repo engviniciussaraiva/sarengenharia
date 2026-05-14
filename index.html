@@ -960,6 +960,48 @@ document.getElementById("descricaoOcupacaoUnica").addEventListener("focus", func
 
 });
 
+// 🔥 BUSCA INTELIGENTE — OCUPAÇÃO POR PAVIMENTO
+document.addEventListener("input", function(e) {
+
+  if (e.target.classList.contains("descricao-ocupacao-pavimento")) {
+    buscarOcupacoesPavimento(e.target, e.target.value);
+  }
+
+});
+
+
+// 🔥 AO CLICAR NO CAMPO, LISTA OCUPAÇÕES DO USO SELECIONADO
+document.addEventListener("focusin", function(e) {
+
+  if (e.target.classList.contains("descricao-ocupacao-pavimento")) {
+    buscarOcupacoesPavimento(e.target, e.target.value, true);
+  }
+
+});
+
+
+// 🔥 AO TROCAR O USO DO PAVIMENTO, LIMPA A DESCRIÇÃO
+document.addEventListener("change", function(e) {
+
+  if (e.target.classList.contains("uso-ocupacao-pavimento")) {
+
+    const linha = e.target.closest(".linha-ocupacao");
+
+    linha.querySelector(".descricao-ocupacao-pavimento").value = "";
+    linha.querySelector(".lista-ocupacao-pavimento").innerHTML = "";
+    linha.querySelector(".lista-ocupacao-pavimento").style.display = "none";
+
+    const alturaArm = linha.querySelector(".altura-armazenamento-pavimento");
+
+    alturaArm.value = "0,00";
+    alturaArm.disabled = true;
+    alturaArm.style.backgroundColor = "#eeeeee";
+    alturaArm.style.cursor = "not-allowed";
+
+  }
+
+});
+
 
 // 🔥 CONTROLE DO MODO DE OCUPAÇÃO
 document.getElementById("ocupacaoUnica").addEventListener("change", function () {
@@ -1325,6 +1367,29 @@ const usos = [...new Set(
 
 }
 
+function gerarOptionsUsoOcupacao() {
+
+  const estado = document.getElementById("estado").value;
+
+  const usos = [...new Set(
+    ocupacoesBase
+      .filter(o => o.ativo && o.estado === estado)
+      .map(o => o.ocupacao_macro)
+      .filter(v => v !== "")
+  )];
+
+  let html = '<option value="">-- Selecione o uso --</option>';
+
+  usos.forEach(uso => {
+    html += `<option value="${uso}">${uso}</option>`;
+  });
+
+  return html;
+
+}
+
+
+
 function buscarOcupacoesUnica(termo, listarTudo = false) {
 
   const lista = document.getElementById("listaOcupacaoUnica");
@@ -1382,12 +1447,12 @@ function buscarOcupacoesUnica(termo, listarTudo = false) {
 
     const div = document.createElement("div");
 
-    div.innerHTML = `
-      <strong>${item.ocupacao_macro}</strong><br>
-      <span style="font-size:12px; color:#555;">
-        ${item.divisao} — ${item.descricao}
-      </span>
-    `;
+   div.innerHTML = `
+  <span style="font-size:13px; color:#333;">
+    <strong>${item.divisao}</strong> — ${item.descricao}
+  </span>
+`;
+
 
     div.onclick = () => {
       selecionarOcupacaoUnica(item.id);
@@ -1398,6 +1463,120 @@ function buscarOcupacoesUnica(termo, listarTudo = false) {
   });
 
   lista.style.display = "block";
+
+}
+
+function buscarOcupacoesPavimento(input, termo, listarTudo = false) {
+
+  const linha = input.closest(".linha-ocupacao");
+  const lista = linha.querySelector(".lista-ocupacao-pavimento");
+  const usoSelecionado = linha.querySelector(".uso-ocupacao-pavimento").value;
+  const estado = document.getElementById("estado").value;
+
+  lista.innerHTML = "";
+
+  const termoBusca = termo.toLowerCase().trim();
+
+  if (!usoSelecionado && termoBusca.length < 2) {
+    lista.innerHTML = `
+      <div style="padding:8px; color:#777;">
+        Digite pelo menos 2 caracteres para buscar em todas as ocupações.
+      </div>
+    `;
+    lista.style.display = "block";
+    return;
+  }
+
+  let resultados = ocupacoesBase.filter(o => {
+
+    if (!o.ativo) return false;
+    if (o.estado !== estado) return false;
+
+    if (usoSelecionado && o.ocupacao_macro !== usoSelecionado) return false;
+
+    if (listarTudo && usoSelecionado) return true;
+
+    const textoBusca = [
+      o.ocupacao_macro,
+      o.descricao,
+      o.divisao,
+      o.grupo
+    ].join(" ").toLowerCase();
+
+    return textoBusca.includes(termoBusca);
+
+  });
+
+  resultados = resultados.slice(0, 30);
+
+  if (resultados.length === 0) {
+    lista.innerHTML = `
+      <div style="padding:8px; color:#777;">
+        Nenhuma ocupação encontrada.
+      </div>
+    `;
+    lista.style.display = "block";
+    return;
+  }
+
+  resultados.forEach(item => {
+
+    const div = document.createElement("div");
+
+    div.innerHTML = `
+      <span style="font-size:13px; color:#333;">
+        <strong>${item.divisao}</strong> — ${item.descricao}
+      </span>
+    `;
+
+    div.onclick = () => {
+      selecionarOcupacaoPavimento(item.id, linha);
+    };
+
+    lista.appendChild(div);
+
+  });
+
+  lista.style.display = "block";
+
+}
+
+function selecionarOcupacaoPavimento(id, linha) {
+
+  const item = ocupacoesBase.find(o => o.id === String(id));
+
+  if (!item) return;
+
+  const uso = linha.querySelector(".uso-ocupacao-pavimento");
+  const descricao = linha.querySelector(".descricao-ocupacao-pavimento");
+  const lista = linha.querySelector(".lista-ocupacao-pavimento");
+  const alturaArm = linha.querySelector(".altura-armazenamento-pavimento");
+
+  uso.value = item.ocupacao_macro;
+  descricao.value = item.descricao;
+
+  lista.style.display = "none";
+
+  const cargaPorMetro = parseFloat(
+    String(item.carga_por_metro_mj_m2).replace(",", ".")
+  ) || 0;
+
+  if (cargaPorMetro > 0 || item.tipo_carga === "POR_METRO") {
+
+    alturaArm.disabled = false;
+    alturaArm.style.backgroundColor = "#ffffff";
+    alturaArm.style.cursor = "text";
+
+  } else {
+
+    alturaArm.value = "0,00";
+    alturaArm.disabled = true;
+    alturaArm.style.backgroundColor = "#eeeeee";
+    alturaArm.style.cursor = "not-allowed";
+
+  }
+
+  console.log("Ocupação do pavimento selecionada:", item);
 
 }
 
@@ -1919,18 +2098,20 @@ function gerarPavimentosOcupacao() {
 
 }
 
-
 function criarLinhaOcupacaoPavimento(pavimento, indice) {
 
   return `
 
-    <div class="linha-ocupacao" style="
-      border:1px solid #eeeeee;
-      background:#ffffff;
-      padding:10px;
-      border-radius:6px;
-      margin-bottom:10px;
-    ">
+    <div class="linha-ocupacao" 
+      data-pavimento="${pavimento}" 
+      data-indice="${indice}"
+      style="
+        border:1px solid #eeeeee;
+        background:#ffffff;
+        padding:10px;
+        border-radius:6px;
+        margin-bottom:10px;
+      ">
 
       <div style="
         font-size:13px;
@@ -1951,18 +2132,21 @@ function criarLinhaOcupacaoPavimento(pavimento, indice) {
         <div>
           <label style="font-size:13px; font-weight:500;">Uso</label>
           <select class="uso-ocupacao-pavimento">
-            <option value="">-- Selecione --</option>
+            ${gerarOptionsUsoOcupacao()}
           </select>
         </div>
 
-    <div>
-  <label style="font-size:13px; font-weight:500;">Ocupação / Descrição</label>
-  <select class="descricao-ocupacao-pavimento" disabled>
-    <option value="">-- Selecione o uso primeiro --</option>
-  </select>
-</div>
+        <div class="ocupacao-box-pavimento" style="position:relative;">
+          <label style="font-size:13px; font-weight:500;">Ocupação / Descrição</label>
 
+          <input type="text"
+            class="descricao-ocupacao-pavimento"
+            placeholder="Digite para buscar a ocupação..."
+            autocomplete="off"
+            style="margin-bottom:12px;">
 
+          <div class="lista-ocupacao-pavimento municipio-lista"></div>
+        </div>
 
         <div>
           <label style="font-size:13px; font-weight:500;">Área desta ocupação (m²)</label>
@@ -1977,7 +2161,7 @@ function criarLinhaOcupacaoPavimento(pavimento, indice) {
           <input type="text"
             class="input-numero altura-armazenamento-pavimento"
             value="0,00"
-            style="text-align:right;"
+            style="text-align:right; background-color:#eeeeee; cursor:not-allowed;"
             disabled>
         </div>
 
@@ -1988,6 +2172,9 @@ function criarLinhaOcupacaoPavimento(pavimento, indice) {
   `;
 
 }
+
+
+
 
 function adicionarOcupacaoPavimento(pavimento) {
 
@@ -2246,10 +2433,11 @@ document.addEventListener("click", function(e) {
     document.getElementById("municipioLista").style.display = "none";
   }
 
-  if (!e.target.closest(".ocupacao-box")) {
-    const listaOcupacao = document.getElementById("listaOcupacaoUnica");
-    if (listaOcupacao) listaOcupacao.style.display = "none";
-  }
+if (!e.target.closest(".ocupacao-box-pavimento")) {
+document.querySelectorAll(".lista-ocupacao-pavimento").forEach(lista => {
+lista.style.display = "none";
+});
+} 
 
 });
 
