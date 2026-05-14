@@ -931,11 +931,19 @@ document.getElementById("alturaEdificacao").addEventListener("blur", function ()
 
 });
 
-
 // 🔥 CONTROLE DO USO — OCUPAÇÃO ÚNICA
 document.getElementById("usoOcupacaoUnica").addEventListener("change", function () {
 
-  popularDescricoesOcupacaoUnica(this.value);
+  document.getElementById("descricaoOcupacaoUnica").value = "";
+  document.getElementById("listaOcupacaoUnica").innerHTML = "";
+  document.getElementById("listaOcupacaoUnica").style.display = "none";
+
+});
+
+// 🔥 BUSCA INTELIGENTE — OCUPAÇÃO ÚNICA
+document.getElementById("descricaoOcupacaoUnica").addEventListener("input", function () {
+
+  buscarOcupacoesUnica(this.value);
 
 });
 
@@ -1303,6 +1311,120 @@ const usos = [...new Set(
   });
 
 }
+
+function buscarOcupacoesUnica(termo) {
+
+  const lista = document.getElementById("listaOcupacaoUnica");
+  const usoSelecionado = document.getElementById("usoOcupacaoUnica").value;
+  const estado = document.getElementById("estado").value;
+
+  lista.innerHTML = "";
+
+  const termoBusca = termo.toLowerCase().trim();
+
+  if (termoBusca.length < 2) {
+    lista.style.display = "none";
+    return;
+  }
+
+  let resultados = ocupacoesBase.filter(o => {
+
+    if (!o.ativo) return false;
+    if (o.estado !== estado) return false;
+
+    // Se o uso foi escolhido, filtra dentro dele
+    if (usoSelecionado && o.ocupacao_macro !== usoSelecionado) return false;
+
+    const textoBusca = [
+      o.ocupacao_macro,
+      o.descricao,
+      o.divisao,
+      o.grupo
+    ].join(" ").toLowerCase();
+
+    return textoBusca.includes(termoBusca);
+
+  });
+
+  resultados = resultados.slice(0, 20);
+
+  if (resultados.length === 0) {
+    lista.innerHTML = `
+      <div style="padding:8px; color:#777;">
+        Nenhuma ocupação encontrada.
+      </div>
+    `;
+    lista.style.display = "block";
+    return;
+  }
+
+  resultados.forEach(item => {
+
+    const div = document.createElement("div");
+
+    div.innerHTML = `
+      <strong>${item.ocupacao_macro}</strong><br>
+      <span style="font-size:12px; color:#555;">
+        ${item.divisao} — ${item.descricao}
+      </span>
+    `;
+
+    div.onclick = () => {
+      selecionarOcupacaoUnica(item.id);
+    };
+
+    lista.appendChild(div);
+
+  });
+
+  lista.style.display = "block";
+
+}
+
+
+function selecionarOcupacaoUnica(id) {
+
+  const item = ocupacoesBase.find(o => o.id === String(id));
+
+  if (!item) return;
+
+  // Preenche o uso automaticamente
+  document.getElementById("usoOcupacaoUnica").value =
+    item.ocupacao_macro;
+
+  // Preenche a descrição
+  document.getElementById("descricaoOcupacaoUnica").value =
+    item.descricao;
+
+  // Fecha a lista
+  document.getElementById("listaOcupacaoUnica").style.display = "none";
+
+  // 🔥 Altura do armazenamento só habilita quando for carga por metro
+  const alturaArm = document.getElementById("alturaArmazenamentoUnica");
+
+  const cargaPorMetro = parseFloat(
+    String(item.carga_por_metro_mj_m2).replace(",", ".")
+  ) || 0;
+
+  if (cargaPorMetro > 0 || item.tipo_carga === "POR_METRO") {
+
+    alturaArm.disabled = false;
+    alturaArm.style.backgroundColor = "#ffffff";
+    alturaArm.style.cursor = "text";
+
+  } else {
+
+    alturaArm.value = "0,00";
+    alturaArm.disabled = true;
+    alturaArm.style.backgroundColor = "#eeeeee";
+    alturaArm.style.cursor = "not-allowed";
+
+  }
+
+  console.log("Ocupação selecionada:", item);
+
+}
+
 
 function popularDescricoesOcupacaoUnica(usoSelecionado) {
 
@@ -1813,12 +1935,18 @@ function criarLinhaOcupacaoPavimento(pavimento, indice) {
           </select>
         </div>
 
-        <div>
-          <label style="font-size:13px; font-weight:500;">Ocupação / Descrição</label>
-          <select class="descricao-ocupacao-pavimento" disabled>
-            <option value="">-- Selecione o uso primeiro --</option>
-          </select>
-        </div>
+        <div class="ocupacao-box" style="position:relative;">
+  <label style="font-size:13px; font-weight:500;">Ocupação / Descrição</label>
+
+  <input type="text"
+    id="descricaoOcupacaoUnica"
+    placeholder="Digite para buscar a ocupação..."
+    autocomplete="off"
+    style="margin-bottom:12px;">
+
+  <div id="listaOcupacaoUnica" class="municipio-lista"></div>
+</div>
+
 
         <div>
           <label style="font-size:13px; font-weight:500;">Área desta ocupação (m²)</label>
@@ -2102,7 +2230,13 @@ document.addEventListener("click", function(e) {
     document.getElementById("municipioLista").style.display = "none";
   }
 
+  if (!e.target.closest(".ocupacao-box")) {
+    const listaOcupacao = document.getElementById("listaOcupacaoUnica");
+    if (listaOcupacao) listaOcupacao.style.display = "none";
+  }
+
 });
+
 
 document.getElementById("municipioInput").addEventListener("focus", function() {
 
