@@ -786,7 +786,7 @@ style="text-align:right;">
 <hr class="divisor-criterio">
 
 <div class="panel-title" style="margin-top:15px;">
-  Ocupação / Uso
+  🏢 Ocupação / Uso
 </div>
 
 <div class="panel-item">
@@ -800,24 +800,25 @@ style="text-align:right;">
 </div>
 
 <div class="panel-item">
+  <strong>Ocupação:</strong>
+  <span id="painelDescricaoOcupacao">—</span>
+</div>
+
+<div class="panel-item">
   <strong>Carga de incêndio:</strong>
   <span id="painelCargaOcupacao">—</span>
 </div>
 
 <div class="panel-item">
-  <strong>Permite CLCB:</strong>
-  <span id="painelPermiteClcbOcupacao">—</span>
+  <strong>Tipo do Processo:</strong>
+  <span id="painelProcOcupacao">—</span>
 </div>
 
 <div class="panel-item">
-  <strong>PT obrigatório:</strong>
-  <span id="painelPtObrigatorioOcupacao">—</span>
+  <strong>Certificação:</strong>
+  <span id="painelCertOcupacao" style="font-weight:bold;">—</span>
 </div>
 
-<div class="panel-item">
-  <strong>Tipo de carga:</strong>
-  <span id="painelTipoCargaOcupacao">—</span>
-</div>
 
 <hr class="divisor-criterio">
 
@@ -1617,24 +1618,30 @@ function selecionarOcupacaoPavimento(id, linha) {
 
 }
 
-
 function atualizarPainelOcupacao(item) {
 
   if (!item) {
+
     document.getElementById("painelGrupoOcupacao").innerText = "—";
     document.getElementById("painelDivisaoOcupacao").innerText = "—";
+    document.getElementById("painelDescricaoOcupacao").innerText = "—";
     document.getElementById("painelCargaOcupacao").innerText = "—";
     document.getElementById("painelProcOcupacao").innerText = "—";
     document.getElementById("painelCertOcupacao").innerText = "—";
     document.getElementById("painelCertOcupacao").style.color = "#333";
+
     return;
   }
 
+  // Grupo + ocupação macro
   document.getElementById("painelGrupoOcupacao").innerText =
-    item.grupo || "—";
+    (item.grupo || "—") + " - " + (item.ocupacao_macro || "—");
 
   document.getElementById("painelDivisaoOcupacao").innerText =
     item.divisao || "—";
+
+  document.getElementById("painelDescricaoOcupacao").innerText =
+    item.descricao || "—";
 
   const cargaFixa = parseFloat(
     String(item.carga_fixa_mj_m2).replace(",", ".")
@@ -1647,33 +1654,44 @@ function atualizarPainelOcupacao(item) {
   let textoCarga = "—";
 
   if (cargaMetro > 0) {
+
     textoCarga =
       cargaMetro.toLocaleString("pt-BR", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       }) + " MJ/m² por metro";
+
   } else if (cargaFixa > 0) {
+
     textoCarga =
       cargaFixa.toLocaleString("pt-BR", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       }) + " MJ/m²";
+
   }
 
-  document.getElementById("painelCargaOcupacao").innerText = textoCarga;
+  document.getElementById("painelCargaOcupacao").innerText =
+    textoCarga;
 
+
+  // Classificação provisória pela ocupação
   let textoProcesso = "PTS (Projeto Técnico Simplificado)";
   let textoCertificacao = "CLCB (Certificado de Licença do Corpo de Bombeiros)";
   let cor = "#2e7d32";
 
   if (item.pt_obrigatorio === "TRUE") {
+
     textoProcesso = "PT (Projeto Técnico)";
     textoCertificacao = "AVCB (Auto de Vistoria do Corpo de Bombeiros)";
     cor = "#c62828";
+
   } else if (item.permite_clcb !== "TRUE") {
+
     textoProcesso = "PTS (Projeto Técnico Simplificado)";
     textoCertificacao = "AVCB (Auto de Vistoria do Corpo de Bombeiros)";
     cor = "#ef6c00";
+
   }
 
   document.getElementById("painelProcOcupacao").innerText =
@@ -1681,11 +1699,16 @@ function atualizarPainelOcupacao(item) {
 
   const cert = document.getElementById("painelCertOcupacao");
 
-  cert.innerText = textoCertificacao;
-  cert.style.color = cor;
-  cert.style.fontWeight = "bold";
-}
+  cert.innerText =
+    textoCertificacao;
 
+  cert.style.color =
+    cor;
+
+  cert.style.fontWeight =
+    "bold";
+
+}
 
 
 function selecionarOcupacaoUnica(id) {
