@@ -855,9 +855,11 @@ await carregarClassificacaoAltura();
 await carregarPrioridades();
 await carregarRegrasConsolidacao();
 await carregarOcupacoesBase();
+await carregarRegrasOcupacao();
 await carregarAlertasArea();
 await carregarNotasAltura(); 
 await carregarMunicipios();
+
 
 
 
@@ -1099,12 +1101,13 @@ let classificacaoAltura = [];
 let regrasPrioridade = [];
 let regrasConsolidacao = [];
 let ocupacoesBase = [];
+let regrasOcupacao = [];
 
 let resultadoArea = null;
 let resultadoAltura = null;
+let resultadoOcupacao = null;
 
 let notasAltura = [];
-
  
 
 async function carregarRegrasArea() {
@@ -1378,6 +1381,69 @@ async function carregarOcupacoesBase() {
 
 }
 
+async function carregarRegrasOcupacao() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRCHSi5kfcb3SQOLj_gFnDOouMLCkpVsdGWXacFkWwYBFGnexc39M_0yQIjISKjUIf6JrPAHbtLYfLK/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  regrasOcupacao = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        criterio: col[2],
+        permite_clcb: col[3],
+        pt_obrigatorio: col[4],
+        processo: col[5],
+        certificacao: col[6],
+        texto_processo: col[7],
+        texto_certificacao: col[8],
+        criterio_determinante: col[9],
+        texto: col[10],
+        cor: col[11],
+        ativo: col[12] === "TRUE"
+      };
+
+    });
+
+  console.log("Regras de ocupação carregadas:", regrasOcupacao);
+
+}
+
+function buscarRegraOcupacao(item) {
+
+  const estado = document.getElementById("estado").value;
+
+  return regrasOcupacao.find(r => {
+
+    if (!r.ativo) return false;
+
+    if (r.estado !== estado) return false;
+
+    if (r.criterio !== "ocupacao") return false;
+
+    if (r.permite_clcb !== item.permite_clcb) return false;
+
+    if (r.pt_obrigatorio !== item.pt_obrigatorio) return false;
+
+    return true;
+
+  });
+
+}
+
+
+
 function popularUsosOcupacaoUnica() {
 
   const selectUso = document.getElementById("usoOcupacaoUnica");
@@ -1630,10 +1696,12 @@ function atualizarPainelOcupacao(item) {
     document.getElementById("painelCertOcupacao").innerText = "—";
     document.getElementById("painelCertOcupacao").style.color = "#333";
 
+    resultadoOcupacao = null;
+    atualizarPreviaFinal();
+
     return;
   }
 
-  // Grupo + ocupação macro
   document.getElementById("painelGrupoOcupacao").innerText =
     (item.grupo || "—") + " - " + (item.ocupacao_macro || "—");
 
@@ -1674,41 +1742,44 @@ function atualizarPainelOcupacao(item) {
   document.getElementById("painelCargaOcupacao").innerText =
     textoCarga;
 
+  const regra = buscarRegraOcupacao(item);
 
-  // Classificação provisória pela ocupação
-  let textoProcesso = "PTS (Projeto Técnico Simplificado)";
-  let textoCertificacao = "CLCB (Certificado de Licença do Corpo de Bombeiros)";
-  let cor = "#2e7d32";
+  if (regra) {
 
-  if (item.pt_obrigatorio === "TRUE") {
+    document.getElementById("painelProcOcupacao").innerText =
+      regra.texto_processo;
 
-    textoProcesso = "PT (Projeto Técnico)";
-    textoCertificacao = "AVCB (Auto de Vistoria do Corpo de Bombeiros)";
-    cor = "#c62828";
+    const cert = document.getElementById("painelCertOcupacao");
 
-  } else if (item.permite_clcb !== "TRUE") {
+    cert.innerText =
+      regra.texto_certificacao;
 
-    textoProcesso = "PTS (Projeto Técnico Simplificado)";
-    textoCertificacao = "AVCB (Auto de Vistoria do Corpo de Bombeiros)";
-    cor = "#ef6c00";
+    cert.style.color =
+      regra.cor;
+
+    cert.style.fontWeight =
+      "bold";
+
+    resultadoOcupacao = {
+      criterio: regra.criterio_determinante || "Ocupação / Uso",
+      processo: regra.processo,
+      certificacao: regra.certificacao
+    };
+
+  } else {
+
+    document.getElementById("painelProcOcupacao").innerText = "—";
+    document.getElementById("painelCertOcupacao").innerText = "—";
+    document.getElementById("painelCertOcupacao").style.color = "#333";
+
+    resultadoOcupacao = null;
 
   }
 
-  document.getElementById("painelProcOcupacao").innerText =
-    textoProcesso;
-
-  const cert = document.getElementById("painelCertOcupacao");
-
-  cert.innerText =
-    textoCertificacao;
-
-  cert.style.color =
-    cor;
-
-  cert.style.fontWeight =
-    "bold";
+  atualizarPreviaFinal();
 
 }
+
 
 
 function selecionarOcupacaoUnica(id) {
@@ -2046,8 +2117,10 @@ function atualizarPreviaFinal() {
 
   const resultados = [];
 
-  if (resultadoArea) resultados.push(resultadoArea);
-  if (resultadoAltura) resultados.push(resultadoAltura);
+if (resultadoArea) resultados.push(resultadoArea);
+if (resultadoAltura) resultados.push(resultadoAltura);
+if (resultadoOcupacao) resultados.push(resultadoOcupacao);
+
 
   // 🔥 PRIMEIRO VERIFICA REGRAS COMBINADAS DA CONSOLIDAÇÃO
   // Só verifica se já existir pelo menos um resultado preenchido
