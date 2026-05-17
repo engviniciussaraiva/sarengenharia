@@ -2221,6 +2221,7 @@ function atualizarClassificacaoAltura() {
     document.getElementById("certAltura").style.fontWeight = "normal";
 
     resultadoAltura = null;
+atualizarMemorialAltura(null, null); 
     atualizarPreviaFinal();
 
     return;
@@ -2263,6 +2264,7 @@ function atualizarClassificacaoAltura() {
     resultadoAltura = null;
 
   }
+atualizarMemorialAltura(regra, classAltura);
 
   atualizarPreviaFinal();
 
@@ -2659,16 +2661,17 @@ function atualizarMemorialArea(regraArea) {
     </div>
 
     <div style="margin-bottom:8px;">
-      <strong>Descontos permitidos para CLCB:</strong>
-      ${formatarBR(descontoCLCB)} m²
-      ${detalhesCLCB ? `<br><span style="color:#555;">(${detalhesCLCB})</span>` : ""}
-    </div>
+  <strong>Descontos permitidos para CLCB:</strong>
+  ${formatarBR(descontoCLCB)} m²
+  ${detalhesCLCB ? `<span style="color:#555;"> (${detalhesCLCB})</span>` : ""}
+</div>
 
-    <div style="margin-bottom:8px;">
-      <strong>Descontos gerais:</strong>
-      ${formatarBR(descontoGeral)} m²
-      ${detalhesGeral ? `<br><span style="color:#555;">(${detalhesGeral})</span>` : ""}
-    </div>
+<div style="margin-bottom:8px;">
+  <strong>Descontos gerais:</strong>
+  ${formatarBR(descontoGeral)} m²
+  ${detalhesGeral ? `<span style="color:#555;"> (${detalhesGeral})</span>` : ""}
+</div>
+
 
     <div style="margin-bottom:12px;">
       <strong>Área computada final:</strong>
@@ -2728,6 +2731,155 @@ function atualizarMemorialArea(regraArea) {
   }
 
   memorial.innerHTML = textoResultado;
+
+}
+
+function atualizarMemorialAltura(regraAltura, classAltura) {
+
+  const memorial = document.getElementById("memorialAltura");
+  if (!memorial) return;
+
+  const pav = parseInt(document.getElementById("pavimentos").value);
+  const alturaTexto = document.getElementById("alturaEdificacao").value;
+  const temSubsolo = document.getElementById("temSubsolo").value;
+  const usoSubsolo = document.getElementById("usoSubsolo").value;
+  const areaSubsolo = document.getElementById("areaSubsolo").value;
+
+  if (!pav) {
+    memorial.innerHTML =
+      "Aguardando preenchimento dos dados de altura e pavimentos.";
+    return;
+  }
+
+  const textoPavimentos =
+    pav === 1 ? "1 pavimento" : pav + " pavimentos";
+
+  let textoAltura = "Não informada";
+
+  if (alturaTexto && alturaTexto !== "0,00") {
+    textoAltura = alturaTexto + " m";
+  } else if (pav === 1) {
+    textoAltura = "Edificação térrea";
+  }
+
+  let textoSubsolo = "Não informado";
+
+  if (temSubsolo === "SIM") {
+    textoSubsolo = "Sim";
+  } else if (temSubsolo === "NAO") {
+    textoSubsolo = "Não";
+  }
+
+  let textoUsoSubsolo = "";
+
+  if (temSubsolo === "SIM") {
+    if (usoSubsolo === "estacionamento") {
+      textoUsoSubsolo = " — Uso: estacionamento exclusivo";
+    } else if (usoSubsolo === "reuniao_publico") {
+      textoUsoSubsolo = " — Uso: reunião de público (Grupo F)";
+    } else if (usoSubsolo === "outra") {
+      textoUsoSubsolo = " — Uso: outra ocupação";
+    }
+
+    if (areaSubsolo === "SIM") {
+      textoUsoSubsolo += " — Área superior a 50,00 m²";
+    } else if (areaSubsolo === "NAO") {
+      textoUsoSubsolo += " — Área até 50,00 m²";
+    }
+  }
+
+let html = `
+  <div style="margin-bottom:8px;">
+    <strong>Altura da edificação:</strong>
+    ${textoAltura}
+  </div>
+`;
+  
+
+  if (classAltura) {
+    html += `
+      <div style="margin-bottom:8px;">
+        <strong>Tipo:</strong>
+        ${classAltura.tipo_altura}
+      </div>
+
+      <div style="margin-bottom:8px;">
+        <strong>Denominação:</strong>
+        ${classAltura.denominacao}
+      </div>
+
+      <div style="margin-bottom:8px;">
+        <strong>Critério:</strong>
+        ${classAltura.texto_altura}
+      </div>
+    `;
+  }
+
+html += `
+  <div style="margin-bottom:8px;">
+    <strong>Subsolo:</strong>
+    ${textoSubsolo}${textoUsoSubsolo}
+  </div>
+
+  <div style="margin-bottom:12px;">
+    <strong>Quantidade de pavimentos:</strong>
+    ${textoPavimentos}
+  </div>
+`;
+
+
+  if (regraAltura) {
+
+    html += `
+      <div class="memorial-resultado" style="
+        margin-top:12px;
+        padding:12px;
+        border:1px solid #e0e0e0;
+        background:#ffffff;
+        border-radius:6px;
+      ">
+
+        <div style="
+          font-weight:700;
+          color:#1b5e20;
+          margin-bottom:8px;
+        ">
+          Resultado pelo critério da altura:
+        </div>
+
+        <div style="margin-bottom:6px;">
+          <strong>Tipo do Processo:</strong>
+          ${regraAltura.texto_processo}
+        </div>
+
+        <div>
+          <strong>Certificação:</strong>
+          <span style="font-weight:700; color:${regraAltura.cor};">
+            ${regraAltura.texto_certificacao}
+          </span>
+        </div>
+
+      </div>
+    `;
+
+  } else {
+
+    html += `
+      <div style="
+        margin-top:10px;
+        padding:10px;
+        border:1px solid #ffcdd2;
+        background:#ffebee;
+        border-radius:6px;
+        color:#b71c1c;
+      ">
+        Não foi encontrada regra de enquadramento por altura para os dados informados.
+      </div>
+    `;
+
+  }
+
+  memorial.innerHTML = html;
 
 }
 
