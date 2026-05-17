@@ -2582,6 +2582,148 @@ function atualizarCabecalhoMemorial() {
 
 }
 
+function atualizarMemorialArea(regraArea) {
+
+  function parseBR(v) {
+    return parseFloat(String(v).replace(/\./g, "").replace(",", ".")) || 0;
+  }
+
+  function formatarBR(n) {
+    return n.toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  // 🔥 COLETA DETALHES DOS DESCONTOS PELO LABEL DO MODAL
+  function coletarDetalhesDescontos(seletor) {
+
+    const detalhes = [];
+
+    document.querySelectorAll(seletor).forEach(input => {
+
+      const valor = parseBR(input.value);
+
+      if (valor > 0) {
+
+        let nome = "Desconto";
+
+        const label = input.previousElementSibling;
+
+        if (label && label.tagName.toLowerCase() === "label") {
+          nome = label.innerText.replace("(m²)", "").trim();
+        }
+
+        detalhes.push(
+          nome + ": " + formatarBR(valor) + " m²"
+        );
+
+      }
+
+    });
+
+    return detalhes.join(" + ");
+
+  }
+
+  const areaTotal = parseBR(document.getElementById("areaTotal").value);
+  const descontoCLCB = parseBR(document.getElementById("descontoCLCB").value);
+  const descontoGeral = parseBR(document.getElementById("descontoGeral").value);
+  const areaComputada = parseBR(document.getElementById("areaComputada").value);
+
+  const detalhesCLCB = coletarDetalhesDescontos(".desconto-clcb");
+  const detalhesGeral = coletarDetalhesDescontos(".desconto-geral");
+
+  const memorial = document.getElementById("memorialArea");
+
+  if (!memorial) return;
+
+  if (areaTotal <= 0) {
+
+    memorial.innerHTML =
+      "Aguardando preenchimento do quadro de áreas da edificação.";
+
+    return;
+  }
+
+  let textoResultado = `
+    <div style="margin-bottom:8px;">
+      <strong>Área total edificada:</strong>
+      ${formatarBR(areaTotal)} m²
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <strong>Descontos permitidos para CLCB:</strong>
+      ${formatarBR(descontoCLCB)} m²
+      ${detalhesCLCB ? `<br><span style="color:#555;">(${detalhesCLCB})</span>` : ""}
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <strong>Descontos gerais:</strong>
+      ${formatarBR(descontoGeral)} m²
+      ${detalhesGeral ? `<br><span style="color:#555;">(${detalhesGeral})</span>` : ""}
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <strong>Área computada final:</strong>
+      ${formatarBR(areaComputada)} m²
+    </div>
+  `;
+
+  if (regraArea) {
+
+    textoResultado += `
+      <div style="
+        margin-top:10px;
+        padding:10px;
+        border:1px solid #e0e0e0;
+        background:#ffffff;
+        border-radius:6px;
+      ">
+
+        <div style="
+          font-weight:700;
+          color:#1b5e20;
+          margin-bottom:8px;
+        ">
+          Resultado pelo critério da área:
+        </div>
+
+        <div style="margin-bottom:6px;">
+          <strong>Tipo do Processo:</strong>
+          ${regraArea.texto_processo}
+        </div>
+
+        <div>
+          <strong>Certificação:</strong>
+          <span style="font-weight:700; color:${regraArea.cor};">
+            ${regraArea.texto_certificacao}
+          </span>
+        </div>
+
+      </div>
+    `;
+
+  } else {
+
+    textoResultado += `
+      <div style="
+        margin-top:10px;
+        padding:10px;
+        border:1px solid #ffcdd2;
+        background:#ffebee;
+        border-radius:6px;
+        color:#b71c1c;
+      ">
+        Não foi encontrada regra de enquadramento por área para os dados informados.
+      </div>
+    `;
+
+  }
+
+  memorial.innerHTML = textoResultado;
+
+}
 
 
 function calcularAreaComputada() {
@@ -2650,6 +2792,7 @@ if (regra) {
 
 }
 
+atualizarMemorialArea(regra);
 atualizarPreviaFinal();
 
 
