@@ -354,21 +354,22 @@ font-weight: 500;
   </div>
 
   <div>
-    <label>Referência</label>
-    <input type="text" placeholder="Nome da edificação">
-  </div>
+  <label>Referência</label>
+  <input type="text" id="referenciaProjeto" placeholder="Nome da edificação">
+</div>
+
 
   <!-- LINHA 2 (OCUPA 3 COLUNAS) -->
   <div style="grid-column: span 3;">
-    <label>Endereço</label>
-    <input type="text" placeholder="Rua / Avenida">
-  </div>
+  <label>Endereço</label>
+  <input type="text" id="enderecoProjeto" placeholder="Rua / Avenida">
+</div>
 
   <!-- LINHA 3 -->
   <!-- CLIENTE ocupa 2 colunas -->
 <div style="grid-column: span 2;">
   <label>Cliente</label>
-  <input type="text" placeholder="Nome do cliente">
+  <input type="text" id="clienteProjeto" placeholder="Nome do cliente">
 </div>
 
 <!-- COLUNA DIVIDIDA -->
@@ -796,6 +797,68 @@ style="text-align:right;">
       line-height:1.6;
     ">
 
+<div style="
+  text-align:center;
+  font-size:16px;
+  font-weight:700;
+  color:#1b5e20;
+  margin-bottom:16px;
+">
+  MEMORIAL DE ENQUADRAMENTO TÉCNICO
+</div>
+
+<div id="cabecalhoMemorial" style="
+  border:1px solid #e0e0e0;
+  background:#ffffff;
+  padding:12px;
+  border-radius:8px;
+  margin-bottom:16px;
+  font-size:13px;
+  line-height:1.6;
+">
+
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+
+    <div>
+      <strong>Referência:</strong><br>
+      <span id="memReferencia">—</span>
+    </div>
+
+    <div>
+      <strong>Data:</strong><br>
+      <span id="memData">—</span>
+    </div>
+
+    <div>
+      <strong>Cliente:</strong><br>
+      <span id="memCliente">—</span>
+    </div>
+
+    <div>
+      <strong>CNPJ / CPF:</strong><br>
+      <span id="memDocumento">—</span>
+    </div>
+
+    <div style="grid-column: span 2;">
+      <strong>Endereço:</strong><br>
+      <span id="memEndereco">—</span>
+    </div>
+
+    <div>
+      <strong>Município:</strong><br>
+      <span id="memMunicipio">—</span>
+    </div>
+
+    <div>
+      <strong>Estado:</strong><br>
+      <span id="memEstado">—</span>
+    </div>
+
+  </div>
+
+</div>
+
+
       <div style="
         font-size:14px;
         font-weight:700;
@@ -1197,6 +1260,53 @@ document.getElementById("ocupacaoUnica").addEventListener("change", function () 
 
 });
 
+// 🔥 CONTROLE DO MODO DE OCUPAÇÃO
+document.getElementById("ocupacaoUnica").addEventListener("change", function () {
+
+  const blocoUnico = document.getElementById("blocoOcupacaoUnica");
+  const blocoPavimentos = document.getElementById("blocoOcupacaoPorPavimento");
+
+  if (this.checked) {
+
+    blocoUnico.style.display = "block";
+    blocoPavimentos.style.display = "none";
+
+  } else {
+
+    blocoUnico.style.display = "none";
+    blocoPavimentos.style.display = "block";
+
+    gerarPavimentosOcupacao();
+
+  }
+
+});
+
+
+// 🔥 ATUALIZA CABEÇALHO DO MEMORIAL
+[
+  "referenciaProjeto",
+  "clienteProjeto",
+  "enderecoProjeto",
+  "municipioInput",
+  "estado",
+  "doc",
+  "dataProjeto"
+].forEach(id => {
+
+  const el = document.getElementById(id);
+
+  if (el) {
+    el.addEventListener("input", atualizarCabecalhoMemorial);
+    el.addEventListener("change", atualizarCabecalhoMemorial);
+  }
+
+});
+
+atualizarCabecalhoMemorial();
+
+
+} 
 
 
 } 
@@ -2446,6 +2556,36 @@ function adicionarOcupacaoPavimento(pavimento) {
 
 }
 
+function atualizarCabecalhoMemorial() {
+
+  const referencia = document.getElementById("referenciaProjeto")?.value || "—";
+  const cliente = document.getElementById("clienteProjeto")?.value || "—";
+  const endereco = document.getElementById("enderecoProjeto")?.value || "—";
+  const municipio = document.getElementById("municipioInput")?.value || "—";
+  const estado = document.getElementById("estado")?.value || "—";
+  const documento = document.getElementById("doc")?.value || "—";
+  const data = document.getElementById("dataProjeto")?.value || "";
+
+  let dataFormatada = "—";
+
+  if (data) {
+    const partes = data.split("-");
+    if (partes.length === 3) {
+      dataFormatada = partes[2] + "/" + partes[1] + "/" + partes[0];
+    }
+  }
+
+  document.getElementById("memReferencia").innerText = referencia;
+  document.getElementById("memCliente").innerText = cliente;
+  document.getElementById("memEndereco").innerText = endereco;
+  document.getElementById("memMunicipio").innerText = municipio;
+  document.getElementById("memEstado").innerText = estado;
+  document.getElementById("memDocumento").innerText = documento;
+  document.getElementById("memData").innerText = dataFormatada;
+
+}
+
+
 
 function calcularAreaComputada() {
 
@@ -2663,9 +2803,11 @@ filtrados = filtrados.slice(0, 20);
     item.textContent = nome;
 
     item.onclick = () => {
-      document.getElementById("municipioInput").value = nome;
-      lista.style.display = "none";
-    };
+  document.getElementById("municipioInput").value = nome;
+  lista.style.display = "none";
+  atualizarCabecalhoMemorial();
+};
+
 
     lista.appendChild(item);
   });
@@ -2699,10 +2841,12 @@ document.getElementById("municipioInput").addEventListener("focus", function() {
     const item = document.createElement("div");
     item.textContent = nome;
 
-    item.onclick = () => {
-      document.getElementById("municipioInput").value = nome;
-      lista.style.display = "none";
-    };
+  item.onclick = () => {
+  document.getElementById("municipioInput").value = nome;
+  lista.style.display = "none";
+  atualizarCabecalhoMemorial();
+};
+
 
     lista.appendChild(item);
 
