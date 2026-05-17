@@ -303,6 +303,44 @@ font-weight: 500;
   font-weight: 500;
 }
 
+/* MEMORIAL */
+.memorial-box {
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.memorial-box strong {
+  font-size: 16px;
+}
+
+.memorial-titulo-principal {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1b5e20;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.memorial-subtitulo {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1b5e20;
+  margin-bottom: 12px;
+}
+
+.memorial-cabecalho {
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.memorial-cabecalho strong {
+  font-size: 16px;
+}
+
+.memorial-resultado {
+  font-size: 16px;
+  line-height: 1.8;
+}
 
 
 
@@ -787,86 +825,69 @@ style="text-align:right;">
 
   <div class="card-content">
 
-    <div style="
-      border:1px solid #dcdcdc;
-      background:#fafafa;
-      padding:14px;
-      border-radius:8px;
-      font-size:13px;
-      color:#333;
-      line-height:1.6;
-    ">
-
-<div style="
-  text-align:center;
-  font-size:16px;
-  font-weight:700;
-  color:#1b5e20;
-  margin-bottom:16px;
+<div class="memorial-box" style="
+  border:1px solid #dcdcdc;
+  background:#fafafa;
+  padding:18px;
+  border-radius:8px;
+  color:#333;
 ">
+    
+
+<div class="memorial-titulo-principal">
   MEMORIAL DE ENQUADRAMENTO TÉCNICO
 </div>
 
-<div id="cabecalhoMemorial" style="
+<div id="cabecalhoMemorial" class="memorial-cabecalho" style="
   border:1px solid #e0e0e0;
   background:#ffffff;
-  padding:12px;
+  padding:14px;
   border-radius:8px;
-  margin-bottom:16px;
-  font-size:13px;
-  line-height:1.6;
+  margin-bottom:18px;
 ">
 
-  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
 
-    <div>
-      <strong>Referência:</strong><br>
-      <span id="memReferencia">—</span>
-    </div>
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
 
-    <div>
-      <strong>Data:</strong><br>
-      <span id="memData">—</span>
-    </div>
+  <div>
+    <strong>Cliente:</strong><br>
+    <span id="memCliente">—</span>
+  </div>
 
-    <div>
-      <strong>Cliente:</strong><br>
-      <span id="memCliente">—</span>
-    </div>
+  <div>
+    <strong>CNPJ / CPF:</strong><br>
+    <span id="memDocumento">—</span>
+  </div>
 
-    <div>
-      <strong>CNPJ / CPF:</strong><br>
-      <span id="memDocumento">—</span>
-    </div>
+  <div>
+    <strong>Endereço:</strong><br>
+    <span id="memEndereco">—</span>
+  </div>
 
-    <div style="grid-column: span 2;">
-      <strong>Endereço:</strong><br>
-      <span id="memEndereco">—</span>
-    </div>
+  <div>
+    <strong>Município / Estado:</strong><br>
+    <span id="memMunicipio">—</span> / <span id="memEstado">—</span>
+  </div>
 
-    <div>
-      <strong>Município:</strong><br>
-      <span id="memMunicipio">—</span>
-    </div>
+  <div>
+    <strong>Referência:</strong><br>
+    <span id="memReferencia">—</span>
+  </div>
 
-    <div>
-      <strong>Estado:</strong><br>
-      <span id="memEstado">—</span>
-    </div>
-
+  <div>
+    <strong>Data:</strong><br>
+    <span id="memData">—</span>
   </div>
 
 </div>
 
+  
+</div>
 
-      <div style="
-        font-size:14px;
-        font-weight:700;
-        color:#1b5e20;
-        margin-bottom:10px;
-      ">
-        1. Quadro de Áreas
-      </div>
+
+    <div class="memorial-subtitulo">
+  1. Quadro de Áreas
+</div>
 
       <div id="memorialArea">
         Aguardando preenchimento do quadro de áreas da edificação.
@@ -874,13 +895,8 @@ style="text-align:right;">
 
       <hr class="divisor-criterio">
 
-      <div style="
-        font-size:14px;
-        font-weight:700;
-        color:#1b5e20;
-        margin-bottom:10px;
-      ">
-        2. Altura e Pavimentos
+      <div class="memorial-subtitulo">
+      2. Altura e Pavimentos
       </div>
 
       <div id="memorialAltura">
@@ -889,12 +905,7 @@ style="text-align:right;">
 
       <hr class="divisor-criterio">
 
-      <div style="
-        font-size:14px;
-        font-weight:700;
-        color:#1b5e20;
-        margin-bottom:10px;
-      ">
+      <div class="memorial-subtitulo">
         3. Ocupação / Uso
       </div>
 
@@ -904,12 +915,7 @@ style="text-align:right;">
 
       <hr class="divisor-criterio">
 
-      <div style="
-        font-size:14px;
-        font-weight:700;
-        color:#1b5e20;
-        margin-bottom:10px;
-      ">
+      <div class="memorial-subtitulo">
         4. Critérios Técnicos Adicionais / Riscos Específicos
       </div>
 
