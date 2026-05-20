@@ -1384,6 +1384,8 @@ let regrasConsolidacao = [];
 let ocupacoesBase = [];
 let regrasOcupacao = [];
 
+let ocupacoesSelecionadas = []; 
+
 let resultadoArea = null;
 let resultadoAltura = null;
 let resultadoOcupacao = null;
@@ -2916,6 +2918,73 @@ html += `
   }
 
   memorial.innerHTML = html;
+
+}
+
+function renderizarOcupacoesSelecionadas() {
+
+  const lista = document.getElementById("listaOcupacoesCadastradas");
+
+  if (!lista) return;
+
+  if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
+
+    lista.innerHTML = "Aguardando inclusão de ocupações.";
+    return;
+
+  }
+
+  let html = `
+    <table style="
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+      background:#fff;
+    ">
+      <thead>
+        <tr style="background:#e8f5e9; color:#1b5e20;">
+          <th style="border:1px solid #ddd; padding:6px; text-align:left;">Pavimento</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:left;">Ocupação</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:center;">Divisão</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:right;">Área (m²)</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  ocupacoesSelecionadas.forEach(item => {
+
+    html += `
+      <tr>
+        <td style="border:1px solid #ddd; padding:6px;">
+          ${item.pavimento || "—"}
+        </td>
+
+        <td style="border:1px solid #ddd; padding:6px;">
+          ${item.descricao || "—"}
+        </td>
+
+        <td style="border:1px solid #ddd; padding:6px; text-align:center;">
+          ${item.divisao || "—"}
+        </td>
+
+        <td style="border:1px solid #ddd; padding:6px; text-align:right;">
+          ${(item.area || 0).toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}
+        </td>
+      </tr>
+    `;
+
+  });
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+  lista.innerHTML = html;
 
 }
 
