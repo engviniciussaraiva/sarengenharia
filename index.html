@@ -781,14 +781,37 @@ style="text-align:right;">
     border-radius:8px;
   ">
 
-    <div style="
-      font-size:15px;
-      font-weight:700;
-      color:#1b5e20;
-      margin-bottom:10px;
+   <div style="
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+">
+
+  <div style="
+    font-size:15px;
+    font-weight:700;
+    color:#1b5e20;
+  ">
+    📋 Ocupações cadastradas na edificação
+  </div>
+
+  <button type="button"
+    onclick="limparOcupacoesSelecionadas()"
+    style="
+      background:#777;
+      color:#fff;
+      border:none;
+      padding:6px 10px;
+      border-radius:5px;
+      cursor:pointer;
+      font-size:12px;
     ">
-      📋 Ocupações cadastradas na edificação
-    </div>
+    🧹 Limpar lista
+  </button>
+
+</div>
+
 
     <div id="listaOcupacoesCadastradas" style="
       font-size:13px;
@@ -3141,8 +3164,33 @@ function removerOcupacaoSelecionada(index) {
 
 }
 
+function limparOcupacoesSelecionadas() {
+
+  if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
+    return;
+  }
+
+  const confirmar = confirm("Deseja limpar todas as ocupações cadastradas?");
+
+  if (!confirmar) return;
+
+  ocupacoesSelecionadas = [];
+
+  renderizarOcupacoesSelecionadas();
+
+  resultadoOcupacao = null;
+
+  document.getElementById("painelProcOcupacao").innerText = "—";
+  document.getElementById("painelCertOcupacao").innerText = "—";
+  document.getElementById("painelCertOcupacao").style.color = "#333";
+  document.getElementById("painelCertOcupacao").style.fontWeight = "normal";
+
+  atualizarPreviaFinal();
+
+}
 
   
+
 function adicionarOcupacaoUnica() {
 
   function parseBR(v) {
