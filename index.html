@@ -2583,10 +2583,106 @@ function criarLinhaOcupacaoPavimento(pavimento, indice) {
 
 }
 
+function registrarOcupacaoPavimento(pavimento) {
+
+  function parseBR(v) {
+    return parseFloat(String(v).replace(/\./g, "").replace(",", ".")) || 0;
+  }
+
+  const container = document.querySelector(
+    '.ocupacoes-pavimento[data-pavimento="' + pavimento + '"]'
+  );
+
+  if (!container) return false;
+
+  const linhas = container.querySelectorAll(".linha-ocupacao");
+
+  const linha = linhas[linhas.length - 1];
+
+  if (!linha) return false;
+
+  const descricaoInput = linha.querySelector(".descricao-ocupacao-pavimento");
+  const areaInput = linha.querySelector(".area-ocupacao-pavimento");
+  const alturaInput = linha.querySelector(".altura-armazenamento-pavimento");
+
+  const descricao = descricaoInput.value.trim();
+
+  if (!descricao) {
+    alert("Selecione a ocupação antes de adicionar nova linha.");
+    return false;
+  }
+
+  const area = parseBR(areaInput.value);
+
+  if (area <= 0) {
+    alert("Informe a área desta ocupação.");
+    return false;
+  }
+
+  const item = ocupacoesBase.find(o => o.descricao === descricao);
+
+  if (!item) {
+    alert("Ocupação não encontrada no banco. Selecione pela lista de busca.");
+    return false;
+  }
+
+  const regra = buscarRegraOcupacao(item);
+
+  if (!regra) {
+    alert("Não foi encontrada regra de classificação para esta ocupação.");
+    return false;
+  }
+
+  const cargaFixa = parseBR(item.carga_fixa_mj_m2);
+  const cargaPorMetro = parseBR(item.carga_por_metro_mj_m2);
+  const alturaArmazenamento = parseBR(alturaInput.value);
+
+  let cargaFinal = cargaFixa;
+
+  if (item.tipo_carga === "POR_METRO" || cargaPorMetro > 0) {
+
+    if (alturaArmazenamento <= 0) {
+      alert("Informe a altura de armazenamento para esta ocupação.");
+      return false;
+    }
+
+    cargaFinal = cargaPorMetro * alturaArmazenamento;
+  }
+
+  let nomePavimento = "";
+
+  if (pavimento === 1) {
+    nomePavimento = "Térreo";
+  } else {
+    nomePavimento = pavimento + "º Pavimento";
+  }
+
+  ocupacoesSelecionadas.push({
+    modo: "pavimento",
+    pavimento: nomePavimento,
+    grupo: item.grupo,
+    ocupacao_macro: item.ocupacao_macro,
+    descricao: item.descricao,
+    divisao: item.divisao,
+    area: area,
+    tipo_carga: item.tipo_carga,
+    carga: cargaFinal,
+    processo: regra.processo,
+    certificacao: regra.certificacao,
+    texto_processo: regra.texto_processo,
+    texto_certificacao: regra.texto_certificacao,
+    cor: regra.cor
+  });
+
+  renderizarOcupacoesSelecionadas();
+
+  return true;
+}
 
 
 
 function adicionarOcupacaoPavimento(pavimento) {
+
 
   const container = document.querySelector(
     '.ocupacoes-pavimento[data-pavimento="' + pavimento + '"]'
@@ -2599,6 +2695,10 @@ function adicionarOcupacaoPavimento(pavimento) {
     return;
   }
 
+  const registrou = registrarOcupacaoPavimento(pavimento);
+
+  if (!registrou) return;
+
   const novoIndice = total + 1;
 
   container.insertAdjacentHTML(
@@ -2607,6 +2707,7 @@ function adicionarOcupacaoPavimento(pavimento) {
   );
 
 }
+  
 
 function atualizarCabecalhoMemorial() {
 
