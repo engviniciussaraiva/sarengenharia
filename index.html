@@ -2496,8 +2496,9 @@ function gerarPavimentosOcupacao() {
 
       <div style="text-align:right; margin-top:10px;">
         <button type="button" onclick="adicionarOcupacaoPavimento(${i})">
-          + Adicionar ocupação neste pavimento
-        </button>
+  + Cadastrar ocupação neste pavimento
+</button>
+
       </div>
 
     `;
@@ -2683,31 +2684,38 @@ function registrarOcupacaoPavimento(pavimento) {
 
 function adicionarOcupacaoPavimento(pavimento) {
 
+  const registrou = registrarOcupacaoPavimento(pavimento);
+
+  if (!registrou) return;
 
   const container = document.querySelector(
     '.ocupacoes-pavimento[data-pavimento="' + pavimento + '"]'
   );
 
-  const total = container.querySelectorAll(".linha-ocupacao").length;
+  if (!container) return;
 
-  if (total >= 5) {
-    alert("Limite máximo de 5 ocupações por pavimento.");
-    return;
-  }
+  const linhas = container.querySelectorAll(".linha-ocupacao");
+  const linha = linhas[linhas.length - 1];
 
-  const registrou = registrarOcupacaoPavimento(pavimento);
+  if (!linha) return;
 
-  if (!registrou) return;
+  // 🔥 LIMPA OS CAMPOS DA LINHA ATUAL
+  linha.querySelector(".uso-ocupacao-pavimento").value = "";
+  linha.querySelector(".descricao-ocupacao-pavimento").value = "";
+  linha.querySelector(".area-ocupacao-pavimento").value = "";
+  linha.querySelector(".lista-ocupacao-pavimento").innerHTML = "";
+  linha.querySelector(".lista-ocupacao-pavimento").style.display = "none";
 
-  const novoIndice = total + 1;
+  const alturaArm = linha.querySelector(".altura-armazenamento-pavimento");
 
-  container.insertAdjacentHTML(
-    "beforeend",
-    criarLinhaOcupacaoPavimento(pavimento, novoIndice)
-  );
+  alturaArm.value = "0,00";
+  alturaArm.disabled = true;
+  alturaArm.style.backgroundColor = "#eeeeee";
+  alturaArm.style.cursor = "not-allowed";
 
 }
-  
+
+    
 
 function atualizarCabecalhoMemorial() {
 
