@@ -3061,45 +3061,60 @@ function renderizarOcupacoesSelecionadas() {
     ">
       <thead>
         <tr style="background:#e8f5e9; color:#1b5e20;">
-  <th style="border:1px solid #ddd; padding:6px; text-align:left;">Pavimento</th>
-  <th style="border:1px solid #ddd; padding:6px; text-align:left;">Ocupação</th>
-  <th style="border:1px solid #ddd; padding:6px; text-align:left;">Descrição</th>
-  <th style="border:1px solid #ddd; padding:6px; text-align:center;">Divisão</th>
-  <th style="border:1px solid #ddd; padding:6px; text-align:right;">Área (m²)</th>
-</tr>
-
+          <th style="border:1px solid #ddd; padding:6px; text-align:left;">Pavimento</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:left;">Ocupação</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:left;">Descrição</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:center;">Divisão</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:right;">Área (m²)</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:center;">Ação</th>
+        </tr>
       </thead>
       <tbody>
   `;
 
-  ocupacoesSelecionadas.forEach(item => {
+  ocupacoesSelecionadas.forEach((item, index) => {
 
     html += `
-     <tr>
-  <td style="border:1px solid #ddd; padding:6px;">
-    ${item.pavimento || "—"}
-  </td>
+      <tr>
+        <td style="border:1px solid #ddd; padding:6px;">
+          ${item.pavimento || "—"}
+        </td>
 
-  <td style="border:1px solid #ddd; padding:6px;">
-    ${item.ocupacao_macro || "—"}
-  </td>
+        <td style="border:1px solid #ddd; padding:6px;">
+          ${item.ocupacao_macro || "—"}
+        </td>
 
-  <td style="border:1px solid #ddd; padding:6px;">
-    ${item.descricao || "—"}
-  </td>
+        <td style="border:1px solid #ddd; padding:6px;">
+          ${item.descricao || "—"}
+        </td>
 
-  <td style="border:1px solid #ddd; padding:6px; text-align:center;">
-    ${item.divisao || "—"}
-  </td>
+        <td style="border:1px solid #ddd; padding:6px; text-align:center;">
+          ${item.divisao || "—"}
+        </td>
 
-  <td style="border:1px solid #ddd; padding:6px; text-align:right;">
-    ${(item.area || 0).toLocaleString("pt-BR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    })}
-  </td>
-</tr>
+        <td style="border:1px solid #ddd; padding:6px; text-align:right;">
+          ${(item.area || 0).toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}
+        </td>
 
+        <td style="border:1px solid #ddd; padding:6px; text-align:center;">
+          <button type="button"
+            onclick="removerOcupacaoSelecionada(${index})"
+            style="
+              background:#c62828;
+              color:#fff;
+              border:none;
+              padding:4px 8px;
+              border-radius:4px;
+              cursor:pointer;
+              font-size:12px;
+            ">
+            ✕
+          </button>
+        </td>
+      </tr>
     `;
 
   });
@@ -3113,6 +3128,21 @@ function renderizarOcupacoesSelecionadas() {
 
 }
 
+function removerOcupacaoSelecionada(index) {
+
+  if (index < 0 || index >= ocupacoesSelecionadas.length) return;
+
+  ocupacoesSelecionadas.splice(index, 1);
+
+  renderizarOcupacoesSelecionadas();
+
+  // depois vamos recalcular o motor de ocupação aqui
+  // analisarOcupacoesSelecionadas();
+
+}
+
+
+  
 function adicionarOcupacaoUnica() {
 
   function parseBR(v) {
