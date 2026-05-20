@@ -3310,6 +3310,13 @@ function renderizarOcupacaoPredominante() {
     return parseFloat(String(v).replace(/\./g, "").replace(",", ".")) || 0;
   }
 
+  function formatarBR(n) {
+    return n.toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
   const areaTotalEdificada = parseBR(document.getElementById("areaTotal").value);
 
   if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
@@ -3335,6 +3342,51 @@ function renderizarOcupacaoPredominante() {
   const maiorArea = Math.max(
     ...ocupacoesSelecionadas.map(o => parseFloat(o.area) || 0)
   );
+
+  const ocupacaoPredominante = ocupacoesSelecionadas.find(o =>
+    (parseFloat(o.area) || 0) === maiorArea
+  );
+
+  const areaSubsidiarias = ocupacoesSelecionadas
+    .filter(o => o !== ocupacaoPredominante)
+    .reduce((total, item) => total + (parseFloat(item.area) || 0), 0);
+
+  const regraMista = buscarRegraOcupacaoMista(areaTotalEdificada);
+
+  let limiteSubsidiaria = 0;
+  let textoLimite = "Regra não encontrada.";
+  let caracterizaMista = false;
+
+  if (regraMista) {
+
+    if (regraMista.tipo_limite === "AREA_FIXA") {
+
+      limiteSubsidiaria = regraMista.valor_limite_area || 0;
+
+      textoLimite =
+        "Limite das ocupações subsidiárias: " +
+        formatarBR(limiteSubsidiaria) +
+        " m²";
+
+    } else if (regraMista.tipo_limite === "PERCENTUAL") {
+
+      limiteSubsidiaria =
+        areaTotalEdificada * ((regraMista.valor_limite_percentual || 0) / 100);
+
+      textoLimite =
+        "Limite das ocupações subsidiárias: " +
+        formatarBR(limiteSubsidiaria) +
+        " m² (" +
+        formatarBR(regraMista.valor_limite_percentual || 0) +
+        "% da área total edificada)";
+
+    }
+
+    if (areaSubsidiarias > limiteSubsidiaria) {
+      caracterizaMista = true;
+    }
+
+  }
 
   let html = `
     <table style="
@@ -3363,7 +3415,7 @@ function renderizarOcupacaoPredominante() {
       ? (area / areaTotalEdificada) * 100
       : 0;
 
-    const ehPredominante = area === maiorArea;
+    const ehPredominante = item === ocupacaoPredominante;
 
     html += `
       <tr style="
@@ -3386,26 +3438,16 @@ function renderizarOcupacaoPredominante() {
         </td>
 
         <td style="border:1px solid #ddd; padding:6px; text-align:right;">
-          ${area.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          })}
+          ${formatarBR(area)}
         </td>
 
         <td style="border:1px solid #ddd; padding:6px; text-align:right;">
-          ${percentual.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          })}%
+          ${formatarBR(percentual)}%
         </td>
       </tr>
     `;
 
   });
-
-  const ocupacaoPredominante = ocupacoesSelecionadas.find(o =>
-    (parseFloat(o.area) || 0) === maiorArea
-  );
 
   html += `
       </tbody>
@@ -3420,12 +3462,10 @@ function renderizarOcupacaoPredominante() {
       font-size:13px;
       line-height:1.5;
     ">
+
       <div>
         <strong>Total edificado:</strong>
-        ${areaTotalEdificada.toLocaleString("pt-BR", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        })} m²
+        ${formatarBR(areaTotalEdificada)} m²
       </div>
 
       <div style="margin-top:6px;">
@@ -3433,6 +3473,26 @@ function renderizarOcupacaoPredominante() {
         ${ocupacaoPredominante?.ocupacao_macro || "—"}
         ${ocupacaoPredominante?.divisao ? " — " + ocupacaoPredominante.divisao : ""}
       </div>
+
+      <div style="margin-top:6px;">
+        <strong>Área das ocupações subsidiárias:</strong>
+        ${formatarBR(areaSubsidiarias)} m²
+      </div>
+
+      <div style="margin-top:6px;">
+        <strong>${textoLimite}</strong>
+      </div>
+
+      <div style="
+        margin-top:8px;
+        font-weight:700;
+        color:${caracterizaMista ? "#c62828" : "#2e7d32"};
+      ">
+        ${caracterizaMista
+          ? "Situação: caracteriza ocupação mista."
+          : "Situação: não caracteriza ocupação mista. Aplica-se a ocupação predominante."}
+      </div>
+
     </div>
   `;
 
