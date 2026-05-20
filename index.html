@@ -1390,7 +1390,8 @@ let regrasConsolidacao = [];
 let ocupacoesBase = [];
 let regrasOcupacao = [];
 
-let ocupacoesSelecionadas = []; 
+let ocupacoesSelecionadas = [];
+let ocupacaoUnicaSelecionada = null;  
 
 let resultadoArea = null;
 let resultadoAltura = null;
@@ -2034,6 +2035,8 @@ function selecionarOcupacaoUnica(id) {
   const item = ocupacoesBase.find(o => o.id === String(id));
 
   if (!item) return;
+
+ocupacaoUnicaSelecionada = item; 
 
   // Preenche o uso automaticamente
   document.getElementById("usoOcupacaoUnica").value =
@@ -2991,6 +2994,85 @@ function renderizarOcupacoesSelecionadas() {
   `;
 
   lista.innerHTML = html;
+
+}
+
+function adicionarOcupacaoUnica() {
+
+  function parseBR(v) {
+    return parseFloat(String(v).replace(/\./g, "").replace(",", ".")) || 0;
+  }
+
+  if (!ocupacaoUnicaSelecionada) {
+    alert("Selecione uma ocupação antes de adicionar.");
+    return;
+  }
+
+  const areaComputada = parseBR(
+    document.getElementById("areaComputada").value
+  );
+
+  if (areaComputada <= 0) {
+    alert("Informe primeiro a área da edificação no Quadro de Áreas.");
+    return;
+  }
+
+  const item = ocupacaoUnicaSelecionada;
+
+  const regra = buscarRegraOcupacao(item);
+
+  if (!regra) {
+    alert("Não foi encontrada regra de classificação para esta ocupação.");
+    return;
+  }
+
+  const cargaFixa = parseBR(item.carga_fixa_mj_m2);
+  const cargaPorMetro = parseBR(item.carga_por_metro_mj_m2);
+  const alturaArmazenamento = parseBR(
+    document.getElementById("alturaArmazenamentoUnica").value
+  );
+
+  let cargaFinal = cargaFixa;
+
+  if (item.tipo_carga === "POR_METRO" || cargaPorMetro > 0) {
+
+    if (alturaArmazenamento <= 0) {
+      alert("Informe a altura de armazenamento para esta ocupação.");
+      return;
+    }
+
+    cargaFinal = cargaPorMetro * alturaArmazenamento;
+  }
+
+  ocupacoesSelecionadas = [];
+
+  ocupacoesSelecionadas.push({
+    modo: "unica",
+    pavimento: "Toda a edificação",
+    grupo: item.grupo,
+    ocupacao_macro: item.ocupacao_macro,
+    descricao: item.descricao,
+    divisao: item.divisao,
+    area: areaComputada,
+    tipo_carga: item.tipo_carga,
+    carga: cargaFinal,
+    processo: regra.processo,
+    certificacao: regra.certificacao,
+    texto_processo: regra.texto_processo,
+    texto_certificacao: regra.texto_certificacao,
+    cor: regra.cor
+  });
+
+  renderizarOcupacoesSelecionadas();
+
+  resultadoOcupacao = {
+    criterio: regra.criterio_determinante || "Ocupação / Uso",
+    processo: regra.processo,
+    certificacao: regra.certificacao
+  };
+
+  atualizarPainelOcupacao(item);
+  atualizarPreviaFinal();
 
 }
 
