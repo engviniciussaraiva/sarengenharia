@@ -3145,12 +3145,17 @@ function renderizarOcupacoesSelecionadas() {
 
   if (!lista) return;
 
-  if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
+if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
 
-    lista.innerHTML = "Aguardando inclusão de ocupações.";
-    return;
+  lista.innerHTML = "Aguardando inclusão de ocupações.";
 
-  }
+  const pred = document.getElementById("listaOcupacaoPredominante");
+  if (pred) pred.innerHTML = "Aguardando cadastro de ocupações.";
+
+  return;
+
+}
+
 
   let html = `
     <table style="
@@ -3226,7 +3231,151 @@ function renderizarOcupacoesSelecionadas() {
 
   lista.innerHTML = html;
 
+renderizarOcupacaoPredominante(); 
+
 }
+
+function renderizarOcupacaoPredominante() {
+
+  const box = document.getElementById("listaOcupacaoPredominante");
+
+  if (!box) return;
+
+  function parseBR(v) {
+    return parseFloat(String(v).replace(/\./g, "").replace(",", ".")) || 0;
+  }
+
+  const areaTotalEdificada = parseBR(document.getElementById("areaTotal").value);
+
+  if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
+    box.innerHTML = "Aguardando cadastro de ocupações.";
+    return;
+  }
+
+  if (areaTotalEdificada <= 0) {
+    box.innerHTML = `
+      <div style="
+        padding:10px;
+        border:1px solid #ffcdd2;
+        background:#ffebee;
+        color:#b71c1c;
+        border-radius:6px;
+      ">
+        Informe primeiro a Área Total Edificada no Quadro de Áreas.
+      </div>
+    `;
+    return;
+  }
+
+  const maiorArea = Math.max(
+    ...ocupacoesSelecionadas.map(o => parseFloat(o.area) || 0)
+  );
+
+  let html = `
+    <table style="
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+      background:#fff;
+    ">
+      <thead>
+        <tr style="background:#e8f5e9; color:#1b5e20;">
+          <th style="border:1px solid #ddd; padding:6px; text-align:left;">Pavimento</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:left;">Ocupação</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:center;">Divisão</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:right;">Área (m²)</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:right;">% sobre total</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  ocupacoesSelecionadas.forEach(item => {
+
+    const area = parseFloat(item.area) || 0;
+
+    const percentual = areaTotalEdificada > 0
+      ? (area / areaTotalEdificada) * 100
+      : 0;
+
+    const ehPredominante = area === maiorArea;
+
+    html += `
+      <tr style="
+        ${ehPredominante ? "background:#f1f8e9; font-weight:700;" : ""}
+      ">
+        <td style="
+          border:1px solid #ddd;
+          padding:6px;
+          ${ehPredominante ? "border-left:4px solid #1b5e20;" : ""}
+        ">
+          ${item.pavimento || "—"}
+        </td>
+
+        <td style="border:1px solid #ddd; padding:6px;">
+          ${item.ocupacao_macro || "—"}
+        </td>
+
+        <td style="border:1px solid #ddd; padding:6px; text-align:center;">
+          ${item.divisao || "—"}
+        </td>
+
+        <td style="border:1px solid #ddd; padding:6px; text-align:right;">
+          ${area.toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}
+        </td>
+
+        <td style="border:1px solid #ddd; padding:6px; text-align:right;">
+          ${percentual.toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}%
+        </td>
+      </tr>
+    `;
+
+  });
+
+  const ocupacaoPredominante = ocupacoesSelecionadas.find(o =>
+    (parseFloat(o.area) || 0) === maiorArea
+  );
+
+  html += `
+      </tbody>
+    </table>
+
+    <div style="
+      margin-top:10px;
+      padding:10px;
+      border:1px solid #e0e0e0;
+      background:#ffffff;
+      border-radius:6px;
+      font-size:13px;
+      line-height:1.5;
+    ">
+      <div>
+        <strong>Total edificado:</strong>
+        ${areaTotalEdificada.toLocaleString("pt-BR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })} m²
+      </div>
+
+      <div style="margin-top:6px;">
+        <strong>Ocupação predominante:</strong>
+        ${ocupacaoPredominante?.ocupacao_macro || "—"}
+        ${ocupacaoPredominante?.divisao ? " — " + ocupacaoPredominante.divisao : ""}
+      </div>
+    </div>
+  `;
+
+  box.innerHTML = html;
+
+}
+
+
 
 function removerOcupacaoSelecionada(index) {
 
