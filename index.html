@@ -1149,6 +1149,7 @@ await carregarPrioridades();
 await carregarRegrasConsolidacao();
 await carregarOcupacoesBase();
 await carregarRegrasOcupacao();
+await carregarRegrasOcupacaoMista();
 await carregarAlertasArea();
 await carregarNotasAltura(); 
 await carregarMunicipios();
@@ -1439,6 +1440,7 @@ let regrasPrioridade = [];
 let regrasConsolidacao = [];
 let ocupacoesBase = [];
 let regrasOcupacao = [];
+let regrasOcupacaoMista = [];
 
 let ocupacoesSelecionadas = [];
 let ocupacaoUnicaSelecionada = null;  
@@ -1759,6 +1761,69 @@ async function carregarRegrasOcupacao() {
   console.log("Regras de ocupação carregadas:", regrasOcupacao);
 
 }
+
+async function carregarRegrasOcupacaoMista() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjAbO94f1iHTdNEf6S1KvNrDEiZAuc-3hQJLI6-qwA6H8ncL34eFKTh4XOiSZfw-vfTCj0mcRST3x9/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  regrasOcupacaoMista = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        criterio: col[2],
+        area_total_min: parseFloat(col[3]),
+        area_total_max: parseFloat(col[4]),
+        tipo_limite: col[5],
+        valor_limite_area: col[6] === "NA" ? null : parseFloat(col[6]),
+        valor_limite_percentual: col[7] === "NA" ? null : parseFloat(col[7]),
+        aplicacao_resultado: col[8],
+        criterio_determinante: col[9],
+        texto: col[10],
+        ativo: col[11] === "TRUE"
+      };
+
+    });
+
+  console.log("Regras de ocupação mista carregadas:", regrasOcupacaoMista);
+
+}
+
+
+function buscarRegraOcupacaoMista(areaTotalEdificada) {
+
+  const estado = document.getElementById("estado").value;
+
+  return regrasOcupacaoMista.find(r => {
+
+    if (!r.ativo) return false;
+
+    if (r.estado !== estado) return false;
+
+    if (r.criterio !== "ocupacao_mista") return false;
+
+    if (areaTotalEdificada < r.area_total_min) return false;
+
+    if (areaTotalEdificada > r.area_total_max) return false;
+
+    return true;
+
+  });
+
+}
+
+
 
 function buscarRegraOcupacao(item) {
 
