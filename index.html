@@ -2607,6 +2607,51 @@ function criarLinhaOcupacaoPavimento(pavimento, indice) {
 
 }
 
+function obterAreaTotalOcupacoesCadastradas() {
+
+  return ocupacoesSelecionadas.reduce((total, item) => {
+    return total + (parseFloat(item.area) || 0);
+  }, 0);
+
+}
+
+function validarLimiteAreaOcupacoes(novaArea) {
+
+  function parseBR(v) {
+    return parseFloat(String(v).replace(/\./g, "").replace(",", ".")) || 0;
+  }
+
+  const areaTotalEdificada = parseBR(
+    document.getElementById("areaTotal").value
+  );
+
+  if (areaTotalEdificada <= 0) {
+    alert("Informe primeiro a Área Total Edificada no Quadro de Áreas.");
+    return false;
+  }
+
+  const areaJaCadastrada = obterAreaTotalOcupacoesCadastradas();
+
+  const totalDepois = areaJaCadastrada + novaArea;
+
+  if (totalDepois > areaTotalEdificada) {
+
+    alert(
+      "A soma das áreas das ocupações cadastradas não pode ultrapassar a Área Total Edificada.\n\n" +
+      "Área total edificada: " + areaTotalEdificada.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) + " m²\n" +
+      "Área já cadastrada: " + areaJaCadastrada.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) + " m²\n" +
+      "Nova área informada: " + novaArea.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) + " m²\n" +
+      "Total resultante: " + totalDepois.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) + " m²"
+    );
+
+    return false;
+  }
+
+  return true;
+
+}
+
+
 function registrarOcupacaoPavimento(pavimento) {
 
   function parseBR(v) {
@@ -2642,6 +2687,11 @@ function registrarOcupacaoPavimento(pavimento) {
     alert("Informe a área desta ocupação.");
     return false;
   }
+
+if (!validarLimiteAreaOcupacoes(area)) {
+  return false;
+}
+
 
   const item = ocupacoesBase.find(o => o.descricao === descricao);
 
@@ -3202,14 +3252,15 @@ function adicionarOcupacaoUnica() {
     return;
   }
 
-  const areaComputada = parseBR(
-    document.getElementById("areaComputada").value
-  );
+ const areaTotalEdificada = parseBR(
+  document.getElementById("areaTotal").value
+);
 
-  if (areaComputada <= 0) {
-    alert("Informe primeiro a área da edificação no Quadro de Áreas.");
-    return;
-  }
+if (areaTotalEdificada <= 0) {
+  alert("Informe primeiro a Área Total Edificada no Quadro de Áreas.");
+  return;
+}
+
 
   const item = ocupacaoUnicaSelecionada;
 
@@ -3247,7 +3298,7 @@ function adicionarOcupacaoUnica() {
     ocupacao_macro: item.ocupacao_macro,
     descricao: item.descricao,
     divisao: item.divisao,
-    area: areaComputada,
+    area: areaTotalEdificada,
     tipo_carga: item.tipo_carga,
     carga: cargaFinal,
     processo: regra.processo,
