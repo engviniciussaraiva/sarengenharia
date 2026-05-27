@@ -3353,9 +3353,13 @@ if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
   const pred = document.getElementById("listaOcupacaoPredominante");
   if (pred) pred.innerHTML = "Aguardando cadastro de ocupações.";
 
+  const memorial = document.getElementById("memorialOcupacao");
+  if (memorial) memorial.innerHTML = "Aguardando seleção da ocupação da edificação.";
+
   return;
 
 }
+
 
 
   let html = `
@@ -3443,6 +3447,7 @@ if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
   lista.innerHTML = html;
 
 renderizarOcupacaoPredominante(); 
+atualizarMemorialOcupacao();
 
 }
 
@@ -3680,6 +3685,265 @@ function renderizarOcupacaoPredominante() {
   }
 
   atualizarPreviaFinal();
+
+}
+
+
+function atualizarMemorialOcupacao() {
+
+  const memorial = document.getElementById("memorialOcupacao");
+
+  if (!memorial) return;
+
+  function parseBR(v) {
+    return parseFloat(String(v).replace(/\./g, "").replace(",", ".")) || 0;
+  }
+
+  function formatarBR(n) {
+    return n.toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  const areaTotalEdificada = parseBR(document.getElementById("areaTotal").value);
+
+  if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
+    memorial.innerHTML = "Aguardando seleção da ocupação da edificação.";
+    return;
+  }
+
+  const maiorArea = Math.max(
+    ...ocupacoesSelecionadas.map(o => parseFloat(o.area) || 0)
+  );
+
+  const ocupacaoPredominante = ocupacoesSelecionadas.find(o =>
+    (parseFloat(o.area) || 0) === maiorArea
+  );
+
+  const areaSubsidiarias = ocupacoesSelecionadas
+    .filter(o => o !== ocupacaoPredominante)
+    .reduce((total, item) => total + (parseFloat(item.area) || 0), 0);
+
+  const regraMista = buscarRegraOcupacaoMista(areaTotalEdificada);
+
+  let limiteSubsidiaria = 0;
+  let textoLimite = "Não foi localizada regra normativa para avaliação de ocupação mista.";
+  let caracterizaMista = false;
+
+  if (regraMista) {
+
+    if (regraMista.tipo_limite === "AREA_FIXA") {
+
+      limiteSubsidiaria = regraMista.valor_limite_area || 0;
+
+      textoLimite =
+        "Para a área total edificada informada, o limite admitido para as ocupações subsidiárias é de " +
+        formatarBR(limiteSubsidiaria) +
+        " m².";
+
+    } else if (regraMista.tipo_limite === "PERCENTUAL") {
+
+      limiteSubsidiaria =
+        areaTotalEdificada * ((regraMista.valor_limite_percentual || 0) / 100);
+
+      textoLimite =
+        "Para a área total edificada informada, o limite admitido para as ocupações subsidiárias é de " +
+        formatarBR(limiteSubsidiaria) +
+        " m², correspondente a " +
+        formatarBR(regraMista.valor_limite_percentual || 0) +
+        "% da área total edificada.";
+
+    }
+
+    if (areaSubsidiarias > limiteSubsidiaria) {
+      caracterizaMista = true;
+    }
+
+  }
+
+  let ocupacaoDeterminante = ocupacaoPredominante;
+
+  if (caracterizaMista) {
+    ocupacaoDeterminante = buscarOcupacaoMaisRestritiva(ocupacoesSelecionadas);
+  }
+
+  let html = `
+    <div style="margin-bottom:12px;">
+      Foram cadastradas as seguintes ocupações para a edificação:
+    </div>
+
+    <table style="
+      width:100%;
+      border-collapse:collapse;
+      font-size:14px;
+      background:#fff;
+      margin-bottom:14px;
+    ">
+      <thead>
+        <tr style="background:#e8f5e9; color:#1b5e20;">
+          <th style="border:1px solid #ddd; padding:6px; text-align:left;">Pavimento</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:left;">Ocupação</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:left;">Descrição</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:center;">Divisão</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:right;">Carga de incêndio<br>(MJ/m²)</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:right;">Área (m²)</th>
+          <th style="border:1px solid #ddd; padding:6px; text-align:right;">% sobre total</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  ocupacoesSelecionadas.forEach(item => {
+
+    const area = parseFloat(item.area) || 0;
+
+    const percentual = areaTotalEdificada > 0
+      ? (area / areaTotalEdificada) * 100
+      : 0;
+
+    const ehPredominante = item === ocupacaoPredominante;
+    const ehDeterminante = item === ocupacaoDeterminante;
+
+    html += `
+      <tr style="
+        ${ehPredominante ? "background:#f1f8e9; font-weight:700;" : ""}
+        ${ehDeterminante && caracterizaMista ? "outline:2px solid #ef6c00;" : ""}
+      ">
+        <td style="border:1px solid #ddd; padding:6px;">
+          ${item.pavimento || "—"}
+        </td>
+
+        <td style="border:1px solid #ddd; padding:6px;">
+          ${item.ocupacao_macro || "—"}
+        </td>
+
+        <td style="border:1px solid #ddd; padding:6px;">
+          ${item.descricao || "—"}
+        </td>
+
+        <td style="border:1px solid #ddd; padding:6px; text-align:center;">
+          ${item.divisao || "—"}
+        </td>
+
+        <td style="border:1px solid #ddd; padding:6px; text-align:right;">
+          ${formatarBR(parseFloat(item.carga) || 0)}
+        </td>
+
+        <td style="border:1px solid #ddd; padding:6px; text-align:right;">
+          ${formatarBR(area)}
+        </td>
+
+        <td style="border:1px solid #ddd; padding:6px; text-align:right;">
+          ${formatarBR(percentual)}%
+        </td>
+      </tr>
+    `;
+
+  });
+
+  html += `
+      </tbody>
+    </table>
+
+    <div style="margin-bottom:8px;">
+      <strong>Área total edificada:</strong>
+      ${formatarBR(areaTotalEdificada)} m²
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <strong>Ocupação predominante pela área:</strong>
+      ${ocupacaoPredominante?.ocupacao_macro || "—"}
+      ${ocupacaoPredominante?.divisao ? " — " + ocupacaoPredominante.divisao : ""}
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <strong>Área total das ocupações subsidiárias:</strong>
+      ${formatarBR(areaSubsidiarias)} m²
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <strong>Limite normativo aplicado:</strong>
+      ${textoLimite}
+    </div>
+  `;
+
+  const ocupacoesGrupoJ = ocupacoesSelecionadas.filter(o => o.grupo === "J");
+
+  if (ocupacoesGrupoJ.length > 0) {
+
+    html += `
+      <div style="
+        margin-top:12px;
+        padding:12px;
+        border:1px solid #e0e0e0;
+        background:#ffffff;
+        border-radius:6px;
+      ">
+
+        <div style="
+          font-weight:700;
+          color:#1b5e20;
+          margin-bottom:8px;
+        ">
+          Classificação específica do Grupo J:
+        </div>
+    `;
+
+    ocupacoesGrupoJ.forEach(item => {
+
+      html += `
+        <div style="margin-bottom:8px;">
+          <strong>${item.descricao || item.ocupacao_macro}:</strong>
+          carga de incêndio ${formatarBR(parseFloat(item.carga) || 0)} MJ/m²,
+          classificada como <strong>${item.divisao}</strong>
+          ${item.risco ? " — risco " + item.risco : ""}.
+        </div>
+      `;
+
+    });
+
+    html += `
+      </div>
+    `;
+
+  }
+
+  html += `
+    <div class="memorial-resultado" style="
+      margin-top:12px;
+      padding:12px;
+      border:1px solid #e0e0e0;
+      background:#ffffff;
+      border-radius:6px;
+    ">
+
+      <div style="
+        font-weight:700;
+        color:${caracterizaMista ? "#c62828" : "#2e7d32"};
+        margin-bottom:8px;
+      ">
+        ${caracterizaMista
+          ? "Conclusão: a edificação caracteriza ocupação mista."
+          : "Conclusão: a edificação não caracteriza ocupação mista."}
+      </div>
+
+      <div style="margin-bottom:8px;">
+        ${caracterizaMista
+          ? "Como a área das ocupações subsidiárias ultrapassa o limite normativo aplicável, deve ser considerada a ocupação mais restritiva para a determinação das medidas de segurança."
+          : "Como a área das ocupações subsidiárias não ultrapassa o limite normativo aplicável, aplica-se a ocupação principal/predominante para a determinação das medidas de segurança."}
+      </div>
+
+      <div>
+        <strong>Ocupação determinante para o enquadramento:</strong>
+        ${ocupacaoDeterminante?.ocupacao_macro || "—"}
+        ${ocupacaoDeterminante?.divisao ? " — " + ocupacaoDeterminante.divisao : ""}
+      </div>
+
+    </div>
+  `;
+
+  memorial.innerHTML = html;
 
 }
 
