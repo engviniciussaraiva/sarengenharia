@@ -3630,45 +3630,25 @@ function renderizarOcupacaoPredominante() {
       line-height:1.5;
     ">
 
-      <div>
-        <strong>Total edificado:</strong>
-        ${formatarBR(areaTotalEdificada)} m²
-      </div>
-
-      <div style="margin-top:6px;">
-        <strong>Ocupação predominante pela área:</strong>
-        ${ocupacaoPredominante?.ocupacao_macro || "—"}
-        ${ocupacaoPredominante?.divisao ? " — " + ocupacaoPredominante.divisao : ""}
-      </div>
-
-      <div style="margin-top:6px;">
-        <strong>Área das ocupações subsidiárias:</strong>
-        ${formatarBR(areaSubsidiarias)} m²
-      </div>
-
-      <div style="margin-top:6px;">
-        <strong>${textoLimite}</strong>
-      </div>
-
-      <div style="
-        margin-top:8px;
+           <div style="
         font-weight:700;
         color:${caracterizaMista ? "#c62828" : "#2e7d32"};
+        margin-bottom:10px;
       ">
         ${caracterizaMista
-          ? "Situação: caracteriza ocupação mista."
-          : "Situação: não caracteriza ocupação mista. Aplica-se a ocupação predominante."}
+          ? "Edificação caracterizada com ocupação mista. Aplica-se a ocupação mais restritiva para a determinação das medidas de segurança."
+          : "Edificação não caracterizada com ocupação mista. Aplica-se a ocupação principal para a determinação das medidas de segurança."}
       </div>
 
       <div style="
-        margin-top:8px;
         font-weight:700;
-        color:${caracterizaMista ? "#ef6c00" : "#1b5e20"};
+        color:#1b5e20;
       ">
         <strong>Ocupação determinante para o enquadramento:</strong>
         ${ocupacaoDeterminante?.ocupacao_macro || "—"}
         ${ocupacaoDeterminante?.divisao ? " — " + ocupacaoDeterminante.divisao : ""}
       </div>
+ 
 
     </div>
   `;
