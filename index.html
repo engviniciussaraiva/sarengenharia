@@ -2288,6 +2288,47 @@ function buscarPrioridade(processo, certificacao) {
 }
 
 
+function buscarOcupacaoMaisRestritiva(listaOcupacoes) {
+
+  if (!listaOcupacoes || listaOcupacoes.length === 0) {
+    return null;
+  }
+
+  const listaComPeso = listaOcupacoes.map(item => {
+
+    const prioridade = buscarPrioridade(item.processo, item.certificacao);
+
+    return {
+      item: item,
+      peso: prioridade ? prioridade.peso : 0,
+      carga: parseFloat(item.carga) || 0,
+      area: parseFloat(item.area) || 0
+    };
+
+  });
+
+  listaComPeso.sort((a, b) => {
+
+    // 1º critério: maior peso normativo
+    if (b.peso !== a.peso) {
+      return b.peso - a.peso;
+    }
+
+    // 2º critério: maior carga de incêndio
+    if (b.carga !== a.carga) {
+      return b.carga - a.carga;
+    }
+
+    // 3º critério: maior área
+    return b.area - a.area;
+
+  });
+
+  return listaComPeso[0].item;
+
+}
+
+
 
 function buscarClassificacaoFisicaAltura(altura) {
 
