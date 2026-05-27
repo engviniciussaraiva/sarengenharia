@@ -2921,6 +2921,33 @@ if (!validarLimiteAreaOcupacoes(area)) {
     cargaFinal = cargaPorMetro * alturaArmazenamento;
   }
 
+// 🔥 CLASSIFICAÇÃO ESPECÍFICA DO GRUPO J PELA CARGA DE INCÊNDIO
+let divisaoFinal = item.divisao;
+let riscoFinal = "";
+let denominacaoFinal = "";
+let textoMemorialGrupoJ = "";
+
+if (item.grupo === "J") {
+
+  const regraGrupoJ = buscarClassificacaoGrupoJ(cargaFinal);
+
+  if (regraGrupoJ) {
+
+    divisaoFinal = regraGrupoJ.divisao_resultado;
+    riscoFinal = regraGrupoJ.risco;
+    denominacaoFinal = regraGrupoJ.denominacao;
+    textoMemorialGrupoJ = regraGrupoJ.texto_memorial;
+
+  } else {
+
+    alert("Não foi encontrada regra para classificação do Grupo J pela carga de incêndio calculada.");
+    return false;
+
+  }
+
+}
+
+
   let nomePavimento = "";
 
   if (pavimento === 1) {
@@ -2935,11 +2962,14 @@ if (!validarLimiteAreaOcupacoes(area)) {
     grupo: item.grupo,
     ocupacao_macro: item.ocupacao_macro,
     descricao: item.descricao,
-    divisao: item.divisao,
-    area: area,
-    tipo_carga: item.tipo_carga,
-    carga: cargaFinal,
-    processo: regra.processo,
+    divisao: divisaoFinal,
+area: area,
+tipo_carga: item.tipo_carga,
+carga: cargaFinal,
+risco: riscoFinal,
+denominacao: denominacaoFinal,
+texto_memorial_grupo_j: textoMemorialGrupoJ,
+processo: regra.processo,
     certificacao: regra.certificacao,
     texto_processo: regra.texto_processo,
     texto_certificacao: regra.texto_certificacao,
