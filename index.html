@@ -3341,6 +3341,7 @@ renderizarOcupacaoPredominante();
 
 }
 
+
 function renderizarOcupacaoPredominante() {
 
   const box = document.getElementById("listaOcupacaoPredominante");
@@ -3429,6 +3430,12 @@ function renderizarOcupacaoPredominante() {
 
   }
 
+  let ocupacaoDeterminante = ocupacaoPredominante;
+
+  if (caracterizaMista) {
+    ocupacaoDeterminante = buscarOcupacaoMaisRestritiva(ocupacoesSelecionadas);
+  }
+
   let html = `
     <table style="
       width:100%;
@@ -3457,10 +3464,12 @@ function renderizarOcupacaoPredominante() {
       : 0;
 
     const ehPredominante = item === ocupacaoPredominante;
+    const ehDeterminante = item === ocupacaoDeterminante;
 
     html += `
       <tr style="
         ${ehPredominante ? "background:#f1f8e9; font-weight:700;" : ""}
+        ${ehDeterminante && caracterizaMista ? "outline:2px solid #ef6c00;" : ""}
       ">
         <td style="
           border:1px solid #ddd;
@@ -3472,6 +3481,8 @@ function renderizarOcupacaoPredominante() {
 
         <td style="border:1px solid #ddd; padding:6px;">
           ${item.ocupacao_macro || "—"}
+          ${ehPredominante ? `<span style="color:#1b5e20;"> — predominante</span>` : ""}
+          ${ehDeterminante && caracterizaMista ? `<span style="color:#ef6c00;"> — determinante</span>` : ""}
         </td>
 
         <td style="border:1px solid #ddd; padding:6px; text-align:center;">
@@ -3510,7 +3521,7 @@ function renderizarOcupacaoPredominante() {
       </div>
 
       <div style="margin-top:6px;">
-        <strong>Ocupação predominante:</strong>
+        <strong>Ocupação predominante pela área:</strong>
         ${ocupacaoPredominante?.ocupacao_macro || "—"}
         ${ocupacaoPredominante?.divisao ? " — " + ocupacaoPredominante.divisao : ""}
       </div>
@@ -3534,10 +3545,46 @@ function renderizarOcupacaoPredominante() {
           : "Situação: não caracteriza ocupação mista. Aplica-se a ocupação predominante."}
       </div>
 
+      <div style="
+        margin-top:8px;
+        font-weight:700;
+        color:${caracterizaMista ? "#ef6c00" : "#1b5e20"};
+      ">
+        <strong>Ocupação determinante para o enquadramento:</strong>
+        ${ocupacaoDeterminante?.ocupacao_macro || "—"}
+        ${ocupacaoDeterminante?.divisao ? " — " + ocupacaoDeterminante.divisao : ""}
+      </div>
+
     </div>
   `;
 
   box.innerHTML = html;
+
+  if (ocupacaoDeterminante) {
+
+    resultadoOcupacao = {
+      criterio: caracterizaMista ? "Ocupação mista" : "Ocupação predominante",
+      processo: ocupacaoDeterminante.processo,
+      certificacao: ocupacaoDeterminante.certificacao
+    };
+
+    document.getElementById("painelProcOcupacao").innerText =
+      ocupacaoDeterminante.texto_processo || "—";
+
+    const cert = document.getElementById("painelCertOcupacao");
+
+    cert.innerText =
+      ocupacaoDeterminante.texto_certificacao || "—";
+
+    cert.style.color =
+      ocupacaoDeterminante.cor || "#333";
+
+    cert.style.fontWeight =
+      "bold";
+
+  }
+
+  atualizarPreviaFinal();
 
 }
 
