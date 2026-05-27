@@ -3549,13 +3549,17 @@ function renderizarOcupacaoPredominante() {
       background:#fff;
     ">
       <thead>
-        <tr style="background:#e8f5e9; color:#1b5e20;">
-          <th style="border:1px solid #ddd; padding:6px; text-align:left;">Pavimento</th>
-          <th style="border:1px solid #ddd; padding:6px; text-align:left;">Ocupação</th>
-          <th style="border:1px solid #ddd; padding:6px; text-align:center;">Divisão</th>
-          <th style="border:1px solid #ddd; padding:6px; text-align:right;">Área (m²)</th>
-          <th style="border:1px solid #ddd; padding:6px; text-align:right;">% sobre total</th>
-        </tr>
+
+     <tr style="background:#e8f5e9; color:#1b5e20;">
+  <th style="border:1px solid #ddd; padding:6px; text-align:left;">Pavimento</th>
+  <th style="border:1px solid #ddd; padding:6px; text-align:left;">Ocupação</th>
+  <th style="border:1px solid #ddd; padding:6px; text-align:center;">Divisão</th>
+  <th style="border:1px solid #ddd; padding:6px; text-align:right;">Carga de incêndio<br>(MJ/m²)</th>
+  <th style="border:1px solid #ddd; padding:6px; text-align:right;">Área (m²)</th>
+  <th style="border:1px solid #ddd; padding:6px; text-align:right;">% sobre total</th>
+</tr>
+   
+
       </thead>
       <tbody>
   `;
@@ -3590,17 +3594,23 @@ function renderizarOcupacaoPredominante() {
           ${ehDeterminante && caracterizaMista ? `<span style="color:#ef6c00;"> — determinante</span>` : ""}
         </td>
 
-        <td style="border:1px solid #ddd; padding:6px; text-align:center;">
-          ${item.divisao || "—"}
-        </td>
+      <td style="border:1px solid #ddd; padding:6px; text-align:center;">
+  ${item.divisao || "—"}
+</td>
 
-        <td style="border:1px solid #ddd; padding:6px; text-align:right;">
-          ${formatarBR(area)}
-        </td>
+<td style="border:1px solid #ddd; padding:6px; text-align:right;">
+  ${formatarBR(parseFloat(item.carga) || 0)}
+</td>
 
-        <td style="border:1px solid #ddd; padding:6px; text-align:right;">
-          ${formatarBR(percentual)}%
-        </td>
+<td style="border:1px solid #ddd; padding:6px; text-align:right;">
+  ${formatarBR(area)}
+</td>
+
+<td style="border:1px solid #ddd; padding:6px; text-align:right;">
+  ${formatarBR(percentual)}%
+</td>
+  
+
       </tr>
     `;
 
