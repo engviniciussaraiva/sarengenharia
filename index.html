@@ -1150,6 +1150,7 @@ await carregarRegrasConsolidacao();
 await carregarOcupacoesBase();
 await carregarRegrasOcupacao();
 await carregarRegrasOcupacaoMista();
+await carregarRegrasGrupoJCarga();
 await carregarAlertasArea();
 await carregarNotasAltura(); 
 await carregarMunicipios();
@@ -1441,6 +1442,7 @@ let regrasConsolidacao = [];
 let ocupacoesBase = [];
 let regrasOcupacao = [];
 let regrasOcupacaoMista = [];
+let regrasGrupoJCarga = [];
 
 let ocupacoesSelecionadas = [];
 let ocupacaoUnicaSelecionada = null;  
@@ -1797,6 +1799,69 @@ async function carregarRegrasOcupacaoMista() {
     });
 
   console.log("Regras de ocupação mista carregadas:", regrasOcupacaoMista);
+
+}
+
+
+async function carregarRegrasGrupoJCarga() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT9fZ-LiqLHO2UaLnMFiPvlkNPkRAX-rG6hws28HNIAMfDeE95Yk0ZmkFZOlDPayp_FVW5Ro0EwVZa6/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  regrasGrupoJCarga = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        criterio: col[2],
+        grupo: col[3],
+        carga_min: parseFloat(col[4]),
+        carga_max: parseFloat(col[5]),
+        divisao_resultado: col[6],
+        risco: col[7],
+        denominacao: col[8],
+        texto_memorial: col[9],
+        ativo: col[10] === "TRUE"
+      };
+
+    });
+
+  console.log("Regras do Grupo J por carga carregadas:", regrasGrupoJCarga);
+
+}
+
+
+function buscarClassificacaoGrupoJ(cargaFinal) {
+
+  const estado = document.getElementById("estado").value;
+
+  return regrasGrupoJCarga.find(r => {
+
+    if (!r.ativo) return false;
+
+    if (r.estado !== estado) return false;
+
+    if (r.criterio !== "grupo_j_carga") return false;
+
+    if (r.grupo !== "J") return false;
+
+    if (cargaFinal < r.carga_min) return false;
+
+    if (cargaFinal > r.carga_max) return false;
+
+    return true;
+
+  });
 
 }
 
