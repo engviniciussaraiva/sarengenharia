@@ -856,9 +856,6 @@ style="text-align:right;">
 </div>
 
   
-
-
-
 <!-- MÓDULO CRITÉRIOS TÉCNICOS ADICIONAIS / RISCOS ESPECÍFICOS -->
 <div class="card">
 
@@ -3647,7 +3644,7 @@ function renderizarOcupacaoPredominante() {
         font-weight:700;
         color:#1b5e20;
       ">
-        <strong>Ocupação determinante para o enquadramento:</strong>
+        <strong>Ocupação determinante para o enquadramento técnico:</strong>
         ${ocupacaoDeterminante?.ocupacao_macro || "—"}
         ${ocupacaoDeterminante?.divisao ? " — " + ocupacaoDeterminante.divisao : ""}
       </div>
@@ -3922,18 +3919,19 @@ function atualizarMemorialOcupacao() {
         margin-bottom:8px;
       ">
         ${caracterizaMista
-          ? "Conclusão: a edificação caracteriza ocupação mista."
-          : "Conclusão: a edificação não caracteriza ocupação mista."}
+? "Conclusão normativa: a edificação caracteriza ocupação mista."
+: "Conclusão normativa: a edificação não caracteriza ocupação mista."}
       </div>
 
       <div style="margin-bottom:8px;">
         ${caracterizaMista
-          ? "Como a área das ocupações subsidiárias ultrapassa o limite normativo aplicável, deve ser considerada a ocupação mais restritiva para a determinação das medidas de segurança."
-          : "Como a área das ocupações subsidiárias não ultrapassa o limite normativo aplicável, aplica-se a ocupação principal/predominante para a determinação das medidas de segurança."}
+  ? "Considerando que a área total das ocupações subsidiárias ultrapassa o limite normativo aplicável, o enquadramento técnico deverá considerar a ocupação mais restritiva dentre as ocupações cadastradas, para fins de determinação das medidas de segurança contra incêndio."
+  : "Considerando que a área total das ocupações subsidiárias não ultrapassa o limite normativo aplicável, o enquadramento técnico poderá adotar a ocupação principal/predominante para fins de determinação das medidas de segurança contra incêndio."}
+
       </div>
 
       <div>
-        <strong>Ocupação determinante para o enquadramento:</strong>
+        <strong>Ocupação determinante para o enquadramento técnico:</strong>
         ${ocupacaoDeterminante?.ocupacao_macro || "—"}
         ${ocupacaoDeterminante?.divisao ? " — " + ocupacaoDeterminante.divisao : ""}
       </div>
