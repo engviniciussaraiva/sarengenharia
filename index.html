@@ -2038,7 +2038,6 @@ function obterRiscosEspecificosAplicaveis() {
 
 
 function renderizarRiscosEspecificos() {
-
   const box = document.getElementById("boxRiscosEspecificos");
 
   if (!box) return;
@@ -2111,52 +2110,63 @@ function renderizarRiscosEspecificos() {
         border:1px solid #dcdcdc;
         background:#ffffff;
         border-radius:8px;
-        margin-bottom:12px;
+        margin-bottom:10px;
         overflow:hidden;
       ">
 
         <summary style="
           cursor:pointer;
-          padding:12px 14px;
+          padding:10px 12px;
           font-size:14px;
-          font-weight:700;
           color:#1b5e20;
           list-style:auto;
+          line-height:1.5;
         ">
-          ${regra.descricao_regra || regra.nome_regra}
+          <strong>${regra.pergunta_principal}</strong>
+
+          ${regra.descricao_regra ? `
+            <span style="
+              font-weight:400;
+              color:#333;
+              margin-left:4px;
+            ">
+              ${regra.descricao_regra}
+            </span>
+          ` : ""}
+
           <span style="
             font-weight:400;
             font-style:italic;
             color:#666;
+            margin-left:4px;
           ">
-            ${regra.base_normativa ? ' (Base normativa: "' + regra.base_normativa + '")' : ""}
+            ${regra.base_normativa ? '(Base normativa: "' + regra.base_normativa + '")' : ""}
           </span>
         </summary>
 
-        <div style="padding:12px 14px 14px 14px;">
+        <div style="
+          padding:12px;
+          border-top:1px solid #eeeeee;
+          background:#fafafa;
+        ">
 
           <div style="
             display:flex;
             flex-wrap:wrap;
             align-items:end;
-            gap:12px 14px;
+            gap:12px;
           ">
 
-            <div style="
-              min-width:220px;
-              max-width:320px;
-            ">
+            <div style="width:160px;">
               <label style="
                 font-size:13px;
                 font-weight:600;
                 display:block;
                 margin-bottom:5px;
               ">
-                ${regra.pergunta_principal}
+                Resposta
               </label>
-            </div>
 
-            <div style="width:150px;">
               <select id="${idResposta}"
                 onchange="atualizarRespostaRiscoEspecifico('${regra.codigo_regra}')"
                 style="width:100%;"
@@ -2168,10 +2178,7 @@ function renderizarRiscosEspecificos() {
             </div>
 
             ${mostrarComplementar ? `
-              <div style="
-                min-width:230px;
-                max-width:320px;
-              ">
+              <div style="width:300px;">
                 <label style="
                   font-size:13px;
                   font-weight:600;
@@ -2183,9 +2190,7 @@ function renderizarRiscosEspecificos() {
                     ? "(" + regra.campo_complementar_unidade + ")"
                     : ""}
                 </label>
-              </div>
 
-              <div style="width:130px;">
                 <input type="text"
                   id="${idComplementar}"
                   class="input-numero"
@@ -2197,7 +2202,11 @@ function renderizarRiscosEspecificos() {
               </div>
             ` : ""}
 
-            <div style="width:120px;">
+            <div style="
+              width:140px;
+              margin-left:auto;
+              text-align:right;
+            ">
               ${regra.tem_modal ? `
                 <button type="button" onclick="abrirModalRiscoEspecifico('${regra.codigo_modal}')">
                   📘 Detalhar
@@ -2220,7 +2229,7 @@ function renderizarRiscosEspecificos() {
 
 }
 
-
+  
 
 function atualizarRespostaRiscoEspecifico(codigoRegra) {
 
