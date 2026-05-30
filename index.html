@@ -1146,6 +1146,11 @@ await carregarOcupacoesBase();
 await carregarRegrasOcupacao();
 await carregarRegrasOcupacaoMista();
 await carregarRegrasGrupoJCarga();
+
+// 🔥 RISCOS ESPECÍFICOS
+await carregarRegrasRiscosEspecificos();
+await carregarFaixasRiscosEspecificos(); 
+
 await carregarAlertasArea();
 await carregarNotasAltura(); 
 await carregarMunicipios();
@@ -1438,6 +1443,11 @@ let ocupacoesBase = [];
 let regrasOcupacao = [];
 let regrasOcupacaoMista = [];
 let regrasGrupoJCarga = [];
+
+// 🔥 RISCOS ESPECÍFICOS
+let regrasRiscosEspecificos = [];
+let faixasRiscosEspecificos = [];
+let respostasRiscosEspecificos = []; 
 
 let ocupacoesSelecionadas = [];
 let ocupacaoUnicaSelecionada = null;  
@@ -1834,6 +1844,103 @@ async function carregarRegrasGrupoJCarga() {
   console.log("Regras do Grupo J por carga carregadas:", regrasGrupoJCarga);
 
 }
+
+async function carregarRegrasRiscosEspecificos() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7GWZE_ZAW0O02BP1JP1RCQu-j5A19CHNZeznId-JMLGpiVe8x8vJNUqIniiEP8pQEmd-_uNqH_GJ3/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  regrasRiscosEspecificos = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        criterio: col[2],
+        codigo_regra: col[3],
+        nome_regra: col[4],
+        descricao_regra: col[5],
+        aplicacao_tipo: col[6],
+        grupos_aplicaveis: col[7],
+        divisoes_aplicaveis: col[8],
+        grupos_excluidos: col[9],
+        divisoes_excluidas: col[10],
+        pergunta_principal: col[11],
+        tipo_resposta: col[12],
+        habilita_complementar_se: col[13],
+        campo_complementar_label: col[14],
+        campo_complementar_tipo: col[15],
+        campo_complementar_unidade: col[16],
+        tem_modal: col[17] === "TRUE",
+        codigo_modal: col[18],
+        base_normativa: col[19],
+        ordem_exibicao: parseInt(col[20]) || 0,
+        ativo: col[21] === "TRUE"
+      };
+
+    });
+
+  console.log("Regras de riscos específicos carregadas:", regrasRiscosEspecificos);
+
+}
+
+
+async function carregarFaixasRiscosEspecificos() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSZ_z2jZupjixowFolDjfRwMqb_ntD33i-dQ8wka0u9uvzgEVWV3U-A3jSjlTEa-aZDH1ELWNv4Kxv1/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  faixasRiscosEspecificos = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        criterio: col[2],
+        codigo_regra: col[3],
+        ordem: parseInt(col[4]) || 0,
+        resposta_principal: col[5],
+        valor_min: col[6] === "NA" ? null : parseFloat(col[6]),
+        valor_max: col[7] === "NA" ? null : parseFloat(col[7]),
+        operador: col[8],
+        valor_referencia: col[9] === "NA" ? null : parseFloat(col[9]),
+        processo_resultado: col[10],
+        certificacao_resultado: col[11],
+        texto_processo: col[12],
+        texto_certificacao: col[13],
+        altera_resultado: col[14] === "TRUE",
+        nivel_restricao: parseInt(col[15]) || 0,
+        criterio_determinante: col[16],
+        texto_resultado: col[17],
+        texto_memorial: col[18],
+        cor: col[19],
+        ativo: col[20] === "TRUE"
+      };
+
+    });
+
+  console.log("Faixas de riscos específicos carregadas:", faixasRiscosEspecificos);
+
+}
+
 
 
 function buscarClassificacaoGrupoJ(cargaFinal) {
@@ -3636,15 +3743,15 @@ function renderizarOcupacaoPredominante() {
         margin-bottom:10px;
       ">
         ${caracterizaMista
-          ? "Edificação caracterizada com ocupação mista. Aplica-se a ocupação mais restritiva para a determinação das medidas de segurança."
-          : "Edificação não caracterizada com ocupação mista. Aplica-se a ocupação principal para a determinação das medidas de segurança."}
+          ? "Edificação caracterizada com ocupação mista. Aplica-se a ocupação mais restritiva para fins de determinação das medidas de segurança contra incêndio."
+          : "Edificação não caracterizada com ocupação mista. Aplica-se a ocupação principal para fins de determinação das medidas de segurança contra incêndio."}
       </div>
 
       <div style="
         font-weight:700;
         color:#1b5e20;
       ">
-        <strong>Ocupação determinante para o enquadramento técnico:</strong>
+        <strong>Ocupação adotada como determinante para o enquadramento técnico:</strong> 
         ${ocupacaoDeterminante?.ocupacao_macro || "—"}
         ${ocupacaoDeterminante?.divisao ? " — " + ocupacaoDeterminante.divisao : ""}
       </div>
@@ -3733,21 +3840,22 @@ function atualizarMemorialOcupacao() {
       limiteSubsidiaria = regraMista.valor_limite_area || 0;
 
       textoLimite =
-        "Para a área total edificada informada, o limite admitido para as ocupações subsidiárias é de " +
-        formatarBR(limiteSubsidiaria) +
-        " m².";
+  "Considerando a área total edificada informada, adota-se como limite para as ocupações subsidiárias o valor de " +
+  formatarBR(limiteSubsidiaria) +
+  " m².";
 
     } else if (regraMista.tipo_limite === "PERCENTUAL") {
 
       limiteSubsidiaria =
         areaTotalEdificada * ((regraMista.valor_limite_percentual || 0) / 100);
 
-      textoLimite =
-        "Para a área total edificada informada, o limite admitido para as ocupações subsidiárias é de " +
-        formatarBR(limiteSubsidiaria) +
-        " m², correspondente a " +
-        formatarBR(regraMista.valor_limite_percentual || 0) +
-        "% da área total edificada.";
+    textoLimite =
+  "Considerando a área total edificada informada, adota-se como limite para as ocupações subsidiárias o valor de " +
+  formatarBR(limiteSubsidiaria) +
+  " m², correspondente a " +
+  formatarBR(regraMista.valor_limite_percentual || 0) +
+  "% da área total edificada.";
+
 
     }
 
@@ -3765,7 +3873,7 @@ function atualizarMemorialOcupacao() {
 
   let html = `
     <div style="margin-bottom:12px;">
-      Foram cadastradas as seguintes ocupações para a edificação:
+      Para fins de análise do enquadramento técnico por ocupação e uso, foram consideradas as seguintes ocupações cadastradas para a edificação:
     </div>
 
     <table style="
@@ -3847,13 +3955,13 @@ function atualizarMemorialOcupacao() {
     </div>
 
     <div style="margin-bottom:8px;">
-      <strong>Ocupação predominante pela área:</strong>
+     <strong>Ocupação predominante identificada pela maior área ocupada:</strong>
       ${ocupacaoPredominante?.ocupacao_macro || "—"}
       ${ocupacaoPredominante?.divisao ? " — " + ocupacaoPredominante.divisao : ""}
     </div>
 
     <div style="margin-bottom:8px;">
-      <strong>Área total das ocupações subsidiárias:</strong>
+     <strong>Somatório das áreas das ocupações subsidiárias:</strong>
       ${formatarBR(areaSubsidiarias)} m²
     </div>
 
@@ -3881,20 +3989,24 @@ function atualizarMemorialOcupacao() {
           color:#1b5e20;
           margin-bottom:8px;
         ">
-          Classificação específica do Grupo J:
+         Classificação da carga de incêndio para ocupações do Grupo J:
         </div>
     `;
 
     ocupacoesGrupoJ.forEach(item => {
 
-      html += `
+   html += `
         <div style="margin-bottom:8px;">
           <strong>${item.descricao || item.ocupacao_macro}:</strong>
-          carga de incêndio ${formatarBR(parseFloat(item.carga) || 0)} MJ/m²,
-          classificada como <strong>${item.divisao}</strong>
-          ${item.risco ? " — risco " + item.risco : ""}.
+          a carga de incêndio foi apurada em
+          <strong>${formatarBR(parseFloat(item.carga) || 0)} MJ/m²</strong>,
+          resultando na classificação
+          <strong>${item.divisao}</strong>
+          ${item.risco ? ", com risco " + item.risco : ""}.
+          ${item.denominacao ? " Denominação: " + item.denominacao + "." : ""}
         </div>
       `;
+
 
     });
 
@@ -3931,7 +4043,7 @@ function atualizarMemorialOcupacao() {
       </div>
 
       <div>
-        <strong>Ocupação determinante para o enquadramento técnico:</strong>
+        <strong>Ocupação adotada como determinante para o enquadramento técnico:</strong>
         ${ocupacaoDeterminante?.ocupacao_macro || "—"}
         ${ocupacaoDeterminante?.divisao ? " — " + ocupacaoDeterminante.divisao : ""}
       </div>
