@@ -2037,7 +2037,6 @@ function obterRiscosEspecificosAplicaveis() {
 }
 
 
-
 function renderizarRiscosEspecificos() {
 
   const box = document.getElementById("boxRiscosEspecificos");
@@ -2125,7 +2124,6 @@ function renderizarRiscosEspecificos() {
           list-style:auto;
         ">
           ${regra.descricao_regra || regra.nome_regra}
-
           <span style="
             font-weight:400;
             font-style:italic;
@@ -2136,93 +2134,92 @@ function renderizarRiscosEspecificos() {
         </summary>
 
         <div style="padding:12px 14px 14px 14px;">
-<div style="
-  display:flex;
-  flex-wrap:wrap;
-  align-items:end;
-  gap:12px 14px;
-">
 
-  <div style="
-    min-width:260px;
-    max-width:420px;
-  ">
-    <label style="
-      font-size:13px;
-      font-weight:600;
-      display:block;
-      margin-bottom:5px;
-    ">
-      ${regra.pergunta_principal}
-    </label>
-  </div>
+          <div style="
+            display:flex;
+            flex-wrap:wrap;
+            align-items:end;
+            gap:12px 14px;
+          ">
 
-  <div style="
-    width:160px;
-  ">
-    <select id="${idResposta}"
-      onchange="atualizarRespostaRiscoEspecifico('${regra.codigo_regra}')"
-      style="width:100%;"
-    >
-      <option value="">-- Selecionar --</option>
-      <option value="SIM" ${respostaPrincipal === "SIM" ? "selected" : ""}>Sim</option>
-      <option value="NAO" ${respostaPrincipal === "NAO" ? "selected" : ""}>Não</option>
-    </select>
-  </div>
+            <div style="
+              min-width:220px;
+              max-width:320px;
+            ">
+              <label style="
+                font-size:13px;
+                font-weight:600;
+                display:block;
+                margin-bottom:5px;
+              ">
+                ${regra.pergunta_principal}
+              </label>
+            </div>
 
-  ${mostrarComplementar ? `
-    <div style="
-      min-width:260px;
-      max-width:340px;
-    ">
-      <label style="
-        font-size:13px;
-        font-weight:600;
-        display:block;
-        margin-bottom:5px;
-      ">
-        ${regra.campo_complementar_label}
-        ${regra.campo_complementar_unidade && regra.campo_complementar_unidade !== "NA"
-          ? "(" + regra.campo_complementar_unidade + ")"
-          : ""}
-      </label>
-    </div>
+            <div style="width:150px;">
+              <select id="${idResposta}"
+                onchange="atualizarRespostaRiscoEspecifico('${regra.codigo_regra}')"
+                style="width:100%;"
+              >
+                <option value="">-- Selecionar --</option>
+                <option value="SIM" ${respostaPrincipal === "SIM" ? "selected" : ""}>Sim</option>
+                <option value="NAO" ${respostaPrincipal === "NAO" ? "selected" : ""}>Não</option>
+              </select>
+            </div>
 
-    <div style="
-      width:140px;
-    ">
-      <input type="text"
-        id="${idComplementar}"
-        class="input-numero"
-        value="${valorComplementar}"
-        placeholder="Informe"
-        onblur="this.value = formatarNumeroBR(this.value); atualizarRespostaRiscoEspecifico('${regra.codigo_regra}')"
-        style="width:100%; text-align:right;"
-      >
-    </div>
-  ` : ""}
+            ${mostrarComplementar ? `
+              <div style="
+                min-width:230px;
+                max-width:320px;
+              ">
+                <label style="
+                  font-size:13px;
+                  font-weight:600;
+                  display:block;
+                  margin-bottom:5px;
+                ">
+                  ${regra.campo_complementar_label}
+                  ${regra.campo_complementar_unidade && regra.campo_complementar_unidade !== "NA"
+                    ? "(" + regra.campo_complementar_unidade + ")"
+                    : ""}
+                </label>
+              </div>
 
-  <div style="
-    width:120px;
-  ">
-    ${regra.tem_modal ? `
-      <button type="button" onclick="abrirModalRiscoEspecifico('${regra.codigo_modal}')">
-        📘 Detalhar
-      </button>
-    ` : `
-      <span style="display:inline-block; width:100%;"></span>
-    `}
-  </div>
+              <div style="width:130px;">
+                <input type="text"
+                  id="${idComplementar}"
+                  class="input-numero"
+                  value="${valorComplementar}"
+                  placeholder="Informe"
+                  onblur="this.value = formatarNumeroBR(this.value); atualizarRespostaRiscoEspecifico('${regra.codigo_regra}')"
+                  style="width:100%; text-align:right;"
+                >
+              </div>
+            ` : ""}
 
-</div>
+            <div style="width:120px;">
+              ${regra.tem_modal ? `
+                <button type="button" onclick="abrirModalRiscoEspecifico('${regra.codigo_modal}')">
+                  📘 Detalhar
+                </button>
+              ` : `
+                <span style="display:inline-block; width:100%;"></span>
+              `}
+            </div>
 
-          
+          </div>
+
+        </div>
+
+      </details>
+    `;
+
   });
 
   box.innerHTML = html;
 
 }
-  
+
 
 
 function atualizarRespostaRiscoEspecifico(codigoRegra) {
