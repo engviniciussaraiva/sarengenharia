@@ -1967,6 +1967,96 @@ function buscarClassificacaoGrupoJ(cargaFinal) {
 
 }
 
+function obterRiscosEspecificosAplicaveis() {
+
+  const estado = document.getElementById("estado").value;
+
+  if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
+    return [];
+  }
+
+  const gruposCadastrados = ocupacoesSelecionadas
+    .map(o => o.grupo)
+    .filter(v => v);
+
+  const divisoesCadastradas = ocupacoesSelecionadas
+    .map(o => o.divisao)
+    .filter(v => v);
+
+  const regrasAplicaveis = regrasRiscosEspecificos.filter(regra => {
+
+    if (!regra.ativo) return false;
+
+    if (regra.estado !== estado) return false;
+
+    if (regra.criterio !== "risco_especifico") return false;
+
+    const gruposAplicaveis = regra.grupos_aplicaveis
+      ? regra.grupos_aplicaveis.split("|").map(v => v.trim()).filter(v => v && v !== "NA")
+      : [];
+
+    const divisoesAplicaveis = regra.divisoes_aplicaveis
+      ? regra.divisoes_aplicaveis.split("|").map(v => v.trim()).filter(v => v && v !== "NA")
+      : [];
+
+    const gruposExcluidos = regra.grupos_excluidos
+      ? regra.grupos_excluidos.split("|").map(v => v.trim()).filter(v => v && v !== "NA")
+      : [];
+
+    const divisoesExcluidas = regra.divisoes_excluidas
+      ? regra.divisoes_excluidas.split("|").map(v => v.trim()).filter(v => v && v !== "NA")
+      : [];
+
+    const possuiGrupoExcluido = gruposCadastrados.some(g =>
+      gruposExcluidos.includes(g)
+    );
+
+    const possuiDivisaoExcluida = divisoesCadastradas.some(d =>
+      divisoesExcluidas.includes(d)
+    );
+
+    if (possuiGrupoExcluido || possuiDivisaoExcluida) {
+      return false;
+    }
+
+    if (regra.aplicacao_tipo === "TODAS") {
+      return true;
+    }
+
+    if (regra.aplicacao_tipo === "POR_GRUPO") {
+      return gruposCadastrados.some(g =>
+        gruposAplicaveis.includes(g)
+      );
+    }
+
+    if (regra.aplicacao_tipo === "POR_DIVISAO") {
+      return divisoesCadastradas.some(d =>
+        divisoesAplicaveis.includes(d)
+      );
+    }
+
+    if (regra.aplicacao_tipo === "EXCETO_GRUPOS") {
+      return !possuiGrupoExcluido;
+    }
+
+    if (regra.aplicacao_tipo === "EXCETO_DIVISOES") {
+      return !possuiDivisaoExcluida;
+    }
+
+    return false;
+
+  });
+
+  regrasAplicaveis.sort((a, b) => {
+    return (a.ordem_exibicao || 0) - (b.ordem_exibicao || 0);
+  });
+
+  console.log("Riscos específicos aplicáveis:", regrasAplicaveis);
+
+  return regrasAplicaveis;
+
+}
+
 
 function buscarRegraOcupacaoMista(areaTotalEdificada) {
 
@@ -3550,6 +3640,7 @@ if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
 
 renderizarOcupacaoPredominante(); 
 atualizarMemorialOcupacao();
+obterRiscosEspecificosAplicaveis();
 
 }
 
