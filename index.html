@@ -1437,6 +1437,32 @@ let resultadoOcupacao = null;
 
 let notasAltura = [];
  
+function formatarCampoComplementarRisco(valor, tipoCampo) {
+
+  if (!valor) return "";
+
+  // Remove pontos de milhar e troca vírgula por ponto
+  let texto = String(valor).replace(/\./g, "").replace(",", ".");
+
+  let numero = parseFloat(texto);
+
+  if (isNaN(numero)) return "";
+
+  // 🔥 Campo inteiro
+  if (tipoCampo === "NUMERO_INTEIRO") {
+    return Math.floor(numero).toLocaleString("pt-BR", {
+      maximumFractionDigits: 0
+    });
+  }
+
+  // 🔥 Campo decimal normal
+  return numero.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+}
+
 
 async function carregarRegrasArea() {
 
@@ -2196,7 +2222,9 @@ function renderizarRiscosEspecificos() {
                   class="input-numero"
                   value="${valorComplementar}"
                   placeholder="Informe"
-                  onblur="this.value = formatarNumeroBR(this.value); atualizarRespostaRiscoEspecifico('${regra.codigo_regra}')"
+                  oninput="${regra.campo_complementar_tipo === "NUMERO_INTEIRO" ? "this.value = this.value.replace(/\\D/g, '')" : ""}"
+onblur="this.value = formatarCampoComplementarRisco(this.value, '${regra.campo_complementar_tipo}'); atualizarRespostaRiscoEspecifico('${regra.codigo_regra}')"
+
                   style="width:100%; text-align:right;"
                 >
               </div>
