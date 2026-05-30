@@ -1434,6 +1434,7 @@ let ocupacaoUnicaSelecionada = null;
 let resultadoArea = null;
 let resultadoAltura = null;
 let resultadoOcupacao = null;
+let resultadoRiscoEspecifico = null; 
 
 let notasAltura = [];
  
@@ -2298,8 +2299,150 @@ function atualizarRespostaRiscoEspecifico(codigoRegra) {
   }
 
   renderizarRiscosEspecificos();
+calcularRiscosEspecificos();
 
-  console.log("Respostas dos riscos específicos:", respostasRiscosEspecificos);
+console.log("Respostas dos riscos específicos:", respostasRiscosEspecificos);
+
+}
+
+function calcularRiscosEspecificos() {
+
+  function parseBR(v) {
+    return parseFloat(String(v).replace(/\./g, "").replace(",", ".")) || 0;
+  }
+
+  const estado = document.getElementById("estado").value;
+
+  const resultadosEncontrados = [];
+
+  respostasRiscosEspecificos.forEach(resposta => {
+
+    if (!resposta.resposta_principal) return;
+
+    const regra = regrasRiscosEspecificos.find(r =>
+      r.codigo_regra === resposta.codigo_regra &&
+      r.estado === estado &&
+      r.ativo
+    );
+
+    if (!regra) return;
+
+    const valorComplementar = parseBR(resposta.valor_complementar);
+
+    const faixasDaRegra = faixasRiscosEspecificos
+      .filter(f =>
+        f.codigo_regra === resposta.codigo_regra &&
+        f.estado === estado &&
+        f.criterio === "risco_especifico" &&
+        f.ativo
+      )
+      .sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+
+    const faixaEncontrada = faixasDaRegra.find(faixa => {
+
+      if (faixa.resposta_principal !== resposta.resposta_principal) {
+        return false;
+      }
+
+      // Caso resposta NÃO, normalmente não depende de valor complementar
+      if (resposta.resposta_principal === "NAO") {
+        return true;
+      }
+
+      // Caso SIM sem campo complementar
+      if (
+        regra.campo_complementar_tipo === "NA" ||
+        regra.campo_complementar_tipo === ""
+      ) {
+        return true;
+      }
+
+      // Caso SIM com campo complementar ainda vazio
+      if (!resposta.valor_complementar) {
+        return false;
+      }
+
+      if (faixa.valor_min !== null && valorComplementar < faixa.valor_min) {
+        return false;
+      }
+
+      if (faixa.valor_max !== null && valorComplementar > faixa.valor_max) {
+        return false;
+      }
+
+      return true;
+
+    });
+
+    if (faixaEncontrada) {
+      resultadosEncontrados.push({
+        codigo_regra: resposta.codigo_regra,
+        nome_regra: regra.nome_regra,
+        criterio: faixaEncontrada.criterio_determinante,
+        processo: faixaEncontrada.processo_resultado,
+        certificacao: faixaEncontrada.certificacao_resultado,
+        texto_processo: faixaEncontrada.texto_processo,
+        texto_certificacao: faixaEncontrada.texto_certificacao,
+        texto_resultado: faixaEncontrada.texto_resultado,
+        texto_memorial: faixaEncontrada.texto_memorial,
+        altera_resultado: faixaEncontrada.altera_resultado,
+        nivel_restricao: faixaEncontrada.nivel_restricao,
+        cor: faixaEncontrada.cor
+      });
+    }
+
+  });
+
+  const resultadosRestritivos = resultadosEncontrados.filter(r =>
+    r.altera_resultado === true
+  );
+
+  if (resultadosRestritivos.length === 0) {
+
+    resultadoRiscoEspecifico = null;
+
+    document.getElementById("procRiscoEspecifico").innerText = "—";
+    document.getElementById("certRiscoEspecifico").innerText = "—";
+    document.getElementById("certRiscoEspecifico").style.color = "#333";
+    document.getElementById("certRiscoEspecifico").style.fontWeight = "normal";
+
+    atualizarPreviaFinal();
+
+    console.log("Resultado risco específico: não altera", resultadosEncontrados);
+
+    return;
+
+  }
+
+  resultadosRestritivos.sort((a, b) =>
+    (b.nivel_restricao || 0) - (a.nivel_restricao || 0)
+  );
+
+  const resultadoMaisRestritivo = resultadosRestritivos[0];
+
+  resultadoRiscoEspecifico = {
+    criterio: resultadoMaisRestritivo.criterio || "Risco específico",
+    processo: resultadoMaisRestritivo.processo,
+    certificacao: resultadoMaisRestritivo.certificacao
+  };
+
+  document.getElementById("procRiscoEspecifico").innerText =
+    resultadoMaisRestritivo.texto_processo || resultadoMaisRestritivo.processo || "—";
+
+  const cert = document.getElementById("certRiscoEspecifico");
+
+  cert.innerText =
+    resultadoMaisRestritivo.texto_certificacao || resultadoMaisRestritivo.certificacao || "—";
+
+  cert.style.color =
+    resultadoMaisRestritivo.cor || "#333";
+
+  cert.style.fontWeight =
+    "bold";
+
+  atualizarPreviaFinal();
+
+  console.log("Resultado risco específico:", resultadoMaisRestritivo);
 
 }
 
