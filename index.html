@@ -865,39 +865,18 @@ style="text-align:right;">
 
   <div class="card-content">
 
-    <div style="
-      border:1px solid #e0e0e0;
-      background:#fafafa;
-      padding:14px;
-      border-radius:8px;
-      font-size:13px;
-      color:#555;
-      line-height:1.5;
-    ">
-
-      Este módulo será utilizado para avaliar condições específicas que podem alterar o enquadramento da edificação, tais como:
-
-      <div style="margin-top:10px; padding-left:15px;">
-        • Lotação superior a 250 pessoas em ocupações do Grupo F<br>
-        • Armazenamento ou uso de GLP<br>
-        • Líquidos combustíveis ou inflamáveis<br>
-        • Gases inflamáveis<br>
-        • Acetileno em ocupações do Grupo G-4<br>
-        • Produtos perigosos<br>
-        • Área descoberta para armazenamento de materiais combustíveis<br>
-        • Necessidade de isolamento de risco<br>
-        • Sistemas especiais exigidos
-      </div>
-
-      <div style="
-        margin-top:12px;
-        color:#777;
-        font-style:italic;
-      ">
-        Conteúdo em desenvolvimento. O resultado deste módulo será exibido no painel lateral em “Pelo Risco Específico”.
-      </div>
-
-    </div>
+ <div id="boxRiscosEspecificos" style="
+  border:1px solid #e0e0e0;
+  background:#fafafa;
+  padding:14px;
+  border-radius:8px;
+  font-size:13px;
+  color:#555;
+  line-height:1.5;
+">
+  Aguardando cadastro das ocupações para verificação dos critérios técnicos adicionais.
+</div>
+   
 
   </div>
 
@@ -2056,6 +2035,231 @@ function obterRiscosEspecificosAplicaveis() {
   return regrasAplicaveis;
 
 }
+
+
+
+function renderizarRiscosEspecificos() {
+
+  const box = document.getElementById("boxRiscosEspecificos");
+
+  if (!box) return;
+
+  const riscosAplicaveis = obterRiscosEspecificosAplicaveis();
+
+  if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
+
+    box.innerHTML = `
+      <div style="
+        padding:10px;
+        border:1px solid #e0e0e0;
+        background:#ffffff;
+        border-radius:6px;
+        color:#777;
+      ">
+        Aguardando cadastro das ocupações para verificação dos critérios técnicos adicionais.
+      </div>
+    `;
+
+    return;
+  }
+
+  if (!riscosAplicaveis || riscosAplicaveis.length === 0) {
+
+    box.innerHTML = `
+      <div style="
+        padding:10px;
+        border:1px solid #c8e6c9;
+        background:#f1f8e9;
+        border-radius:6px;
+        color:#2e7d32;
+        font-weight:600;
+      ">
+        Nenhum critério técnico adicional aplicável foi identificado para as ocupações cadastradas até o momento.
+      </div>
+    `;
+
+    return;
+  }
+
+  let html = `
+    <div style="
+      margin-bottom:12px;
+      color:#333;
+      line-height:1.5;
+    ">
+      Foram identificados os seguintes critérios técnicos adicionais aplicáveis às ocupações cadastradas:
+    </div>
+  `;
+
+  riscosAplicaveis.forEach(regra => {
+
+    const respostaAtual = respostasRiscosEspecificos.find(r =>
+      r.codigo_regra === regra.codigo_regra
+    ) || {};
+
+    const respostaPrincipal = respostaAtual.resposta_principal || "";
+    const valorComplementar = respostaAtual.valor_complementar || "";
+
+    const idResposta = "risco_" + regra.codigo_regra + "_resposta";
+    const idComplementar = "risco_" + regra.codigo_regra + "_complementar";
+
+    const mostrarComplementar =
+      respostaPrincipal === regra.habilita_complementar_se &&
+      regra.campo_complementar_tipo !== "NA";
+
+    html += `
+      <div style="
+        border:1px solid #dcdcdc;
+        background:#ffffff;
+        padding:12px;
+        border-radius:8px;
+        margin-bottom:12px;
+      ">
+
+        <div style="
+          font-size:14px;
+          font-weight:700;
+          color:#1b5e20;
+          margin-bottom:8px;
+        ">
+          ${regra.nome_regra}
+        </div>
+
+        <div style="
+          font-size:13px;
+          color:#555;
+          margin-bottom:10px;
+          line-height:1.5;
+        ">
+          ${regra.descricao_regra || ""}
+        </div>
+
+        <label style="
+          font-size:13px;
+          font-weight:600;
+          display:block;
+          margin-bottom:5px;
+        ">
+          ${regra.pergunta_principal}
+        </label>
+
+        <select id="${idResposta}"
+          onchange="atualizarRespostaRiscoEspecifico('${regra.codigo_regra}')"
+          style="margin-bottom:10px;"
+        >
+          <option value="">-- Selecionar --</option>
+          <option value="SIM" ${respostaPrincipal === "SIM" ? "selected" : ""}>Sim</option>
+          <option value="NAO" ${respostaPrincipal === "NAO" ? "selected" : ""}>Não</option>
+        </select>
+    `;
+
+    if (mostrarComplementar) {
+
+      html += `
+        <div style="
+          margin-top:8px;
+        ">
+          <label style="
+            font-size:13px;
+            font-weight:600;
+            display:block;
+            margin-bottom:5px;
+          ">
+            ${regra.campo_complementar_label}
+            ${regra.campo_complementar_unidade && regra.campo_complementar_unidade !== "NA"
+              ? "(" + regra.campo_complementar_unidade + ")"
+              : ""}
+          </label>
+
+          <input type="text"
+            id="${idComplementar}"
+            class="input-numero"
+            value="${valorComplementar}"
+            placeholder="Informe o valor"
+            onblur="this.value = formatarNumeroBR(this.value); atualizarRespostaRiscoEspecifico('${regra.codigo_regra}')"
+            style="text-align:right;"
+          >
+        </div>
+      `;
+
+    }
+
+    if (regra.tem_modal) {
+
+      html += `
+        <div style="margin-top:10px; text-align:right;">
+          <button type="button" onclick="abrirModalRiscoEspecifico('${regra.codigo_modal}')">
+            📘 Dados adicionais
+          </button>
+        </div>
+      `;
+
+    }
+
+    html += `
+        <div style="
+          margin-top:10px;
+          font-size:12px;
+          color:#777;
+          font-style:italic;
+        ">
+          Base normativa: ${regra.base_normativa || "—"}
+        </div>
+
+      </div>
+    `;
+
+  });
+
+  box.innerHTML = html;
+
+}
+
+function atualizarRespostaRiscoEspecifico(codigoRegra) {
+
+  const regra = regrasRiscosEspecificos.find(r =>
+    r.codigo_regra === codigoRegra
+  );
+
+  if (!regra) return;
+
+  const idResposta = "risco_" + codigoRegra + "_resposta";
+  const idComplementar = "risco_" + codigoRegra + "_complementar";
+
+  const campoResposta = document.getElementById(idResposta);
+  const campoComplementar = document.getElementById(idComplementar);
+
+  const respostaPrincipal = campoResposta ? campoResposta.value : "";
+
+  let valorComplementar = "";
+
+  if (campoComplementar) {
+    valorComplementar = campoComplementar.value || "";
+  }
+
+  const index = respostasRiscosEspecificos.findIndex(r =>
+    r.codigo_regra === codigoRegra
+  );
+
+  const registro = {
+    codigo_regra: codigoRegra,
+    resposta_principal: respostaPrincipal,
+    valor_complementar: valorComplementar
+  };
+
+  if (index >= 0) {
+    respostasRiscosEspecificos[index] = registro;
+  } else {
+    respostasRiscosEspecificos.push(registro);
+  }
+
+  renderizarRiscosEspecificos();
+
+  console.log("Respostas dos riscos específicos:", respostasRiscosEspecificos);
+
+}
+
+
 
 
 function buscarRegraOcupacaoMista(areaTotalEdificada) {
@@ -3640,9 +3844,14 @@ if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
 
 renderizarOcupacaoPredominante(); 
 atualizarMemorialOcupacao();
-obterRiscosEspecificosAplicaveis();
+renderizarRiscosEspecificos(); 
 
 }
+
+function abrirModalRiscoEspecifico(codigoModal) {
+  alert("Modal em desenvolvimento: " + codigoModal);
+}
+
 
 
 function renderizarOcupacaoPredominante() {
