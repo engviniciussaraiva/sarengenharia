@@ -1930,7 +1930,7 @@ async function carregarFaixasRiscosEspecificos() {
         valor_min: col[6] === "NA" ? null : parseFloat(col[6]),
         valor_max: col[7] === "NA" ? null : parseFloat(col[7]),
         operador: col[8],
-        valor_referencia: col[9] === "NA" ? null : parseFloat(col[9]),
+        valor_referencia: col[9] === "NA" ? null : col[9], 
         processo_resultado: col[10],
         certificacao_resultado: col[11],
         texto_processo: col[12],
@@ -2101,6 +2101,22 @@ function obterRiscosEspecificosAplicaveis() {
 
 }
 
+function obterOpcoesRiscoEspecifico(codigoRegra) {
+
+  const estado = document.getElementById("estado").value;
+
+  return opcoesRiscosEspecificos
+    .filter(op =>
+      op.ativo &&
+      op.estado === estado &&
+      op.criterio === "risco_especifico" &&
+      op.codigo_regra === codigoRegra
+    )
+    .sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+
+}
+
+
 
 function renderizarRiscosEspecificos() {
   const box = document.getElementById("boxRiscosEspecificos");
@@ -2242,32 +2258,52 @@ function renderizarRiscosEspecificos() {
               </select>
             </div>
 
-            ${mostrarComplementar ? `
-              <div style="width:300px;">
-                <label style="
-                  font-size:13px;
-                  font-weight:600;
-                  display:block;
-                  margin-bottom:5px;
-                ">
-                  ${regra.campo_complementar_label}
-                  ${regra.campo_complementar_unidade && regra.campo_complementar_unidade !== "NA"
-                    ? "(" + regra.campo_complementar_unidade + ")"
-                    : ""}
-                </label>
+${mostrarComplementar ? `
+  <div style="width:300px;">
+    <label style="
+      font-size:13px;
+      font-weight:600;
+      display:block;
+      margin-bottom:5px;
+    ">
+      ${regra.campo_complementar_label}
+      ${regra.campo_complementar_unidade && regra.campo_complementar_unidade !== "NA"
+        ? "(" + regra.campo_complementar_unidade + ")"
+        : ""}
+    </label>
 
-                <input type="text"
-                  id="${idComplementar}"
-                  class="input-numero"
-                  value="${valorComplementar}"
-                  placeholder="Informe"
-                  oninput="${regra.campo_complementar_tipo === "NUMERO_INTEIRO" ? "this.value = this.value.replace(/\\D/g, '')" : ""}"
-onblur="this.value = formatarCampoComplementarRisco(this.value, '${regra.campo_complementar_tipo}'); atualizarRespostaRiscoEspecifico('${regra.codigo_regra}')"
-
-                  style="width:100%; text-align:right;"
-                >
-              </div>
-            ` : ""}
+    ${
+      regra.campo_complementar_tipo === "DROP"
+      ? `
+        <select id="${idComplementar}"
+          onchange="atualizarRespostaRiscoEspecifico('${regra.codigo_regra}')"
+          style="width:100%;"
+        >
+          <option value="">-- Selecionar --</option>
+          ${
+            obterOpcoesRiscoEspecifico(regra.codigo_regra).map(op => `
+              <option value="${op.valor_opcao}" ${valorComplementar === op.valor_opcao ? "selected" : ""}>
+                ${op.label_opcao}
+              </option>
+            `).join("")
+          }
+        </select>
+      `
+      : `
+        <input type="text"
+          id="${idComplementar}"
+          class="input-numero"
+          value="${valorComplementar}"
+          placeholder="Informe"
+          oninput="${regra.campo_complementar_tipo === "NUMERO_INTEIRO" ? "this.value = this.value.replace(/\\D/g, '')" : ""}"
+          onblur="this.value = formatarCampoComplementarRisco(this.value, '${regra.campo_complementar_tipo}'); atualizarRespostaRiscoEspecifico('${regra.codigo_regra}')"
+          style="width:100%; text-align:right;"
+        >
+      `
+    }
+  </div>
+` : ""}
+            
 
             <div style="
               width:140px;
@@ -2396,11 +2432,24 @@ function calcularRiscosEspecificos() {
         return true;
       }
 
-      // Caso SIM com campo complementar ainda vazio
+            // Caso SIM com campo complementar ainda vazio
       if (!resposta.valor_complementar) {
         return false;
       }
 
+      // 🔥 Campo complementar tipo DROP
+      if (regra.campo_complementar_tipo === "DROP") {
+
+        if (!faixa.valor_referencia) {
+          return false;
+        }
+
+        return String(resposta.valor_complementar).trim() ===
+               String(faixa.valor_referencia).trim();
+
+      }
+
+      // 🔥 Campo complementar numérico
       if (faixa.valor_min !== null && valorComplementar < faixa.valor_min) {
         return false;
       }
