@@ -1427,6 +1427,7 @@ let regrasGrupoJCarga = [];
 let regrasRiscosEspecificos = [];
 let faixasRiscosEspecificos = [];
 let respostasRiscosEspecificos = []; 
+let resultadosRiscosEspecificos = []; 
 
 let ocupacoesSelecionadas = [];
 let ocupacaoUnicaSelecionada = null;  
@@ -2393,6 +2394,8 @@ function calcularRiscosEspecificos() {
 
   });
 
+resultadosRiscosEspecificos = resultadosEncontrados; 
+
   const resultadosRestritivos = resultadosEncontrados.filter(r =>
     r.altera_resultado === true
   );
@@ -2407,6 +2410,7 @@ function calcularRiscosEspecificos() {
     document.getElementById("certRiscoEspecifico").style.fontWeight = "normal";
 
     atualizarPreviaFinal();
+atualizarMemorialRiscos(); 
 
     console.log("Resultado risco específico: não altera", resultadosEncontrados);
 
@@ -2441,12 +2445,253 @@ function calcularRiscosEspecificos() {
     "bold";
 
   atualizarPreviaFinal();
+atualizarMemorialRiscos(); 
 
   console.log("Resultado risco específico:", resultadoMaisRestritivo);
 
 }
 
+function atualizarMemorialRiscos() {
 
+  const memorial = document.getElementById("memorialRiscos");
+
+  if (!memorial) return;
+
+  if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
+    memorial.innerHTML = "Aguardando análise dos critérios técnicos adicionais.";
+    return;
+  }
+
+  const riscosAplicaveis = obterRiscosEspecificosAplicaveis();
+
+  if (!riscosAplicaveis || riscosAplicaveis.length === 0) {
+    memorial.innerHTML = `
+      <div style="
+        padding:10px;
+        border:1px solid #c8e6c9;
+        background:#f1f8e9;
+        color:#2e7d32;
+        border-radius:6px;
+        font-weight:600;
+      ">
+        Não foram identificados critérios técnicos adicionais aplicáveis às ocupações cadastradas até o momento.
+      </div>
+    `;
+    return;
+  }
+
+  if (!resultadosRiscosEspecificos || resultadosRiscosEspecificos.length === 0) {
+    memorial.innerHTML = `
+      <div style="
+        padding:10px;
+        border:1px solid #fff3cd;
+        background:#fffde7;
+        color:#795548;
+        border-radius:6px;
+      ">
+        Foram identificados critérios técnicos adicionais aplicáveis, porém as respostas ainda não foram preenchidas.
+      </div>
+    `;
+    return;
+  }
+
+  let html = `
+    <div style="margin-bottom:12px;">
+      Para fins de análise complementar do enquadramento técnico, foram avaliados os seguintes critérios técnicos adicionais / riscos específicos:
+    </div>
+  `;
+
+  resultadosRiscosEspecificos.forEach(resultado => {
+
+    const regra = regrasRiscosEspecificos.find(r =>
+      r.codigo_regra === resultado.codigo_regra
+    );
+
+    const resposta = respostasRiscosEspecificos.find(r =>
+      r.codigo_regra === resultado.codigo_regra
+    ) || {};
+
+    let textoResposta = "Não informada";
+
+    if (resposta.resposta_principal === "SIM") {
+      textoResposta = "Sim";
+    } else if (resposta.resposta_principal === "NAO") {
+      textoResposta = "Não";
+    }
+
+    let textoComplementar = "";
+
+    if (resposta.valor_complementar) {
+      textoComplementar = `
+        <div style="margin-bottom:6px;">
+          <strong>${regra?.campo_complementar_label || "Valor informado"}:</strong>
+          ${resposta.valor_complementar}
+          ${regra?.campo_complementar_unidade && regra.campo_complementar_unidade !== "NA"
+            ? regra.campo_complementar_unidade
+            : ""}
+        </div>
+      `;
+    }
+
+    html += `
+      <div style="
+        margin-top:10px;
+        padding:12px;
+        border:1px solid #e0e0e0;
+        background:#ffffff;
+        border-radius:6px;
+      ">
+
+        <div style="
+          font-weight:700;
+          color:#1b5e20;
+          margin-bottom:8px;
+        ">
+          ${regra?.nome_regra || resultado.nome_regra || "Critério técnico adicional"}
+        </div>
+
+        <div style="margin-bottom:6px;">
+          <strong>Pergunta avaliada:</strong>
+          ${regra?.pergunta_principal || "—"}
+        </div>
+
+        <div style="margin-bottom:6px;">
+          <strong>Resposta informada:</strong>
+          ${textoResposta}
+        </div>
+
+        ${textoComplementar}
+
+        <div style="margin-bottom:6px;">
+          <strong>Resultado da análise:</strong>
+          <span style="
+            font-weight:700;
+            color:${resultado.cor || "#333"};
+          ">
+            ${resultado.texto_resultado || "Critério avaliado."}
+          </span>
+        </div>
+
+        <div style="margin-bottom:6px;">
+          ${resultado.texto_memorial || ""}
+        </div>
+
+        <div style="
+          margin-top:8px;
+          font-size:13px;
+          color:#666;
+          font-style:italic;
+        ">
+          Base normativa: ${regra?.base_normativa || "—"}
+        </div>
+
+      </div>
+    `;
+
+  });
+
+  const restritivos = resultadosRiscosEspecificos.filter(r =>
+    r.altera_resultado === true
+  );
+
+  if (restritivos.length > 0) {
+
+    restritivos.sort((a, b) =>
+      (b.nivel_restricao || 0) - (a.nivel_restricao || 0)
+    );
+
+    const maisRestritivo = restritivos[0];
+
+    html += `
+      <div class="memorial-resultado" style="
+        margin-top:12px;
+        padding:12px;
+        border:1px solid #e0e0e0;
+        background:#ffffff;
+        border-radius:6px;
+      ">
+
+        <div style="
+          font-weight:700;
+          color:${maisRestritivo.cor || "#c62828"};
+          margin-bottom:8px;
+        ">
+          Resultado pelo critério de risco específico:
+        </div>
+
+        <div style="margin-bottom:6px;">
+          <strong>Tipo do Processo:</strong>
+          ${maisRestritivo.texto_processo || maisRestritivo.processo || "—"}
+        </div>
+
+        <div style="margin-bottom:6px;">
+          <strong>Certificação:</strong>
+          <span style="
+            font-weight:700;
+            color:${maisRestritivo.cor || "#333"};
+          ">
+            ${maisRestritivo.texto_certificacao || maisRestritivo.certificacao || "—"}
+          </span>
+        </div>
+
+        <div>
+          <strong>Critério determinante:</strong>
+          ${maisRestritivo.criterio || "Risco específico"}
+        </div>
+
+      </div>
+    `;
+
+  } else {
+
+    html += `
+      <div class="memorial-resultado" style="
+        margin-top:12px;
+        padding:12px;
+        border:1px solid #c8e6c9;
+        background:#f1f8e9;
+        border-radius:6px;
+        color:#2e7d32;
+        font-weight:600;
+      ">
+        Os critérios técnicos adicionais avaliados não alteram o enquadramento técnico da edificação.
+      </div>
+    `;
+
+  }
+
+  memorial.innerHTML = html;
+
+}
+
+function limparRiscosEspecificos() {
+
+  respostasRiscosEspecificos = [];
+  resultadosRiscosEspecificos = [];
+  resultadoRiscoEspecifico = null;
+
+  const proc = document.getElementById("procRiscoEspecifico");
+  const cert = document.getElementById("certRiscoEspecifico");
+  const memorial = document.getElementById("memorialRiscos");
+
+  if (proc) {
+    proc.innerText = "—";
+  }
+
+  if (cert) {
+    cert.innerText = "—";
+    cert.style.color = "#333";
+    cert.style.fontWeight = "normal";
+  }
+
+  if (memorial) {
+    memorial.innerHTML = "Aguardando análise dos critérios técnicos adicionais.";
+  }
+
+  renderizarRiscosEspecificos();
+  atualizarPreviaFinal();
+
+}
 
 
 function buscarRegraOcupacaoMista(areaTotalEdificada) {
@@ -3940,6 +4185,8 @@ if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
   const memorial = document.getElementById("memorialOcupacao");
   if (memorial) memorial.innerHTML = "Aguardando seleção da ocupação da edificação.";
 
+  limparRiscosEspecificos();
+
   return;
 
 }
@@ -4551,10 +4798,11 @@ function removerOcupacaoSelecionada(index) {
 
   ocupacoesSelecionadas.splice(index, 1);
 
-  renderizarOcupacoesSelecionadas();
+  // Ao remover ocupações, as perguntas aplicáveis podem mudar.
+  // Por segurança, limpamos as respostas e recalculamos o módulo.
+  limparRiscosEspecificos();
 
-  // depois vamos recalcular o motor de ocupação aqui
-  // analisarOcupacoesSelecionadas();
+  renderizarOcupacoesSelecionadas();
 
 }
 
@@ -4571,6 +4819,8 @@ function limparOcupacoesSelecionadas() {
   ocupacoesSelecionadas = [];
 
   renderizarOcupacoesSelecionadas();
+
+renderizarOcupacoesSelecionadas(); 
 
   resultadoOcupacao = null;
 
