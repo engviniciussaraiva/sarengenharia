@@ -1128,7 +1128,8 @@ await carregarRegrasGrupoJCarga();
 
 // 🔥 RISCOS ESPECÍFICOS
 await carregarRegrasRiscosEspecificos();
-await carregarFaixasRiscosEspecificos(); 
+await carregarFaixasRiscosEspecificos();
+await carregarOpcoesRiscosEspecificos();  
 
 await carregarAlertasArea();
 await carregarNotasAltura(); 
@@ -1426,6 +1427,7 @@ let regrasGrupoJCarga = [];
 // 🔥 RISCOS ESPECÍFICOS
 let regrasRiscosEspecificos = [];
 let faixasRiscosEspecificos = [];
+let opcoesRiscosEspecificos = []; 
 let respostasRiscosEspecificos = []; 
 let resultadosRiscosEspecificos = []; 
 
@@ -1948,6 +1950,41 @@ async function carregarFaixasRiscosEspecificos() {
 
 }
 
+async function carregarOpcoesRiscosEspecificos() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRdAXIy68eVwAqhINast80jNGn8TpsPRGXYAd47A8OSnrd-RZfpRvWcbDFH9iIWnIXS0l4pho2U4HNv/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  opcoesRiscosEspecificos = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        criterio: col[2],
+        codigo_regra: col[3],
+        valor_opcao: col[4],
+        label_opcao: col[5],
+        valor_numerico: col[6] === "NA" ? null : parseFloat(col[6]),
+        unidade: col[7],
+        ordem: parseInt(col[8]) || 0,
+        ativo: col[9] === "TRUE"
+      };
+
+    });
+
+  console.log("Opções de riscos específicos carregadas:", opcoesRiscosEspecificos);
+
+}
 
 
 function buscarClassificacaoGrupoJ(cargaFinal) {
@@ -2306,6 +2343,7 @@ console.log("Respostas dos riscos específicos:", respostasRiscosEspecificos);
 
 }
 
+
 function calcularRiscosEspecificos() {
 
   function parseBR(v) {
@@ -2345,7 +2383,7 @@ function calcularRiscosEspecificos() {
         return false;
       }
 
-      // Caso resposta NÃO, normalmente não depende de valor complementar
+      // Caso resposta NÃO
       if (resposta.resposta_principal === "NAO") {
         return true;
       }
@@ -2394,13 +2432,11 @@ function calcularRiscosEspecificos() {
 
   });
 
-resultadosRiscosEspecificos = resultadosEncontrados; 
+  // Guarda todos os resultados para o memorial
+  resultadosRiscosEspecificos = resultadosEncontrados;
 
-  const resultadosRestritivos = resultadosEncontrados.filter(r =>
-    r.altera_resultado === true
-  );
-
-  if (resultadosRestritivos.length === 0) {
+  // Se ainda não existe nenhuma resposta válida, limpa o painel do módulo
+  if (resultadosEncontrados.length === 0) {
 
     resultadoRiscoEspecifico = null;
 
@@ -2410,19 +2446,35 @@ resultadosRiscosEspecificos = resultadosEncontrados;
     document.getElementById("certRiscoEspecifico").style.fontWeight = "normal";
 
     atualizarPreviaFinal();
-atualizarMemorialRiscos(); 
+    atualizarMemorialRiscos();
 
-    console.log("Resultado risco específico: não altera", resultadosEncontrados);
+    console.log("Resultado risco específico: nenhuma resposta válida.");
 
     return;
 
   }
 
-  resultadosRestritivos.sort((a, b) =>
-    (b.nivel_restricao || 0) - (a.nivel_restricao || 0)
-  );
+  // 🔥 MOTOR INTERNO DO MÓDULO DE RISCOS
+  // Pega o resultado mais rigoroso entre todas as perguntas respondidas
+  resultadosEncontrados.sort((a, b) => {
 
-  const resultadoMaisRestritivo = resultadosRestritivos[0];
+    // 1º critério: maior nível de restrição vindo do banco
+    if ((b.nivel_restricao || 0) !== (a.nivel_restricao || 0)) {
+      return (b.nivel_restricao || 0) - (a.nivel_restricao || 0);
+    }
+
+    // 2º critério: peso da tabela de prioridade, se existir
+    const prioridadeA = buscarPrioridade(a.processo, a.certificacao);
+    const prioridadeB = buscarPrioridade(b.processo, b.certificacao);
+
+    const pesoA = prioridadeA ? prioridadeA.peso : 0;
+    const pesoB = prioridadeB ? prioridadeB.peso : 0;
+
+    return pesoB - pesoA;
+
+  });
+
+  const resultadoMaisRestritivo = resultadosEncontrados[0];
 
   resultadoRiscoEspecifico = {
     criterio: resultadoMaisRestritivo.criterio || "Risco específico",
@@ -2431,12 +2483,16 @@ atualizarMemorialRiscos();
   };
 
   document.getElementById("procRiscoEspecifico").innerText =
-    resultadoMaisRestritivo.texto_processo || resultadoMaisRestritivo.processo || "—";
+    resultadoMaisRestritivo.texto_processo ||
+    resultadoMaisRestritivo.processo ||
+    "—";
 
   const cert = document.getElementById("certRiscoEspecifico");
 
   cert.innerText =
-    resultadoMaisRestritivo.texto_certificacao || resultadoMaisRestritivo.certificacao || "—";
+    resultadoMaisRestritivo.texto_certificacao ||
+    resultadoMaisRestritivo.certificacao ||
+    "—";
 
   cert.style.color =
     resultadoMaisRestritivo.cor || "#333";
@@ -2445,11 +2501,12 @@ atualizarMemorialRiscos();
     "bold";
 
   atualizarPreviaFinal();
-atualizarMemorialRiscos(); 
+  atualizarMemorialRiscos();
 
-  console.log("Resultado risco específico:", resultadoMaisRestritivo);
+  console.log("Resultado do módulo de risco específico:", resultadoMaisRestritivo);
 
 }
+
 
 function atualizarMemorialRiscos() {
 
