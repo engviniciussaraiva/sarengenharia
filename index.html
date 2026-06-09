@@ -1437,7 +1437,8 @@ let ocupacaoUnicaSelecionada = null;
 let resultadoArea = null;
 let resultadoAltura = null;
 let resultadoOcupacao = null;
-let resultadoRiscoEspecifico = null; 
+let resultadoRiscoEspecifico = null;
+let resultadoFinalConsolidado = null;  
 
 let notasAltura = [];
  
@@ -3491,40 +3492,54 @@ if (resultadoRiscoEspecifico) resultados.push(resultadoRiscoEspecifico);
 
     if (regraConsolidacao) {
 
-      document.getElementById("procPreviaFinal").innerText =
-        regraConsolidacao.texto_processo;
+  document.getElementById("procPreviaFinal").innerText =
+    regraConsolidacao.texto_processo;
 
-      const certFinal = document.getElementById("certPreviaFinal");
+  const certFinal = document.getElementById("certPreviaFinal");
 
-      certFinal.innerText =
-        regraConsolidacao.texto_certificacao;
+  certFinal.innerText =
+    regraConsolidacao.texto_certificacao;
 
-      certFinal.style.color =
-        regraConsolidacao.cor;
+  certFinal.style.color =
+    regraConsolidacao.cor;
 
-      certFinal.style.fontWeight =
-        "bold";
+  certFinal.style.fontWeight =
+    "bold";
 
-      document.getElementById("criterioPreviaFinal").innerText =
-        regraConsolidacao.criterio_determinante;
+  document.getElementById("criterioPreviaFinal").innerText =
+    regraConsolidacao.criterio_determinante;
 
-      return;
-    }
+  resultadoFinalConsolidado = {
+    criterio: regraConsolidacao.criterio_determinante,
+    processo: regraConsolidacao.processo_resultado,
+    certificacao: regraConsolidacao.certificacao_resultado,
+    peso: null,
+    texto_processo: regraConsolidacao.texto_processo,
+    texto_certificacao: regraConsolidacao.texto_certificacao,
+    cor: regraConsolidacao.cor
+  };
+
+  console.log("Resultado final consolidado:", resultadoFinalConsolidado);
+
+  return;
+}
 
   }
 
   // Se ainda não tem nenhum critério preenchido
   if (resultados.length === 0) {
 
-    document.getElementById("procPreviaFinal").innerText = "—";
-    document.getElementById("certPreviaFinal").innerText = "—";
-    document.getElementById("criterioPreviaFinal").innerText = "—";
+  resultadoFinalConsolidado = null;
 
-    document.getElementById("certPreviaFinal").style.color = "#333";
-    document.getElementById("certPreviaFinal").style.fontWeight = "normal";
+  document.getElementById("procPreviaFinal").innerText = "—";
+  document.getElementById("certPreviaFinal").innerText = "—";
+  document.getElementById("criterioPreviaFinal").innerText = "—";
 
-    return;
-  }
+  document.getElementById("certPreviaFinal").style.color = "#333";
+  document.getElementById("certPreviaFinal").style.fontWeight = "normal";
+
+  return;
+}
 
   // Enriquecer cada resultado com peso da tabela PROC_PRIORIDADE
   const resultadosComPeso = resultados
@@ -3549,15 +3564,18 @@ if (resultadoRiscoEspecifico) resultados.push(resultadoRiscoEspecifico);
 
   if (resultadosComPeso.length === 0) {
 
-    document.getElementById("procPreviaFinal").innerText = "—";
-    document.getElementById("certPreviaFinal").innerText = "—";
-    document.getElementById("criterioPreviaFinal").innerText = "—";
+  resultadoFinalConsolidado = null;
 
-    document.getElementById("certPreviaFinal").style.color = "#333";
-    document.getElementById("certPreviaFinal").style.fontWeight = "normal";
+  document.getElementById("procPreviaFinal").innerText = "—";
+  document.getElementById("certPreviaFinal").innerText = "—";
+  document.getElementById("criterioPreviaFinal").innerText = "—";
 
-    return;
-  }
+  document.getElementById("certPreviaFinal").style.color = "#333";
+  document.getElementById("certPreviaFinal").style.fontWeight = "normal";
+
+  return;
+}
+
 
   // Pega o maior peso
   const maiorPeso = Math.max(...resultadosComPeso.map(r => r.peso));
@@ -3587,6 +3605,19 @@ if (resultadoRiscoEspecifico) resultados.push(resultadoRiscoEspecifico);
 
   document.getElementById("criterioPreviaFinal").innerText =
     criterios;
+
+resultadoFinalConsolidado = {
+  criterio: criterios,
+  processo: resultadoFinal.processo,
+  certificacao: resultadoFinal.certificacao,
+  peso: resultadoFinal.peso,
+  texto_processo: resultadoFinal.texto_processo,
+  texto_certificacao: resultadoFinal.texto_certificacao,
+  cor: resultadoFinal.cor
+};
+
+console.log("Resultado final consolidado:", resultadoFinalConsolidado);
+
 
 }
 
