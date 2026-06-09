@@ -1129,7 +1129,8 @@ await carregarRegrasGrupoJCarga();
 // 🔥 RISCOS ESPECÍFICOS
 await carregarRegrasRiscosEspecificos();
 await carregarFaixasRiscosEspecificos();
-await carregarOpcoesRiscosEspecificos();  
+await carregarOpcoesRiscosEspecificos();
+await carregarRegrasMemorialConclusao();   
 
 await carregarAlertasArea();
 await carregarNotasAltura(); 
@@ -1429,7 +1430,8 @@ let regrasRiscosEspecificos = [];
 let faixasRiscosEspecificos = [];
 let opcoesRiscosEspecificos = []; 
 let respostasRiscosEspecificos = []; 
-let resultadosRiscosEspecificos = []; 
+let resultadosRiscosEspecificos = [];
+let regrasMemorialConclusao = [];  
 
 let ocupacoesSelecionadas = [];
 let ocupacaoUnicaSelecionada = null;  
@@ -1984,6 +1986,44 @@ async function carregarOpcoesRiscosEspecificos() {
     });
 
   console.log("Opções de riscos específicos carregadas:", opcoesRiscosEspecificos);
+
+}
+
+
+async function carregarRegrasMemorialConclusao() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSG8756fH--pOI7S3zRjnhU54pjs2nYYcend8zBKiZs7pGNdNk07T8jHXMFePG1wA6gv4loYvt-hVh3/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  regrasMemorialConclusao = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").replace(/^"|"$/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        criterio: col[2],
+        processo: col[3],
+        certificacao: col[4],
+        texto_titulo: col[5],
+        texto_conclusao: col[6],
+        texto_observacao: col[7],
+        base_normativa: col[8],
+        ordem: parseInt(col[9]) || 0,
+        ativo: col[10] === "TRUE"
+      };
+
+    });
+
+  console.log("Regras do memorial de conclusão carregadas:", regrasMemorialConclusao);
 
 }
 
@@ -2557,6 +2597,31 @@ function calcularRiscosEspecificos() {
 
 }
 
+function buscarRegraMemorialConclusao() {
+
+  if (!resultadoFinalConsolidado) return null;
+
+  const estado = document.getElementById("estado").value;
+
+  return regrasMemorialConclusao.find(r => {
+
+    if (!r.ativo) return false;
+
+    if (r.estado !== estado) return false;
+
+    if (r.criterio !== "conclusao_final") return false;
+
+    if (r.processo !== resultadoFinalConsolidado.processo) return false;
+
+    if (r.certificacao !== resultadoFinalConsolidado.certificacao) return false;
+
+    return true;
+
+  });
+
+}
+
+
 
 function atualizarMemorialConclusao() {
 
@@ -2578,6 +2643,8 @@ function atualizarMemorialConclusao() {
     `;
     return;
   }
+
+  const regraMemorial = buscarRegraMemorialConclusao();
 
   memorial.innerHTML = `
     <div style="
@@ -2627,8 +2694,36 @@ function atualizarMemorialConclusao() {
       border-radius:6px;
       line-height:1.7;
     ">
-      <strong>Descritivo do enquadramento:</strong><br>
-      O enquadramento técnico acima representa o resultado consolidado entre os critérios de área, altura, ocupação/uso e critérios técnicos adicionais avaliados pelo sistema.
+
+      <div style="
+        font-weight:700;
+        color:#1b5e20;
+        margin-bottom:8px;
+      ">
+        ${regraMemorial?.texto_titulo || "Descritivo do enquadramento"}
+      </div>
+
+      <div style="margin-bottom:8px;">
+        ${regraMemorial?.texto_conclusao || "Não foi localizado texto de conclusão final no banco de dados para este enquadramento."}
+      </div>
+
+      ${regraMemorial?.texto_observacao ? `
+        <div style="margin-bottom:8px;">
+          ${regraMemorial.texto_observacao}
+        </div>
+      ` : ""}
+
+      ${regraMemorial?.base_normativa ? `
+        <div style="
+          margin-top:8px;
+          font-size:13px;
+          color:#666;
+          font-style:italic;
+        ">
+          Base normativa: ${regraMemorial.base_normativa}
+        </div>
+      ` : ""}
+
     </div>
   `;
 
