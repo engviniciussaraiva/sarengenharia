@@ -2312,6 +2312,26 @@ async function carregarNotasGeraisMedidas() {
 
 }
 
+function classificarRiscoPorCarga(carga) {
+
+  carga = parseFloat(carga) || 0;
+
+  if (carga <= 300) {
+    return "Baixo";
+  }
+
+  if (carga > 300 && carga <= 1200) {
+    return "Médio";
+  }
+
+  if (carga > 1200) {
+    return "Alto";
+  }
+
+  return "—";
+
+}
+
 
 function buscarClassificacaoGrupoJ(cargaFinal) {
 
@@ -4931,6 +4951,7 @@ let divisaoFinal = item.divisao;
 let riscoFinal = "";
 let denominacaoFinal = "";
 let textoMemorialGrupoJ = "";
+riscoFinal = classificarRiscoPorCarga(cargaFinal); 
 
 if (item.grupo === "J") {
 
@@ -5801,7 +5822,8 @@ function atualizarMemorialOcupacao() {
           <th style="border:1px solid #ddd; padding:6px; text-align:left;">Descrição</th>
           <th style="border:1px solid #ddd; padding:6px; text-align:center;">Divisão</th>
           <th style="border:1px solid #ddd; padding:6px; text-align:right;">Carga de incêndio<br>(MJ/m²)</th>
-          <th style="border:1px solid #ddd; padding:6px; text-align:right;">Área (m²)</th>
+<th style="border:1px solid #ddd; padding:6px; text-align:center;">Risco</th>
+<th style="border:1px solid #ddd; padding:6px; text-align:right;">Área (m²)</th>
           <th style="border:1px solid #ddd; padding:6px; text-align:right;">% sobre total</th>
         </tr>
       </thead>
@@ -5839,15 +5861,19 @@ function atualizarMemorialOcupacao() {
         <td style="border:1px solid #ddd; padding:6px; text-align:center;">
           ${item.divisao || "—"}
         </td>
+<td style="border:1px solid #ddd; padding:6px; text-align:right;">
+  ${formatarBR(parseFloat(item.carga) || 0)}
+</td>
 
-        <td style="border:1px solid #ddd; padding:6px; text-align:right;">
-          ${formatarBR(parseFloat(item.carga) || 0)}
-        </td>
+<td style="border:1px solid #ddd; padding:6px; text-align:center;">
+  ${item.risco || classificarRiscoPorCarga(item.carga)}
+</td>
 
-        <td style="border:1px solid #ddd; padding:6px; text-align:right;">
-          ${formatarBR(area)}
-        </td>
+<td style="border:1px solid #ddd; padding:6px; text-align:right;">
+  ${formatarBR(area)}
+</td>
 
+        
         <td style="border:1px solid #ddd; padding:6px; text-align:right;">
           ${formatarBR(percentual)}%
         </td>
@@ -6064,6 +6090,8 @@ let divisaoFinal = item.divisao;
 let riscoFinal = "";
 let denominacaoFinal = "";
 let textoMemorialGrupoJ = "";
+
+riscoFinal = classificarRiscoPorCarga(cargaFinal); 
 
 if (item.grupo === "J") {
 
