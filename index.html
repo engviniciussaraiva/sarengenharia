@@ -1011,6 +1011,18 @@ style="text-align:right;">
   Aguardando definição da validade da certificação.
 </div>
 
+<hr class="divisor-criterio">
+
+<div class="memorial-subtitulo">
+  6. Medidas de Segurança contra Incêndio
+</div>
+
+<div id="memorialMedidasSeguranca">
+  Aguardando definição das medidas de segurança aplicáveis.
+</div>
+
+
+
 
     </div>
 
@@ -1141,7 +1153,10 @@ await carregarOpcoesRiscosEspecificos();
 await carregarRegrasMemorialConclusao();
 await carregarRegrasValidadeCertificacao();
 await carregarNotasValidadeCertificacao();
-   
+
+await carregarMedidasSeguranca();
+await carregarMedidasCondicoes();
+await carregarNotasGeraisMedidas();
 
 await carregarAlertasArea();
 await carregarNotasAltura(); 
@@ -1445,6 +1460,10 @@ let resultadosRiscosEspecificos = [];
 let regrasMemorialConclusao = [];
 let regrasValidadeCertificacao = [];
 let notasValidadeCertificacao = [];
+let regrasMedidasSeguranca = [];
+let regrasMedidasCondicoes = [];
+let notasGeraisMedidas = [];
+
   
 
 let ocupacoesSelecionadas = [];
@@ -2115,6 +2134,165 @@ async function carregarNotasValidadeCertificacao() {
     });
 
   console.log("Notas de validade da certificação carregadas:", notasValidadeCertificacao);
+
+}
+
+
+async function carregarMedidasSeguranca() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSnAyfNgTphQ01pwlMqD2PRraNu8BLwJqWvvWLMamqUroxi8bjCrqS6G1s3WzOdbMwcEKgNDndRWfdh/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  regrasMedidasSeguranca = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").replace(/^"|"$/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        tabela: col[2],
+        criterio: col[3],
+        area_max_m2: parseFloat(col[4]) || 0,
+        altura_max_m: parseFloat(col[5]) || 0,
+        codigo_coluna: col[6],
+        divisoes_aplicaveis: col[7],
+        medida_codigo: col[8],
+        medida_nome: col[9],
+        exigencia_tipo: col[10],
+        codigo_condicao: col[11],
+        ordem_medida: parseInt(col[12]) || 0,
+        ativo: col[13] === "TRUE"
+      };
+
+    });
+
+  console.log("Medidas de segurança carregadas:", regrasMedidasSeguranca);
+
+}
+
+
+async function carregarMedidasCondicoes() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSTmwjarOheRSDYuqYkxxKXS_2qZkJuuuxRWFNw3ZJuToNBNLwU8pMiBX5uljiA7W1FxBvfjnr688bf/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  regrasMedidasCondicoes = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").replace(/^"|"$/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        tabela: col[2],
+        criterio: col[3],
+        codigo_condicao: col[4],
+        nome_condicao: col[5],
+        campo_origem: col[6],
+        operador: col[7],
+        valor_referencia: col[8] === "NA" ? null : parseFloat(col[8]),
+        texto_justificativa: col[9],
+        base_normativa: col[10],
+        ordem: parseInt(col[11]) || 0,
+        ativo: col[12] === "TRUE"
+      };
+
+    });
+
+  console.log("Condições das medidas carregadas:", regrasMedidasCondicoes);
+
+}
+
+async function carregarMedidasCondicoes() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSTmwjarOheRSDYuqYkxxKXS_2qZkJuuuxRWFNw3ZJuToNBNLwU8pMiBX5uljiA7W1FxBvfjnr688bf/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  regrasMedidasCondicoes = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").replace(/^"|"$/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        tabela: col[2],
+        criterio: col[3],
+        codigo_condicao: col[4],
+        nome_condicao: col[5],
+        campo_origem: col[6],
+        operador: col[7],
+        valor_referencia: col[8] === "NA" ? null : parseFloat(col[8]),
+        texto_justificativa: col[9],
+        base_normativa: col[10],
+        ordem: parseInt(col[11]) || 0,
+        ativo: col[12] === "TRUE"
+      };
+
+    });
+
+  console.log("Condições das medidas carregadas:", regrasMedidasCondicoes);
+
+}
+
+
+async function carregarNotasGeraisMedidas() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRm5d7-JzJA2n9p-qhw5kA3i0B_A3l9-HGVqg8jafUv-6H3LnpmAEiSnapMO5Qy9whQpJ9iNtGtPDeR/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  notasGeraisMedidas = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").replace(/^"|"$/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        tabela: col[2],
+        criterio: col[3],
+        letra_nota: col[4],
+        titulo_nota: col[5],
+        texto_nota: col[6],
+        aplicacao_tipo: col[7],
+        grupos_aplicaveis: col[8],
+        divisoes_aplicaveis: col[9],
+        ordem: parseInt(col[10]) || 0,
+        ativo: col[11] === "TRUE"
+      };
+
+    });
+
+  console.log("Notas gerais das medidas carregadas:", notasGeraisMedidas);
 
 }
 
@@ -2934,6 +3112,372 @@ function atualizarMemorialValidade() {
 
 }
 
+function obterLotacaoInformada() {
+
+  let maiorLotacao = 0;
+
+  respostasRiscosEspecificos.forEach(resposta => {
+
+    const regra = regrasRiscosEspecificos.find(r =>
+      r.codigo_regra === resposta.codigo_regra
+    );
+
+    if (!regra) return;
+
+    const label = (regra.campo_complementar_label || "").toLowerCase();
+
+    if (
+      label.includes("lotação") ||
+      label.includes("lotacao") ||
+      label.includes("pessoas") ||
+      label.includes("funcionários") ||
+      label.includes("funcionarios")
+    ) {
+
+      const valor = parseFloat(
+        String(resposta.valor_complementar)
+          .replace(/\./g, "")
+          .replace(",", ".")
+      ) || 0;
+
+      if (valor > maiorLotacao) {
+        maiorLotacao = valor;
+      }
+
+    }
+
+  });
+
+  return maiorLotacao;
+
+}
+
+function avaliarCondicaoMedida(condicao) {
+
+  if (!condicao) return false;
+
+  const pavimentos = parseInt(document.getElementById("pavimentos").value) || 0;
+  const lotacao = obterLotacaoInformada();
+
+  if (condicao.campo_origem === "pavimentos") {
+
+    if (condicao.operador === ">") {
+      return pavimentos > condicao.valor_referencia;
+    }
+
+    if (condicao.operador === ">=") {
+      return pavimentos >= condicao.valor_referencia;
+    }
+
+  }
+
+  if (condicao.campo_origem === "lotacao") {
+
+    if (condicao.operador === ">") {
+      return lotacao > condicao.valor_referencia;
+    }
+
+    if (condicao.operador === ">=") {
+      return lotacao >= condicao.valor_referencia;
+    }
+
+  }
+
+  if (condicao.campo_origem === "lotacao_ou_pavimentos") {
+
+    if (condicao.operador === ">") {
+      return lotacao > condicao.valor_referencia || pavimentos > 2;
+    }
+
+  }
+
+  if (condicao.campo_origem === "condicao_manual") {
+    return false;
+  }
+
+  if (condicao.campo_origem === "lotacao_e_condicao_manual") {
+
+    if (condicao.operador === ">") {
+      return lotacao > condicao.valor_referencia;
+    }
+
+  }
+
+  return false;
+
+}
+
+function buscarMedidasSegurancaAplicaveis() {
+
+  const estado = document.getElementById("estado").value;
+
+  const ocupacaoDeterminante = obterOcupacaoDeterminanteParaValidade();
+
+  if (!ocupacaoDeterminante) return [];
+
+  function parseBR(v) {
+    return parseFloat(String(v).replace(/\./g, "").replace(",", ".")) || 0;
+  }
+
+  const areaComputada = parseBR(document.getElementById("areaComputada").value);
+  const altura = parseBR(document.getElementById("alturaEdificacao").value);
+
+  const alturaConsiderada = altura > 0 ? altura : 0;
+
+  return regrasMedidasSeguranca
+    .filter(r => {
+
+      if (!r.ativo) return false;
+
+      if (r.estado !== estado) return false;
+
+      if (r.tabela !== "TABELA_5") return false;
+
+      if (r.criterio !== "medidas_seguranca") return false;
+
+      if (areaComputada > r.area_max_m2) return false;
+
+      if (alturaConsiderada > r.altura_max_m) return false;
+
+      const divisoes = r.divisoes_aplicaveis
+        ? r.divisoes_aplicaveis.split("|").map(v => v.trim())
+        : [];
+
+      if (!divisoes.includes(ocupacaoDeterminante.divisao)) return false;
+
+      return true;
+
+    })
+    .map(r => {
+
+      let exigida = false;
+      let justificativa = "";
+      let baseNormativa = "";
+
+      if (r.exigencia_tipo === "OBRIGATORIA") {
+        exigida = true;
+        justificativa = "Medida obrigatória conforme Tabela 5 da IT 42/2025.";
+      }
+
+      if (r.exigencia_tipo === "CONDICIONAL") {
+
+        const condicao = regrasMedidasCondicoes.find(c =>
+          c.ativo &&
+          c.estado === estado &&
+          c.tabela === r.tabela &&
+          c.codigo_condicao === r.codigo_condicao
+        );
+
+        if (avaliarCondicaoMedida(condicao)) {
+          exigida = true;
+          justificativa = condicao?.texto_justificativa || "Medida exigida por condição específica da tabela.";
+          baseNormativa = condicao?.base_normativa || "";
+        } else {
+          exigida = false;
+        }
+
+      }
+
+      return {
+        ...r,
+        exigida,
+        justificativa,
+        baseNormativa
+      };
+
+    })
+    .filter(r => r.exigida)
+    .sort((a, b) => (a.ordem_medida || 0) - (b.ordem_medida || 0));
+
+}
+
+function buscarNotasGeraisMedidasAplicaveis() {
+
+  const estado = document.getElementById("estado").value;
+
+  const gruposCadastrados = ocupacoesSelecionadas
+    .map(o => o.grupo)
+    .filter(v => v);
+
+  const divisoesCadastradas = ocupacoesSelecionadas
+    .map(o => o.divisao)
+    .filter(v => v);
+
+  return notasGeraisMedidas
+    .filter(n => {
+
+      if (!n.ativo) return false;
+
+      if (n.estado !== estado) return false;
+
+      if (n.tabela !== "TABELA_5") return false;
+
+      if (n.criterio !== "notas_gerais") return false;
+
+      if (n.aplicacao_tipo === "GERAL") {
+        return true;
+      }
+
+      if (n.aplicacao_tipo === "POR_GRUPO") {
+
+        const grupos = n.grupos_aplicaveis
+          ? n.grupos_aplicaveis.split("|").map(v => v.trim()).filter(v => v && v !== "NA")
+          : [];
+
+        return gruposCadastrados.some(g => grupos.includes(g));
+      }
+
+      if (n.aplicacao_tipo === "POR_DIVISAO") {
+
+        const divisoes = n.divisoes_aplicaveis
+          ? n.divisoes_aplicaveis.split("|").map(v => v.trim()).filter(v => v && v !== "NA")
+          : [];
+
+        return divisoesCadastradas.some(d => divisoes.includes(d));
+      }
+
+      return false;
+
+    })
+    .sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+
+}
+
+function atualizarMemorialMedidasSeguranca() {
+
+  const memorial = document.getElementById("memorialMedidasSeguranca");
+
+  if (!memorial) return;
+
+  if (!resultadoFinalConsolidado || !ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
+    memorial.innerHTML = `
+      <div style="
+        padding:10px;
+        border:1px solid #fff3cd;
+        background:#fffde7;
+        color:#795548;
+        border-radius:6px;
+      ">
+        Aguardando definição das medidas de segurança aplicáveis.
+      </div>
+    `;
+    return;
+  }
+
+  const medidas = buscarMedidasSegurancaAplicaveis();
+  const notas = buscarNotasGeraisMedidasAplicaveis();
+
+  if (medidas.length === 0) {
+    memorial.innerHTML = `
+      <div style="
+        padding:10px;
+        border:1px solid #ffcdd2;
+        background:#ffebee;
+        color:#b71c1c;
+        border-radius:6px;
+      ">
+        Não foram localizadas medidas de segurança aplicáveis para os parâmetros informados neste primeiro motor da Tabela 5.
+      </div>
+    `;
+    return;
+  }
+
+  let html = `
+    <div style="
+      padding:12px;
+      border:1px solid #e0e0e0;
+      background:#ffffff;
+      border-radius:6px;
+      margin-bottom:10px;
+    ">
+
+      <div style="
+        font-weight:700;
+        color:#1b5e20;
+        margin-bottom:10px;
+      ">
+        Medidas obrigatórias aplicáveis:
+      </div>
+  `;
+
+  medidas.forEach(medida => {
+
+    html += `
+      <div style="
+        margin-bottom:10px;
+        padding:8px;
+        border-left:4px solid #1b5e20;
+        background:#f9f9f9;
+      ">
+        <div style="font-weight:700;">
+          ${medida.medida_nome}
+        </div>
+
+        <div style="
+          font-size:13px;
+          color:#555;
+          margin-top:4px;
+        ">
+          ${medida.justificativa || "Medida obrigatória conforme tabela aplicável."}
+        </div>
+
+        ${medida.baseNormativa ? `
+          <div style="
+            font-size:12px;
+            color:#666;
+            font-style:italic;
+            margin-top:4px;
+          ">
+            Base normativa: ${medida.baseNormativa}
+          </div>
+        ` : ""}
+      </div>
+    `;
+
+  });
+
+  html += `
+    </div>
+  `;
+
+  if (notas.length > 0) {
+
+    html += `
+      <div style="
+        padding:12px;
+        border:1px solid #e0e0e0;
+        background:#ffffff;
+        border-radius:6px;
+      ">
+
+        <div style="
+          font-weight:700;
+          color:#1b5e20;
+          margin-bottom:8px;
+        ">
+          Notas gerais aplicáveis:
+        </div>
+    `;
+
+    notas.forEach(nota => {
+
+      html += `
+        <div style="margin-bottom:6px;">
+          <strong>${nota.letra_nota})</strong> ${nota.texto_nota}
+        </div>
+      `;
+
+    });
+
+    html += `
+      </div>
+    `;
+
+  }
+
+  memorial.innerHTML = html;
+
+}
 
 
 function atualizarMemorialConclusao() {
@@ -3041,6 +3585,7 @@ function atualizarMemorialConclusao() {
   `;
 
 atualizarMemorialValidade();
+atualizarMemorialMedidasSeguranca();
 
 }
 
