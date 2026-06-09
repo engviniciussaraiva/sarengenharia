@@ -951,6 +951,18 @@ style="text-align:right;">
 </div>
 
 
+<div id="memorialConclusao">
+  Aguardando consolidação dos critérios preenchidos.
+</div>
+
+<hr class="divisor-criterio">
+
+<div class="memorial-titulo-principal" style="margin-top:18px;">
+  MEMORIAL DESCRITIVO DO ENQUADRAMENTO TÉCNICO
+</div>
+
+
+
     <div class="memorial-subtitulo">
   1. Quadro de Áreas
 </div>
@@ -989,20 +1001,16 @@ style="text-align:right;">
         Aguardando análise dos critérios técnicos adicionais.
       </div>
 
-      <hr class="divisor-criterio">
+    <hr class="divisor-criterio">
 
-      <div style="
-        font-size:14px;
-        font-weight:700;
-        color:#1b5e20;
-        margin-bottom:10px;
-      ">
-        5. Conclusão Prévia de Enquadramento
-      </div>
+<div class="memorial-subtitulo">
+  5. Validade da Certificação
+</div>
 
-      <div id="memorialConclusao">
-        Aguardando consolidação dos critérios preenchidos.
-      </div>
+<div id="memorialValidade">
+  Aguardando definição da validade da certificação.
+</div>
+
 
     </div>
 
@@ -1130,7 +1138,10 @@ await carregarRegrasGrupoJCarga();
 await carregarRegrasRiscosEspecificos();
 await carregarFaixasRiscosEspecificos();
 await carregarOpcoesRiscosEspecificos();
-await carregarRegrasMemorialConclusao();   
+await carregarRegrasMemorialConclusao();
+await carregarRegrasValidadeCertificacao();
+await carregarNotasValidadeCertificacao();
+   
 
 await carregarAlertasArea();
 await carregarNotasAltura(); 
@@ -1431,7 +1442,10 @@ let faixasRiscosEspecificos = [];
 let opcoesRiscosEspecificos = []; 
 let respostasRiscosEspecificos = []; 
 let resultadosRiscosEspecificos = [];
-let regrasMemorialConclusao = [];  
+let regrasMemorialConclusao = [];
+let regrasValidadeCertificacao = [];
+let notasValidadeCertificacao = [];
+  
 
 let ocupacoesSelecionadas = [];
 let ocupacaoUnicaSelecionada = null;  
@@ -2028,6 +2042,83 @@ async function carregarRegrasMemorialConclusao() {
 }
 
 
+async function carregarRegrasValidadeCertificacao() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQx-I2qVqgl6hMWdIe69SaDVvkUIoEsuA88Cr639WV3-EK3XdQFeXhNgMJ1E6uraDgGqjkWtfzzIjmW/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  regrasValidadeCertificacao = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").replace(/^"|"$/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        criterio: col[2],
+        grupo: col[3],
+        ocupacao_macro: col[4],
+        descricao: col[5],
+        divisao: col[6],
+        processo: col[7],
+        certificacao: col[8],
+        validade_anos: parseInt(col[9]) || 0,
+        texto_validade: col[10],
+        base_normativa: col[11],
+        ordem: parseInt(col[12]) || 0,
+        ativo: col[13] === "TRUE"
+      };
+
+    });
+
+  console.log("Regras de validade da certificação carregadas:", regrasValidadeCertificacao);
+
+}
+
+
+async function carregarNotasValidadeCertificacao() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbmcaAKDPI1FgIuo4Dl1qMGu5tcrh9XuOKEEIfkgr_65zXp0TGYi3cEbERqX9QsB5dectsrBa9Ptnx/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  notasValidadeCertificacao = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").replace(/^"|"$/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        criterio: col[2],
+        codigo_nota: col[3],
+        titulo_nota: col[4],
+        texto_nota: col[5],
+        aplicacao: col[6],
+        ordem: parseInt(col[7]) || 0,
+        ativo: col[8] === "TRUE"
+      };
+
+    });
+
+  console.log("Notas de validade da certificação carregadas:", notasValidadeCertificacao);
+
+}
+
+
 function buscarClassificacaoGrupoJ(cargaFinal) {
 
   const estado = document.getElementById("estado").value;
@@ -2597,6 +2688,92 @@ function calcularRiscosEspecificos() {
 
 }
 
+
+function obterOcupacaoDeterminanteParaValidade() {
+
+  if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
+    return null;
+  }
+
+  function parseBR(v) {
+    return parseFloat(String(v).replace(/\./g, "").replace(",", ".")) || 0;
+  }
+
+  const areaTotalEdificada = parseBR(document.getElementById("areaTotal").value);
+
+  if (areaTotalEdificada <= 0) {
+    return ocupacoesSelecionadas[0];
+  }
+
+  const maiorArea = Math.max(
+    ...ocupacoesSelecionadas.map(o => parseFloat(o.area) || 0)
+  );
+
+  const ocupacaoPredominante = ocupacoesSelecionadas.find(o =>
+    (parseFloat(o.area) || 0) === maiorArea
+  );
+
+  const areaSubsidiarias = ocupacoesSelecionadas
+    .filter(o => o !== ocupacaoPredominante)
+    .reduce((total, item) => total + (parseFloat(item.area) || 0), 0);
+
+  const regraMista = buscarRegraOcupacaoMista(areaTotalEdificada);
+
+  let caracterizaMista = false;
+
+  if (regraMista) {
+
+    let limiteSubsidiaria = 0;
+
+    if (regraMista.tipo_limite === "AREA_FIXA") {
+      limiteSubsidiaria = regraMista.valor_limite_area || 0;
+    }
+
+    if (regraMista.tipo_limite === "PERCENTUAL") {
+      limiteSubsidiaria =
+        areaTotalEdificada * ((regraMista.valor_limite_percentual || 0) / 100);
+    }
+
+    if (areaSubsidiarias > limiteSubsidiaria) {
+      caracterizaMista = true;
+    }
+
+  }
+
+  if (caracterizaMista) {
+    return buscarOcupacaoMaisRestritiva(ocupacoesSelecionadas);
+  }
+
+  return ocupacaoPredominante;
+
+}
+
+function buscarRegraValidadeCertificacao() {
+
+  const estado = document.getElementById("estado").value;
+
+  const ocupacaoDeterminante = obterOcupacaoDeterminanteParaValidade();
+
+  if (!ocupacaoDeterminante) return null;
+
+  return regrasValidadeCertificacao.find(r => {
+
+    if (!r.ativo) return false;
+
+    if (r.estado !== estado) return false;
+
+    if (r.criterio !== "validade_certificacao") return false;
+
+    if (r.divisao !== ocupacaoDeterminante.divisao) return false;
+
+    return true;
+
+  });
+
+}
+
+
+
 function buscarRegraMemorialConclusao() {
 
   if (!resultadoFinalConsolidado) return null;
@@ -2618,6 +2795,142 @@ function buscarRegraMemorialConclusao() {
     return true;
 
   });
+
+}
+
+
+function atualizarMemorialValidade() {
+
+  const memorial = document.getElementById("memorialValidade");
+
+  if (!memorial) return;
+
+  if (!resultadoFinalConsolidado) {
+    memorial.innerHTML = `
+      <div style="
+        padding:10px;
+        border:1px solid #fff3cd;
+        background:#fffde7;
+        color:#795548;
+        border-radius:6px;
+      ">
+        Aguardando definição da validade da certificação.
+      </div>
+    `;
+    return;
+  }
+
+  const regraValidade = buscarRegraValidadeCertificacao();
+
+  const estado = document.getElementById("estado").value;
+
+  const notas = notasValidadeCertificacao
+    .filter(n =>
+      n.ativo &&
+      n.estado === estado &&
+      n.criterio === "validade_certificacao" &&
+      n.aplicacao === "GERAL"
+    )
+    .sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+
+  let html = "";
+
+  if (regraValidade) {
+
+    html += `
+      <div style="
+        padding:12px;
+        border:1px solid #e0e0e0;
+        background:#ffffff;
+        border-radius:6px;
+        margin-bottom:10px;
+      ">
+
+        <div style="margin-bottom:8px;">
+          <strong>Divisão considerada:</strong>
+          ${regraValidade.divisao || "—"} - ${regraValidade.descricao || "—"}
+        </div>
+
+        <div style="margin-bottom:8px;">
+          <strong>Validade da certificação:</strong>
+          ${regraValidade.validade_anos || "—"} ${regraValidade.validade_anos === 1 ? "ano" : "anos"}
+        </div>
+
+        ${regraValidade.texto_validade ? `
+          <div style="margin-bottom:8px;">
+            ${regraValidade.texto_validade}
+          </div>
+        ` : ""}
+
+        ${regraValidade.base_normativa ? `
+          <div style="
+            margin-top:8px;
+            font-size:13px;
+            color:#666;
+            font-style:italic;
+          ">
+            Base normativa: ${regraValidade.base_normativa}
+          </div>
+        ` : ""}
+
+      </div>
+    `;
+
+  } else {
+
+    html += `
+      <div style="
+        padding:10px;
+        border:1px solid #ffcdd2;
+        background:#ffebee;
+        color:#b71c1c;
+        border-radius:6px;
+        margin-bottom:10px;
+      ">
+        Não foi localizada regra de validade para a divisão determinante informada.
+      </div>
+    `;
+
+  }
+
+  if (notas.length > 0) {
+
+    const titulo = notas[0].titulo_nota || "Notas";
+
+    html += `
+      <div style="
+        padding:12px;
+        border:1px solid #e0e0e0;
+        background:#ffffff;
+        border-radius:6px;
+      ">
+
+        <div style="
+          font-weight:700;
+          color:#1b5e20;
+          margin-bottom:8px;
+        ">
+          ${titulo}
+        </div>
+    `;
+
+    notas.forEach((nota, index) => {
+
+      html += `
+        <div style="margin-bottom:6px;">
+          ${index + 1}) ${nota.texto_nota}
+        </div>
+      `;
+
+    });
+
+    html += `
+      </div>
+    `;
+
+  }
+
+  memorial.innerHTML = html;
 
 }
 
@@ -2726,6 +3039,8 @@ function atualizarMemorialConclusao() {
 
     </div>
   `;
+
+atualizarMemorialValidade();
 
 }
 
