@@ -2558,6 +2558,83 @@ function calcularRiscosEspecificos() {
 }
 
 
+function atualizarMemorialConclusao() {
+
+  const memorial = document.getElementById("memorialConclusao");
+
+  if (!memorial) return;
+
+  if (!resultadoFinalConsolidado) {
+    memorial.innerHTML = `
+      <div style="
+        padding:12px;
+        border:1px solid #fff3cd;
+        background:#fffde7;
+        color:#795548;
+        border-radius:6px;
+      ">
+        Aguardando consolidação dos critérios preenchidos.
+      </div>
+    `;
+    return;
+  }
+
+  memorial.innerHTML = `
+    <div style="
+      margin-top:12px;
+      padding:14px;
+      border:2px solid ${resultadoFinalConsolidado.cor || "#c62828"};
+      background:#ffffff;
+      border-radius:8px;
+    ">
+
+      <div style="
+        font-size:16px;
+        font-weight:700;
+        color:${resultadoFinalConsolidado.cor || "#c62828"};
+        margin-bottom:10px;
+      ">
+        Resultado consolidado final
+      </div>
+
+      <div style="margin-bottom:8px;">
+        <strong>Tipo do Processo:</strong>
+        ${resultadoFinalConsolidado.texto_processo || resultadoFinalConsolidado.processo || "—"}
+      </div>
+
+      <div style="margin-bottom:8px;">
+        <strong>Certificação:</strong>
+        <span style="
+          font-weight:700;
+          color:${resultadoFinalConsolidado.cor || "#333"};
+        ">
+          ${resultadoFinalConsolidado.texto_certificacao || resultadoFinalConsolidado.certificacao || "—"}
+        </span>
+      </div>
+
+      <div style="margin-bottom:8px;">
+        <strong>Critério determinante:</strong>
+        ${resultadoFinalConsolidado.criterio || "—"}
+      </div>
+
+    </div>
+
+    <div style="
+      margin-top:12px;
+      padding:12px;
+      border:1px solid #e0e0e0;
+      background:#ffffff;
+      border-radius:6px;
+      line-height:1.7;
+    ">
+      <strong>Descritivo do enquadramento:</strong><br>
+      O enquadramento técnico acima representa o resultado consolidado entre os critérios de área, altura, ocupação/uso e critérios técnicos adicionais avaliados pelo sistema.
+    </div>
+  `;
+
+}
+
+
 function atualizarMemorialRiscos() {
 
   const memorial = document.getElementById("memorialRiscos");
@@ -3510,18 +3587,21 @@ if (resultadoRiscoEspecifico) resultados.push(resultadoRiscoEspecifico);
     regraConsolidacao.criterio_determinante;
 
   resultadoFinalConsolidado = {
-    criterio: regraConsolidacao.criterio_determinante,
-    processo: regraConsolidacao.processo_resultado,
-    certificacao: regraConsolidacao.certificacao_resultado,
-    peso: null,
-    texto_processo: regraConsolidacao.texto_processo,
-    texto_certificacao: regraConsolidacao.texto_certificacao,
-    cor: regraConsolidacao.cor
-  };
+  criterio: regraConsolidacao.criterio_determinante,
+  processo: regraConsolidacao.processo_resultado,
+  certificacao: regraConsolidacao.certificacao_resultado,
+  peso: null,
+  texto_processo: regraConsolidacao.texto_processo,
+  texto_certificacao: regraConsolidacao.texto_certificacao,
+  cor: regraConsolidacao.cor
+};
 
-  console.log("Resultado final consolidado:", resultadoFinalConsolidado);
+console.log("Resultado final consolidado:", resultadoFinalConsolidado);
 
-  return;
+atualizarMemorialConclusao();
+
+return;
+
 }
 
   }
@@ -3538,8 +3618,11 @@ if (resultadoRiscoEspecifico) resultados.push(resultadoRiscoEspecifico);
   document.getElementById("certPreviaFinal").style.color = "#333";
   document.getElementById("certPreviaFinal").style.fontWeight = "normal";
 
+  atualizarMemorialConclusao();
+
   return;
 }
+
 
   // Enriquecer cada resultado com peso da tabela PROC_PRIORIDADE
   const resultadosComPeso = resultados
@@ -3572,6 +3655,8 @@ if (resultadoRiscoEspecifico) resultados.push(resultadoRiscoEspecifico);
 
   document.getElementById("certPreviaFinal").style.color = "#333";
   document.getElementById("certPreviaFinal").style.fontWeight = "normal";
+
+  atualizarMemorialConclusao();
 
   return;
 }
@@ -3618,6 +3703,7 @@ resultadoFinalConsolidado = {
 
 console.log("Resultado final consolidado:", resultadoFinalConsolidado);
 
+atualizarMemorialConclusao();
 
 }
 
