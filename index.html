@@ -899,6 +899,22 @@ style="text-align:right;">
   color:#333;
 ">
     
+<div style="text-align:right; margin-bottom:12px;">
+  <button type="button" onclick="imprimirMemorial()" style="
+    background:#1b5e20;
+    color:#fff;
+    border:none;
+    padding:10px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:600;
+  ">
+    📄 Gerar PDF do Memorial
+  </button>
+</div>
+
+
 
 <div class="memorial-titulo-principal">
   MEMORIAL DE ENQUADRAMENTO TÉCNICO
@@ -3343,6 +3359,7 @@ function buscarNotasGeraisMedidasAplicaveis() {
 
 }
 
+
 function atualizarMemorialMedidasSeguranca() {
 
   const memorial = document.getElementById("memorialMedidasSeguranca");
@@ -3352,11 +3369,8 @@ function atualizarMemorialMedidasSeguranca() {
   if (!resultadoFinalConsolidado || !ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
     memorial.innerHTML = `
       <div style="
-        padding:10px;
-        border:1px solid #fff3cd;
-        background:#fffde7;
-        color:#795548;
-        border-radius:6px;
+        color:#777;
+        font-style:italic;
       ">
         Aguardando definição das medidas de segurança aplicáveis.
       </div>
@@ -3370,11 +3384,8 @@ function atualizarMemorialMedidasSeguranca() {
   if (medidas.length === 0) {
     memorial.innerHTML = `
       <div style="
-        padding:10px;
-        border:1px solid #ffcdd2;
-        background:#ffebee;
         color:#b71c1c;
-        border-radius:6px;
+        font-weight:600;
       ">
         Não foram localizadas medidas de segurança aplicáveis para os parâmetros informados neste primeiro motor da Tabela 5.
       </div>
@@ -3383,60 +3394,45 @@ function atualizarMemorialMedidasSeguranca() {
   }
 
   let html = `
-    <div style="
-      padding:12px;
-      border:1px solid #e0e0e0;
-      background:#ffffff;
-      border-radius:6px;
-      margin-bottom:10px;
-    ">
+    <div style="margin-bottom:14px;">
 
       <div style="
         font-weight:700;
         color:#1b5e20;
-        margin-bottom:10px;
+        margin-bottom:8px;
       ">
         Medidas obrigatórias aplicáveis:
       </div>
+
+      <ul style="
+        margin:0 0 10px 22px;
+        padding:0;
+        line-height:1.7;
+      ">
   `;
 
   medidas.forEach(medida => {
 
     html += `
-      <div style="
-        margin-bottom:10px;
-        padding:8px;
-        border-left:4px solid #1b5e20;
-        background:#f9f9f9;
-      ">
-        <div style="font-weight:700;">
-          ${medida.medida_nome}
-        </div>
-
-        <div style="
-          font-size:13px;
-          color:#555;
-          margin-top:4px;
-        ">
-          ${medida.justificativa || "Medida obrigatória conforme tabela aplicável."}
-        </div>
-
-        ${medida.baseNormativa ? `
-          <div style="
-            font-size:12px;
-            color:#666;
-            font-style:italic;
-            margin-top:4px;
-          ">
-            Base normativa: ${medida.baseNormativa}
-          </div>
-        ` : ""}
-      </div>
+      <li>
+        ${medida.medida_nome}
+      </li>
     `;
 
   });
 
   html += `
+      </ul>
+
+      <div style="
+        font-size:13px;
+        color:#666;
+        font-style:italic;
+        margin-top:6px;
+      ">
+        Medidas definidas conforme Tabela 5 da IT 42/2025.
+      </div>
+
     </div>
   `;
 
@@ -3444,10 +3440,9 @@ function atualizarMemorialMedidasSeguranca() {
 
     html += `
       <div style="
-        padding:12px;
-        border:1px solid #e0e0e0;
-        background:#ffffff;
-        border-radius:6px;
+        margin-top:14px;
+        padding-top:10px;
+        border-top:1px solid #e0e0e0;
       ">
 
         <div style="
@@ -3462,7 +3457,10 @@ function atualizarMemorialMedidasSeguranca() {
     notas.forEach(nota => {
 
       html += `
-        <div style="margin-bottom:6px;">
+        <div style="
+          margin-bottom:6px;
+          line-height:1.6;
+        ">
           <strong>${nota.letra_nota})</strong> ${nota.texto_nota}
         </div>
       `;
@@ -6480,6 +6478,145 @@ function buscarClassificacaoArea(area, descontoCLCB, descontoGeral) {
 
 }
 
+function imprimirMemorial() {
+
+  const memorial = document.querySelector(".memorial-box");
+
+  if (!memorial) {
+    alert("Memorial não encontrado.");
+    return;
+  }
+
+  const conteudo = memorial.innerHTML;
+
+  const janela = window.open("", "_blank", "width=900,height=700");
+
+  if (!janela) {
+    alert("O navegador bloqueou a janela de impressão. Libere pop-ups para este site.");
+    return;
+  }
+
+  janela.document.open();
+
+  janela.document.write(`
+    <!DOCTYPE html>
+    <html lang="pt-br">
+    <head>
+      <meta charset="UTF-8">
+      <title>Memorial de Enquadramento Técnico</title>
+
+      <style>
+        * {
+          box-sizing: border-box;
+          font-family: Arial, sans-serif;
+        }
+
+        body {
+          margin: 0;
+          padding: 30px;
+          color: #222;
+          background: #ffffff;
+          font-size: 12pt;
+          line-height: 1.5;
+        }
+
+        .pagina {
+          max-width: 900px;
+          margin: 0 auto;
+        }
+
+        .memorial-titulo-principal {
+          font-size: 18pt;
+          font-weight: 700;
+          color: #1b5e20;
+          text-align: center;
+          margin-bottom: 18px;
+        }
+
+        .memorial-subtitulo {
+          font-size: 14pt;
+          font-weight: 700;
+          color: #1b5e20;
+          margin-top: 18px;
+          margin-bottom: 8px;
+        }
+
+        .memorial-cabecalho {
+          border: 1px solid #dddddd;
+          padding: 12px;
+          border-radius: 6px;
+          margin-bottom: 18px;
+        }
+
+        .divisor-criterio {
+          border: none;
+          border-top: 1px solid #dddddd;
+          margin: 16px 0;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 10px 0;
+          font-size: 10pt;
+        }
+
+        th, td {
+          border: 1px solid #dddddd;
+          padding: 6px;
+        }
+
+        th {
+          background: #e8f5e9;
+          color: #1b5e20;
+        }
+
+        ul {
+          margin-top: 6px;
+        }
+
+        button {
+          display: none;
+        }
+
+        @page {
+          size: A4;
+          margin: 15mm;
+        }
+
+        @media print {
+          body {
+            padding: 0;
+          }
+
+          .pagina {
+            max-width: 100%;
+          }
+
+          button {
+            display: none !important;
+          }
+        }
+      </style>
+    </head>
+
+    <body>
+      <div class="pagina">
+        ${conteudo}
+      </div>
+
+      <script>
+        window.onload = function() {
+          window.print();
+        };
+      <\/script>
+    </body>
+    </html>
+  `);
+
+  janela.document.close();
+
+}
 
 
 </script>
