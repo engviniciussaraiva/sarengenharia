@@ -2066,18 +2066,19 @@ async function carregarRegrasMemorialConclusao() {
         .map(c => c.replace(/\r/g, "").replace(/^"|"$/g, "").trim());
 
       return {
-        id: col[0],
-        estado: col[1],
-        criterio: col[2],
-        processo: col[3],
-        certificacao: col[4],
-        texto_titulo: col[5],
-        texto_conclusao: col[6],
-        texto_observacao: col[7],
-        base_normativa: col[8],
-        ordem: parseInt(col[9]) || 0,
-        ativo: col[10] === "TRUE"
-      };
+  id: col[0],
+  estado: col[1],
+  criterio: col[2],
+  processo: col[3],
+  certificacao: col[4],
+  texto_titulo: col[5],
+  texto_conclusao: col[6],
+  texto_observacao: col[7],
+  texto_complementar: col[8],
+  base_normativa: col[9],
+  ordem: parseInt(col[10]) || 0,
+  ativo: col[11] === "TRUE"
+};
 
     });
 
@@ -3615,6 +3616,19 @@ function atualizarMemorialConclusao() {
         <strong>Critério determinante:</strong>
         ${resultadoFinalConsolidado.criterio || "—"}
       </div>
+
+${regraMemorial?.texto_complementar ? `
+  <div style="
+    margin-top:10px;
+    padding-top:8px;
+    border-top:1px solid #e0e0e0;
+    color:#555;
+    font-style:italic;
+  ">
+    ${regraMemorial.texto_complementar}
+  </div>
+` : ""}
+
 
     </div>
 
