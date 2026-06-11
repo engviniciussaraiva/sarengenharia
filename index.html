@@ -1014,7 +1014,7 @@ style="text-align:right;">
       </div>
 
       <div id="memorialRiscos">
-        Aguardando análise dos critérios técnicos adicionais.
+        Não informado dados de critérios adicionais.
       </div>
 
     <hr class="divisor-criterio">
@@ -1481,6 +1481,7 @@ let faixasRiscosEspecificos = [];
 let opcoesRiscosEspecificos = []; 
 let respostasRiscosEspecificos = []; 
 let resultadosRiscosEspecificos = [];
+let riscosAbertos = new Set(); 
 let regrasMemorialConclusao = [];
 let regrasValidadeCertificacao = [];
 let notasValidadeCertificacao = [];
@@ -2578,7 +2579,10 @@ function renderizarRiscosEspecificos() {
       regra.campo_complementar_tipo !== "NA";
 
     html += `
-      <details style="
+<details
+data-codigo-risco="${regra.codigo_regra}"
+${riscosAbertos.has(regra.codigo_regra) ? "open" : ""}
+style=" 
         border:1px solid #dcdcdc;
         background:#ffffff;
         border-radius:8px;
@@ -2719,7 +2723,25 @@ ${mostrarComplementar ? `
 
   });
 
-  box.innerHTML = html;
+    box.innerHTML = html;
+
+  document.querySelectorAll("#boxRiscosEspecificos details[data-codigo-risco]").forEach(det => {
+
+    det.addEventListener("toggle", function () {
+
+      const codigo = this.getAttribute("data-codigo-risco");
+
+      if (!codigo) return;
+
+      if (this.open) {
+        riscosAbertos.add(codigo);
+      } else {
+        riscosAbertos.delete(codigo);
+      }
+
+    });
+
+  });
 
 }
 
@@ -2732,6 +2754,16 @@ function atualizarRespostaRiscoEspecifico(codigoRegra) {
   );
 
   if (!regra) return;
+
+  riscosAbertos = new Set(
+    Array.from(document.querySelectorAll("#boxRiscosEspecificos details[data-codigo-risco][open]"))
+      .map(det => det.getAttribute("data-codigo-risco"))
+      .filter(v => v)
+  );
+
+  riscosAbertos.add(codigoRegra);
+
+
 
   const idResposta = "risco_" + codigoRegra + "_resposta";
   const idComplementar = "risco_" + codigoRegra + "_complementar";
@@ -3660,7 +3692,7 @@ function atualizarMemorialRiscos() {
   if (!memorial) return;
 
   if (!ocupacoesSelecionadas || ocupacoesSelecionadas.length === 0) {
-    memorial.innerHTML = "Aguardando análise dos critérios técnicos adicionais.";
+    memorial.innerHTML = "Não informado dados de critérios adicionais.";
     return;
   }
 
@@ -3792,76 +3824,7 @@ function atualizarMemorialRiscos() {
 
   });
 
-  const restritivos = resultadosRiscosEspecificos.filter(r =>
-    r.altera_resultado === true
-  );
-
-  if (restritivos.length > 0) {
-
-    restritivos.sort((a, b) =>
-      (b.nivel_restricao || 0) - (a.nivel_restricao || 0)
-    );
-
-    const maisRestritivo = restritivos[0];
-
-    html += `
-      <div class="memorial-resultado" style="
-        margin-top:12px;
-        padding:12px;
-        border:1px solid #e0e0e0;
-        background:#ffffff;
-        border-radius:6px;
-      ">
-
-        <div style="
-          font-weight:700;
-          color:${maisRestritivo.cor || "#c62828"};
-          margin-bottom:8px;
-        ">
-          Resultado pelo critério de risco específico:
-        </div>
-
-        <div style="margin-bottom:6px;">
-          <strong>Tipo do Processo:</strong>
-          ${maisRestritivo.texto_processo || maisRestritivo.processo || "—"}
-        </div>
-
-        <div style="margin-bottom:6px;">
-          <strong>Certificação:</strong>
-          <span style="
-            font-weight:700;
-            color:${maisRestritivo.cor || "#333"};
-          ">
-            ${maisRestritivo.texto_certificacao || maisRestritivo.certificacao || "—"}
-          </span>
-        </div>
-
-        <div>
-          <strong>Critério determinante:</strong>
-          ${maisRestritivo.criterio || "Risco específico"}
-        </div>
-
-      </div>
-    `;
-
-  } else {
-
-    html += `
-      <div class="memorial-resultado" style="
-        margin-top:12px;
-        padding:12px;
-        border:1px solid #c8e6c9;
-        background:#f1f8e9;
-        border-radius:6px;
-        color:#2e7d32;
-        font-weight:600;
-      ">
-        Os critérios técnicos adicionais avaliados não alteram o enquadramento técnico da edificação.
-      </div>
-    `;
-
-  }
-
+  
   memorial.innerHTML = html;
 
 }
@@ -3887,7 +3850,7 @@ function limparRiscosEspecificos() {
   }
 
   if (memorial) {
-    memorial.innerHTML = "Aguardando análise dos critérios técnicos adicionais.";
+    memorial.innerHTML = "Não informado dados de critérios adicionais.";
   }
 
   renderizarRiscosEspecificos();
@@ -5207,57 +5170,6 @@ function atualizarMemorialArea(regraArea) {
     </div>
   `;
 
-  if (regraArea) {
-
-    textoResultado += `
-      <div style="
-        margin-top:10px;
-        padding:10px;
-        border:1px solid #e0e0e0;
-        background:#ffffff;
-        border-radius:6px;
-      ">
-
-        <div style="
-          font-weight:700;
-          color:#1b5e20;
-          margin-bottom:8px;
-        ">
-          Resultado pelo critério da área:
-        </div>
-
-        <div style="margin-bottom:6px;">
-          <strong>Tipo do Processo:</strong>
-          ${regraArea.texto_processo}
-        </div>
-
-        <div>
-          <strong>Certificação:</strong>
-          <span style="font-weight:700; color:${regraArea.cor};">
-            ${regraArea.texto_certificacao}
-          </span>
-        </div>
-
-      </div>
-    `;
-
-  } else {
-
-    textoResultado += `
-      <div style="
-        margin-top:10px;
-        padding:10px;
-        border:1px solid #ffcdd2;
-        background:#ffebee;
-        border-radius:6px;
-        color:#b71c1c;
-      ">
-        Não foi encontrada regra de enquadramento por área para os dados informados.
-      </div>
-    `;
-
-  }
-
   memorial.innerHTML = textoResultado;
 
 }
@@ -5356,57 +5268,7 @@ html += `
 `;
 
 
-  if (regraAltura) {
-
-    html += `
-      <div class="memorial-resultado" style="
-        margin-top:12px;
-        padding:12px;
-        border:1px solid #e0e0e0;
-        background:#ffffff;
-        border-radius:6px;
-      ">
-
-        <div style="
-          font-weight:700;
-          color:#1b5e20;
-          margin-bottom:8px;
-        ">
-          Resultado pelo critério da altura:
-        </div>
-
-        <div style="margin-bottom:6px;">
-          <strong>Tipo do Processo:</strong>
-          ${regraAltura.texto_processo}
-        </div>
-
-        <div>
-          <strong>Certificação:</strong>
-          <span style="font-weight:700; color:${regraAltura.cor};">
-            ${regraAltura.texto_certificacao}
-          </span>
-        </div>
-
-      </div>
-    `;
-
-  } else {
-
-    html += `
-      <div style="
-        margin-top:10px;
-        padding:10px;
-        border:1px solid #ffcdd2;
-        background:#ffebee;
-        border-radius:6px;
-        color:#b71c1c;
-      ">
-        Não foi encontrada regra de enquadramento por altura para os dados informados.
-      </div>
-    `;
-
-  }
-
+  
   memorial.innerHTML = html;
 
 }
