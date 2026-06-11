@@ -1152,31 +1152,39 @@ style="text-align:right;">
 
 window.onload = async () => {
 
-await carregarRegrasArea();
-await carregarRegrasAltura();
-await carregarClassificacaoAltura();
-await carregarPrioridades();
-await carregarRegrasConsolidacao();
-await carregarOcupacoesBase();
-await carregarRegrasOcupacao();
-await carregarRegrasOcupacaoMista();
-await carregarRegrasGrupoJCarga();
+await Promise.all([
+  carregarRegrasArea(),
+  carregarRegrasAltura(),
+  carregarClassificacaoAltura(),
+  carregarPrioridades(),
+  carregarRegrasConsolidacao(),
+  carregarOcupacoesBase(),
+  carregarRegrasOcupacao(),
+  carregarRegrasOcupacaoMista(),
+  carregarRegrasGrupoJCarga(),
 
-// 🔥 RISCOS ESPECÍFICOS
-await carregarRegrasRiscosEspecificos();
-await carregarFaixasRiscosEspecificos();
-await carregarOpcoesRiscosEspecificos();
-await carregarRegrasMemorialConclusao();
-await carregarRegrasValidadeCertificacao();
-await carregarNotasValidadeCertificacao();
+  // 🔥 RISCOS ESPECÍFICOS
+  carregarRegrasRiscosEspecificos(),
+  carregarFaixasRiscosEspecificos(),
+  carregarOpcoesRiscosEspecificos(),
 
-await carregarMedidasSeguranca();
-await carregarMedidasCondicoes();
-await carregarNotasGeraisMedidas();
+  // 🔥 MEMORIAIS
+  carregarRegrasMemorialConclusao(),
+  carregarRegrasValidadeCertificacao(),
+  carregarNotasValidadeCertificacao(),
+  carregarMemorialOcupacaoMista(),
 
-await carregarAlertasArea();
-await carregarNotasAltura(); 
-await carregarMunicipios();
+  // 🔥 MEDIDAS DE SEGURANÇA
+  carregarMedidasSeguranca(),
+  carregarMedidasCondicoes(),
+  carregarNotasGeraisMedidas(),
+
+  // 🔥 APOIO
+  carregarAlertasArea(),
+  carregarNotasAltura(),
+  carregarMunicipios()
+]);
+
 
 
 
@@ -2311,6 +2319,43 @@ async function carregarNotasGeraisMedidas() {
   console.log("Notas gerais das medidas carregadas:", notasGeraisMedidas);
 
 }
+
+
+async function carregarMemorialOcupacaoMista() {
+
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSBe1uXRTyYLV8pOA5PzSw9OiFSciUwn_BfHQpz1VQ-t3VnbLrEDZC7meHyh8Mazs165eOW1emfSU24/pub?output=csv";
+
+  const res = await fetch(url);
+  const texto = await res.text();
+
+  const linhas = texto.split(/\r?\n/).slice(1);
+
+  regrasMemorialOcupacaoMista = linhas
+    .filter(l => l.trim() !== "")
+    .map(l => {
+
+      const col = l
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(c => c.replace(/\r/g, "").replace(/^"|"$/g, "").trim());
+
+      return {
+        id: col[0],
+        estado: col[1],
+        criterio: col[2],
+        situacao: col[3],
+        titulo: col[4],
+        texto_memorial: col[5],
+        base_normativa: col[6],
+        ordem: parseInt(col[7]) || 0,
+        ativo: col[8] === "TRUE"
+      };
+
+    });
+
+  console.log("Textos do memorial de ocupação mista carregados:", regrasMemorialOcupacaoMista);
+
+}
+
 
 function classificarRiscoPorCarga(carga) {
 
@@ -5723,6 +5768,31 @@ function renderizarOcupacaoPredominante() {
 }
 
 
+function buscarTextoMemorialOcupacaoMista(caracterizaMista) {
+
+  const estado = document.getElementById("estado").value;
+
+  const situacao = caracterizaMista
+    ? "CARACTERIZA"
+    : "NAO_CARACTERIZA";
+
+  return regrasMemorialOcupacaoMista.find(r => {
+
+    if (!r.ativo) return false;
+
+    if (r.estado !== estado) return false;
+
+    if (r.criterio !== "ocupacao_mista") return false;
+
+    if (r.situacao !== situacao) return false;
+
+    return true;
+
+  });
+
+}
+
+
 function atualizarMemorialOcupacao() {
 
   const memorial = document.getElementById("memorialOcupacao");
@@ -5953,7 +6023,9 @@ function atualizarMemorialOcupacao() {
 
   }
 
-  html += `
+ const textoOcupacaoMista = buscarTextoMemorialOcupacaoMista(caracterizaMista);
+
+html += `
     <div class="memorial-resultado" style="
       margin-top:12px;
       padding:12px;
@@ -5967,17 +6039,24 @@ function atualizarMemorialOcupacao() {
         color:${caracterizaMista ? "#c62828" : "#2e7d32"};
         margin-bottom:8px;
       ">
-        ${caracterizaMista
-? "Conclusão normativa: a edificação caracteriza ocupação mista."
-: "Conclusão normativa: a edificação não caracteriza ocupação mista."}
+        ${textoOcupacaoMista?.titulo || "Conclusão normativa da ocupação"}
       </div>
 
       <div style="margin-bottom:8px;">
-        ${caracterizaMista
-  ? "Considerando que a área total das ocupações subsidiárias ultrapassa o limite normativo aplicável, o enquadramento técnico deverá considerar a ocupação mais restritiva dentre as ocupações cadastradas, para fins de determinação das medidas de segurança contra incêndio."
-  : "Considerando que a área total das ocupações subsidiárias não ultrapassa o limite normativo aplicável, o enquadramento técnico poderá adotar a ocupação principal/predominante para fins de determinação das medidas de segurança contra incêndio."}
-
+        ${textoOcupacaoMista?.texto_memorial || "Texto de ocupação mista não localizado no banco de dados."}
       </div>
+
+      ${textoOcupacaoMista?.base_normativa ? `
+        <div style="
+          margin-bottom:8px;
+          font-size:13px;
+          color:#666;
+          font-style:italic;
+        ">
+          Base normativa: ${textoOcupacaoMista.base_normativa}
+        </div>
+      ` : ""}
+
 
       <div>
         <strong>Ocupação adotada como determinante para o enquadramento técnico:</strong>
