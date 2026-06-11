@@ -3092,6 +3092,7 @@ function buscarRegraMemorialConclusao() {
 
 function atualizarMemorialValidade() {
 
+
   const memorial = document.getElementById("memorialValidade");
 
   if (!memorial) return;
@@ -3099,11 +3100,8 @@ function atualizarMemorialValidade() {
   if (!resultadoFinalConsolidado) {
     memorial.innerHTML = `
       <div style="
-        padding:10px;
-        border:1px solid #fff3cd;
-        background:#fffde7;
-        color:#795548;
-        border-radius:6px;
+        color:#777;
+        font-style:italic;
       ">
         Aguardando definição da validade da certificação.
       </div>
@@ -3124,95 +3122,73 @@ function atualizarMemorialValidade() {
     )
     .sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
 
-  let html = "";
-
-  if (regraValidade) {
-
-    html += `
+  if (!regraValidade) {
+    memorial.innerHTML = `
       <div style="
-        padding:12px;
-        border:1px solid #e0e0e0;
-        background:#ffffff;
-        border-radius:6px;
-        margin-bottom:10px;
-      ">
-
-        <div style="margin-bottom:8px;">
-          <strong>Divisão considerada:</strong>
-          ${regraValidade.divisao || "—"} - ${regraValidade.descricao || "—"}
-        </div>
-
-        <div style="margin-bottom:8px;">
-          <strong>Validade da certificação:</strong>
-          ${regraValidade.validade_anos || "—"} ${regraValidade.validade_anos === 1 ? "ano" : "anos"}
-        </div>
-
-        ${regraValidade.texto_validade ? `
-          <div style="margin-bottom:8px;">
-            ${regraValidade.texto_validade}
-          </div>
-        ` : ""}
-
-        ${regraValidade.base_normativa ? `
-          <div style="
-            margin-top:8px;
-            font-size:13px;
-            color:#666;
-            font-style:italic;
-          ">
-            Base normativa: ${regraValidade.base_normativa}
-          </div>
-        ` : ""}
-
-      </div>
-    `;
-
-  } else {
-
-    html += `
-      <div style="
-        padding:10px;
-        border:1px solid #ffcdd2;
-        background:#ffebee;
         color:#b71c1c;
-        border-radius:6px;
-        margin-bottom:10px;
+        font-weight:600;
       ">
         Não foi localizada regra de validade para a divisão determinante informada.
       </div>
     `;
-
+    return;
   }
+
+  let html = `
+    <div style="
+      padding:12px;
+      border:1px solid #e0e0e0;
+      background:#ffffff;
+      border-radius:6px;
+    ">
+
+      <div style="margin-bottom:8px;">
+        <strong>Divisão considerada:</strong>
+        ${regraValidade.divisao || "—"} - ${regraValidade.descricao || "—"}
+      </div>
+
+      <div style="margin-bottom:8px;">
+        <strong>Validade da certificação:</strong>
+        ${regraValidade.validade_anos || "—"} ${regraValidade.validade_anos === 1 ? "ano" : "anos"}
+      </div>
+
+      ${regraValidade.texto_validade ? `
+        <div style="margin-bottom:8px;">
+          ${regraValidade.texto_validade}
+        </div>
+      ` : ""}
+
+      ${regraValidade.base_normativa ? `
+        <div style="
+          margin-top:8px;
+          font-size:13px;
+          color:#666;
+          font-style:italic;
+        ">
+          Base normativa: ${regraValidade.base_normativa}
+        </div>
+      ` : ""}
+  `;
 
   if (notas.length > 0) {
 
-    const titulo = notas[0].titulo_nota || "Notas";
-
     html += `
       <div style="
-        padding:12px;
-        border:1px solid #e0e0e0;
-        background:#ffffff;
-        border-radius:6px;
+        margin-top:12px;
+        padding-top:8px;
+        border-top:1px solid #e0e0e0;
+        font-size:13px;
+        color:#555;
+        line-height:1.5;
       ">
-
-        <div style="
-          font-weight:700;
-          color:#1b5e20;
-          margin-bottom:8px;
-        ">
-          ${titulo}
-        </div>
     `;
 
     notas.forEach((nota, index) => {
-
       html += `
-        <div style="margin-bottom:6px;">
-          ${index + 1}) ${nota.texto_nota}
+        <div style="margin-bottom:4px;">
+          <strong>Nota ${index + 1}:</strong> ${nota.texto_nota}
         </div>
       `;
-
     });
 
     html += `
@@ -3220,6 +3196,10 @@ function atualizarMemorialValidade() {
     `;
 
   }
+
+  html += `
+    </div>
+  `;
 
   memorial.innerHTML = html;
 
