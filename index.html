@@ -461,20 +461,36 @@ function abrirCustosSTL(){
 
 }
 
-
 function abrirModuloImpressao3D(){
 
     // mostra barra de abas
     document.getElementById("tabs").style.display = "flex";
 
-    // cria a aba
+    // cria a aba clicável
     document.getElementById("tabs").innerHTML = `
-        <div class="tab active">
+        <div class="tab active" onclick="abrirCalculadoraImpressao()">
             Calculadora de Impressão
         </div>
     `;
 
-    // carrega o módulo
+    // deixa área central vazia
+    document.getElementById("mainContent").innerHTML = `
+
+        <div class="welcome">
+
+            <h1>Impressão 3D</h1>
+
+            <p>Selecione uma ferramenta acima.</p>
+
+        </div>
+
+    `;
+
+}
+
+
+function abrirCalculadoraImpressao(){
+
     document.getElementById("mainContent").innerHTML = `
 
         <iframe
@@ -490,7 +506,6 @@ function abrirModuloImpressao3D(){
     `;
 
 }
-
 
 
 function mostrarHome(){
