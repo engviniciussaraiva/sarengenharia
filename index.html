@@ -275,66 +275,17 @@ body{
 
     <!-- MENU ESQUERDO -->
 
-    <div class="sidebar" id="sidebar">
+<div class="sidebar" id="sidebar">
 
-        <div class="portal-title">
-            Portal
-        </div>
-
-        <div class="menu-item" onclick="mostrarHome()">
-🏠 <span class="menu-text">Início</span>
-</div> 
-
-        <div class="menu-item" onclick="toggleMenu('ppci')">
-            📁 <span class="menu-text">PPCI</span>
-        </div>
-
-        <div class="submenu" id="ppci">
-            <a href="#">🔥 Classificador</a>
-            <a href="#">📋 Medidas de Segurança</a>
-            <a href="#">📄 Memorial</a>
-            <a href="#">📚 Biblioteca</a>
-        </div>
-
-        <div class="menu-item" onclick="toggleMenu('hidraulica')">
-            💧 <span class="menu-text">Hidráulica</span>
-        </div>
-
-        <div class="submenu" id="hidraulica">
-            <a href="#">Hidrantes</a>
-            <a href="#">Bombas</a>
-            <a href="#">Reservatórios</a>
-        </div>
-
-        <div class="menu-item" onclick="toggleMenu('conversoes')">
-            🔄 <span class="menu-text">Conversões</span>
-        </div>
-
-        <div class="submenu" id="conversoes">
-            <a href="#">Vazão</a>
-            <a href="#">Pressão</a>
-            <a href="#">Área</a>
-            <a href="#">Volume</a>
-            <a href="#">Potência</a>
-        </div>
-
-        <div class="menu-item" onclick="abrirModuloImpressao3D()">
-    🖨️ <span class="menu-text">Impressão 3D</span>
-</div>
-
-
-      
-
-        <div class="menu-item">
-            🪜 <span class="menu-text">Escadas</span>
-        </div>
-
-        <div class="menu-item">
-            ⚙️ <span class="menu-text">Configurações</span>
-        </div>
-
+    <div class="portal-title">
+        Portal
     </div>
 
+    <div id="menuDinamico"></div>
+
+</div>
+
+    
     <!-- CONTEÚDO -->
 
     <div class="content">
@@ -415,6 +366,10 @@ body{
 </div>
 
 <script>
+
+const URL_MODULOS =
+'https://docs.google.com/spreadsheets/d/e/2PACX-1vSUOh5Dd8Gi7pmgkfvto7qOG-_Puoki7wR9yeYf0Jmx8bJMCmkXE3JXHvzepxHBXxTUfOWiRs_oPgK7/pub?output=csv';
+
 
 function toggleMenu(id){
 
@@ -547,6 +502,50 @@ document.getElementById("mainContent").innerHTML = `
 }
 
 
+async function carregarModulos(){
+
+    const resposta = await fetch(URL_MODULOS);
+    const texto = await resposta.text();
+
+    const linhas = texto.trim().split('\n');
+
+    let html = '';
+
+    for(let i = 1; i < linhas.length; i++){
+
+        const colunas = linhas[i].split(',');
+
+        const modulo = colunas[0];
+        const titulo = colunas[1];
+        const icone = colunas[2];
+
+        html += `
+            <div class="menu-item"
+                 onclick="abrirModulo('${modulo}')">
+
+                ${icone}
+                <span class="menu-text">
+                    ${titulo}
+                </span>
+
+            </div>
+        `;
+    }
+
+    document.getElementById("menuDinamico").innerHTML = html;
+
+}
+
+function abrirModulo(modulo){
+
+    console.log(modulo);
+
+}
+
+
+
+
+carregarModulos(); 
 
 </script>
 
