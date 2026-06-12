@@ -281,9 +281,9 @@ body{
             Portal
         </div>
 
-        <div class="menu-item">
-            🏠 <span class="menu-text">Início</span>
-        </div>
+        <div class="menu-item" onclick="mostrarHome()">
+🏠 <span class="menu-text">Início</span>
+</div> 
 
         <div class="menu-item" onclick="toggleMenu('ppci')">
             📁 <span class="menu-text">PPCI</span>
@@ -349,7 +349,7 @@ body{
 
         </div>
 
-        <div class="main" id="mainContent">
+  <div class="main" id="mainContent">
 
     <div class="welcome">
 
@@ -357,11 +357,30 @@ body{
 
         <p>Sistema Avançado de Resposta</p>
 
-        <p>Selecione um módulo no menu lateral.</p>
+        <p><b>Versão Alpha</b></p>
+
+        <br>
+
+        <p><b>Módulos Ativos</b></p>
+
+        <p>✓ PPCI</p>
+
+        <p>✓ Impressão 3D</p>
+
+        <br>
+
+        <p><b>Módulos em Desenvolvimento</b></p>
+
+        <p>• Hidráulica</p>
+
+        <p>• Conversões</p>
+
+        <p>• Escadas</p>
 
     </div>
 
 </div>
+
 
     </div>
 
@@ -437,6 +456,42 @@ function abrirCustosSTL(){
                 background:white;
             ">
         </iframe>
+
+    `;
+
+}
+
+function mostrarHome(){
+
+    document.getElementById("mainContent").innerHTML = `
+
+        <div class="welcome">
+
+            <h1>SAR Engenharia</h1>
+
+            <p>Sistema Avançado de Resposta</p>
+
+            <p><b>Versão Alpha</b></p>
+
+            <br>
+
+            <p><b>Módulos Ativos</b></p>
+
+            <p>✓ PPCI</p>
+
+            <p>✓ Impressão 3D</p>
+
+            <br>
+
+            <p><b>Módulos em Desenvolvimento</b></p>
+
+            <p>• Hidráulica</p>
+
+            <p>• Conversões</p>
+
+            <p>• Escadas</p>
+
+        </div>
 
     `;
 
