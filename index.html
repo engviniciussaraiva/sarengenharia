@@ -591,14 +591,37 @@ async function carregarAbas(modulo){
 
         const colunas = linhas[i].split(',');
 
-        const moduloLinha = colunas[0];
-        const nomeAba = colunas[1];
-        const arquivo = colunas[3];
+        const moduloLinha = String(colunas[0] || "")
+            .trim()
+            .toUpperCase();
 
-        if(moduloLinha === modulo){
+        const nomeAba = String(colunas[1] || "")
+            .trim();
+
+        const arquivo = String(colunas[3] || "")
+            .trim();
+
+        const ordem = Number(
+            String(colunas[4] || "")
+                .trim()
+        );
+
+        const status = String(colunas[5] || "")
+            .trim()
+            .toUpperCase();
+
+        const moduloSelecionado = String(modulo || "")
+            .trim()
+            .toUpperCase();
+
+        if(
+            moduloLinha === moduloSelecionado &&
+            status === "ATIVO"
+        ){
 
             htmlAbas += `
                 <div class="tab"
+                     data-ordem="${ordem}"
                      onclick="abrirArquivo('${arquivo}')">
 
                     ${nomeAba}
@@ -609,8 +632,11 @@ async function carregarAbas(modulo){
     }
 
     document.getElementById("tabs").innerHTML = htmlAbas;
-    document.getElementById("tabs").style.display = "flex";
 
+    document.getElementById("tabs").style.display =
+        htmlAbas.trim() !== ""
+            ? "flex"
+            : "none";
 }
 
 
