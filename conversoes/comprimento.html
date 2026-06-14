@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Conversor de Unidades de Comprimento</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #f4f7f5;
+      color: #263536;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .conversor {
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 30px;
+      background: #ffffff;
+      border: 1px solid #d3ded9;
+      border-radius: 12px;
+      box-shadow: 0 3px 14px rgba(35, 65, 59, 0.07);
+    }
+
+    .conversor__titulo {
+      margin: 0 0 30px;
+      color: #315f57;
+      font-size: 27px;
+      line-height: 1.25;
+      text-align: center;
+    }
+
+    .campo {
+      margin-bottom: 20px;
+    }
+
+    .campo label {
+      display: block;
+      margin-bottom: 8px;
+      color: #293d3d;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .campo input,
+    .campo select {
+      width: 100%;
+      min-height: 50px;
+      padding: 11px 14px;
+      background: #ffffff;
+      color: #263536;
+      border: 1px solid #bdcbc5;
+      border-radius: 7px;
+      outline: none;
+      font-size: 16px;
+      transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .campo input::placeholder {
+      color: #8d9a96;
+    }
+
+    .campo input:focus,
+    .campo select:focus {
+      border-color: #4e8f83;
+      box-shadow: 0 0 0 3px rgba(78, 143, 131, 0.13);
+    }
+
+    .ajuda {
+      display: none;
+      margin: -10px 0 20px;
+      color: #647472;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .ajuda.ativa {
+      display: block;
+    }
+
+    .acoes {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 4px;
+    }
+
+    .botao-limpar {
+      min-width: 150px;
+      min-height: 46px;
+      padding: 11px 24px;
+      background: #87928e;
+      color: #ffffff;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+      transition:
+        background-color 0.2s ease,
+        transform 0.1s ease;
+    }
+
+    .botao-limpar:hover {
+      background: #737f7b;
+    }
+
+    .botao-limpar:active {
+      transform: translateY(1px);
+    }
+
+    .mensagem {
+      display: none;
+      margin-top: 18px;
+      padding: 13px 15px;
+      color: #8f2525;
+      background: #fff1f1;
+      border: 1px solid #e6bebe;
+      border-radius: 7px;
+      font-size: 15px;
+    }
+
+    .mensagem.ativa {
+      display: block;
+    }
+
+    .resultado {
+      display: none;
+      margin-top: 26px;
+      padding: 20px;
+      background: #f5f9f7;
+      border: 1px solid #d7e3de;
+      border-radius: 9px;
+    }
+
+    .resultado.ativo {
+      display: block;
+    }
+
+    .resultado__titulo {
+      margin: 0 0 17px;
+      color: #315f57;
+      font-size: 18px;
+    }
+
+    .resultado__lista {
+      display: grid;
+      gap: 9px;
+    }
+
+    .resultado__linha {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 48px;
+      padding: 11px 14px;
+      background: #ffffff;
+      border: 1px solid #e1eae6;
+      border-radius: 7px;
+    }
+
+    .resultado__linha.entrada {
+      background: #edf6f2;
+      border-color: #b9d5ca;
+    }
+
+    .resultado__linha.especial {
+      background: #f2f8f5;
+      border-color: #c8ddd5;
+    }
+
+    .resultado__unidade {
+      color: #4a5e5d;
+      font-size: 15px;
+    }
+
+    .resultado__valor {
+      color: #243635;
+      font-size: 17px;
+      font-weight: 700;
+      text-align: right;
+      word-break: break-word;
+    }
+
+    .resultado__linha.entrada .resultado__unidade,
+    .resultado__linha.entrada .resultado__valor {
+      color: #2d665b;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 14px;
+      }
+
+      .conversor {
+        padding: 21px;
+        border-radius: 10px;
+      }
+
+      .conversor__titulo {
+        margin-bottom: 25px;
+        font-size: 23px;
+      }
+
+      .acoes {
+        display: block;
+      }
+
+      .botao-limpar {
+        width: 100%;
+      }
+
+      .resultado {
+        padding: 15px;
+      }
+
+      .resultado__linha {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .resultado__valor {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="conversor">
+
+    <h1 class="conversor__titulo">
+      Conversor de Unidades de Comprimento
+    </h1>
+
+    <div class="campo">
+      <label for="valorComprimento">
+        Valor do comprimento
+      </label>
+
+      <input
+        id="valorComprimento"
+        type="text"
+        inputmode="decimal"
+        autocomplete="off"
+        placeholder="Digite o valor"
+      >
+    </div>
+
+    <div class="campo">
+      <label for="unidadeEntrada">
+        Unidade de entrada
+      </label>
+
+      <select id="unidadeEntrada">
+        <option value="">
+          — Selecione —
+        </option>
+
+        <option value="mm">
+          Milímetro (mm)
+        </option>
+
+        <option value="cm">
+          Centímetro (cm)
+        </option>
+
+        <option value="m">
+          Metro (m)
+        </option>
+
+        <option value="km">
+          Quilômetro (km)
+        </option>
+
+        <option value="in">
+          Polegada decimal (in)
+        </option>
+
+        <option value="ft">
+          Pé (ft)
+        </option>
+
+        <option value="yd">
+          Jarda (yd)
+        </option>
+
+        <option value="mi">
+          Milha (mi)
+        </option>
+
+        <option value="fracao">
+          Polegada fracionária
+        </option>
+      </select>
+    </div>
+
+    <p id="ajudaFracao" class="ajuda">
+      Exemplos aceitos: 1/2, 2 1/2, 3 3/4 ou 2-1/2.
+    </p>
+
+    <div class="acoes">
+      <button
+        id="botaoLimpar"
+        class="botao-limpar"
+        type="button"
+      >
+        Limpar
+      </button>
+    </div>
+
+    <div
+      id="mensagem"
+      class="mensagem"
+      role="alert"
+    ></div>
+
+    <section
+      id="resultado"
+      class="resultado"
+      aria-live="polite"
+    >
+      <h2 class="resultado__titulo">
+        Resultado da conversão
+      </h2>
+
+      <div
+        id="listaResultados"
+        class="resultado__lista"
+      ></div>
+    </section>
+
+  </main>
+
+  <script>
+    const campoValor =
+      document.getElementById("valorComprimento");
+
+    const campoUnidade =
+      document.getElementById("unidadeEntrada");
+
+    const botaoLimpar =
+      document.getElementById("botaoLimpar");
+
+    const resultado =
+      document.getElementById("resultado");
+
+    const listaResultados =
+      document.getElementById("listaResultados");
+
+    const mensagem =
+      document.getElementById("mensagem");
+
+    const ajudaFracao =
+      document.getElementById("ajudaFracao");
+
+    /*
+      Todos os fatores convertem a unidade para metros.
+    */
+
+    const unidades = {
+      mm: {
+        nome: "Milímetro",
+        simbolo: "mm",
+        fatorParaMetro: 0.001
+      },
+
+      cm: {
+        nome: "Centímetro",
+        simbolo: "cm",
+        fatorParaMetro: 0.01
+      },
+
+      m: {
+        nome: "Metro",
+        simbolo: "m",
+        fatorParaMetro: 1
+      },
+
+      km: {
+        nome: "Quilômetro",
+        simbolo: "km",
+        fatorParaMetro: 1000
+      },
+
+      in: {
+        nome: "Polegada",
+        simbolo: "in",
+        fatorParaMetro: 0.0254
+      },
+
+      ft: {
+        nome: "Pé",
+        simbolo: "ft",
+        fatorParaMetro: 0.3048
+      },
+
+      yd: {
+        nome: "Jarda",
+        simbolo: "yd",
+        fatorParaMetro: 0.9144
+      },
+
+      mi: {
+        nome: "Milha",
+        simbolo: "mi",
+        fatorParaMetro: 1609.344
+      }
+    };
+
+    function obterNumeroDecimal(textoOriginal) {
+      let texto = textoOriginal
+        .trim()
+        .replace(/\s/g, "");
+
+      if (texto === "") {
+        return null;
+      }
+
+      if (texto.includes(",") && texto.includes(".")) {
+        texto = texto
+          .replace(/\./g, "")
+          .replace(",", ".");
+      } else if (texto.includes(",")) {
+        texto = texto.replace(",", ".");
+      }
+
+      const valor = Number(texto);
+
+      return Number.isFinite(valor)
+        ? valor
+        : NaN;
+    }
+
+    function obterPolegadaFracionaria(textoOriginal) {
+      let texto = textoOriginal
+        .trim()
+        .replace(/"/g, "")
+        .replace(/-/g, " ")
+        .replace(/\s+/g, " ");
+
+      if (texto === "") {
+        return null;
+      }
+
+      if (!texto.includes("/")) {
+        return obterNumeroDecimal(texto);
+      }
+
+      const partes = texto.split(" ");
+
+      let inteiro = 0;
+      let fracaoTexto = "";
+
+      if (partes.length === 1) {
+        fracaoTexto = partes[0];
+      } else if (partes.length === 2) {
+        inteiro = Number(
+          partes[0].replace(",", ".")
+        );
+
+        fracaoTexto = partes[1];
+      } else {
+        return NaN;
+      }
+
+      const fracao = fracaoTexto.split("/");
+
+      if (fracao.length !== 2) {
+        return NaN;
+      }
+
+      const numerador = Number(fracao[0]);
+      const denominador = Number(fracao[1]);
+
+      if (
+        !Number.isFinite(inteiro) ||
+        !Number.isFinite(numerador) ||
+        !Number.isFinite(denominador) ||
+        denominador === 0
+      ) {
+        return NaN;
+      }
+
+      return inteiro + numerador / denominador;
+    }
+
+    function obterValorEmMetros() {
+      const unidadeSelecionada = campoUnidade.value;
+
+      if (!unidadeSelecionada) {
+        return null;
+      }
+
+      if (unidadeSelecionada === "fracao") {
+        const polegadas =
+          obterPolegadaFracionaria(
+            campoValor.value
+          );
+
+        if (polegadas === null) {
+          return null;
+        }
+
+        if (Number.isNaN(polegadas)) {
+          return NaN;
+        }
+
+        return polegadas * 0.0254;
+      }
+
+      const valor =
+        obterNumeroDecimal(
+          campoValor.value
+        );
+
+      if (valor === null) {
+        return null;
+      }
+
+      if (Number.isNaN(valor)) {
+        return NaN;
+      }
+
+      return (
+        valor *
+        unidades[unidadeSelecionada]
+          .fatorParaMetro
+      );
+    }
+
+    function definirCasasDecimais(valor) {
+      const valorAbsoluto = Math.abs(valor);
+
+      if (valorAbsoluto === 0) {
+        return 2;
+      }
+
+      if (valorAbsoluto >= 100000) {
+        return 2;
+      }
+
+      if (valorAbsoluto >= 1000) {
+        return 3;
+      }
+
+      if (valorAbsoluto >= 100) {
+        return 3;
+      }
+
+      if (valorAbsoluto >= 10) {
+        return 4;
+      }
+
+      if (valorAbsoluto >= 1) {
+        return 5;
+      }
+
+      if (valorAbsoluto >= 0.01) {
+        return 6;
+      }
+
+      return 8;
+    }
+
+    function formatarNumero(valor) {
+      return valor.toLocaleString("pt-BR", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits:
+          definirCasasDecimais(valor)
+      });
+    }
+
+    function maiorDivisorComum(a, b) {
+      a = Math.abs(a);
+      b = Math.abs(b);
+
+      while (b !== 0) {
+        const resto = a % b;
+        a = b;
+        b = resto;
+      }
+
+      return a;
+    }
+
+    function converterParaPolegadaFracionaria(
+      polegadasDecimais
+    ) {
+      const denominadorBase = 64;
+
+      let inteiro =
+        Math.floor(polegadasDecimais);
+
+      const parteDecimal =
+        polegadasDecimais - inteiro;
+
+      let numerador =
+        Math.round(
+          parteDecimal * denominadorBase
+        );
+
+      if (numerador === denominadorBase) {
+        inteiro += 1;
+        numerador = 0;
+      }
+
+      if (numerador === 0) {
+        return `${inteiro}"`;
+      }
+
+      const divisor =
+        maiorDivisorComum(
+          numerador,
+          denominadorBase
+        );
+
+      const numeradorSimplificado =
+        numerador / divisor;
+
+      const denominadorSimplificado =
+        denominadorBase / divisor;
+
+      if (inteiro === 0) {
+        return (
+          `${numeradorSimplificado}/` +
+          `${denominadorSimplificado}"`
+        );
+      }
+
+      return (
+        `${inteiro} ` +
+        `${numeradorSimplificado}/` +
+        `${denominadorSimplificado}"`
+      );
+    }
+
+    function converterParaPesEPolegadas(
+      metros
+    ) {
+      const polegadasTotais =
+        metros / 0.0254;
+
+      let pes =
+        Math.floor(
+          polegadasTotais / 12
+        );
+
+      let polegadasRestantes =
+        polegadasTotais - pes * 12;
+
+      polegadasRestantes =
+        Math.round(
+          polegadasRestantes * 64
+        ) / 64;
+
+      if (polegadasRestantes >= 12) {
+        pes += 1;
+        polegadasRestantes = 0;
+      }
+
+      const polegadasFormatadas =
+        converterParaPolegadaFracionaria(
+          polegadasRestantes
+        );
+
+      return `${pes}' ${polegadasFormatadas}`;
+    }
+
+    function mostrarMensagem(texto) {
+      mensagem.textContent = texto;
+      mensagem.classList.add("ativa");
+    }
+
+    function esconderMensagem() {
+      mensagem.textContent = "";
+      mensagem.classList.remove("ativa");
+    }
+
+    function esconderResultado() {
+      resultado.classList.remove("ativo");
+      listaResultados.innerHTML = "";
+    }
+
+    function criarLinhaResultado(
+      chave,
+      unidade,
+      valor,
+      unidadeEntrada
+    ) {
+      const classeEntrada =
+        chave === unidadeEntrada
+          ? "resultado__linha entrada"
+          : "resultado__linha";
+
+      return `
+        <div class="${classeEntrada}">
+          <span class="resultado__unidade">
+            ${unidade.nome}
+          </span>
+
+          <span class="resultado__valor">
+            ${formatarNumero(valor)}
+            ${unidade.simbolo}
+          </span>
+        </div>
+      `;
+    }
+
+    function criarLinhaEspecial(
+      titulo,
+      valor,
+      destacarEntrada = false
+    ) {
+      const classes = [
+        "resultado__linha",
+        "especial"
+      ];
+
+      if (destacarEntrada) {
+        classes.push("entrada");
+      }
+
+      return `
+        <div class="${classes.join(" ")}">
+          <span class="resultado__unidade">
+            ${titulo}
+          </span>
+
+          <span class="resultado__valor">
+            ${valor}
+          </span>
+        </div>
+      `;
+    }
+
+    function atualizarAjuda() {
+      const fracionaria =
+        campoUnidade.value === "fracao";
+
+      ajudaFracao.classList.toggle(
+        "ativa",
+        fracionaria
+      );
+
+      campoValor.placeholder =
+        fracionaria
+          ? "Ex.: 2 1/2"
+          : "Digite o valor";
+    }
+
+    function converterComprimento() {
+      esconderMensagem();
+      atualizarAjuda();
+
+      const unidadeEntrada =
+        campoUnidade.value;
+
+      if (!unidadeEntrada) {
+        esconderResultado();
+        return;
+      }
+
+      const metros =
+        obterValorEmMetros();
+
+      if (metros === null) {
+        esconderResultado();
+        return;
+      }
+
+      if (Number.isNaN(metros)) {
+        esconderResultado();
+
+        mostrarMensagem(
+          unidadeEntrada === "fracao"
+            ? "Digite uma polegada fracionária válida. Exemplo: 2 1/2."
+            : "Digite um valor numérico válido."
+        );
+
+        return;
+      }
+
+      if (metros < 0) {
+        esconderResultado();
+
+        mostrarMensagem(
+          "O comprimento não pode possuir valor negativo."
+        );
+
+        return;
+      }
+
+      const linhas =
+        Object.entries(unidades).map(
+          ([chave, unidade]) => {
+            const valorConvertido =
+              metros /
+              unidade.fatorParaMetro;
+
+            return criarLinhaResultado(
+              chave,
+              unidade,
+              valorConvertido,
+              unidadeEntrada
+            );
+          }
+        );
+
+      const polegadasDecimais =
+        metros /
+        unidades.in.fatorParaMetro;
+
+      linhas.push(
+        criarLinhaEspecial(
+          "Polegada fracionária",
+          converterParaPolegadaFracionaria(
+            polegadasDecimais
+          ),
+          unidadeEntrada === "fracao"
+        )
+      );
+
+      linhas.push(
+        criarLinhaEspecial(
+          "Pés e polegadas",
+          converterParaPesEPolegadas(
+            metros
+          )
+        )
+      );
+
+      listaResultados.innerHTML =
+        linhas.join("");
+
+      resultado.classList.add("ativo");
+    }
+
+    function limparCampos() {
+      campoValor.value = "";
+      campoUnidade.value = "";
+
+      esconderMensagem();
+      esconderResultado();
+      atualizarAjuda();
+
+      campoValor.focus();
+    }
+
+    campoValor.addEventListener(
+      "input",
+      converterComprimento
+    );
+
+    campoUnidade.addEventListener(
+      "change",
+      converterComprimento
+    );
+
+    botaoLimpar.addEventListener(
+      "click",
+      limparCampos
+    );
+
+    atualizarAjuda();
+  </script>
+
+</body>
+</html>
