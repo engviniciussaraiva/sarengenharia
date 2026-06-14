@@ -2,1286 +2,237 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Conversor de Unidades de Pressão</title>
-
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      width: 100%;
-      min-height: 100%;
-    }
-
-    body {
-      margin: 0;
-      padding: 24px;
-      background: #f4f7f5;
-      color: #263536;
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
-    .pagina {
-      width: 100%;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    .conversor {
-      width: 100%;
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 30px;
-      background: #ffffff;
-      border: 1px solid #d3ded9;
-      border-radius: 12px;
-      box-shadow: 0 3px 14px rgba(35, 65, 59, 0.07);
-    }
-
-    .conversor__titulo {
-      margin: 0 0 30px;
-      color: #315f57;
-      font-size: 27px;
-      line-height: 1.25;
-      text-align: center;
-    }
-
-    .campo {
-      margin-bottom: 20px;
-    }
-
-    .campo label {
-      display: block;
-      margin-bottom: 8px;
-      color: #293d3d;
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .campo input,
-    .campo select {
-      width: 100%;
-      min-height: 50px;
-      padding: 11px 14px;
-      background: #ffffff;
-      color: #263536;
-      border: 1px solid #bdcbc5;
-      border-radius: 7px;
-      outline: none;
-      font-size: 16px;
-      transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
-    }
-
-    .campo input::placeholder {
-      color: #8d9a96;
-    }
-
-    .campo input:focus,
-    .campo select:focus {
-      border-color: #4e8f83;
-      box-shadow: 0 0 0 3px rgba(78, 143, 131, 0.13);
-    }
-
-    .acoes {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 4px;
-    }
-
-    .botao-limpar {
-      min-width: 150px;
-      min-height: 46px;
-      padding: 11px 24px;
-      background: #87928e;
-      color: #ffffff;
-      border: none;
-      border-radius: 7px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 700;
-      transition:
-        background-color 0.2s ease,
-        transform 0.1s ease;
-    }
-
-    .botao-limpar:hover {
-      background: #737f7b;
-    }
-
-    .botao-limpar:active {
-      transform: translateY(1px);
-    }
-
-    .mensagem {
-      display: none;
-      margin-top: 18px;
-      padding: 13px 15px;
-      color: #8f2525;
-      background: #fff1f1;
-      border: 1px solid #e6bebe;
-      border-radius: 7px;
-      font-size: 15px;
-    }
-
-    .mensagem.ativa {
-      display: block;
-    }
-
-    .resultado {
-      display: none;
-      margin-top: 26px;
-      padding: 20px;
-      background: #f5f9f7;
-      border: 1px solid #d7e3de;
-      border-radius: 9px;
-    }
-
-    .resultado.ativo {
-      display: block;
-    }
-
-    .resultado__titulo {
-      margin: 0 0 17px;
-      color: #315f57;
-      font-size: 18px;
-    }
-
-    .resultado__lista {
-      display: grid;
-      gap: 9px;
-    }
-
-    .resultado__linha {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      min-height: 48px;
-      padding: 11px 14px;
-      background: #ffffff;
-      border: 1px solid #e1eae6;
-      border-radius: 7px;
-    }
-
-    .resultado__linha.entrada {
-      background: #edf6f2;
-      border-color: #b9d5ca;
-    }
-
-    .resultado__linha.pn {
-      background: #eef7f3;
-      border-color: #b5d5c9;
-    }
-
-    .resultado__unidade {
-      color: #4a5e5d;
-      font-size: 15px;
-    }
-
-    .resultado__valor {
-      color: #243635;
-      font-size: 17px;
-      font-weight: 700;
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    .resultado__linha.entrada .resultado__unidade,
-    .resultado__linha.entrada .resultado__valor {
-      color: #2d665b;
-    }
-
-    .pn-destaque {
-      display: inline-block;
-      margin-left: 8px;
-      padding: 4px 9px;
-      background: #315f57;
-      color: #ffffff;
-      border-radius: 5px;
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    .nota {
-      margin: 15px 2px 0;
-      color: #647472;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .classes {
-      display: none;
-      width: 100%;
-      margin-top: 28px;
-      padding: 24px;
-      background: #ffffff;
-      border: 1px solid #d3ded9;
-      border-radius: 12px;
-      box-shadow: 0 3px 14px rgba(35, 65, 59, 0.06);
-    }
-
-    .classes.ativa {
-      display: block;
-    }
-
-    .classes__cabecalho {
-      margin-bottom: 18px;
-    }
-
-    .classes__titulo {
-      margin: 0 0 7px;
-      color: #315f57;
-      font-size: 21px;
-    }
-
-    .classes__subtitulo {
-      margin: 0;
-      color: #647472;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .tabela-responsiva {
-      width: 100%;
-      overflow-x: auto;
-    }
-
-    .tabela-classes {
-      width: 100%;
-      min-width: 850px;
-      border-collapse: collapse;
-    }
-
-    .tabela-classes th {
-      padding: 13px 14px;
-      background: #315f57;
-      color: #ffffff;
-      border: 1px solid #315f57;
-      font-size: 14px;
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    .tabela-classes td {
-      padding: 13px 14px;
-      color: #334746;
-      background: #ffffff;
-      border: 1px solid #dce6e2;
-      font-size: 14px;
-      line-height: 1.4;
-      vertical-align: top;
-    }
-
-    .tabela-classes tbody tr:nth-child(even) td {
-      background: #f7faf8;
-    }
-
-    .classe-destaque {
-      color: #2d665b;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .pressao-admissivel {
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .selo-apto {
-      display: inline-block;
-      padding: 5px 10px;
-      color: #24594f;
-      background: #e3f2ec;
-      border: 1px solid #afd2c5;
-      border-radius: 5px;
-      font-size: 13px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .classes__mensagem {
-      display: none;
-      padding: 16px;
-      color: #5b6d6a;
-      background: #f5f8f7;
-      border: 1px solid #d7e2de;
-      border-radius: 7px;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .classes__mensagem.ativa {
-      display: block;
-    }
-
-    .status-banco {
-      display: none;
-      margin-top: 15px;
-      padding: 12px 14px;
-      color: #795b18;
-      background: #fff8e6;
-      border: 1px solid #ead79d;
-      border-radius: 7px;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .status-banco.ativo {
-      display: block;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 14px;
-      }
-
-      .conversor {
-        padding: 21px;
-        border-radius: 10px;
-      }
-
-      .conversor__titulo {
-        margin-bottom: 25px;
-        font-size: 23px;
-      }
-
-      .acoes {
-        display: block;
-      }
-
-      .botao-limpar {
-        width: 100%;
-      }
-
-      .resultado {
-        padding: 15px;
-      }
-
-      .resultado__linha {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 5px;
-      }
-
-      .resultado__valor {
-        text-align: left;
-        white-space: normal;
-      }
-
-      .pn-destaque {
-        display: block;
-        width: fit-content;
-        margin: 7px 0 0;
-      }
-
-      .classes {
-        padding: 17px;
-      }
-
-      .classes__titulo {
-        font-size: 19px;
-      }
-    }
+    *{box-sizing:border-box}
+    html,body{width:100%;min-height:100%}
+    body{margin:0;padding:24px;background:#f4f7f5;color:#263536;font-family:Arial,Helvetica,sans-serif}
+    .pagina{width:100%;max-width:1200px;margin:0 auto}
+    .conversor{width:100%;max-width:720px;margin:0 auto;padding:30px;background:#fff;border:1px solid #d3ded9;border-radius:12px;box-shadow:0 3px 14px rgba(35,65,59,.07)}
+    h1{margin:0 0 30px;color:#315f57;font-size:27px;text-align:center}
+    .campo{margin-bottom:20px}.campo label{display:block;margin-bottom:8px;color:#293d3d;font-size:16px;font-weight:700}
+    .campo input,.campo select{width:100%;min-height:50px;padding:11px 14px;background:#fff;color:#263536;border:1px solid #bdcbc5;border-radius:7px;outline:none;font-size:16px}
+    .campo input:focus,.campo select:focus{border-color:#4e8f83;box-shadow:0 0 0 3px rgba(78,143,131,.13)}
+    .acoes{display:flex;justify-content:flex-end}.botao-limpar{min-width:150px;min-height:46px;padding:11px 24px;background:#87928e;color:#fff;border:0;border-radius:7px;cursor:pointer;font-size:16px;font-weight:700}
+    .botao-limpar:hover{background:#737f7b}
+    .mensagem{display:none;margin-top:18px;padding:13px 15px;color:#8f2525;background:#fff1f1;border:1px solid #e6bebe;border-radius:7px}.mensagem.ativa{display:block}
+    .resultado{display:none;margin-top:26px;padding:20px;background:#f5f9f7;border:1px solid #d7e3de;border-radius:9px}.resultado.ativo{display:block}
+    .titulo-secao{margin:0 0 17px;color:#315f57;font-size:18px}
+    .resultado__lista{display:grid;gap:9px}
+    .resultado__linha{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:48px;padding:11px 14px;background:#fff;border:1px solid #e1eae6;border-radius:7px}
+    .resultado__linha.entrada{background:#edf6f2;border-color:#b9d5ca}.resultado__linha.pn{background:#eef7f3;border-color:#b5d5c9}
+    .resultado__unidade{color:#4a5e5d;font-size:15px}.resultado__valor{color:#243635;font-size:17px;font-weight:700;text-align:right}
+    .pn-destaque{display:inline-block;margin-left:8px;padding:4px 9px;background:#315f57;color:#fff;border-radius:5px;font-size:14px}
+    .nota{margin:15px 2px 0;color:#647472;font-size:13px;line-height:1.5}
+    .painel{display:none;width:100%;margin-top:28px;padding:24px;background:#fff;border:1px solid #d3ded9;border-radius:12px;box-shadow:0 3px 14px rgba(35,65,59,.06)}
+    .painel.ativo{display:block}.painel h2{margin:0 0 7px;color:#315f57;font-size:21px}.subtitulo{margin:0 0 18px;color:#647472;font-size:14px;line-height:1.5}
+    .tabela-responsiva{width:100%;overflow-x:auto}.tabela{width:100%;min-width:900px;border-collapse:collapse}
+    .tabela th{padding:13px 14px;background:#315f57;color:#fff;border:1px solid #315f57;font-size:14px;text-align:left;white-space:nowrap}
+    .tabela td{padding:12px 14px;color:#334746;background:#fff;border:1px solid #dce6e2;font-size:14px;vertical-align:top}
+    .tabela tbody tr:nth-child(even) td{background:#f7faf8}.destaque{color:#2d665b;font-weight:700}.selo{display:inline-block;padding:5px 9px;color:#24594f;background:#e3f2ec;border:1px solid #afd2c5;border-radius:5px;font-size:12px;font-weight:700;white-space:nowrap}
+    .grupo-tubo td{background:#edf6f2!important;color:#315f57;font-weight:700;font-size:15px}
+    .aviso{display:none;padding:16px;color:#5b6d6a;background:#f5f8f7;border:1px solid #d7e2de;border-radius:7px;font-size:14px}.aviso.ativo{display:block}
+    @media(max-width:600px){body{padding:14px}.conversor{padding:21px}h1{font-size:23px}.acoes{display:block}.botao-limpar{width:100%}.resultado__linha{align-items:flex-start;flex-direction:column;gap:5px}.resultado__valor{text-align:left}.pn-destaque{display:block;width:max-content;margin:7px 0 0}.painel{padding:17px}}
   </style>
 </head>
-
 <body>
-
-  <main class="pagina">
-
-    <section class="conversor">
-
-      <h1 class="conversor__titulo">
-        Conversor de Unidades de Pressão
-      </h1>
-
-      <div class="campo">
-        <label for="valorPressao">
-          Valor da pressão
-        </label>
-
-        <input
-          id="valorPressao"
-          type="text"
-          inputmode="decimal"
-          autocomplete="off"
-          placeholder="Digite o valor"
-        >
-      </div>
-
-      <div class="campo">
-        <label for="unidadeEntrada">
-          Unidade de entrada
-        </label>
-
-        <select id="unidadeEntrada">
-          <option value="">
-            — Selecione —
-          </option>
-
-          <option value="mca">
-            Metros de coluna d'água (mca)
-          </option>
-
-          <option value="bar">
-            Bar (bar)
-          </option>
-
-          <option value="kgfcm2">
-            Quilograma-força por centímetro quadrado (kgf/cm²)
-          </option>
-
-          <option value="kpa">
-            Quilopascal (kPa)
-          </option>
-
-          <option value="mpa">
-            Megapascal (MPa)
-          </option>
-
-          <option value="pa">
-            Pascal (Pa)
-          </option>
-
-          <option value="psi">
-            Libra-força por polegada quadrada (psi)
-          </option>
-        </select>
-      </div>
-
-      <div class="acoes">
-        <button
-          id="botaoLimpar"
-          class="botao-limpar"
-          type="button"
-        >
-          Limpar
-        </button>
-      </div>
-
-      <div
-        id="mensagem"
-        class="mensagem"
-        role="alert"
-      ></div>
-
-      <section
-        id="resultado"
-        class="resultado"
-        aria-live="polite"
-      >
-        <h2 class="resultado__titulo">
-          Resultado da conversão
-        </h2>
-
-        <div
-          id="listaResultados"
-          class="resultado__lista"
-        ></div>
-
-        <p class="nota">
-          A classe PN apresentada corresponde à classe nominal
-          imediatamente superior à pressão convertida em bar.
-        </p>
-      </section>
-
+<main class="pagina">
+  <section class="conversor">
+    <h1>Conversor de Unidades de Pressão</h1>
+    <div class="campo">
+      <label for="valorPressao">Valor da pressão</label>
+      <input id="valorPressao" type="text" inputmode="decimal" autocomplete="off" placeholder="Digite o valor">
+    </div>
+    <div class="campo">
+      <label for="unidadeEntrada">Unidade de entrada</label>
+      <select id="unidadeEntrada">
+        <option value="">— Selecione —</option>
+        <option value="mca">Metros de coluna d'água (mca)</option>
+        <option value="bar">Bar (bar)</option>
+        <option value="kgfcm2">Quilograma-força por centímetro quadrado (kgf/cm²)</option>
+        <option value="kpa">Quilopascal (kPa)</option>
+        <option value="mpa">Megapascal (MPa)</option>
+        <option value="pa">Pascal (Pa)</option>
+        <option value="psi">Libra-força por polegada quadrada (psi)</option>
+      </select>
+    </div>
+    <div class="acoes"><button id="botaoLimpar" class="botao-limpar" type="button">Limpar</button></div>
+    <div id="mensagem" class="mensagem"></div>
+    <section id="resultado" class="resultado">
+      <h2 class="titulo-secao">Resultado da conversão</h2>
+      <div id="listaResultados" class="resultado__lista"></div>
+      <p class="nota">A classe PN apresentada corresponde à classe nominal imediatamente superior à pressão convertida em bar.</p>
     </section>
-
-    <section
-      id="classesCompativeis"
-      class="classes"
-      aria-live="polite"
-    >
-      <div class="classes__cabecalho">
-        <h2 class="classes__titulo">
-          Classes compatíveis com a pressão informada
-        </h2>
-
-        <p class="classes__subtitulo">
-          O sistema apresenta somente a menor classe apta cadastrada
-          para cada família de material.
-        </p>
-      </div>
-
-      <div
-        id="tabelaClassesContainer"
-        class="tabela-responsiva"
-      >
-        <table class="tabela-classes">
-          <thead>
-            <tr>
-              <th>Material</th>
-              <th>Classe mínima apta</th>
-              <th>Norma</th>
-              <th>Pressão admissível</th>
-              <th>Condição</th>
-              <th>Situação</th>
-              <th>Observação</th>
-            </tr>
-          </thead>
-
-          <tbody id="corpoTabelaClasses"></tbody>
-        </table>
-      </div>
-
-      <div
-        id="mensagemClasses"
-        class="classes__mensagem"
-      ></div>
-
-      <div
-        id="statusBanco"
-        class="status-banco"
-      >
-        O banco técnico não pôde ser carregado. As conversões continuam
-        funcionando normalmente, mas a consulta de classes está indisponível.
-      </div>
-
-      <p class="nota">
-        Critério de consulta: água para proteção contra incêndio,
-        temperatura de referência cadastrada e serviço sem choque.
-        Confirmar sempre a pressão de trabalho declarada pelo fabricante.
-      </p>
-    </section>
-
-  </main>
-
-  <script>
-    const URL_CLASSES_PRESSAO =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vS32m1CnN7Q1lXjPM05DAybM2vu2NPDAeIibFKGRt3BJ5g2abH376wWsRnY_H45hkcQEClIOlV9RjTn/pub?output=csv";
-
-    const campoValor =
-      document.getElementById("valorPressao");
-
-    const campoUnidade =
-      document.getElementById("unidadeEntrada");
-
-    const botaoLimpar =
-      document.getElementById("botaoLimpar");
-
-    const resultado =
-      document.getElementById("resultado");
-
-    const listaResultados =
-      document.getElementById("listaResultados");
-
-    const mensagem =
-      document.getElementById("mensagem");
-
-    const classesCompativeis =
-      document.getElementById("classesCompativeis");
-
-    const corpoTabelaClasses =
-      document.getElementById("corpoTabelaClasses");
-
-    const tabelaClassesContainer =
-      document.getElementById("tabelaClassesContainer");
-
-    const mensagemClasses =
-      document.getElementById("mensagemClasses");
-
-    const statusBanco =
-      document.getElementById("statusBanco");
-
-    let bancoClassesPressao = [];
-    let bancoCarregado = false;
-
-    const unidades = {
-      mca: {
-        nome: "Metros de coluna d'água",
-        simbolo: "mca",
-        fatorParaKpa: 9.80665
-      },
-
-      bar: {
-        nome: "Bar",
-        simbolo: "bar",
-        fatorParaKpa: 100
-      },
-
-      kgfcm2: {
-        nome: "Quilograma-força por centímetro quadrado",
-        simbolo: "kgf/cm²",
-        fatorParaKpa: 98.0665
-      },
-
-      kpa: {
-        nome: "Quilopascal",
-        simbolo: "kPa",
-        fatorParaKpa: 1
-      },
-
-      mpa: {
-        nome: "Megapascal",
-        simbolo: "MPa",
-        fatorParaKpa: 1000
-      },
-
-      pa: {
-        nome: "Pascal",
-        simbolo: "Pa",
-        fatorParaKpa: 0.001
-      },
-
-      psi: {
-        nome: "Libra-força por polegada quadrada",
-        simbolo: "psi",
-        fatorParaKpa: 6.894757293168
-      }
-    };
-
-    const classesPn = [
-      2.5,
-      4,
-      6,
-      10,
-      16,
-      25,
-      40,
-      63,
-      100,
-      160,
-      250,
-      400
-    ];
-
-    function obterNumeroDigitado() {
-      let texto = campoValor.value
-        .trim()
-        .replace(/\s/g, "");
-
-      if (texto === "") {
-        return null;
-      }
-
-      if (texto.includes(",") && texto.includes(".")) {
-        texto = texto
-          .replace(/\./g, "")
-          .replace(",", ".");
-      } else if (texto.includes(",")) {
-        texto = texto.replace(",", ".");
-      }
-
-      const valor = Number(texto);
-
-      return Number.isFinite(valor)
-        ? valor
-        : NaN;
-    }
-
-    function converterNumeroBanco(valor) {
-      if (valor === null || valor === undefined) {
-        return NaN;
-      }
-
-      let texto = String(valor)
-        .trim()
-        .replace(/\s/g, "");
-
-      if (texto === "") {
-        return NaN;
-      }
-
-      if (texto.includes(",") && texto.includes(".")) {
-        const ultimaVirgula = texto.lastIndexOf(",");
-        const ultimoPonto = texto.lastIndexOf(".");
-
-        if (ultimaVirgula > ultimoPonto) {
-          texto = texto
-            .replace(/\./g, "")
-            .replace(",", ".");
-        } else {
-          texto = texto.replace(/,/g, "");
-        }
-      } else if (texto.includes(",")) {
-        texto = texto.replace(",", ".");
-      }
-
-      const numero = Number(texto);
-
-      return Number.isFinite(numero)
-        ? numero
-        : NaN;
-    }
-
-    function definirCasasDecimais(valor) {
-      const valorAbsoluto = Math.abs(valor);
-
-      if (valorAbsoluto === 0) {
-        return 2;
-      }
-
-      if (valorAbsoluto >= 100000) {
-        return 0;
-      }
-
-      if (valorAbsoluto >= 1000) {
-        return 2;
-      }
-
-      if (valorAbsoluto >= 100) {
-        return 2;
-      }
-
-      if (valorAbsoluto >= 10) {
-        return 3;
-      }
-
-      if (valorAbsoluto >= 1) {
-        return 4;
-      }
-
-      if (valorAbsoluto >= 0.1) {
-        return 5;
-      }
-
-      if (valorAbsoluto >= 0.01) {
-        return 6;
-      }
-
-      return 8;
-    }
-
-    function formatarNumero(valor) {
-      const casasDecimais =
-        definirCasasDecimais(valor);
-
-      return valor.toLocaleString("pt-BR", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: casasDecimais
-      });
-    }
-
-    function formatarNumeroFixo(valor, casas = 2) {
-      return valor.toLocaleString("pt-BR", {
-        minimumFractionDigits: casas,
-        maximumFractionDigits: casas
-      });
-    }
-
-    function formatarPn(valor) {
-      return String(valor).replace(".", ",");
-    }
-
-    function escaparHtml(valor) {
-      return String(valor ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-    function obterClassePnMinima(pressaoEmBar) {
-      const classeEncontrada =
-        classesPn.find(
-          classe => classe >= pressaoEmBar
-        );
-
-      if (classeEncontrada !== undefined) {
-        return `PN ${formatarPn(classeEncontrada)}`;
-      }
-
-      return "Acima de PN 400";
-    }
-
-    function mostrarMensagem(texto) {
-      mensagem.textContent = texto;
-      mensagem.classList.add("ativa");
-    }
-
-    function esconderMensagem() {
-      mensagem.textContent = "";
-      mensagem.classList.remove("ativa");
-    }
-
-    function esconderResultado() {
-      resultado.classList.remove("ativo");
-      listaResultados.innerHTML = "";
-    }
-
-    function esconderClasses() {
-      classesCompativeis.classList.remove("ativa");
-      corpoTabelaClasses.innerHTML = "";
-      mensagemClasses.textContent = "";
-      mensagemClasses.classList.remove("ativa");
-      tabelaClassesContainer.style.display = "";
-    }
-
-    function criarLinhaResultado(
-      chave,
-      unidade,
-      valor,
-      chaveEntrada,
-      classePn
-    ) {
-      const classes = ["resultado__linha"];
-
-      if (chave === chaveEntrada) {
-        classes.push("entrada");
-      }
-
-      if (chave === "psi") {
-        classes.push("pn");
-      }
-
-      const indicacaoPn =
-        chave === "psi"
-          ? `
-            <span class="pn-destaque">
-              Mínimo ${classePn}
-            </span>
-          `
-          : "";
-
-      return `
-        <div class="${classes.join(" ")}">
-          <span class="resultado__unidade">
-            ${unidade.nome}
-          </span>
-
-          <span class="resultado__valor">
-            ${formatarNumero(valor)} ${unidade.simbolo}
-            ${indicacaoPn}
-          </span>
-        </div>
-      `;
-    }
-
-    function detectarSeparadorCsv(primeiraLinha) {
-      const quantidadePontoVirgula =
-        (primeiraLinha.match(/;/g) || []).length;
-
-      const quantidadeVirgula =
-        (primeiraLinha.match(/,/g) || []).length;
-
-      return quantidadePontoVirgula > quantidadeVirgula
-        ? ";"
-        : ",";
-    }
-
-    function dividirLinhaCsv(linha, separador) {
-      const campos = [];
-      let campoAtual = "";
-      let dentroDeAspas = false;
-
-      for (let i = 0; i < linha.length; i++) {
-        const caractere = linha[i];
-        const proximo = linha[i + 1];
-
-        if (caractere === "\"") {
-          if (dentroDeAspas && proximo === "\"") {
-            campoAtual += "\"";
-            i++;
-          } else {
-            dentroDeAspas = !dentroDeAspas;
-          }
-        } else if (
-          caractere === separador &&
-          !dentroDeAspas
-        ) {
-          campos.push(campoAtual.trim());
-          campoAtual = "";
-        } else {
-          campoAtual += caractere;
-        }
-      }
-
-      campos.push(campoAtual.trim());
-
-      return campos;
-    }
-
-    function converterCsvParaObjetos(csv) {
-      const linhas = csv
-        .replace(/^\uFEFF/, "")
-        .split(/\r?\n/)
-        .filter(linha => linha.trim() !== "");
-
-      if (linhas.length < 2) {
-        return [];
-      }
-
-      const separador =
-        detectarSeparadorCsv(linhas[0]);
-
-      const cabecalhos =
-        dividirLinhaCsv(linhas[0], separador)
-          .map(item =>
-            item
-              .trim()
-              .toUpperCase()
-          );
-
-      return linhas
-        .slice(1)
-        .map(linha => {
-          const valores =
-            dividirLinhaCsv(linha, separador);
-
-          const objeto = {};
-
-          cabecalhos.forEach((cabecalho, indice) => {
-            objeto[cabecalho] =
-              valores[indice] !== undefined
-                ? valores[indice].trim()
-                : "";
-          });
-
-          return objeto;
-        });
-    }
-
-    async function carregarClassesPressao() {
-      try {
-        const resposta = await fetch(
-          `${URL_CLASSES_PRESSAO}&t=${Date.now()}`,
-          {
-            cache: "no-store"
-          }
-        );
-
-        if (!resposta.ok) {
-          throw new Error(
-            `Erro HTTP ${resposta.status}`
-          );
-        }
-
-        const csv = await resposta.text();
-
-        const registros =
-          converterCsvParaObjetos(csv);
-
-        bancoClassesPressao = registros
-          .filter(item => {
-            return (
-              String(item.STATUS)
-                .trim()
-                .toUpperCase() === "ATIVO"
-            );
-          })
-          .map(item => ({
-            ...item,
-
-            PRESSAO_MAX_PSI_NUM:
-              converterNumeroBanco(
-                item.PRESSAO_MAX_PSI
-              ),
-
-            PRESSAO_MAX_BAR_NUM:
-              converterNumeroBanco(
-                item.PRESSAO_MAX_BAR
-              ),
-
-            ORDEM_NUM:
-              converterNumeroBanco(
-                item.ORDEM
-              )
-          }))
-          .filter(item => {
-            return (
-              item.FAMILIA &&
-              item.MATERIAL &&
-              item.CLASSE &&
-              Number.isFinite(
-                item.PRESSAO_MAX_BAR_NUM
-              )
-            );
-          });
-
-        bancoCarregado =
-          bancoClassesPressao.length > 0;
-
-        statusBanco.classList.remove("ativo");
-      } catch (erro) {
-        console.error(
-          "Erro ao carregar CLASSES_PRESSAO:",
-          erro
-        );
-
-        bancoClassesPressao = [];
-        bancoCarregado = false;
-
-        statusBanco.classList.add("ativo");
-      }
-    }
-
-    function obterMenorClasseAptaPorFamilia(
-      pressaoEmBar
-    ) {
-      const aptas = bancoClassesPressao
-        .filter(item => {
-          return (
-            item.PRESSAO_MAX_BAR_NUM >=
-            pressaoEmBar
-          );
-        })
-        .sort((a, b) => {
-          const diferencaPressao =
-            a.PRESSAO_MAX_BAR_NUM -
-            b.PRESSAO_MAX_BAR_NUM;
-
-          if (diferencaPressao !== 0) {
-            return diferencaPressao;
-          }
-
-          return (
-            (a.ORDEM_NUM || 9999) -
-            (b.ORDEM_NUM || 9999)
-          );
-        });
-
-      const porFamilia = new Map();
-
-      aptas.forEach(item => {
-        const familia =
-          String(item.FAMILIA)
-            .trim()
-            .toUpperCase();
-
-        if (!porFamilia.has(familia)) {
-          porFamilia.set(familia, item);
-        }
-      });
-
-      return Array.from(
-        porFamilia.values()
-      ).sort((a, b) => {
-        return (
-          (a.ORDEM_NUM || 9999) -
-          (b.ORDEM_NUM || 9999)
-        );
-      });
-    }
-
-    function criarLinhaClasse(item) {
-      const pressaoPsi =
-        Number.isFinite(item.PRESSAO_MAX_PSI_NUM)
-          ? `${formatarNumeroFixo(
-              item.PRESSAO_MAX_PSI_NUM,
-              0
-            )} psi`
-          : "";
-
-      const pressaoBar =
-        Number.isFinite(item.PRESSAO_MAX_BAR_NUM)
-          ? `${formatarNumeroFixo(
-              item.PRESSAO_MAX_BAR_NUM,
-              2
-            )} bar`
-          : "";
-
-      const pressaoAdmissivel =
-        [pressaoPsi, pressaoBar]
-          .filter(Boolean)
-          .join(" / ");
-
-      return `
-        <tr>
-          <td>
-            ${escaparHtml(item.MATERIAL)}
-          </td>
-
-          <td>
-            <span class="classe-destaque">
-              ${escaparHtml(item.CLASSE)}
-            </span>
-          </td>
-
-          <td>
-            ${escaparHtml(item.NORMA)}
-          </td>
-
-          <td>
-            <span class="pressao-admissivel">
-              ${escaparHtml(pressaoAdmissivel)}
-            </span>
-          </td>
-
-          <td>
-            ${escaparHtml(item.CONDICAO)}
-          </td>
-
-          <td>
-            <span class="selo-apto">
-              APTO
-            </span>
-          </td>
-
-          <td>
-            ${escaparHtml(item.OBSERVACAO)}
-          </td>
-        </tr>
-      `;
-    }
-
-    function atualizarTabelaClasses(
-      pressaoEmBar
-    ) {
-      classesCompativeis.classList.add("ativa");
-
-      corpoTabelaClasses.innerHTML = "";
-      mensagemClasses.textContent = "";
-      mensagemClasses.classList.remove("ativa");
-      tabelaClassesContainer.style.display = "";
-
-      if (!bancoCarregado) {
-        tabelaClassesContainer.style.display =
-          "none";
-
-        mensagemClasses.textContent =
-          "O banco técnico ainda não está disponível para consulta.";
-
-        mensagemClasses.classList.add("ativa");
-        return;
-      }
-
-      const classesAptas =
-        obterMenorClasseAptaPorFamilia(
-          pressaoEmBar
-        );
-
-      if (classesAptas.length === 0) {
-        tabelaClassesContainer.style.display =
-          "none";
-
-        mensagemClasses.textContent =
-          "Nenhuma classe cadastrada atende à pressão informada. Consulte uma classe superior ou revise o banco técnico.";
-
-        mensagemClasses.classList.add("ativa");
-        return;
-      }
-
-      corpoTabelaClasses.innerHTML =
-        classesAptas
-          .map(criarLinhaClasse)
-          .join("");
-    }
-
-    function converterPressao() {
-      esconderMensagem();
-
-      const chaveEntrada =
-        campoUnidade.value;
-
-      const valorEntrada =
-        obterNumeroDigitado();
-
-      if (!chaveEntrada) {
-        esconderResultado();
-        esconderClasses();
-        return;
-      }
-
-      if (valorEntrada === null) {
-        esconderResultado();
-        esconderClasses();
-        return;
-      }
-
-      if (Number.isNaN(valorEntrada)) {
-        esconderResultado();
-        esconderClasses();
-
-        mostrarMensagem(
-          "Digite um valor numérico válido."
-        );
-
-        return;
-      }
-
-      if (valorEntrada < 0) {
-        esconderResultado();
-        esconderClasses();
-
-        mostrarMensagem(
-          "A pressão não pode possuir valor negativo."
-        );
-
-        return;
-      }
-
-      const unidadeEntrada =
-        unidades[chaveEntrada];
-
-      const pressaoEmKpa =
-        valorEntrada *
-        unidadeEntrada.fatorParaKpa;
-
-      const pressaoEmBar =
-        pressaoEmKpa /
-        unidades.bar.fatorParaKpa;
-
-      const classePn =
-        obterClassePnMinima(
-          pressaoEmBar
-        );
-
-      const linhas =
-        Object.entries(unidades).map(
-          ([chave, unidade]) => {
-            const valorConvertido =
-              pressaoEmKpa /
-              unidade.fatorParaKpa;
-
-            return criarLinhaResultado(
-              chave,
-              unidade,
-              valorConvertido,
-              chaveEntrada,
-              classePn
-            );
-          }
-        );
-
-      listaResultados.innerHTML =
-        linhas.join("");
-
-      resultado.classList.add("ativo");
-
-      atualizarTabelaClasses(
-        pressaoEmBar
-      );
-    }
-
-    function limparCampos() {
-      campoValor.value = "";
-      campoUnidade.value = "";
-
-      esconderMensagem();
-      esconderResultado();
-      esconderClasses();
-
-      campoValor.focus();
-    }
-
-    campoValor.addEventListener(
-      "input",
-      converterPressao
-    );
-
-    campoUnidade.addEventListener(
-      "change",
-      converterPressao
-    );
-
-    botaoLimpar.addEventListener(
-      "click",
-      limparCampos
-    );
-
-    carregarClassesPressao();
-  </script>
-
+  </section>
+
+  <section id="classesCompativeis" class="painel">
+    <h2>Classes compatíveis com a pressão informada</h2>
+    <p class="subtitulo">Somente a menor classe apta cadastrada para cada família de material.</p>
+    <div id="tabelaClassesContainer" class="tabela-responsiva">
+      <table class="tabela"><thead><tr>
+        <th>Material</th><th>Classe mínima apta</th><th>Norma</th><th>Pressão admissível</th><th>Condição</th><th>Situação</th><th>Observação</th>
+      </tr></thead><tbody id="corpoTabelaClasses"></tbody></table>
+    </div>
+    <div id="mensagemClasses" class="aviso"></div>
+  </section>
+
+  <section id="tubulacoesAptas" class="painel">
+    <h2>Tubulações aptas / indicadas</h2>
+    <p class="subtitulo">Relação automática de 2&quot; a 12&quot;. Para linhas com limite de pressão cadastrado, aparece somente a menor classe apta por família e diâmetro. Linhas de referência são apresentadas conforme o banco.</p>
+    <div id="tabelaTubosContainer" class="tabela-responsiva">
+      <table class="tabela"><thead><tr>
+        <th>Material</th><th>DN</th><th>Norma</th><th>Classe / especificação</th><th>Espessura</th><th>Pressão cadastrada</th><th>Observação</th>
+      </tr></thead><tbody id="corpoTabelaTubos"></tbody></table>
+    </div>
+    <div id="mensagemTubos" class="aviso"></div>
+  </section>
+</main>
+
+<script>
+const URL_CLASSES_PRESSAO="https://docs.google.com/spreadsheets/d/e/2PACX-1vS32m1CnN7Q1lXjPM05DAybM2vu2NPDAeIibFKGRt3BJ5g2abH376wWsRnY_H45hkcQEClIOlV9RjTn/pub?output=csv";
+const URL_TUBULACOES_PRESSAO="https://docs.google.com/spreadsheets/d/e/2PACX-1vRHwreHkLjji3jUsmCNNY57SjkogeQY1gdo9lNZr5v3f7wgqQnNfCkPliNs-KigIs_oY7J_RUSOaocx/pub?output=csv";
+
+const $=id=>document.getElementById(id);
+const campoValor=$("valorPressao"),campoUnidade=$("unidadeEntrada"),botaoLimpar=$("botaoLimpar");
+const resultado=$("resultado"),listaResultados=$("listaResultados"),mensagem=$("mensagem");
+const classesCompativeis=$("classesCompativeis"),corpoTabelaClasses=$("corpoTabelaClasses"),tabelaClassesContainer=$("tabelaClassesContainer"),mensagemClasses=$("mensagemClasses");
+const tubulacoesAptas=$("tubulacoesAptas"),corpoTabelaTubos=$("corpoTabelaTubos"),tabelaTubosContainer=$("tabelaTubosContainer"),mensagemTubos=$("mensagemTubos");
+
+let bancoClasses=[],bancoTubos=[],classesCarregadas=false,tubosCarregados=false;
+
+const unidades={
+  mca:{nome:"Metros de coluna d'água",simbolo:"mca",fator:9.80665},
+  bar:{nome:"Bar",simbolo:"bar",fator:100},
+  kgfcm2:{nome:"Quilograma-força por centímetro quadrado",simbolo:"kgf/cm²",fator:98.0665},
+  kpa:{nome:"Quilopascal",simbolo:"kPa",fator:1},
+  mpa:{nome:"Megapascal",simbolo:"MPa",fator:1000},
+  pa:{nome:"Pascal",simbolo:"Pa",fator:.001},
+  psi:{nome:"Libra-força por polegada quadrada",simbolo:"psi",fator:6.894757293168}
+};
+const classesPn=[2.5,4,6,10,16,25,40,63,100,160,250,400];
+
+function numeroEntrada(){
+  let t=campoValor.value.trim().replace(/\s/g,"");
+  if(!t)return null;
+  if(t.includes(",")&&t.includes("."))t=t.replace(/\./g,"").replace(",",".");
+  else if(t.includes(","))t=t.replace(",",".");
+  const n=Number(t);return Number.isFinite(n)?n:NaN;
+}
+function numeroBanco(v){
+  if(v===null||v===undefined||String(v).trim()==="")return NaN;
+  let t=String(v).trim().replace(/\s/g,"");
+  if(t.includes(",")&&t.includes(".")){
+    if(t.lastIndexOf(",")>t.lastIndexOf("."))t=t.replace(/\./g,"").replace(",",".");
+    else t=t.replace(/,/g,"");
+  }else if(t.includes(","))t=t.replace(",",".");
+  const n=Number(t);return Number.isFinite(n)?n:NaN;
+}
+function fmt(v,max=4){return v.toLocaleString("pt-BR",{maximumFractionDigits:max})}
+function fmt2(v){return v.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function esc(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
+function pnMin(bar){const p=classesPn.find(x=>x>=bar);return p!==undefined?`PN ${String(p).replace(".",",")}`:"Acima de PN 400"}
+
+function detectarSeparador(l){return (l.match(/;/g)||[]).length>(l.match(/,/g)||[]).length?";":","}
+function dividirCsv(l,s){
+  const a=[];let c="",asp=false;
+  for(let i=0;i<l.length;i++){const ch=l[i],prox=l[i+1];
+    if(ch==='"'){if(asp&&prox==='"'){c+='"';i++}else asp=!asp}
+    else if(ch===s&&!asp){a.push(c.trim());c=""}else c+=ch
+  }a.push(c.trim());return a
+}
+function csvObjetos(csv){
+  const linhas=csv.replace(/^\uFEFF/,"").split(/\r?\n/).filter(x=>x.trim());
+  if(linhas.length<2)return[];
+  const sep=detectarSeparador(linhas[0]),cab=dividirCsv(linhas[0],sep).map(x=>x.trim().toUpperCase());
+  return linhas.slice(1).map(l=>{const vals=dividirCsv(l,sep),o={};cab.forEach((h,i)=>o[h]=(vals[i]??"").trim());return o})
+}
+async function buscarCsv(url){
+  const r=await fetch(`${url}${url.includes("?")?"&":"?"}t=${Date.now()}`,{cache:"no-store"});
+  if(!r.ok)throw new Error(`HTTP ${r.status}`);
+  return csvObjetos(await r.text())
+}
+async function carregarBancos(){
+  try{
+    bancoClasses=(await buscarCsv(URL_CLASSES_PRESSAO)).filter(x=>String(x.STATUS).toUpperCase()==="ATIVO").map(x=>({...x,BAR:numeroBanco(x.PRESSAO_MAX_BAR),PSI:numeroBanco(x.PRESSAO_MAX_PSI),ORDEM_N:numeroBanco(x.ORDEM)})).filter(x=>Number.isFinite(x.BAR));
+    classesCarregadas=bancoClasses.length>0;
+  }catch(e){console.error("Classes:",e)}
+  try{
+    bancoTubos=(await buscarCsv(URL_TUBULACOES_PRESSAO)).filter(x=>String(x.STATUS).toUpperCase()==="ATIVO").map(x=>({...x,BAR:numeroBanco(x.PRESSAO_MAX_BAR),PSI:numeroBanco(x.PRESSAO_MAX_PSI),ORDEM_N:numeroBanco(x.ORDEM),ESP:numeroBanco(x.ESPESSURA_MM)}));
+    tubosCarregados=bancoTubos.length>0;
+  }catch(e){console.error("Tubos:",e)}
+  converter();
+}
+
+function menorClassePorFamilia(bar){
+  const aptas=bancoClasses.filter(x=>x.BAR>=bar).sort((a,b)=>a.BAR-b.BAR||(a.ORDEM_N||9999)-(b.ORDEM_N||9999));
+  const m=new Map();aptas.forEach(x=>{const k=String(x.FAMILIA).toUpperCase();if(!m.has(k))m.set(k,x)});
+  return [...m.values()]
+}
+function renderClasses(bar){
+  classesCompativeis.classList.add("ativo");mensagemClasses.classList.remove("ativo");tabelaClassesContainer.style.display="";
+  if(!classesCarregadas){tabelaClassesContainer.style.display="none";mensagemClasses.textContent="Banco de classes indisponível.";mensagemClasses.classList.add("ativo");return}
+  const dados=menorClassePorFamilia(bar);
+  if(!dados.length){tabelaClassesContainer.style.display="none";mensagemClasses.textContent="Nenhuma classe cadastrada atende à pressão informada.";mensagemClasses.classList.add("ativo");return}
+  corpoTabelaClasses.innerHTML=dados.map(x=>`<tr>
+    <td>${esc(x.MATERIAL)}</td><td class="destaque">${esc(x.CLASSE)}</td><td>${esc(x.NORMA)}</td>
+    <td><b>${Number.isFinite(x.PSI)?fmt(x.PSI,0)+" psi":""}${Number.isFinite(x.BAR)?" / "+fmt2(x.BAR)+" bar":""}</b></td>
+    <td>${esc(x.CONDICAO)}</td><td><span class="selo">APTO</span></td><td>${esc(x.OBSERVACAO)}</td>
+  </tr>`).join("")
+}
+
+function especificacaoTubo(x){
+  return [x.CLASSE,x.SCHEDULE,x.SDR,x.PN].filter(Boolean).join(" — ")
+}
+function ordemDn(dn){
+  const mapa={'2"':2,'2.1/2"':2.5,'3"':3,'4"':4,'5"':5,'6"':6,'8"':8,'10"':10,'12"':12};
+  return mapa[dn]??999
+}
+function selecionarTubos(bar){
+  const referencia=bancoTubos.filter(x=>String(x.MODO_EXIBICAO).toUpperCase()==="REFERENCIA");
+  const pressao=bancoTubos.filter(x=>String(x.MODO_EXIBICAO).toUpperCase()==="PRESSAO"&&Number.isFinite(x.BAR)&&x.BAR>=bar)
+    .sort((a,b)=>a.BAR-b.BAR||(a.ORDEM_N||9999)-(b.ORDEM_N||9999));
+  const minimos=new Map();
+  pressao.forEach(x=>{const k=`${x.FAMILIA}|${x.DN_POL}`;if(!minimos.has(k))minimos.set(k,x)});
+  return [...referencia,...minimos.values()].sort((a,b)=>{
+    const f=String(a.FAMILIA).localeCompare(String(b.FAMILIA),"pt-BR");
+    if(f)return f;
+    return ordemDn(a.DN_POL)-ordemDn(b.DN_POL)||(a.ORDEM_N||9999)-(b.ORDEM_N||9999)
+  })
+}
+function renderTubos(bar){
+  tubulacoesAptas.classList.add("ativo");mensagemTubos.classList.remove("ativo");tabelaTubosContainer.style.display="";
+  if(!tubosCarregados){tabelaTubosContainer.style.display="none";mensagemTubos.textContent="Banco de tubulações indisponível.";mensagemTubos.classList.add("ativo");return}
+  const dados=selecionarTubos(bar);
+  if(!dados.length){tabelaTubosContainer.style.display="none";mensagemTubos.textContent="Nenhuma tubulação cadastrada foi localizada para esta pressão.";mensagemTubos.classList.add("ativo");return}
+  let familia="";
+  corpoTabelaTubos.innerHTML=dados.map(x=>{
+    let grupo="";if(x.FAMILIA!==familia){familia=x.FAMILIA;grupo=`<tr class="grupo-tubo"><td colspan="7">${esc(x.MATERIAL)}</td></tr>`}
+    const press=Number.isFinite(x.BAR)?`${fmt2(x.BAR)} bar${Number.isFinite(x.PSI)?` / ${fmt(x.PSI,0)} psi`:""}`:"Referência";
+    const esp=Number.isFinite(x.ESP)?`${fmt2(x.ESP)} mm`:"—";
+    return grupo+`<tr><td>${esc(x.DESCRICAO)}</td><td class="destaque">${esc(x.DN_POL)}</td><td>${esc(x.NORMA)}</td><td>${esc(especificacaoTubo(x))}</td><td>${esp}</td><td>${press}</td><td>${esc(x.OBSERVACAO)}</td></tr>`
+  }).join("")
+}
+
+function esconderTudo(){
+  resultado.classList.remove("ativo");classesCompativeis.classList.remove("ativo");tubulacoesAptas.classList.remove("ativo");
+  listaResultados.innerHTML="";corpoTabelaClasses.innerHTML="";corpoTabelaTubos.innerHTML=""
+}
+function converter(){
+  mensagem.classList.remove("ativa");
+  const chave=campoUnidade.value,valor=numeroEntrada();
+  if(!chave||valor===null){esconderTudo();return}
+  if(Number.isNaN(valor)||valor<0){esconderTudo();mensagem.textContent=Number.isNaN(valor)?"Digite um valor numérico válido.":"A pressão não pode ser negativa.";mensagem.classList.add("ativa");return}
+  const kpa=valor*unidades[chave].fator,bar=kpa/100,pn=pnMin(bar);
+  listaResultados.innerHTML=Object.entries(unidades).map(([k,u])=>`<div class="resultado__linha ${k===chave?"entrada":""} ${k==="psi"?"pn":""}">
+    <span class="resultado__unidade">${u.nome}</span>
+    <span class="resultado__valor">${fmt(kpa/u.fator,k==="pa"?0:6)} ${u.simbolo}${k==="psi"?` <span class="pn-destaque">Mínimo ${pn}</span>`:""}</span>
+  </div>`).join("");
+  resultado.classList.add("ativo");renderClasses(bar);renderTubos(bar)
+}
+function limpar(){campoValor.value="";campoUnidade.value="";mensagem.classList.remove("ativa");esconderTudo();campoValor.focus()}
+campoValor.addEventListener("input",converter);campoUnidade.addEventListener("change",converter);botaoLimpar.addEventListener("click",limpar);
+carregarBancos();
+</script>
 </body>
 </html>
