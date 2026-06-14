@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Conversor de Unidades de Pressão</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #f4f7f5;
+      color: #263536;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .conversor {
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 30px;
+      background: #ffffff;
+      border: 1px solid #d3ded9;
+      border-radius: 12px;
+      box-shadow: 0 3px 14px rgba(35, 65, 59, 0.07);
+    }
+
+    .conversor__titulo {
+      margin: 0 0 30px;
+      color: #315f57;
+      font-size: 27px;
+      line-height: 1.25;
+      text-align: center;
+    }
+
+    .campo {
+      margin-bottom: 20px;
+    }
+
+    .campo label {
+      display: block;
+      margin-bottom: 8px;
+      color: #293d3d;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .campo input,
+    .campo select {
+      width: 100%;
+      min-height: 50px;
+      padding: 11px 14px;
+      background: #ffffff;
+      color: #263536;
+      border: 1px solid #bdcbc5;
+      border-radius: 7px;
+      outline: none;
+      font-size: 16px;
+      transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .campo input::placeholder {
+      color: #8d9a96;
+    }
+
+    .campo input:focus,
+    .campo select:focus {
+      border-color: #4e8f83;
+      box-shadow: 0 0 0 3px rgba(78, 143, 131, 0.13);
+    }
+
+    .acoes {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 4px;
+    }
+
+    .botao-limpar {
+      min-width: 150px;
+      min-height: 46px;
+      padding: 11px 24px;
+      background: #87928e;
+      color: #ffffff;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+      transition:
+        background-color 0.2s ease,
+        transform 0.1s ease;
+    }
+
+    .botao-limpar:hover {
+      background: #737f7b;
+    }
+
+    .botao-limpar:active {
+      transform: translateY(1px);
+    }
+
+    .mensagem {
+      display: none;
+      margin-top: 18px;
+      padding: 13px 15px;
+      color: #8f2525;
+      background: #fff1f1;
+      border: 1px solid #e6bebe;
+      border-radius: 7px;
+      font-size: 15px;
+    }
+
+    .mensagem.ativa {
+      display: block;
+    }
+
+    .resultado {
+      display: none;
+      margin-top: 26px;
+      padding: 20px;
+      background: #f5f9f7;
+      border: 1px solid #d7e3de;
+      border-radius: 9px;
+    }
+
+    .resultado.ativo {
+      display: block;
+    }
+
+    .resultado__titulo {
+      margin: 0 0 17px;
+      color: #315f57;
+      font-size: 18px;
+    }
+
+    .resultado__lista {
+      display: grid;
+      gap: 9px;
+    }
+
+    .resultado__linha {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 48px;
+      padding: 11px 14px;
+      background: #ffffff;
+      border: 1px solid #e1eae6;
+      border-radius: 7px;
+    }
+
+    .resultado__linha.entrada {
+      background: #edf6f2;
+      border-color: #b9d5ca;
+    }
+
+    .resultado__linha.pn {
+      background: #eef7f3;
+      border-color: #b5d5c9;
+    }
+
+    .resultado__unidade {
+      color: #4a5e5d;
+      font-size: 15px;
+    }
+
+    .resultado__valor {
+      color: #243635;
+      font-size: 17px;
+      font-weight: 700;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .resultado__linha.entrada .resultado__unidade,
+    .resultado__linha.entrada .resultado__valor {
+      color: #2d665b;
+    }
+
+    .pn-destaque {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 4px 9px;
+      background: #315f57;
+      color: #ffffff;
+      border-radius: 5px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .nota {
+      margin: 15px 2px 0;
+      color: #647472;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 14px;
+      }
+
+      .conversor {
+        padding: 21px;
+        border-radius: 10px;
+      }
+
+      .conversor__titulo {
+        margin-bottom: 25px;
+        font-size: 23px;
+      }
+
+      .acoes {
+        display: block;
+      }
+
+      .botao-limpar {
+        width: 100%;
+      }
+
+      .resultado {
+        padding: 15px;
+      }
+
+      .resultado__linha {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .resultado__valor {
+        text-align: left;
+        white-space: normal;
+      }
+
+      .pn-destaque {
+        display: block;
+        width: fit-content;
+        margin: 7px 0 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="conversor">
+
+    <h1 class="conversor__titulo">
+      Conversor de Unidades de Pressão
+    </h1>
+
+    <div class="campo">
+      <label for="valorPressao">
+        Valor da pressão
+      </label>
+
+      <input
+        id="valorPressao"
+        type="text"
+        inputmode="decimal"
+        autocomplete="off"
+        placeholder="Digite o valor"
+      >
+    </div>
+
+    <div class="campo">
+      <label for="unidadeEntrada">
+        Unidade de entrada
+      </label>
+
+      <select id="unidadeEntrada">
+        <option value="">
+          — Selecione —
+        </option>
+
+        <option value="mca">
+          Metros de coluna d'água (mca)
+        </option>
+
+        <option value="bar">
+          Bar (bar)
+        </option>
+
+        <option value="kgfcm2">
+          Quilograma-força por centímetro quadrado (kgf/cm²)
+        </option>
+
+        <option value="kpa">
+          Quilopascal (kPa)
+        </option>
+
+        <option value="mpa">
+          Megapascal (MPa)
+        </option>
+
+        <option value="pa">
+          Pascal (Pa)
+        </option>
+
+        <option value="psi">
+          Libra-força por polegada quadrada (psi)
+        </option>
+      </select>
+    </div>
+
+    <div class="acoes">
+      <button
+        id="botaoLimpar"
+        class="botao-limpar"
+        type="button"
+      >
+        Limpar
+      </button>
+    </div>
+
+    <div
+      id="mensagem"
+      class="mensagem"
+      role="alert"
+    ></div>
+
+    <section
+      id="resultado"
+      class="resultado"
+      aria-live="polite"
+    >
+      <h2 class="resultado__titulo">
+        Resultado da conversão
+      </h2>
+
+      <div
+        id="listaResultados"
+        class="resultado__lista"
+      ></div>
+
+      <p class="nota">
+        A classe PN apresentada é a classe nominal imediatamente superior
+        à pressão convertida em bar. A seleção definitiva do componente
+        deve considerar material, temperatura, norma e fabricante.
+      </p>
+    </section>
+
+  </main>
+
+  <script>
+    const campoValor = document.getElementById("valorPressao");
+    const campoUnidade = document.getElementById("unidadeEntrada");
+    const botaoLimpar = document.getElementById("botaoLimpar");
+
+    const resultado = document.getElementById("resultado");
+    const listaResultados = document.getElementById("listaResultados");
+    const mensagem = document.getElementById("mensagem");
+
+    /*
+      Todas as unidades são convertidas inicialmente para kPa.
+
+      1 mca     = 9,80665 kPa
+      1 bar     = 100 kPa
+      1 kgf/cm² = 98,0665 kPa
+      1 kPa     = 1 kPa
+      1 MPa     = 1000 kPa
+      1 Pa      = 0,001 kPa
+      1 psi     = 6,894757293168 kPa
+    */
+
+    const unidades = {
+      mca: {
+        nome: "Metros de coluna d'água",
+        simbolo: "mca",
+        fatorParaKpa: 9.80665
+      },
+
+      bar: {
+        nome: "Bar",
+        simbolo: "bar",
+        fatorParaKpa: 100
+      },
+
+      kgfcm2: {
+        nome: "Quilograma-força por centímetro quadrado",
+        simbolo: "kgf/cm²",
+        fatorParaKpa: 98.0665
+      },
+
+      kpa: {
+        nome: "Quilopascal",
+        simbolo: "kPa",
+        fatorParaKpa: 1
+      },
+
+      mpa: {
+        nome: "Megapascal",
+        simbolo: "MPa",
+        fatorParaKpa: 1000
+      },
+
+      pa: {
+        nome: "Pascal",
+        simbolo: "Pa",
+        fatorParaKpa: 0.001
+      },
+
+      psi: {
+        nome: "Libra-força por polegada quadrada",
+        simbolo: "psi",
+        fatorParaKpa: 6.894757293168
+      }
+    };
+
+    /*
+      Classes nominais utilizadas para indicação da
+      classe PN imediatamente superior.
+    */
+
+    const classesPn = [
+      2.5,
+      4,
+      6,
+      10,
+      16,
+      25,
+      40,
+      63,
+      100,
+      160,
+      250,
+      400
+    ];
+
+    function obterNumeroDigitado() {
+      let texto = campoValor.value
+        .trim()
+        .replace(/\s/g, "");
+
+      if (texto === "") {
+        return null;
+      }
+
+      /*
+        Aceita:
+        125
+        125,5
+        125.5
+        1.250,50
+      */
+
+      if (texto.includes(",") && texto.includes(".")) {
+        texto = texto
+          .replace(/\./g, "")
+          .replace(",", ".");
+      } else if (texto.includes(",")) {
+        texto = texto.replace(",", ".");
+      }
+
+      const valor = Number(texto);
+
+      return Number.isFinite(valor) ? valor : NaN;
+    }
+
+    function definirCasasDecimais(valor) {
+      const valorAbsoluto = Math.abs(valor);
+
+      if (valorAbsoluto === 0) {
+        return 2;
+      }
+
+      if (valorAbsoluto >= 100000) {
+        return 0;
+      }
+
+      if (valorAbsoluto >= 1000) {
+        return 2;
+      }
+
+      if (valorAbsoluto >= 100) {
+        return 2;
+      }
+
+      if (valorAbsoluto >= 10) {
+        return 3;
+      }
+
+      if (valorAbsoluto >= 1) {
+        return 4;
+      }
+
+      if (valorAbsoluto >= 0.1) {
+        return 5;
+      }
+
+      if (valorAbsoluto >= 0.01) {
+        return 6;
+      }
+
+      return 8;
+    }
+
+    function formatarNumero(valor) {
+      const casasDecimais = definirCasasDecimais(valor);
+
+      return valor.toLocaleString("pt-BR", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: casasDecimais
+      });
+    }
+
+    function formatarPn(valor) {
+      return valor
+        .toString()
+        .replace(".", ",");
+    }
+
+    function obterClassePnMinima(pressaoEmBar) {
+      const classeEncontrada = classesPn.find(
+        classe => classe >= pressaoEmBar
+      );
+
+      if (classeEncontrada !== undefined) {
+        return `PN ${formatarPn(classeEncontrada)}`;
+      }
+
+      return "Acima de PN 400";
+    }
+
+    function mostrarMensagem(texto) {
+      mensagem.textContent = texto;
+      mensagem.classList.add("ativa");
+    }
+
+    function esconderMensagem() {
+      mensagem.textContent = "";
+      mensagem.classList.remove("ativa");
+    }
+
+    function esconderResultado() {
+      resultado.classList.remove("ativo");
+      listaResultados.innerHTML = "";
+    }
+
+    function criarLinhaResultado(
+      chave,
+      unidade,
+      valor,
+      chaveEntrada,
+      classePn
+    ) {
+      const classes = ["resultado__linha"];
+
+      if (chave === chaveEntrada) {
+        classes.push("entrada");
+      }
+
+      if (chave === "psi") {
+        classes.push("pn");
+      }
+
+      const indicacaoPn =
+        chave === "psi"
+          ? `<span class="pn-destaque">Mínimo ${classePn}</span>`
+          : "";
+
+      return `
+        <div class="${classes.join(" ")}">
+          <span class="resultado__unidade">
+            ${unidade.nome}
+          </span>
+
+          <span class="resultado__valor">
+            ${formatarNumero(valor)} ${unidade.simbolo}
+            ${indicacaoPn}
+          </span>
+        </div>
+      `;
+    }
+
+    function converterPressao() {
+      esconderMensagem();
+
+      const chaveEntrada = campoUnidade.value;
+      const valorEntrada = obterNumeroDigitado();
+
+      if (!chaveEntrada) {
+        esconderResultado();
+        return;
+      }
+
+      if (valorEntrada === null) {
+        esconderResultado();
+        return;
+      }
+
+      if (Number.isNaN(valorEntrada)) {
+        esconderResultado();
+        mostrarMensagem("Digite um valor numérico válido.");
+        return;
+      }
+
+      if (valorEntrada < 0) {
+        esconderResultado();
+        mostrarMensagem("A pressão não pode possuir valor negativo.");
+        return;
+      }
+
+      const unidadeEntrada = unidades[chaveEntrada];
+
+      const pressaoEmKpa =
+        valorEntrada *
+        unidadeEntrada.fatorParaKpa;
+
+      const pressaoEmBar =
+        pressaoEmKpa /
+        unidades.bar.fatorParaKpa;
+
+      const classePn =
+        obterClassePnMinima(pressaoEmBar);
+
+      const linhas = Object.entries(unidades).map(
+        ([chave, unidade]) => {
+          const valorConvertido =
+            pressaoEmKpa /
+            unidade.fatorParaKpa;
+
+          return criarLinhaResultado(
+            chave,
+            unidade,
+            valorConvertido,
+            chaveEntrada,
+            classePn
+          );
+        }
+      );
+
+      listaResultados.innerHTML = linhas.join("");
+      resultado.classList.add("ativo");
+    }
+
+    function limparCampos() {
+      campoValor.value = "";
+      campoUnidade.value = "";
+
+      esconderMensagem();
+      esconderResultado();
+
+      campoValor.focus();
+    }
+
+    campoValor.addEventListener("input", converterPressao);
+    campoUnidade.addEventListener("change", converterPressao);
+    botaoLimpar.addEventListener("click", limparCampos);
+  </script>
+
+</body>
+</html>
