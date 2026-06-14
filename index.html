@@ -1,3 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SAR Engenharia</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Segoe UI, sans-serif;
+    background:#f5f6f8;
+    overflow:hidden;
+}
+
+/* ==========================
+   TOPO
+========================== */
+
+.topbar{
+    height:60px;
+    background:#fff;
+    border-bottom:1px solid #ddd;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 20px;
+}
+
+.top-left{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.top-right{
+    color:#666;
+}
+
+.toggle-left{
+    cursor:pointer;
+    font-size:22px;
+}
+
+.logo{
+    font-size:22px;
+    font-weight:700;
+    color:#7cb342;
+}
+
+/* ==========================
+   LAYOUT
+========================== */
+
+.container{
+    display:flex;
+    height:calc(100vh - 60px);
+}
+
+/* ==========================
+   MENU ESQUERDO
+========================== */
+
+.sidebar{
+    width:260px;
+    background:#fff;
+    border-right:1px solid #ddd;
+    transition:.3s;
+    overflow:auto;
+}
+
+.sidebar.collapsed{
+    width:65px;
+}
+
+.portal-title{
+    background:#444;
+    color:white;
+    text-align:center;
+    padding:14px;
+    font-weight:600;
+}
+
+.sidebar.collapsed .portal-title{
+    display:none;
+}
+
+.menu-item{
+    padding:14px 18px;
+    cursor:pointer;
+    border-bottom:1px solid #f1f1f1;
+    color:#444;
+}
+
+.menu-item:hover{
+    background:#f7f7f7;
+}
+
+.submenu{
+    display:none;
+    background:#fafafa;
+}
+
+.submenu a{
+    display:block;
+    padding:12px 35px;
+    text-decoration:none;
+    color:#666;
+}
+
+.submenu a:hover{
+    background:#efefef;
+}
+
+.sidebar.collapsed .menu-text{
+    display:none;
+}
+
+.sidebar.collapsed .submenu{
+    display:none !important;
+}
+
+/* ==========================
+   CONTEÚDO
+========================== */
+
+.content{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+/* ==========================
+   ABAS
+========================== */
+
+.tabs{
+    height:55px;
+    background:#fff;
+    border-bottom:1px solid #ddd;
+    display:none;
+    align-items:center;
+    gap:30px;
+    padding-left:25px;
+}
+
+.tab{
+    padding-bottom:10px;
+    cursor:pointer;
+    color:#888;
+}
+
+.tab.active{
+    color:#333;
+    border-bottom:3px solid #7cb342;
+}
+
+/* ==========================
+   ÁREA CENTRAL
+========================== */
+
+.main{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    height:100%;
+}
+
+
+.welcome h1{
+    font-size:40px;
+    color:#444;
+    margin-bottom:15px;
+}
+
+.welcome p{
+    font-size:18px;
+    color:#777;
+    margin-bottom:8px;
+}
+
+/* ==========================
+   PAINEL DIREITO
+========================== */
+
+.right-panel{
+    width:280px;
+    background:#fff;
+    border-left:1px solid #ddd;
+    transition:.3s;
+    position:relative;
+}
+
+.right-panel.collapsed{
+    width:20px;
+}
+
+.right-content{
+    padding:20px;
+}
+
+.right-panel.collapsed .right-content{
+    display:none;
+}
+
+.toggle-right{
+    position:absolute;
+    left:-13px;
+    top:50%;
+    transform:translateY(-50%);
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    border:1px solid #ddd;
+    background:white;
+    cursor:pointer;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.info-card{
+    margin-bottom:25px;
+}
+
+.info-card h3{
+    margin-bottom:8px;
+    color:#555;
+    font-size:15px;
+}
+
+.info-card p{
+    color:#888;
+    font-size:14px;
+    margin-bottom:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- TOPO -->
+
+<div class="topbar">
+
+    <div class="top-left">
+
+        <div class="toggle-left" onclick="toggleSidebar()">
+            ☰
+        </div>
+
+        <div class="logo">
+            SAR Engenharia
+        </div>
+
+    </div>
+
+    <div class="top-right">
+        By Vinicius Saraiva
+    </div>
+
+</div>
+
+<div class="container">
+
+    <!-- MENU ESQUERDO -->
+
+<div class="sidebar" id="sidebar">
+
+    <div class="portal-title">
+        Portal
+    </div>
+
+    <div id="menuDinamico"></div>
+
+</div>
+
+    
+    <!-- CONTEÚDO -->
+
+    <div class="content">
+
+        <div class="tabs" id="tabs">
+
+        </div>
+
+  <div class="main" id="mainContent">
+
+    <div class="welcome">
+
+        <h1>SAR Engenharia</h1>
+
+        <p>Sistema Avançado de Resposta</p>
+
+        <p><b>Versão Alpha</b></p>
+
+        <br>
+
+        <p><b>Módulos Ativos</b></p>
+
+        <p>✓ PPCI</p>
+
+        <p>✓ Impressão 3D</p>
+
+        <br>
+
+        <p><b>Módulos em Desenvolvimento</b></p>
+
+        <p>• Hidráulica</p>
+
+        <p>• Conversões</p>
+
+        <p>• Escadas</p>
+
+    </div>
+
+</div>
+
+
+    </div>
+
+    <!-- PAINEL DIREITO -->
+
+    <div class="right-panel" id="rightPanel">
+
+        <div class="toggle-right" onclick="toggleRightPanel()">
+            ◀
+        </div>
+
+        <div class="right-content">
+
+            <div class="info-card">
+                <h3>Projetos Recentes</h3>
+                <p>Nenhum projeto</p>
+            </div>
+
+            <div class="info-card">
+                <h3>Favoritos</h3>
+                <p>Em desenvolvimento</p>
+            </div>
+
+            <div class="info-card">
+                <h3>Últimas Ferramentas</h3>
+                <p>Em desenvolvimento</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const URL_MODULOS =
+'https://docs.google.com/spreadsheets/d/e/2PACX-1vSUOh5Dd8Gi7pmgkfvto7qOG-_Puoki7wR9yeYf0Jmx8bJMCmkXE3JXHvzepxHBXxTUfOWiRs_oPgK7/pub?output=csv';
+const URL_ABAS =
+'https://docs.google.com/spreadsheets/d/e/2PACX-1vRwpMRjaaBEej8ZIzU2cv4Jl8TU4uJY0yfe51P1laWa7Xh9zhlVpLTi8khkyvBcM1wZ7pDMH9OmPpFf/pub?output=csv';
+
+
+
+function toggleMenu(id){
+
+    const menu = document.getElementById(id);
+
+    if(menu.style.display === "block"){
+        menu.style.display = "none";
+    }else{
+        menu.style.display = "block";
+    }
+
+}
+
+function toggleSidebar(){
+
+    document.getElementById("sidebar")
+        .classList.toggle("collapsed");
+
+}
+
+function toggleRightPanel(){
+
+    document.getElementById("rightPanel")
+        .classList.toggle("collapsed");
+
+}
+
+function abrirCustosSTL(){
+
+
+    document.getElementById("mainContent").innerHTML = `
+
+        <iframe
+            src="impressao3d/custosimpressao.html"
+            style="
+                width:100%;
+                height:100%;
+                border:none;
+                background:white;
+            ">
+        </iframe>
+
+    `;
+
+}
+
+function abrirModuloImpressao3D(){
+
+    // mostra barra de abas
+    document.getElementById("tabs").style.display = "flex";
+
+    // cria a aba clicável
+    document.getElementById("tabs").innerHTML = `
+        <div class="tab active" onclick="abrirCalculadoraImpressao()">
+            Calculadora de Impressão
+        </div>
+    `;
+
+    // deixa área central vazia
+    document.getElementById("mainContent").innerHTML = `
+
+        <div class="welcome">
+
+            <h1>Impressão 3D</h1>
+
+            <p>Selecione uma ferramenta acima.</p>
+
+        </div>
+
+    `;
+
+}
+
+
+function abrirCalculadoraImpressao(){
+
+    document.getElementById("mainContent").innerHTML = `
+
+        <iframe
+            src="impressao3d/custosimpressao.html"
+            style="
+                width:100%;
+                height:100%;
+                border:none;
+                background:white;
+            ">
+        </iframe>
+
+    `;
+
+}
+
+
+function mostrarHome(){
+
+document.getElementById("tabs").style.display = "none";    
+
+document.getElementById("mainContent").innerHTML = `
+
+        <div class="welcome">
+
+            <h1>SAR Engenharia</h1>
+
+            <p>Sistema Avançado de Resposta</p>
+
+            <p><b>Versão Alpha</b></p>
+
+            <br>
+
+            <p><b>Módulos Ativos</b></p>
+
+            <p>✓ PPCI</p>
+
+            <p>✓ Impressão 3D</p>
+
+            <br>
+
+            <p><b>Módulos em Desenvolvimento</b></p>
+
+            <p>• Hidráulica</p>
+
+            <p>• Conversões</p>
+
+            <p>• Escadas</p>
+
+        </div>
+
+    `;
+
+}
+
+
+async function carregarModulos(){
+
+    const resposta = await fetch(URL_MODULOS);
+    const texto = await resposta.text();
+
+    const linhas = texto.trim().split('\n');
+
+    let html = '';
+
+    for(let i = 1; i < linhas.length; i++){
+
+        const colunas = linhas[i].split(',');
+
+        const modulo = colunas[0];
+        const titulo = colunas[1];
+        const icone = colunas[2];
+
+        html += `
+            <div class="menu-item"
+                 onclick="abrirModulo('${modulo}')">
+
+                ${icone}
+                <span class="menu-text">
+                    ${titulo}
+                </span>
+
+            </div>
+        `;
+    }
+
+    document.getElementById("menuDinamico").innerHTML = html;
+
+}
+
 function abrirModulo(modulo){
 
     if(modulo === "INICIO"){
@@ -20,3 +556,70 @@ function abrirModulo(modulo){
     `;
 
 }
+
+
+
+function abrirArquivo(arquivo){
+
+    document.getElementById("mainContent").innerHTML = `
+
+        <iframe
+            src="${arquivo}"
+            style="
+                width:100%;
+                height:100%;
+                border:none;
+                background:white;
+            ">
+        </iframe>
+
+    `;
+
+}
+
+
+async function carregarAbas(modulo){
+
+    const resposta = await fetch(URL_ABAS);
+    const texto = await resposta.text();
+
+    const linhas = texto.trim().split('\n');
+
+    let htmlAbas = '';
+
+    for(let i = 1; i < linhas.length; i++){
+
+        const colunas = linhas[i].split(',');
+
+        const moduloLinha = colunas[0];
+        const nomeAba = colunas[1];
+        const arquivo = colunas[3];
+
+        if(moduloLinha === modulo){
+
+            htmlAbas += `
+                <div class="tab"
+                     onclick="abrirArquivo('${arquivo}')">
+
+                    ${nomeAba}
+
+                </div>
+            `;
+        }
+    }
+
+    document.getElementById("tabs").innerHTML = htmlAbas;
+    document.getElementById("tabs").style.display = "flex";
+
+}
+
+
+
+
+carregarModulos(); 
+
+</script>
+
+</body>
+</html>
+
