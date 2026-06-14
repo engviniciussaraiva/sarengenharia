@@ -292,11 +292,6 @@ body{
 
         <div class="tabs" id="tabs">
 
-            <div class="tab active">Aba 1</div>
-            <div class="tab">Aba 2</div>
-            <div class="tab">Aba 3</div>
-            <div class="tab">Aba 4</div>
-
         </div>
 
   <div class="main" id="mainContent">
@@ -538,9 +533,17 @@ async function carregarModulos(){
 
 function abrirModulo(modulo){
 
-    console.log(modulo);
+
+    if(modulo === "INICIO"){
+        mostrarHome();
+    }
+
+    if(modulo === "IMPRESSAO3D"){
+        abrirModuloImpressao3D();
+    }
 
 }
+
 
 
 
