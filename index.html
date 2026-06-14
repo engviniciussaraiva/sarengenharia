@@ -426,8 +426,12 @@ min-width:20px;
 
 const URL_MODULOS =
 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSUOh5Dd8Gi7pmgkfvto7qOG-_Puoki7wR9yeYf0Jmx8bJMCmkXE3JXHvzepxHBXxTUfOWiRs_oPgK7/pub?output=csv';
+
 const URL_ABAS =
 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRwpMRjaaBEej8ZIzU2cv4Jl8TU4uJY0yfe51P1laWa7Xh9zhlVpLTi8khkyvBcM1wZ7pDMH9OmPpFf/pub?output=csv';
+
+const URL_SUBABAS =
+'https://docs.google.com/spreadsheets/d/e/2PACX-1vSArC3E9K0Tx0JbLN7_cGPo_SeLXnbsbPvz4-MoRqIwM-aXHIJPFRE9n65CcfdkpwPoGYUWuvZWgCW6/pub?output=csv';
 
 
 
@@ -525,7 +529,9 @@ function abrirCalculadoraImpressao(){
 
 function mostrarHome(){
 
-document.getElementById("tabs").style.display = "none";    
+document.getElementById("tabs").style.display = "none";
+
+esconderSubabas();     
 
 document.getElementById("mainContent").innerHTML = `
 
@@ -599,11 +605,13 @@ async function carregarModulos(){
 function abrirModulo(modulo){
 
     if(modulo === "INICIO"){
-        mostrarHome();
-        return;
-    }
+   mostrarHome();
+   return;
+}
 
-    carregarAbas(modulo);
+esconderSubabas();
+carregarAbas(modulo);
+
 
     document.getElementById("mainContent").innerHTML = `
 
@@ -642,12 +650,17 @@ function abrirArquivo(arquivo){
 
 async function carregarAbas(modulo){
 
+
     const resposta = await fetch(URL_ABAS);
     const texto = await resposta.text();
 
     const linhas = texto.trim().split('\n');
 
-    let htmlAbas = '';
+    const moduloSelecionado = String(modulo || "")
+        .trim()
+        .toUpperCase();
+
+    const abasEncontradas = [];
 
     for(let i = 1; i < linhas.length; i++){
 
@@ -672,33 +685,299 @@ async function carregarAbas(modulo){
             .trim()
             .toUpperCase();
 
-        const moduloSelecionado = String(modulo || "")
-            .trim()
-            .toUpperCase();
-
         if(
             moduloLinha === moduloSelecionado &&
             status === "ATIVO"
         ){
-
-            htmlAbas += `
-                <div class="tab"
-                     data-ordem="${ordem}"
-                     onclick="abrirArquivo('${arquivo}')">
-
-                    ${nomeAba}
-
-                </div>
-            `;
+            abasEncontradas.push({
+                modulo: moduloSelecionado,
+                nome: nomeAba,
+                arquivo: arquivo,
+                ordem: ordem
+            });
         }
     }
 
-    document.getElementById("tabs").innerHTML = htmlAbas;
+    abasEncontradas.sort(function(a, b){
+        return a.ordem - b.ordem;
+    });
 
-    document.getElementById("tabs").style.display =
-        htmlAbas.trim() !== ""
+    let htmlAbas = "";
+
+    abasEncontradas.forEach(function(aba){
+
+        htmlAbas += `
+            <div
+                class="tab"
+                onclick='abrirAba(
+                    ${JSON.stringify(aba.modulo)},
+                    ${JSON.stringify(aba.nome)},
+                    ${JSON.stringify(aba.arquivo)},
+                    this
+                )'
+            >
+                ${aba.nome}
+            </div>
+        `;
+    });
+
+    const tabs = document.getElementById("tabs");
+
+    tabs.innerHTML = htmlAbas;
+
+    tabs.style.display =
+        abasEncontradas.length > 0
             ? "flex"
             : "none";
+
+    esconderSubabas();
+}
+
+
+/* =========================================
+   ABRIR ABA PRINCIPAL
+========================================= */
+
+async function abrirAba(
+    modulo,
+    nomeAba,
+    arquivo,
+    elementoClicado
+){
+
+    marcarAbaAtiva(elementoClicado);
+
+    const possuiSubabas =
+        await carregarSubabas(modulo, nomeAba);
+
+    /*
+      Quando existem subabas:
+      a própria função carregarSubabas abre
+      automaticamente a primeira subaba ativa.
+    */
+
+    if(possuiSubabas){
+        return;
+    }
+
+    /*
+      Quando não existem subabas:
+      esconde a segunda faixa e abre diretamente
+      o arquivo cadastrado em SAR_MENU_ABAS.
+    */
+
+    esconderSubabas();
+
+    if(arquivo && arquivo.trim() !== ""){
+        abrirArquivo(arquivo);
+        return;
+    }
+
+    document.getElementById("mainContent").innerHTML = `
+        <div class="welcome">
+            <h1>${nomeAba}</h1>
+            <p>Nenhuma ferramenta ativa cadastrada.</p>
+        </div>
+    `;
+}
+
+
+/* =========================================
+   CARREGAR SUBABAS
+========================================= */
+
+async function carregarSubabas(modulo, abaPai){
+
+    try{
+
+        const resposta = await fetch(URL_SUBABAS);
+        const texto = await resposta.text();
+
+        const linhas = texto.trim().split('\n');
+
+        const moduloSelecionado = String(modulo || "")
+            .trim()
+            .toUpperCase();
+
+        const abaSelecionada = String(abaPai || "")
+            .trim()
+            .toUpperCase();
+
+        const subabasEncontradas = [];
+
+        for(let i = 1; i < linhas.length; i++){
+
+            const colunas = linhas[i].split(',');
+
+            const moduloLinha = String(colunas[0] || "")
+                .trim()
+                .toUpperCase();
+
+            const abaPaiLinha = String(colunas[1] || "")
+                .trim()
+                .toUpperCase();
+
+            const nomeSubaba = String(colunas[2] || "")
+                .trim();
+
+            const arquivo = String(colunas[3] || "")
+                .trim();
+
+            const ordem = Number(
+                String(colunas[4] || "")
+                    .trim()
+            );
+
+            const status = String(colunas[5] || "")
+                .trim()
+                .toUpperCase();
+
+            if(
+                moduloLinha === moduloSelecionado &&
+                abaPaiLinha === abaSelecionada &&
+                status === "ATIVO"
+            ){
+                subabasEncontradas.push({
+                    nome: nomeSubaba,
+                    arquivo: arquivo,
+                    ordem: ordem
+                });
+            }
+        }
+
+        subabasEncontradas.sort(function(a, b){
+            return a.ordem - b.ordem;
+        });
+
+        if(subabasEncontradas.length === 0){
+            esconderSubabas();
+            return false;
+        }
+
+        const subtabs =
+            document.getElementById("subtabs");
+
+        let htmlSubabas = "";
+
+        subabasEncontradas.forEach(function(subaba){
+
+            htmlSubabas += `
+                <div
+                    class="subtab"
+                    onclick='abrirSubaba(
+                        ${JSON.stringify(subaba.arquivo)},
+                        this
+                    )'
+                >
+                    ${subaba.nome}
+                </div>
+            `;
+        });
+
+        subtabs.innerHTML = htmlSubabas;
+        subtabs.style.display = "flex";
+
+        /*
+          Abre automaticamente a primeira
+          subaba ativa.
+        */
+
+        const primeiraSubaba =
+            subtabs.querySelector(".subtab");
+
+        if(primeiraSubaba){
+            primeiraSubaba.click();
+        }
+
+        return true;
+
+    }catch(erro){
+
+        console.error(
+            "Erro ao carregar subabas:",
+            erro
+        );
+
+        esconderSubabas();
+
+        return false;
+    }
+}
+
+
+/* =========================================
+   ABRIR SUBABA
+========================================= */
+
+function abrirSubaba(arquivo, elementoClicado){
+
+    marcarSubabaAtiva(elementoClicado);
+
+    if(!arquivo || arquivo.trim() === ""){
+
+        document.getElementById("mainContent").innerHTML = `
+            <div class="welcome">
+                <h1>Ferramenta não cadastrada</h1>
+                <p>Verifique o endereço do arquivo no banco de subabas.</p>
+            </div>
+        `;
+
+        return;
+    }
+
+    abrirArquivo(arquivo);
+}
+
+
+/* =========================================
+   MARCAR ABA PRINCIPAL ATIVA
+========================================= */
+
+function marcarAbaAtiva(elementoAtivo){
+
+    const abas =
+        document.querySelectorAll("#tabs .tab");
+
+    abas.forEach(function(aba){
+        aba.classList.remove("active");
+    });
+
+    if(elementoAtivo){
+        elementoAtivo.classList.add("active");
+    }
+}
+
+
+/* =========================================
+   MARCAR SUBABA ATIVA
+========================================= */
+
+function marcarSubabaAtiva(elementoAtivo){
+
+    const subabas =
+        document.querySelectorAll("#subtabs .subtab");
+
+    subabas.forEach(function(subaba){
+        subaba.classList.remove("active");
+    });
+
+    if(elementoAtivo){
+        elementoAtivo.classList.add("active");
+    }
+}
+
+
+/* =========================================
+   ESCONDER SUBABAS
+========================================= */
+
+function esconderSubabas(){
+
+    const subtabs =
+        document.getElementById("subtabs");
+
+    subtabs.innerHTML = "";
+    subtabs.style.display = "none";
 }
 
 
