@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Conversor de Unidades de Potência</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #f4f7f5;
+      color: #263536;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .conversor {
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 30px;
+      background: #ffffff;
+      border: 1px solid #d3ded9;
+      border-radius: 12px;
+      box-shadow: 0 3px 14px rgba(35, 65, 59, 0.07);
+    }
+
+    .conversor__titulo {
+      margin: 0 0 30px;
+      color: #315f57;
+      font-size: 27px;
+      line-height: 1.25;
+      text-align: center;
+    }
+
+    .campo {
+      margin-bottom: 20px;
+    }
+
+    .campo label {
+      display: block;
+      margin-bottom: 8px;
+      color: #293d3d;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .campo input,
+    .campo select {
+      width: 100%;
+      min-height: 50px;
+      padding: 11px 14px;
+      background: #ffffff;
+      color: #263536;
+      border: 1px solid #bdcbc5;
+      border-radius: 7px;
+      outline: none;
+      font-size: 16px;
+      transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .campo input::placeholder {
+      color: #8d9a96;
+    }
+
+    .campo input:focus,
+    .campo select:focus {
+      border-color: #4e8f83;
+      box-shadow: 0 0 0 3px rgba(78, 143, 131, 0.13);
+    }
+
+    .acoes {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 4px;
+    }
+
+    .botao-limpar {
+      min-width: 150px;
+      min-height: 46px;
+      padding: 11px 24px;
+      background: #87928e;
+      color: #ffffff;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+      transition:
+        background-color 0.2s ease,
+        transform 0.1s ease;
+    }
+
+    .botao-limpar:hover {
+      background: #737f7b;
+    }
+
+    .botao-limpar:active {
+      transform: translateY(1px);
+    }
+
+    .mensagem {
+      display: none;
+      margin-top: 18px;
+      padding: 13px 15px;
+      color: #8f2525;
+      background: #fff1f1;
+      border: 1px solid #e6bebe;
+      border-radius: 7px;
+      font-size: 15px;
+    }
+
+    .mensagem.ativa {
+      display: block;
+    }
+
+    .resultado {
+      display: none;
+      margin-top: 26px;
+      padding: 20px;
+      background: #f5f9f7;
+      border: 1px solid #d7e3de;
+      border-radius: 9px;
+    }
+
+    .resultado.ativo {
+      display: block;
+    }
+
+    .resultado__titulo {
+      margin: 0 0 17px;
+      color: #315f57;
+      font-size: 18px;
+    }
+
+    .resultado__lista {
+      display: grid;
+      gap: 9px;
+    }
+
+    .resultado__linha {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 48px;
+      padding: 11px 14px;
+      background: #ffffff;
+      border: 1px solid #e1eae6;
+      border-radius: 7px;
+    }
+
+    .resultado__linha.entrada {
+      background: #edf6f2;
+      border-color: #b9d5ca;
+    }
+
+    .resultado__unidade {
+      color: #4a5e5d;
+      font-size: 15px;
+    }
+
+    .resultado__valor {
+      color: #243635;
+      font-size: 17px;
+      font-weight: 700;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .resultado__linha.entrada .resultado__unidade,
+    .resultado__linha.entrada .resultado__valor {
+      color: #2d665b;
+    }
+
+    .nota {
+      margin: 15px 2px 0;
+      color: #647472;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 14px;
+      }
+
+      .conversor {
+        padding: 21px;
+        border-radius: 10px;
+      }
+
+      .conversor__titulo {
+        margin-bottom: 25px;
+        font-size: 23px;
+      }
+
+      .acoes {
+        display: block;
+      }
+
+      .botao-limpar {
+        width: 100%;
+      }
+
+      .resultado {
+        padding: 15px;
+      }
+
+      .resultado__linha {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .resultado__valor {
+        text-align: left;
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="conversor">
+
+    <h1 class="conversor__titulo">
+      Conversor de Unidades de Potência
+    </h1>
+
+    <div class="campo">
+      <label for="valorPotencia">
+        Valor da potência
+      </label>
+
+      <input
+        id="valorPotencia"
+        type="text"
+        inputmode="decimal"
+        autocomplete="off"
+        placeholder="Digite o valor"
+      >
+    </div>
+
+    <div class="campo">
+      <label for="unidadeEntrada">
+        Unidade de entrada
+      </label>
+
+      <select id="unidadeEntrada">
+        <option value="">
+          — Selecione —
+        </option>
+
+        <option value="cv">
+          Cavalo-vapor (cv)
+        </option>
+
+        <option value="hp">
+          Horsepower mecânico (hp)
+        </option>
+
+        <option value="kw">
+          Quilowatt (kW)
+        </option>
+
+        <option value="w">
+          Watt (W)
+        </option>
+
+        <option value="mw">
+          Megawatt (MW)
+        </option>
+
+        <option value="btuh">
+          BTU por hora (BTU/h)
+        </option>
+
+        <option value="kcalh">
+          Quilocaloria por hora (kcal/h)
+        </option>
+      </select>
+    </div>
+
+    <div class="acoes">
+      <button
+        id="botaoLimpar"
+        class="botao-limpar"
+        type="button"
+      >
+        Limpar
+      </button>
+    </div>
+
+    <div
+      id="mensagem"
+      class="mensagem"
+      role="alert"
+    ></div>
+
+    <section
+      id="resultado"
+      class="resultado"
+      aria-live="polite"
+    >
+      <h2 class="resultado__titulo">
+        Resultado da conversão
+      </h2>
+
+      <div
+        id="listaResultados"
+        class="resultado__lista"
+      ></div>
+
+      <p class="nota">
+        O horsepower utilizado é o horsepower mecânico.
+        Cavalo-vapor (cv) e horsepower (hp) são unidades diferentes.
+      </p>
+    </section>
+
+  </main>
+
+  <script>
+    const campoValor =
+      document.getElementById("valorPotencia");
+
+    const campoUnidade =
+      document.getElementById("unidadeEntrada");
+
+    const botaoLimpar =
+      document.getElementById("botaoLimpar");
+
+    const resultado =
+      document.getElementById("resultado");
+
+    const listaResultados =
+      document.getElementById("listaResultados");
+
+    const mensagem =
+      document.getElementById("mensagem");
+
+    /*
+      Todas as unidades são convertidas inicialmente para watts.
+
+      1 cv     = 735,49875 W
+      1 hp     = 745,699871582 W
+      1 kW     = 1.000 W
+      1 MW     = 1.000.000 W
+      1 BTU/h  = 0,293071070172 W
+      1 kcal/h = 1,163 W
+    */
+
+    const unidades = {
+      cv: {
+        nome: "Cavalo-vapor",
+        simbolo: "cv",
+        fatorParaWatt: 735.49875
+      },
+
+      hp: {
+        nome: "Horsepower mecânico",
+        simbolo: "hp",
+        fatorParaWatt: 745.699871582
+      },
+
+      kw: {
+        nome: "Quilowatt",
+        simbolo: "kW",
+        fatorParaWatt: 1000
+      },
+
+      w: {
+        nome: "Watt",
+        simbolo: "W",
+        fatorParaWatt: 1
+      },
+
+      mw: {
+        nome: "Megawatt",
+        simbolo: "MW",
+        fatorParaWatt: 1000000
+      },
+
+      btuh: {
+        nome: "BTU por hora",
+        simbolo: "BTU/h",
+        fatorParaWatt: 0.293071070172
+      },
+
+      kcalh: {
+        nome: "Quilocaloria por hora",
+        simbolo: "kcal/h",
+        fatorParaWatt: 1.163
+      }
+    };
+
+    function obterNumeroDigitado() {
+      let texto = campoValor.value
+        .trim()
+        .replace(/\s/g, "");
+
+      if (texto === "") {
+        return null;
+      }
+
+      /*
+        Aceita:
+        10
+        10,5
+        10.5
+        1.250,50
+      */
+
+      if (
+        texto.includes(",") &&
+        texto.includes(".")
+      ) {
+        texto = texto
+          .replace(/\./g, "")
+          .replace(",", ".");
+      } else if (texto.includes(",")) {
+        texto = texto.replace(",", ".");
+      }
+
+      const valor = Number(texto);
+
+      return Number.isFinite(valor)
+        ? valor
+        : NaN;
+    }
+
+    function definirCasasDecimais(valor) {
+      const valorAbsoluto = Math.abs(valor);
+
+      if (valorAbsoluto === 0) {
+        return 2;
+      }
+
+      if (valorAbsoluto >= 1000000) {
+        return 0;
+      }
+
+      if (valorAbsoluto >= 100000) {
+        return 1;
+      }
+
+      if (valorAbsoluto >= 1000) {
+        return 2;
+      }
+
+      if (valorAbsoluto >= 100) {
+        return 2;
+      }
+
+      if (valorAbsoluto >= 10) {
+        return 3;
+      }
+
+      if (valorAbsoluto >= 1) {
+        return 4;
+      }
+
+      if (valorAbsoluto >= 0.1) {
+        return 5;
+      }
+
+      if (valorAbsoluto >= 0.01) {
+        return 6;
+      }
+
+      return 8;
+    }
+
+    function formatarNumero(valor) {
+      return valor.toLocaleString("pt-BR", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits:
+          definirCasasDecimais(valor)
+      });
+    }
+
+    function mostrarMensagem(texto) {
+      mensagem.textContent = texto;
+      mensagem.classList.add("ativa");
+    }
+
+    function esconderMensagem() {
+      mensagem.textContent = "";
+      mensagem.classList.remove("ativa");
+    }
+
+    function esconderResultado() {
+      resultado.classList.remove("ativo");
+      listaResultados.innerHTML = "";
+    }
+
+    function criarLinhaResultado(
+      chave,
+      unidade,
+      valor,
+      chaveEntrada
+    ) {
+      const classe =
+        chave === chaveEntrada
+          ? "resultado__linha entrada"
+          : "resultado__linha";
+
+      return `
+        <div class="${classe}">
+          <span class="resultado__unidade">
+            ${unidade.nome}
+          </span>
+
+          <span class="resultado__valor">
+            ${formatarNumero(valor)}
+            ${unidade.simbolo}
+          </span>
+        </div>
+      `;
+    }
+
+    function converterPotencia() {
+      esconderMensagem();
+
+      const chaveEntrada =
+        campoUnidade.value;
+
+      const valorEntrada =
+        obterNumeroDigitado();
+
+      if (!chaveEntrada) {
+        esconderResultado();
+        return;
+      }
+
+      if (valorEntrada === null) {
+        esconderResultado();
+        return;
+      }
+
+      if (Number.isNaN(valorEntrada)) {
+        esconderResultado();
+
+        mostrarMensagem(
+          "Digite um valor numérico válido."
+        );
+
+        return;
+      }
+
+      if (valorEntrada < 0) {
+        esconderResultado();
+
+        mostrarMensagem(
+          "A potência não pode possuir valor negativo."
+        );
+
+        return;
+      }
+
+      const unidadeEntrada =
+        unidades[chaveEntrada];
+
+      const potenciaEmWatt =
+        valorEntrada *
+        unidadeEntrada.fatorParaWatt;
+
+      const linhas =
+        Object.entries(unidades).map(
+          ([chave, unidade]) => {
+            const valorConvertido =
+              potenciaEmWatt /
+              unidade.fatorParaWatt;
+
+            return criarLinhaResultado(
+              chave,
+              unidade,
+              valorConvertido,
+              chaveEntrada
+            );
+          }
+        );
+
+      listaResultados.innerHTML =
+        linhas.join("");
+
+      resultado.classList.add("ativo");
+    }
+
+    function limparCampos() {
+      campoValor.value = "";
+      campoUnidade.value = "";
+
+      esconderMensagem();
+      esconderResultado();
+
+      campoValor.focus();
+    }
+
+    campoValor.addEventListener(
+      "input",
+      converterPotencia
+    );
+
+    campoUnidade.addEventListener(
+      "change",
+      converterPotencia
+    );
+
+    botaoLimpar.addEventListener(
+      "click",
+      limparCampos
+    );
+  </script>
+
+</body>
+</html>
