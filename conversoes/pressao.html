@@ -29,6 +29,12 @@
       font-family: Arial, Helvetica, sans-serif;
     }
 
+    .pagina {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
     .conversor {
       width: 100%;
       max-width: 720px;
@@ -213,6 +219,127 @@
       line-height: 1.5;
     }
 
+    .classes {
+      display: none;
+      width: 100%;
+      margin-top: 28px;
+      padding: 24px;
+      background: #ffffff;
+      border: 1px solid #d3ded9;
+      border-radius: 12px;
+      box-shadow: 0 3px 14px rgba(35, 65, 59, 0.06);
+    }
+
+    .classes.ativa {
+      display: block;
+    }
+
+    .classes__cabecalho {
+      margin-bottom: 18px;
+    }
+
+    .classes__titulo {
+      margin: 0 0 7px;
+      color: #315f57;
+      font-size: 21px;
+    }
+
+    .classes__subtitulo {
+      margin: 0;
+      color: #647472;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .tabela-responsiva {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .tabela-classes {
+      width: 100%;
+      min-width: 850px;
+      border-collapse: collapse;
+    }
+
+    .tabela-classes th {
+      padding: 13px 14px;
+      background: #315f57;
+      color: #ffffff;
+      border: 1px solid #315f57;
+      font-size: 14px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .tabela-classes td {
+      padding: 13px 14px;
+      color: #334746;
+      background: #ffffff;
+      border: 1px solid #dce6e2;
+      font-size: 14px;
+      line-height: 1.4;
+      vertical-align: top;
+    }
+
+    .tabela-classes tbody tr:nth-child(even) td {
+      background: #f7faf8;
+    }
+
+    .classe-destaque {
+      color: #2d665b;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .pressao-admissivel {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .selo-apto {
+      display: inline-block;
+      padding: 5px 10px;
+      color: #24594f;
+      background: #e3f2ec;
+      border: 1px solid #afd2c5;
+      border-radius: 5px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .classes__mensagem {
+      display: none;
+      padding: 16px;
+      color: #5b6d6a;
+      background: #f5f8f7;
+      border: 1px solid #d7e2de;
+      border-radius: 7px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .classes__mensagem.ativa {
+      display: block;
+    }
+
+    .status-banco {
+      display: none;
+      margin-top: 15px;
+      padding: 12px 14px;
+      color: #795b18;
+      background: #fff8e6;
+      border: 1px solid #ead79d;
+      border-radius: 7px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .status-banco.ativo {
+      display: block;
+    }
+
     @media (max-width: 600px) {
       body {
         padding: 14px;
@@ -256,131 +383,218 @@
         width: fit-content;
         margin: 7px 0 0;
       }
+
+      .classes {
+        padding: 17px;
+      }
+
+      .classes__titulo {
+        font-size: 19px;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <main class="conversor">
+  <main class="pagina">
 
-    <h1 class="conversor__titulo">
-      Conversor de Unidades de Pressão
-    </h1>
+    <section class="conversor">
 
-    <div class="campo">
-      <label for="valorPressao">
-        Valor da pressão
-      </label>
+      <h1 class="conversor__titulo">
+        Conversor de Unidades de Pressão
+      </h1>
 
-      <input
-        id="valorPressao"
-        type="text"
-        inputmode="decimal"
-        autocomplete="off"
-        placeholder="Digite o valor"
-      >
-    </div>
+      <div class="campo">
+        <label for="valorPressao">
+          Valor da pressão
+        </label>
 
-    <div class="campo">
-      <label for="unidadeEntrada">
-        Unidade de entrada
-      </label>
+        <input
+          id="valorPressao"
+          type="text"
+          inputmode="decimal"
+          autocomplete="off"
+          placeholder="Digite o valor"
+        >
+      </div>
 
-      <select id="unidadeEntrada">
-        <option value="">
-          — Selecione —
-        </option>
+      <div class="campo">
+        <label for="unidadeEntrada">
+          Unidade de entrada
+        </label>
 
-        <option value="mca">
-          Metros de coluna d'água (mca)
-        </option>
+        <select id="unidadeEntrada">
+          <option value="">
+            — Selecione —
+          </option>
 
-        <option value="bar">
-          Bar (bar)
-        </option>
+          <option value="mca">
+            Metros de coluna d'água (mca)
+          </option>
 
-        <option value="kgfcm2">
-          Quilograma-força por centímetro quadrado (kgf/cm²)
-        </option>
+          <option value="bar">
+            Bar (bar)
+          </option>
 
-        <option value="kpa">
-          Quilopascal (kPa)
-        </option>
+          <option value="kgfcm2">
+            Quilograma-força por centímetro quadrado (kgf/cm²)
+          </option>
 
-        <option value="mpa">
-          Megapascal (MPa)
-        </option>
+          <option value="kpa">
+            Quilopascal (kPa)
+          </option>
 
-        <option value="pa">
-          Pascal (Pa)
-        </option>
+          <option value="mpa">
+            Megapascal (MPa)
+          </option>
 
-        <option value="psi">
-          Libra-força por polegada quadrada (psi)
-        </option>
-      </select>
-    </div>
+          <option value="pa">
+            Pascal (Pa)
+          </option>
 
-    <div class="acoes">
-      <button
-        id="botaoLimpar"
-        class="botao-limpar"
-        type="button"
-      >
-        Limpar
-      </button>
-    </div>
+          <option value="psi">
+            Libra-força por polegada quadrada (psi)
+          </option>
+        </select>
+      </div>
 
-    <div
-      id="mensagem"
-      class="mensagem"
-      role="alert"
-    ></div>
-
-    <section
-      id="resultado"
-      class="resultado"
-      aria-live="polite"
-    >
-      <h2 class="resultado__titulo">
-        Resultado da conversão
-      </h2>
+      <div class="acoes">
+        <button
+          id="botaoLimpar"
+          class="botao-limpar"
+          type="button"
+        >
+          Limpar
+        </button>
+      </div>
 
       <div
-        id="listaResultados"
-        class="resultado__lista"
+        id="mensagem"
+        class="mensagem"
+        role="alert"
       ></div>
 
+      <section
+        id="resultado"
+        class="resultado"
+        aria-live="polite"
+      >
+        <h2 class="resultado__titulo">
+          Resultado da conversão
+        </h2>
+
+        <div
+          id="listaResultados"
+          class="resultado__lista"
+        ></div>
+
+        <p class="nota">
+          A classe PN apresentada corresponde à classe nominal
+          imediatamente superior à pressão convertida em bar.
+        </p>
+      </section>
+
+    </section>
+
+    <section
+      id="classesCompativeis"
+      class="classes"
+      aria-live="polite"
+    >
+      <div class="classes__cabecalho">
+        <h2 class="classes__titulo">
+          Classes compatíveis com a pressão informada
+        </h2>
+
+        <p class="classes__subtitulo">
+          O sistema apresenta somente a menor classe apta cadastrada
+          para cada família de material.
+        </p>
+      </div>
+
+      <div
+        id="tabelaClassesContainer"
+        class="tabela-responsiva"
+      >
+        <table class="tabela-classes">
+          <thead>
+            <tr>
+              <th>Material</th>
+              <th>Classe mínima apta</th>
+              <th>Norma</th>
+              <th>Pressão admissível</th>
+              <th>Condição</th>
+              <th>Situação</th>
+              <th>Observação</th>
+            </tr>
+          </thead>
+
+          <tbody id="corpoTabelaClasses"></tbody>
+        </table>
+      </div>
+
+      <div
+        id="mensagemClasses"
+        class="classes__mensagem"
+      ></div>
+
+      <div
+        id="statusBanco"
+        class="status-banco"
+      >
+        O banco técnico não pôde ser carregado. As conversões continuam
+        funcionando normalmente, mas a consulta de classes está indisponível.
+      </div>
+
       <p class="nota">
-        A classe PN apresentada é a classe nominal imediatamente superior
-        à pressão convertida em bar. A seleção definitiva do componente
-        deve considerar material, temperatura, norma e fabricante.
+        Critério de consulta: água para proteção contra incêndio,
+        temperatura de referência cadastrada e serviço sem choque.
+        Confirmar sempre a pressão de trabalho declarada pelo fabricante.
       </p>
     </section>
 
   </main>
 
   <script>
-    const campoValor = document.getElementById("valorPressao");
-    const campoUnidade = document.getElementById("unidadeEntrada");
-    const botaoLimpar = document.getElementById("botaoLimpar");
+    const URL_CLASSES_PRESSAO =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vS32m1CnN7Q1lXjPM05DAybM2vu2NPDAeIibFKGRt3BJ5g2abH376wWsRnY_H45hkcQEClIOlV9RjTn/pub?output=csv";
 
-    const resultado = document.getElementById("resultado");
-    const listaResultados = document.getElementById("listaResultados");
-    const mensagem = document.getElementById("mensagem");
+    const campoValor =
+      document.getElementById("valorPressao");
 
-    /*
-      Todas as unidades são convertidas inicialmente para kPa.
+    const campoUnidade =
+      document.getElementById("unidadeEntrada");
 
-      1 mca     = 9,80665 kPa
-      1 bar     = 100 kPa
-      1 kgf/cm² = 98,0665 kPa
-      1 kPa     = 1 kPa
-      1 MPa     = 1000 kPa
-      1 Pa      = 0,001 kPa
-      1 psi     = 6,894757293168 kPa
-    */
+    const botaoLimpar =
+      document.getElementById("botaoLimpar");
+
+    const resultado =
+      document.getElementById("resultado");
+
+    const listaResultados =
+      document.getElementById("listaResultados");
+
+    const mensagem =
+      document.getElementById("mensagem");
+
+    const classesCompativeis =
+      document.getElementById("classesCompativeis");
+
+    const corpoTabelaClasses =
+      document.getElementById("corpoTabelaClasses");
+
+    const tabelaClassesContainer =
+      document.getElementById("tabelaClassesContainer");
+
+    const mensagemClasses =
+      document.getElementById("mensagemClasses");
+
+    const statusBanco =
+      document.getElementById("statusBanco");
+
+    let bancoClassesPressao = [];
+    let bancoCarregado = false;
 
     const unidades = {
       mca: {
@@ -426,11 +640,6 @@
       }
     };
 
-    /*
-      Classes nominais utilizadas para indicação da
-      classe PN imediatamente superior.
-    */
-
     const classesPn = [
       2.5,
       4,
@@ -455,14 +664,6 @@
         return null;
       }
 
-      /*
-        Aceita:
-        125
-        125,5
-        125.5
-        1.250,50
-      */
-
       if (texto.includes(",") && texto.includes(".")) {
         texto = texto
           .replace(/\./g, "")
@@ -473,7 +674,44 @@
 
       const valor = Number(texto);
 
-      return Number.isFinite(valor) ? valor : NaN;
+      return Number.isFinite(valor)
+        ? valor
+        : NaN;
+    }
+
+    function converterNumeroBanco(valor) {
+      if (valor === null || valor === undefined) {
+        return NaN;
+      }
+
+      let texto = String(valor)
+        .trim()
+        .replace(/\s/g, "");
+
+      if (texto === "") {
+        return NaN;
+      }
+
+      if (texto.includes(",") && texto.includes(".")) {
+        const ultimaVirgula = texto.lastIndexOf(",");
+        const ultimoPonto = texto.lastIndexOf(".");
+
+        if (ultimaVirgula > ultimoPonto) {
+          texto = texto
+            .replace(/\./g, "")
+            .replace(",", ".");
+        } else {
+          texto = texto.replace(/,/g, "");
+        }
+      } else if (texto.includes(",")) {
+        texto = texto.replace(",", ".");
+      }
+
+      const numero = Number(texto);
+
+      return Number.isFinite(numero)
+        ? numero
+        : NaN;
     }
 
     function definirCasasDecimais(valor) {
@@ -515,7 +753,8 @@
     }
 
     function formatarNumero(valor) {
-      const casasDecimais = definirCasasDecimais(valor);
+      const casasDecimais =
+        definirCasasDecimais(valor);
 
       return valor.toLocaleString("pt-BR", {
         minimumFractionDigits: 0,
@@ -523,16 +762,31 @@
       });
     }
 
+    function formatarNumeroFixo(valor, casas = 2) {
+      return valor.toLocaleString("pt-BR", {
+        minimumFractionDigits: casas,
+        maximumFractionDigits: casas
+      });
+    }
+
     function formatarPn(valor) {
-      return valor
-        .toString()
-        .replace(".", ",");
+      return String(valor).replace(".", ",");
+    }
+
+    function escaparHtml(valor) {
+      return String(valor ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
     function obterClassePnMinima(pressaoEmBar) {
-      const classeEncontrada = classesPn.find(
-        classe => classe >= pressaoEmBar
-      );
+      const classeEncontrada =
+        classesPn.find(
+          classe => classe >= pressaoEmBar
+        );
 
       if (classeEncontrada !== undefined) {
         return `PN ${formatarPn(classeEncontrada)}`;
@@ -556,6 +810,14 @@
       listaResultados.innerHTML = "";
     }
 
+    function esconderClasses() {
+      classesCompativeis.classList.remove("ativa");
+      corpoTabelaClasses.innerHTML = "";
+      mensagemClasses.textContent = "";
+      mensagemClasses.classList.remove("ativa");
+      tabelaClassesContainer.style.display = "";
+    }
+
     function criarLinhaResultado(
       chave,
       unidade,
@@ -575,7 +837,11 @@
 
       const indicacaoPn =
         chave === "psi"
-          ? `<span class="pn-destaque">Mínimo ${classePn}</span>`
+          ? `
+            <span class="pn-destaque">
+              Mínimo ${classePn}
+            </span>
+          `
           : "";
 
       return `
@@ -592,35 +858,361 @@
       `;
     }
 
+    function detectarSeparadorCsv(primeiraLinha) {
+      const quantidadePontoVirgula =
+        (primeiraLinha.match(/;/g) || []).length;
+
+      const quantidadeVirgula =
+        (primeiraLinha.match(/,/g) || []).length;
+
+      return quantidadePontoVirgula > quantidadeVirgula
+        ? ";"
+        : ",";
+    }
+
+    function dividirLinhaCsv(linha, separador) {
+      const campos = [];
+      let campoAtual = "";
+      let dentroDeAspas = false;
+
+      for (let i = 0; i < linha.length; i++) {
+        const caractere = linha[i];
+        const proximo = linha[i + 1];
+
+        if (caractere === "\"") {
+          if (dentroDeAspas && proximo === "\"") {
+            campoAtual += "\"";
+            i++;
+          } else {
+            dentroDeAspas = !dentroDeAspas;
+          }
+        } else if (
+          caractere === separador &&
+          !dentroDeAspas
+        ) {
+          campos.push(campoAtual.trim());
+          campoAtual = "";
+        } else {
+          campoAtual += caractere;
+        }
+      }
+
+      campos.push(campoAtual.trim());
+
+      return campos;
+    }
+
+    function converterCsvParaObjetos(csv) {
+      const linhas = csv
+        .replace(/^\uFEFF/, "")
+        .split(/\r?\n/)
+        .filter(linha => linha.trim() !== "");
+
+      if (linhas.length < 2) {
+        return [];
+      }
+
+      const separador =
+        detectarSeparadorCsv(linhas[0]);
+
+      const cabecalhos =
+        dividirLinhaCsv(linhas[0], separador)
+          .map(item =>
+            item
+              .trim()
+              .toUpperCase()
+          );
+
+      return linhas
+        .slice(1)
+        .map(linha => {
+          const valores =
+            dividirLinhaCsv(linha, separador);
+
+          const objeto = {};
+
+          cabecalhos.forEach((cabecalho, indice) => {
+            objeto[cabecalho] =
+              valores[indice] !== undefined
+                ? valores[indice].trim()
+                : "";
+          });
+
+          return objeto;
+        });
+    }
+
+    async function carregarClassesPressao() {
+      try {
+        const resposta = await fetch(
+          `${URL_CLASSES_PRESSAO}&t=${Date.now()}`,
+          {
+            cache: "no-store"
+          }
+        );
+
+        if (!resposta.ok) {
+          throw new Error(
+            `Erro HTTP ${resposta.status}`
+          );
+        }
+
+        const csv = await resposta.text();
+
+        const registros =
+          converterCsvParaObjetos(csv);
+
+        bancoClassesPressao = registros
+          .filter(item => {
+            return (
+              String(item.STATUS)
+                .trim()
+                .toUpperCase() === "ATIVO"
+            );
+          })
+          .map(item => ({
+            ...item,
+
+            PRESSAO_MAX_PSI_NUM:
+              converterNumeroBanco(
+                item.PRESSAO_MAX_PSI
+              ),
+
+            PRESSAO_MAX_BAR_NUM:
+              converterNumeroBanco(
+                item.PRESSAO_MAX_BAR
+              ),
+
+            ORDEM_NUM:
+              converterNumeroBanco(
+                item.ORDEM
+              )
+          }))
+          .filter(item => {
+            return (
+              item.FAMILIA &&
+              item.MATERIAL &&
+              item.CLASSE &&
+              Number.isFinite(
+                item.PRESSAO_MAX_BAR_NUM
+              )
+            );
+          });
+
+        bancoCarregado =
+          bancoClassesPressao.length > 0;
+
+        statusBanco.classList.remove("ativo");
+      } catch (erro) {
+        console.error(
+          "Erro ao carregar CLASSES_PRESSAO:",
+          erro
+        );
+
+        bancoClassesPressao = [];
+        bancoCarregado = false;
+
+        statusBanco.classList.add("ativo");
+      }
+    }
+
+    function obterMenorClasseAptaPorFamilia(
+      pressaoEmBar
+    ) {
+      const aptas = bancoClassesPressao
+        .filter(item => {
+          return (
+            item.PRESSAO_MAX_BAR_NUM >=
+            pressaoEmBar
+          );
+        })
+        .sort((a, b) => {
+          const diferencaPressao =
+            a.PRESSAO_MAX_BAR_NUM -
+            b.PRESSAO_MAX_BAR_NUM;
+
+          if (diferencaPressao !== 0) {
+            return diferencaPressao;
+          }
+
+          return (
+            (a.ORDEM_NUM || 9999) -
+            (b.ORDEM_NUM || 9999)
+          );
+        });
+
+      const porFamilia = new Map();
+
+      aptas.forEach(item => {
+        const familia =
+          String(item.FAMILIA)
+            .trim()
+            .toUpperCase();
+
+        if (!porFamilia.has(familia)) {
+          porFamilia.set(familia, item);
+        }
+      });
+
+      return Array.from(
+        porFamilia.values()
+      ).sort((a, b) => {
+        return (
+          (a.ORDEM_NUM || 9999) -
+          (b.ORDEM_NUM || 9999)
+        );
+      });
+    }
+
+    function criarLinhaClasse(item) {
+      const pressaoPsi =
+        Number.isFinite(item.PRESSAO_MAX_PSI_NUM)
+          ? `${formatarNumeroFixo(
+              item.PRESSAO_MAX_PSI_NUM,
+              0
+            )} psi`
+          : "";
+
+      const pressaoBar =
+        Number.isFinite(item.PRESSAO_MAX_BAR_NUM)
+          ? `${formatarNumeroFixo(
+              item.PRESSAO_MAX_BAR_NUM,
+              2
+            )} bar`
+          : "";
+
+      const pressaoAdmissivel =
+        [pressaoPsi, pressaoBar]
+          .filter(Boolean)
+          .join(" / ");
+
+      return `
+        <tr>
+          <td>
+            ${escaparHtml(item.MATERIAL)}
+          </td>
+
+          <td>
+            <span class="classe-destaque">
+              ${escaparHtml(item.CLASSE)}
+            </span>
+          </td>
+
+          <td>
+            ${escaparHtml(item.NORMA)}
+          </td>
+
+          <td>
+            <span class="pressao-admissivel">
+              ${escaparHtml(pressaoAdmissivel)}
+            </span>
+          </td>
+
+          <td>
+            ${escaparHtml(item.CONDICAO)}
+          </td>
+
+          <td>
+            <span class="selo-apto">
+              APTO
+            </span>
+          </td>
+
+          <td>
+            ${escaparHtml(item.OBSERVACAO)}
+          </td>
+        </tr>
+      `;
+    }
+
+    function atualizarTabelaClasses(
+      pressaoEmBar
+    ) {
+      classesCompativeis.classList.add("ativa");
+
+      corpoTabelaClasses.innerHTML = "";
+      mensagemClasses.textContent = "";
+      mensagemClasses.classList.remove("ativa");
+      tabelaClassesContainer.style.display = "";
+
+      if (!bancoCarregado) {
+        tabelaClassesContainer.style.display =
+          "none";
+
+        mensagemClasses.textContent =
+          "O banco técnico ainda não está disponível para consulta.";
+
+        mensagemClasses.classList.add("ativa");
+        return;
+      }
+
+      const classesAptas =
+        obterMenorClasseAptaPorFamilia(
+          pressaoEmBar
+        );
+
+      if (classesAptas.length === 0) {
+        tabelaClassesContainer.style.display =
+          "none";
+
+        mensagemClasses.textContent =
+          "Nenhuma classe cadastrada atende à pressão informada. Consulte uma classe superior ou revise o banco técnico.";
+
+        mensagemClasses.classList.add("ativa");
+        return;
+      }
+
+      corpoTabelaClasses.innerHTML =
+        classesAptas
+          .map(criarLinhaClasse)
+          .join("");
+    }
+
     function converterPressao() {
       esconderMensagem();
 
-      const chaveEntrada = campoUnidade.value;
-      const valorEntrada = obterNumeroDigitado();
+      const chaveEntrada =
+        campoUnidade.value;
+
+      const valorEntrada =
+        obterNumeroDigitado();
 
       if (!chaveEntrada) {
         esconderResultado();
+        esconderClasses();
         return;
       }
 
       if (valorEntrada === null) {
         esconderResultado();
+        esconderClasses();
         return;
       }
 
       if (Number.isNaN(valorEntrada)) {
         esconderResultado();
-        mostrarMensagem("Digite um valor numérico válido.");
+        esconderClasses();
+
+        mostrarMensagem(
+          "Digite um valor numérico válido."
+        );
+
         return;
       }
 
       if (valorEntrada < 0) {
         esconderResultado();
-        mostrarMensagem("A pressão não pode possuir valor negativo.");
+        esconderClasses();
+
+        mostrarMensagem(
+          "A pressão não pode possuir valor negativo."
+        );
+
         return;
       }
 
-      const unidadeEntrada = unidades[chaveEntrada];
+      const unidadeEntrada =
+        unidades[chaveEntrada];
 
       const pressaoEmKpa =
         valorEntrada *
@@ -631,26 +1223,35 @@
         unidades.bar.fatorParaKpa;
 
       const classePn =
-        obterClassePnMinima(pressaoEmBar);
+        obterClassePnMinima(
+          pressaoEmBar
+        );
 
-      const linhas = Object.entries(unidades).map(
-        ([chave, unidade]) => {
-          const valorConvertido =
-            pressaoEmKpa /
-            unidade.fatorParaKpa;
+      const linhas =
+        Object.entries(unidades).map(
+          ([chave, unidade]) => {
+            const valorConvertido =
+              pressaoEmKpa /
+              unidade.fatorParaKpa;
 
-          return criarLinhaResultado(
-            chave,
-            unidade,
-            valorConvertido,
-            chaveEntrada,
-            classePn
-          );
-        }
-      );
+            return criarLinhaResultado(
+              chave,
+              unidade,
+              valorConvertido,
+              chaveEntrada,
+              classePn
+            );
+          }
+        );
 
-      listaResultados.innerHTML = linhas.join("");
+      listaResultados.innerHTML =
+        linhas.join("");
+
       resultado.classList.add("ativo");
+
+      atualizarTabelaClasses(
+        pressaoEmBar
+      );
     }
 
     function limparCampos() {
@@ -659,13 +1260,27 @@
 
       esconderMensagem();
       esconderResultado();
+      esconderClasses();
 
       campoValor.focus();
     }
 
-    campoValor.addEventListener("input", converterPressao);
-    campoUnidade.addEventListener("change", converterPressao);
-    botaoLimpar.addEventListener("click", limparCampos);
+    campoValor.addEventListener(
+      "input",
+      converterPressao
+    );
+
+    campoUnidade.addEventListener(
+      "change",
+      converterPressao
+    );
+
+    botaoLimpar.addEventListener(
+      "click",
+      limparCampos
+    );
+
+    carregarClassesPressao();
   </script>
 
 </body>
