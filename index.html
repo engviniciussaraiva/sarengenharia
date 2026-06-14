@@ -161,6 +161,40 @@ body{
     color:#333;
     border-bottom:3px solid #7cb342;
 }
+/* ==========================
+   SUBABAS
+========================== */
+
+.subtabs{
+    min-height:50px;
+    background:#f7f8fa;
+    border-bottom:1px solid #ddd;
+    display:none;
+    align-items:center;
+    gap:10px;
+    padding:6px 25px;
+}
+
+.subtab{
+    padding:9px 16px;
+    border-radius:5px;
+    cursor:pointer;
+    color:#666;
+    font-size:14px;
+    transition:.2s;
+}
+
+.subtab:hover{
+    background:#e9eded;
+    color:#315858;
+}
+
+.subtab.active{
+    background:#315858;
+    color:#fff;
+}
+
+
 
 /* ==========================
    ÁREA CENTRAL
@@ -288,13 +322,16 @@ body{
     
     <!-- CONTEÚDO -->
 
-    <div class="content">
+    <div class="tabs" id="tabs">
 
-        <div class="tabs" id="tabs">
+</div>
 
-        </div>
+<!-- SUBABAS DO MÓDULO -->
+<div class="subtabs" id="subtabs">
 
-  <div class="main" id="mainContent">
+</div>
+
+<div class="main" id="mainContent"> 
 
     <div class="welcome">
 
