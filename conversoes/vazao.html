@@ -8,35 +8,42 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>Conversão de Vazão</title>
+  <title>Conversor de Unidades de Vazão</title>
 
   <style>
     * {
       box-sizing: border-box;
     }
 
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+    }
+
     body {
       margin: 0;
       padding: 24px;
-      background: transparent;
-      color: #e8eeee;
+      background: #f4f7f5;
+      color: #263536;
       font-family: Arial, Helvetica, sans-serif;
     }
 
     .conversor {
       width: 100%;
-      max-width: 620px;
+      max-width: 720px;
       margin: 0 auto;
-      padding: 28px;
-      background: #171d1f;
-      border: 1px solid #344548;
+      padding: 30px;
+      background: #ffffff;
+      border: 1px solid #d3ded9;
       border-radius: 12px;
+      box-shadow: 0 3px 14px rgba(35, 65, 59, 0.07);
     }
 
     .conversor__titulo {
-      margin: 0 0 28px;
-      color: #ffffff;
-      font-size: 26px;
+      margin: 0 0 30px;
+      color: #315f57;
+      font-size: 27px;
       line-height: 1.25;
       text-align: center;
     }
@@ -48,7 +55,7 @@
     .campo label {
       display: block;
       margin-bottom: 8px;
-      color: #f2f5f5;
+      color: #293d3d;
       font-size: 16px;
       font-weight: 700;
     }
@@ -56,24 +63,27 @@
     .campo input,
     .campo select {
       width: 100%;
-      min-height: 48px;
-      padding: 10px 13px;
-      background: #222a2c;
-      color: #ffffff;
-      border: 1px solid #566568;
-      border-radius: 6px;
+      min-height: 50px;
+      padding: 11px 14px;
+      background: #ffffff;
+      color: #263536;
+      border: 1px solid #bdcbc5;
+      border-radius: 7px;
       outline: none;
       font-size: 16px;
+      transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
     }
 
     .campo input::placeholder {
-      color: #9ba6a8;
+      color: #8d9a96;
     }
 
     .campo input:focus,
     .campo select:focus {
-      border-color: #58a89f;
-      box-shadow: 0 0 0 2px rgba(88, 168, 159, 0.18);
+      border-color: #4e8f83;
+      box-shadow: 0 0 0 3px rgba(78, 143, 131, 0.13);
     }
 
     .acoes {
@@ -85,11 +95,11 @@
     .botao-limpar {
       min-width: 150px;
       min-height: 46px;
-      padding: 11px 22px;
-      background: #465255;
+      padding: 11px 24px;
+      background: #87928e;
       color: #ffffff;
-      border: 0;
-      border-radius: 6px;
+      border: none;
+      border-radius: 7px;
       cursor: pointer;
       font-size: 16px;
       font-weight: 700;
@@ -99,20 +109,35 @@
     }
 
     .botao-limpar:hover {
-      background: #59676a;
+      background: #737f7b;
     }
 
     .botao-limpar:active {
       transform: translateY(1px);
     }
 
+    .mensagem {
+      display: none;
+      margin-top: 18px;
+      padding: 13px 15px;
+      color: #8f2525;
+      background: #fff1f1;
+      border: 1px solid #e6bebe;
+      border-radius: 7px;
+      font-size: 15px;
+    }
+
+    .mensagem.ativa {
+      display: block;
+    }
+
     .resultado {
       display: none;
-      margin-top: 24px;
+      margin-top: 26px;
       padding: 20px;
-      background: #20282a;
-      border: 1px solid #344548;
-      border-radius: 8px;
+      background: #f5f9f7;
+      border: 1px solid #d7e3de;
+      border-radius: 9px;
     }
 
     .resultado.ativo {
@@ -120,14 +145,14 @@
     }
 
     .resultado__titulo {
-      margin: 0 0 16px;
-      color: #ffffff;
-      font-size: 17px;
+      margin: 0 0 17px;
+      color: #315f57;
+      font-size: 18px;
     }
 
     .resultado__lista {
       display: grid;
-      gap: 10px;
+      gap: 9px;
     }
 
     .resultado__linha {
@@ -135,36 +160,34 @@
       align-items: center;
       justify-content: space-between;
       gap: 20px;
-      padding: 10px 12px;
-      background: #171d1f;
-      border-radius: 6px;
+      min-height: 48px;
+      padding: 11px 14px;
+      background: #ffffff;
+      border: 1px solid #e1eae6;
+      border-radius: 7px;
+    }
+
+    .resultado__linha.entrada {
+      background: #edf6f2;
+      border-color: #b9d5ca;
     }
 
     .resultado__unidade {
-      color: #b9c4c5;
+      color: #4a5e5d;
       font-size: 15px;
     }
 
     .resultado__valor {
-      color: #ffffff;
+      color: #243635;
       font-size: 17px;
       font-weight: 700;
       text-align: right;
+      white-space: nowrap;
     }
 
-    .mensagem {
-      display: none;
-      margin-top: 14px;
-      padding: 12px;
-      color: #ffd4d4;
-      background: rgba(180, 45, 45, 0.15);
-      border: 1px solid rgba(255, 100, 100, 0.35);
-      border-radius: 6px;
-      font-size: 14px;
-    }
-
-    .mensagem.ativa {
-      display: block;
+    .resultado__linha.entrada .resultado__unidade,
+    .resultado__linha.entrada .resultado__valor {
+      color: #2d665b;
     }
 
     @media (max-width: 600px) {
@@ -173,11 +196,13 @@
       }
 
       .conversor {
-        padding: 20px;
+        padding: 21px;
+        border-radius: 10px;
       }
 
       .conversor__titulo {
-        font-size: 22px;
+        margin-bottom: 25px;
+        font-size: 23px;
       }
 
       .acoes {
@@ -188,6 +213,10 @@
         width: 100%;
       }
 
+      .resultado {
+        padding: 15px;
+      }
+
       .resultado__linha {
         align-items: flex-start;
         flex-direction: column;
@@ -196,6 +225,7 @@
 
       .resultado__valor {
         text-align: left;
+        white-space: normal;
       }
     }
   </style>
@@ -306,67 +336,81 @@
     const mensagem = document.getElementById("mensagem");
 
     /*
-      Todos os fatores convertem primeiro para L/s.
+      Todas as unidades são convertidas inicialmente para L/s.
 
-      Exemplo:
       1 L/min = 1 / 60 L/s
-      1 m³/h  = 1000 / 3600 L/s
-      1 gpm   = 3,785411784 / 60 L/s
+      1 L/h = 1 / 3600 L/s
+      1 m³/s = 1000 L/s
+      1 m³/min = 1000 / 60 L/s
+      1 m³/h = 1000 / 3600 L/s
+      1 gpm americano = 3,785411784 / 60 L/s
     */
 
     const unidades = {
       ls: {
         nome: "Litros por segundo",
         simbolo: "L/s",
-        paraLitrosPorSegundo: 1
+        fatorParaLitrosPorSegundo: 1
       },
 
       lmin: {
         nome: "Litros por minuto",
         simbolo: "L/min",
-        paraLitrosPorSegundo: 1 / 60
+        fatorParaLitrosPorSegundo: 1 / 60
       },
 
       lh: {
         nome: "Litros por hora",
         simbolo: "L/h",
-        paraLitrosPorSegundo: 1 / 3600
+        fatorParaLitrosPorSegundo: 1 / 3600
       },
 
       m3s: {
         nome: "Metros cúbicos por segundo",
         simbolo: "m³/s",
-        paraLitrosPorSegundo: 1000
+        fatorParaLitrosPorSegundo: 1000
       },
 
       m3min: {
         nome: "Metros cúbicos por minuto",
         simbolo: "m³/min",
-        paraLitrosPorSegundo: 1000 / 60
+        fatorParaLitrosPorSegundo: 1000 / 60
       },
 
       m3h: {
         nome: "Metros cúbicos por hora",
         simbolo: "m³/h",
-        paraLitrosPorSegundo: 1000 / 3600
+        fatorParaLitrosPorSegundo: 1000 / 3600
       },
 
       gpm: {
         nome: "Galões americanos por minuto",
         simbolo: "gpm",
-        paraLitrosPorSegundo: 3.785411784 / 60
+        fatorParaLitrosPorSegundo: 3.785411784 / 60
       }
     };
 
     function obterNumeroDigitado() {
-      const texto = campoValor.value
-        .trim()
-        .replace(/\s/g, "")
-        .replace(/\./g, "")
-        .replace(",", ".");
+      let texto = campoValor.value.trim().replace(/\s/g, "");
 
       if (texto === "") {
         return null;
+      }
+
+      /*
+        Aceita:
+        250
+        250,5
+        250.5
+        1.250,50
+      */
+
+      if (texto.includes(",") && texto.includes(".")) {
+        texto = texto
+          .replace(/\./g, "")
+          .replace(",", ".");
+      } else if (texto.includes(",")) {
+        texto = texto.replace(",", ".");
       }
 
       const valor = Number(texto);
@@ -374,22 +418,42 @@
       return Number.isFinite(valor) ? valor : NaN;
     }
 
-    function formatarNumero(valor) {
-      let casasDecimais;
-
+    function definirCasasDecimais(valor) {
       const valorAbsoluto = Math.abs(valor);
 
       if (valorAbsoluto === 0) {
-        casasDecimais = 2;
-      } else if (valorAbsoluto >= 1000) {
-        casasDecimais = 2;
-      } else if (valorAbsoluto >= 1) {
-        casasDecimais = 3;
-      } else if (valorAbsoluto >= 0.01) {
-        casasDecimais = 4;
-      } else {
-        casasDecimais = 6;
+        return 2;
       }
+
+      if (valorAbsoluto >= 1000) {
+        return 2;
+      }
+
+      if (valorAbsoluto >= 100) {
+        return 2;
+      }
+
+      if (valorAbsoluto >= 10) {
+        return 3;
+      }
+
+      if (valorAbsoluto >= 1) {
+        return 3;
+      }
+
+      if (valorAbsoluto >= 0.1) {
+        return 4;
+      }
+
+      if (valorAbsoluto >= 0.01) {
+        return 5;
+      }
+
+      return 6;
+    }
+
+    function formatarNumero(valor) {
+      const casasDecimais = definirCasasDecimais(valor);
 
       return valor.toLocaleString("pt-BR", {
         minimumFractionDigits: 0,
@@ -412,9 +476,14 @@
       listaResultados.innerHTML = "";
     }
 
-    function criarLinhaResultado(unidade, valor) {
+    function criarLinhaResultado(chave, unidade, valor, chaveEntrada) {
+      const classeEntrada =
+        chave === chaveEntrada
+          ? "resultado__linha entrada"
+          : "resultado__linha";
+
       return `
-        <div class="resultado__linha">
+        <div class="${classeEntrada}">
           <span class="resultado__unidade">
             ${unidade.nome}
           </span>
@@ -457,29 +526,25 @@
       const unidadeEntrada = unidades[chaveEntrada];
 
       const litrosPorSegundo =
-        valorEntrada * unidadeEntrada.paraLitrosPorSegundo;
+        valorEntrada *
+        unidadeEntrada.fatorParaLitrosPorSegundo;
 
-      const resultadosConvertidos = Object.entries(unidades)
-        .map(([chave, unidade]) => {
+      const linhas = Object.entries(unidades).map(
+        ([chave, unidade]) => {
           const valorConvertido =
-            litrosPorSegundo / unidade.paraLitrosPorSegundo;
+            litrosPorSegundo /
+            unidade.fatorParaLitrosPorSegundo;
 
-          return {
+          return criarLinhaResultado(
             chave,
             unidade,
-            valor: valorConvertido
-          };
-        });
-
-      listaResultados.innerHTML = resultadosConvertidos
-        .map(item => {
-          return criarLinhaResultado(
-            item.unidade,
-            item.valor
+            valorConvertido,
+            chaveEntrada
           );
-        })
-        .join("");
+        }
+      );
 
+      listaResultados.innerHTML = linhas.join("");
       resultado.classList.add("ativo");
     }
 
@@ -493,8 +558,8 @@
       campoValor.focus();
     }
 
-    campoUnidade.addEventListener("change", converterVazao);
     campoValor.addEventListener("input", converterVazao);
+    campoUnidade.addEventListener("change", converterVazao);
     botaoLimpar.addEventListener("click", limparCampos);
   </script>
 
