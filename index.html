@@ -70,6 +70,8 @@ body{
 
 .sidebar{
     width:260px;
+    min-width:260px;
+    flex-shrink:0;
     background:#fff;
     border-right:1px solid #ddd;
     transition:.3s;
@@ -77,8 +79,9 @@ body{
 }
 
 .sidebar.collapsed{
-    width:65px;
-}
+width:65px;
+min-width:65px;
+} 
 
 .portal-title{
     background:#444;
@@ -342,7 +345,9 @@ min-width:20px;
     
     <!-- CONTEÚDO -->
 
-    <div class="tabs" id="tabs">
+<div class="content">
+
+<div class="tabs" id="tabs">
 
 </div>
 
