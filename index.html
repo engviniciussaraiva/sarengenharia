@@ -69,13 +69,97 @@ body{
 ========================== */
 
 .sidebar{
-    width:260px;
-    min-width:260px;
-    flex-shrink:0;
-    background:#fff;
-    border-right:1px solid #ddd;
-    transition:.3s;
-    overflow:auto;
+width:260px;
+min-width:260px;
+flex-shrink:0;
+background:#fff;
+border-right:1px solid #ddd;
+transition:.3s;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+
+}
+/* Área dos módulos: somente esta parte terá rolagem */
+#menuDinamico{
+flex:1;
+min-height:0;
+overflow-y:auto;
+overflow-x:hidden;
+}
+/* ==========================
+RODAPÉ DO MENU ESQUERDO
+========================== */
+.sidebar-footer{
+flex-shrink:0;
+padding:10px 8px 12px;
+border-top:1px solid #e5e5e5;
+background:#fff;
+text-align:center;
+}
+.sidebar-footer-icons{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:16px;
+margin-bottom:9px;
+}
+.sidebar-footer-btn{
+width:28px;
+height:28px;
+display:flex;
+align-items:center;
+justify-content:center;
+border:none;
+border-radius:5px;
+background:transparent;
+
+font-size:16px;
+line-height:1;
+cursor:pointer;
+transition:.2s;
+
+}
+.sidebar-footer-btn:hover{
+background:#f0f3f3;
+transform:translateY(-1px);
+}
+.sidebar-footer-btn:active{
+transform:translateY(0);
+}
+.sidebar-footer-btn.logout:hover
+.sidebar-footer-brand{
+color:#555;
+line-height:1.35;
+}
+.sidebar-footer-brand strong{
+display:block;
+color:#315858;
+font-size:13px;
+margin-bottom:1px;
+}
+.sidebar-footer-brand span{
+display:block;
+font-size:10px;
+}
+.sidebar-footer-version{
+margin-top:3px;
+color:#888;
+font-size:10px;
+}
+/* Menu recolhido */
+.sidebar.collapsed .sidebar-footer{
+padding:8px 4px;
+}
+.sidebar.collapsed .sidebar-footer-icons{
+display:grid;
+grid-template-columns:repeat(2, 28px);
+justify-content:center;
+gap:5px;
+margin-bottom:0;
+}
+.sidebar.collapsed .sidebar-footer-brand{
+display:none;
 }
 
 .sidebar.collapsed{
@@ -332,15 +416,69 @@ min-width:20px;
 
     <!-- MENU ESQUERDO -->
 
-<div class="sidebar" id="sidebar">
+<div class="portal-title">
+    Portal
+</div>
 
-    <div class="portal-title">
-        Portal
+<div id="menuDinamico"></div>
+
+<div class="sidebar-footer">
+
+    <div class="sidebar-footer-icons">
+
+        <button
+            class="sidebar-footer-btn"
+            type="button"
+            title="Configurações"
+            aria-label="Configurações"
+            onclick="abrirAreaRodape('CONFIGURACOES')"
+        >
+            ⚙️
+        </button>
+
+        <button
+            class="sidebar-footer-btn"
+            type="button"
+            title="Sobre o SAR"
+            aria-label="Sobre o SAR"
+            onclick="abrirAreaRodape('SOBRE')"
+        >
+            ℹ️
+        </button>
+
+        <button
+            class="sidebar-footer-btn"
+            type="button"
+            title="Ajuda"
+            aria-label="Ajuda"
+            onclick="abrirAreaRodape('AJUDA')"
+        >
+            ❓
+        </button>
+
+        <button
+            class="sidebar-footer-btn logout"
+            type="button"
+            title="Sair"
+            aria-label="Sair"
+            onclick="sairDoSistema()"
+        >
+            🚪
+        </button>
+
     </div>
 
-    <div id="menuDinamico"></div>
+    <div class="sidebar-footer-brand">
+        <strong>SAR</strong>
+        <span>Sistema Avançado de Resposta</span>
+        <div class="sidebar-footer-version">
+            Versão Beta
+        </div>
+    </div>
 
 </div>
+
+
 
     
     <!-- CONTEÚDO -->
@@ -980,7 +1118,32 @@ function esconderSubabas(){
     subtabs.style.display = "none";
 }
 
+/* =========================================
+ÍCONES DO RODAPÉ DA BARRA LATERAL
+========================================= */
+function abrirAreaRodape(modulo){
+/*
+  CONFIGURACOES, SOBRE e AJUDA utilizarão
+  as mesmas tabelas SAR_MENU_ABAS e
+  SAR_MENU_SUBABAS dos demais módulos.
+*/
 
+abrirModulo(modulo);
+
+}
+/* =========================================
+SAIR DO SISTEMA
+========================================= */
+function sairDoSistema(){
+/*
+  Função provisória.
+  Quando o login estiver implantado,
+  colocaremos aqui o encerramento da sessão.
+*/
+
+alert("A função de sair será ativada junto com o login do sistema.");
+
+}
 
 
 carregarModulos(); 
