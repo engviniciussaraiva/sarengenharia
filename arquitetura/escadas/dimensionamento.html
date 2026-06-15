@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dimensionamento de Escadas</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --verde:#315858;
+  --verde2:#7cb342;
+  --fundo:#f5f6f8;
+  --borda:#d8dee3;
+  --texto:#243238;
+  --muted:#6f7b80;
+  --ok:#237a3b;
+  --erro:#b33a3a;
+}
+body{
+  font-family:Segoe UI,Arial,sans-serif;
+  background:var(--fundo);
+  color:var(--texto);
+  padding:20px;
+}
+.app{max-width:1180px;margin:0 auto}
+.card{
+  background:#fff;
+  border:1px solid var(--borda);
+  border-radius:14px;
+  box-shadow:0 4px 18px rgba(0,0,0,.05);
+  overflow:hidden;
+}
+.header{
+  padding:22px 24px;
+  border-bottom:1px solid var(--borda);
+  display:flex;
+  gap:14px;
+  align-items:center;
+}
+.header-icon{
+  width:48px;height:48px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  background:#eef4f1;font-size:26px;
+}
+.header h1{font-size:24px;color:#193f43;margin-bottom:4px}
+.header p{color:var(--muted);font-size:14px}
+.content{padding:22px 24px}
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+}
+.field label{display:block;font-weight:700;font-size:14px;margin-bottom:7px}
+.input-wrap{display:flex}
+.input-wrap input{
+  width:100%;height:44px;border:1px solid #bfc9ce;border-right:none;
+  border-radius:8px 0 0 8px;padding:0 12px;font-size:15px;outline:none;
+}
+.input-wrap input:focus{border-color:var(--verde2);box-shadow:0 0 0 3px rgba(124,179,66,.14)}
+.unit{
+  min-width:64px;height:44px;border:1px solid #bfc9ce;border-radius:0 8px 8px 0;
+  background:#eef2f2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;
+}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+button{
+  border:none;border-radius:8px;padding:11px 18px;font-weight:700;cursor:pointer;font-size:14px;
+}
+.btn-primary{background:var(--verde);color:#fff}
+.btn-primary:hover{filter:brightness(.95)}
+.btn-secondary{background:#e9eeee;color:#294c4f}
+.status{margin-top:14px;padding:11px 13px;border-radius:8px;font-size:13px;display:none}
+.status.ok{display:block;background:#edf8ef;color:var(--ok);border:1px solid #b9dfc1}
+.status.erro{display:block;background:#fff0f0;color:var(--erro);border:1px solid #efc2c2}
+.resultados{display:none;margin-top:22px}
+.resultados.show{display:block}
+.section-title{font-size:18px;color:#193f43;margin:0 0 12px}
+.table-wrap{overflow:auto;border:1px solid var(--borda);border-radius:10px;background:#fff}
+table{width:100%;border-collapse:collapse;min-width:820px}
+th,td{border-bottom:1px solid #e5eaed;border-right:1px solid #e5eaed;padding:11px 12px;text-align:center;font-size:13px}
+th:last-child,td:last-child{border-right:none}
+tr:last-child td{border-bottom:none}
+th{background:#f0f4f4;color:#234b4e;font-size:13px}
+th:first-child,td:first-child{text-align:left;font-weight:700;min-width:240px}
+.col-ambas{background:#f5faef}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:700;font-size:12px}
+.badge.ok{background:#e6f5e9;color:#236d36}
+.badge.no{background:#fdeaea;color:#a83232}
+.cards-alternativas{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px;
+}
+.alt-card{background:#fff;border:1px solid var(--borda);border-radius:10px;padding:14px}
+.alt-card h3{font-size:15px;color:#244f52;margin-bottom:9px}
+.alt-list{display:flex;flex-direction:column;gap:7px}
+.alt-item{font-size:12px;padding:8px;border-radius:7px;background:#f6f8f9;border:1px solid #e5eaed}
+.alt-item.recomendada{background:#eef8e8;border-color:#cde4bc}
+.note{margin-top:14px;font-size:12px;color:var(--muted);line-height:1.45}
+@media(max-width:780px){
+  body{padding:10px}
+  .content,.header{padding:16px}
+  .form-grid{grid-template-columns:1fr}
+  .cards-alternativas{grid-template-columns:1fr}
+  .header h1{font-size:20px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="card">
+    <div class="header">
+      <div class="header-icon">📐</div>
+      <div>
+        <h1>Dimensionamento de Escadas</h1>
+        <p>Comparação automática entre CBPMESP — IT 11/2025, atendimento simultâneo e ABNT NBR 9050.</p>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="form-grid">
+        <div class="field">
+          <label for="desnivel">Desnível total a vencer</label>
+          <div class="input-wrap">
+            <input id="desnivel" inputmode="decimal" placeholder="Ex.: 2,80">
+            <div class="unit">m</div>
+          </div>
+          <div class="hint">Campo obrigatório.</div>
+        </div>
+
+        <div class="field">
+          <label for="espacoDisponivel">Espaço horizontal disponível</label>
+          <div class="input-wrap">
+            <input id="espacoDisponivel" inputmode="decimal" placeholder="Opcional. Ex.: 4,50">
+            <div class="unit">m</div>
+          </div>
+          <div class="hint">Se informado, o sistema verifica se a solução reta cabe no espaço.</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" type="button" onclick="calcularEscada()">Calcular</button>
+        <button class="btn-secondary" type="button" onclick="limparCalculadora()">Limpar</button>
+      </div>
+
+      <div id="status" class="status"></div>
+
+      <div id="resultados" class="resultados">
+        <h2 class="section-title">Tabela-resumo dos resultados</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Resultado</th>
+                <th>CBPMESP<br>IT 11/2025</th>
+                <th class="col-ambas">AMBAS</th>
+                <th>ABNT NBR 9050</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaResultados"></tbody>
+          </table>
+        </div>
+
+        <h2 class="section-title" style="margin-top:22px">Outras combinações válidas</h2>
+        <div id="alternativas" class="cards-alternativas"></div>
+
+        <div class="note">
+          Nesta primeira versão, o comprimento horizontal corresponde à solução em lance reto. A etapa seguinte incluirá mudança de direção, distribuição por lances e dimensionamento detalhado dos patamares.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const URL_ESCADAS_REGRAS =
+'https://docs.google.com/spreadsheets/d/e/2PACX-1vSojnsR2aB3mY3SeACwRbFyrUwXLVrnX7rKiZzli8cVtx0auRZmGQPcSSwBxIHe3iLw22193zZGgmGQ/pub?output=csv';
+
+let regrasEscadas = [];
+let regrasCarregadas = false;
+
+function parseCSV(texto){
+  const linhas = [];
+  let linha = [];
+  let campo = '';
+  let dentroAspas = false;
+
+  for(let i = 0; i < texto.length; i++){
+    const c = texto[i];
+    const prox = texto[i + 1];
+
+    if(c === '"'){
+      if(dentroAspas && prox === '"'){
+        campo += '"';
+        i++;
+      }else{
+        dentroAspas = !dentroAspas;
+      }
+    }else if(c === ',' && !dentroAspas){
+      linha.push(campo);
+      campo = '';
+    }else if((c === '\n' || c === '\r') && !dentroAspas){
+      if(c === '\r' && prox === '\n') i++;
+      linha.push(campo);
+      if(linha.some(v => String(v).trim() !== '')) linhas.push(linha);
+      linha = [];
+      campo = '';
+    }else{
+      campo += c;
+    }
+  }
+
+  linha.push(campo);
+  if(linha.some(v => String(v).trim() !== '')) linhas.push(linha);
+  return linhas;
+}
+
+function numeroBR(valor){
+  const texto = String(valor ?? '').trim();
+  if(!texto) return NaN;
+  return Number(texto.replace(/\./g,'').replace(',','.'));
+}
+
+function fmt(valor, casas = 2){
+  if(!Number.isFinite(valor)) return '—';
+  return valor.toLocaleString('pt-BR', {
+    minimumFractionDigits: casas,
+    maximumFractionDigits: casas
+  });
+}
+
+function normalizar(texto){
+  return String(texto || '').trim().toUpperCase();
+}
+
+async function carregarRegrasEscadas(){
+  try{
+    const resposta = await fetch(URL_ESCADAS_REGRAS, {cache:'no-store'});
+    if(!resposta.ok) throw new Error('Falha ao acessar o banco de regras.');
+
+    const texto = await resposta.text();
+    const dados = parseCSV(texto);
+    if(dados.length < 2) throw new Error('Banco de regras vazio.');
+
+    const cab = dados[0].map(normalizar);
+    const idx = nome => cab.indexOf(nome);
+
+    regrasEscadas = dados.slice(1).map(col => ({
+      norma: normalizar(col[idx('NORMA')]),
+      grupo: normalizar(col[idx('GRUPO')]),
+      regra: normalizar(col[idx('REGRA')]),
+      valorMin: numeroBR(col[idx('VALOR_MIN')]),
+      valorMax: numeroBR(col[idx('VALOR_MAX')]),
+      unidade: String(col[idx('UNIDADE')] || '').trim(),
+      condicao: normalizar(col[idx('CONDICAO')]),
+      texto: String(col[idx('TEXTO')] || '').trim(),
+      ordem: Number(col[idx('ORDEM')] || 0),
+      status: normalizar(col[idx('STATUS')])
+    })).filter(r => r.status === 'ATIVO');
+
+    regrasCarregadas = true;
+    mostrarStatus('Regras carregadas com sucesso.', 'ok');
+    setTimeout(() => {
+      const s = document.getElementById('status');
+      if(s.classList.contains('ok')) s.className = 'status';
+    }, 1600);
+  }catch(erro){
+    regrasCarregadas = false;
+    mostrarStatus('Não foi possível carregar o banco SAR_ESCADAS_REGRAS. ' + erro.message, 'erro');
+    console.error(erro);
+  }
+}
+
+function obterRegra(norma, regra){
+  return regrasEscadas.find(r =>
+    r.norma === normalizar(norma) &&
+    r.regra === normalizar(regra)
+  );
+}
+
+function montarConfiguracao(norma){
+  const espelho = obterRegra(norma, 'ALTURA_ESPELHO');
+  const blondel = obterRegra(norma, 'BLONDEL');
+  const piso = obterRegra(norma, 'LARGURA_PISO');
+  const desnivel = obterRegra(norma, 'DESNIVEL_MAX_LANCE');
+
+  if(!espelho || !blondel || !desnivel){
+    throw new Error('Faltam regras obrigatórias para ' + norma + '.');
+  }
+
+  return {
+    norma,
+    espelhoMin: espelho.valorMin,
+    espelhoMax: espelho.valorMax,
+    blondelMin: blondel.valorMin,
+    blondelMax: blondel.valorMax,
+    pisoMin: piso && Number.isFinite(piso.valorMin) ? piso.valorMin : -Infinity,
+    pisoMax: piso && Number.isFinite(piso.valorMax) ? piso.valorMax : Infinity,
+    desnivelMaxLance: desnivel.valorMax
+  };
+}
+
+function montarConfiguracaoAmbas(cb, nbr){
+  return {
+    norma:'AMBAS',
+    espelhoMin: Math.max(cb.espelhoMin, nbr.espelhoMin),
+    espelhoMax: Math.min(cb.espelhoMax, nbr.espelhoMax),
+    blondelMin: Math.max(cb.blondelMin, nbr.blondelMin),
+    blondelMax: Math.min(cb.blondelMax, nbr.blondelMax),
+    pisoMin: Math.max(cb.pisoMin, nbr.pisoMin),
+    pisoMax: Math.min(cb.pisoMax, nbr.pisoMax),
+    desnivelMaxLance: Math.min(cb.desnivelMaxLance, nbr.desnivelMaxLance)
+  };
+}
+
+function calcularSolucoes(desnivelMetros, cfg){
+  const H = desnivelMetros * 100;
+  const eMin = Math.ceil(H / cfg.espelhoMax - 1e-9);
+  const eMax = Math.floor(H / cfg.espelhoMin + 1e-9);
+  const solucoes = [];
+
+  for(let E = eMin; E <= eMax; E++){
+    const h = H / E;
+    if(h < cfg.espelhoMin - 1e-9 || h > cfg.espelhoMax + 1e-9) continue;
+
+    const pisoMin = Math.max(cfg.pisoMin, cfg.blondelMin - 2 * h);
+    const pisoMax = Math.min(cfg.pisoMax, cfg.blondelMax - 2 * h);
+    if(pisoMin > pisoMax + 1e-9) continue;
+
+    const pisoSugerido = (pisoMin + pisoMax) / 2;
+    const blondel = 2 * h + pisoSugerido;
+    const pisos = E - 1;
+    const comprimentoReto = pisos * pisoSugerido / 100;
+    const inclinacao = Math.atan(h / pisoSugerido) * 180 / Math.PI;
+    const lances = Math.ceil(desnivelMetros / cfg.desnivelMaxLance - 1e-9);
+    const patamaresIntermediarios = Math.max(0, lances - 1);
+
+    const alvoEspelho = (cfg.espelhoMin + cfg.espelhoMax) / 2;
+    const alvoPiso = Number.isFinite(cfg.pisoMin) && Number.isFinite(cfg.pisoMax)
+      ? (cfg.pisoMin + cfg.pisoMax) / 2
+      : pisoSugerido;
+
+    const score = Math.abs(h - alvoEspelho) + 0.12 * Math.abs(pisoSugerido - alvoPiso);
+
+    solucoes.push({
+      E,h,pisos,pisoMin,pisoMax,pisoSugerido,blondel,
+      comprimentoReto,inclinacao,lances,patamaresIntermediarios,score
+    });
+  }
+
+  solucoes.sort((a,b) => a.score - b.score || a.E - b.E);
+  return solucoes;
+}
+
+function linhaTabela(rotulo, cb, ambas, nbr, classeAmbas = false){
+  return `
+    <tr>
+      <td>${rotulo}</td>
+      <td>${cb}</td>
+      <td class="col-ambas">${ambas}</td>
+      <td>${nbr}</td>
+    </tr>
+  `;
+}
+
+function valorOuNao(solucao, formatador){
+  return solucao ? formatador(solucao) : '<span class="badge no">Sem solução</span>';
+}
+
+function calcularEscada(){
+  const desnivel = numeroBR(document.getElementById('desnivel').value);
+  const espaco = numeroBR(document.getElementById('espacoDisponivel').value);
+
+  if(!regrasCarregadas){
+    mostrarStatus('Aguarde o carregamento das regras ou atualize a página.', 'erro');
+    return;
+  }
+
+  if(!Number.isFinite(desnivel) || desnivel <= 0){
+    mostrarStatus('Informe um desnível total válido.', 'erro');
+    return;
+  }
+
+  try{
+    const cfgCB = montarConfiguracao('CBPMESP');
+    const cfgNBR = montarConfiguracao('NBR9050');
+    const cfgAmbas = montarConfiguracaoAmbas(cfgCB, cfgNBR);
+
+    const listaCB = calcularSolucoes(desnivel, cfgCB);
+    const listaAmbas = calcularSolucoes(desnivel, cfgAmbas);
+    const listaNBR = calcularSolucoes(desnivel, cfgNBR);
+
+    const cb = listaCB[0] || null;
+    const ambas = listaAmbas[0] || null;
+    const nbr = listaNBR[0] || null;
+
+    const caber = s => {
+      if(!s) return '<span class="badge no">Sem solução</span>';
+      if(!Number.isFinite(espaco)) return 'Não informado';
+      return s.comprimentoReto <= espaco + 1e-9
+        ? '<span class="badge ok">Cabe no espaço</span>'
+        : '<span class="badge no">Não cabe</span>';
+    };
+
+    let html = '';
+    html += linhaTabela('Desnível total', fmt(desnivel)+' m', fmt(desnivel)+' m', fmt(desnivel)+' m');
+    html += linhaTabela('Quantidade de espelhos (E)',
+      valorOuNao(cb,s=>s.E), valorOuNao(ambas,s=>s.E), valorOuNao(nbr,s=>s.E));
+    html += linhaTabela('Altura real do espelho',
+      valorOuNao(cb,s=>fmt(s.h)+' cm'), valorOuNao(ambas,s=>fmt(s.h)+' cm'), valorOuNao(nbr,s=>fmt(s.h)+' cm'));
+    html += linhaTabela('Quantidade de pisos (1 lance)',
+      valorOuNao(cb,s=>s.pisos), valorOuNao(ambas,s=>s.pisos), valorOuNao(nbr,s=>s.pisos));
+    html += linhaTabela('Largura mínima do piso',
+      valorOuNao(cb,s=>fmt(s.pisoMin)+' cm'), valorOuNao(ambas,s=>fmt(s.pisoMin)+' cm'), valorOuNao(nbr,s=>fmt(s.pisoMin)+' cm'));
+    html += linhaTabela('Largura máxima do piso',
+      valorOuNao(cb,s=>fmt(s.pisoMax)+' cm'), valorOuNao(ambas,s=>fmt(s.pisoMax)+' cm'), valorOuNao(nbr,s=>fmt(s.pisoMax)+' cm'));
+    html += linhaTabela('Piso sugerido (mediana)',
+      valorOuNao(cb,s=>fmt(s.pisoSugerido)+' cm'), valorOuNao(ambas,s=>fmt(s.pisoSugerido)+' cm'), valorOuNao(nbr,s=>fmt(s.pisoSugerido)+' cm'));
+    html += linhaTabela('Resultado da fórmula de Blondel',
+      valorOuNao(cb,s=>fmt(s.blondel)+' cm'), valorOuNao(ambas,s=>fmt(s.blondel)+' cm'), valorOuNao(nbr,s=>fmt(s.blondel)+' cm'));
+    html += linhaTabela('Inclinação',
+      valorOuNao(cb,s=>fmt(s.inclinacao)+'°'), valorOuNao(ambas,s=>fmt(s.inclinacao)+'°'), valorOuNao(nbr,s=>fmt(s.inclinacao)+'°'));
+    html += linhaTabela('Comprimento horizontal — lance reto',
+      valorOuNao(cb,s=>fmt(s.comprimentoReto)+' m'), valorOuNao(ambas,s=>fmt(s.comprimentoReto)+' m'), valorOuNao(nbr,s=>fmt(s.comprimentoReto)+' m'));
+    html += linhaTabela('Verificação do espaço disponível', caber(cb), caber(ambas), caber(nbr));
+    html += linhaTabela('Desnível máximo por lance',
+      fmt(cfgCB.desnivelMaxLance)+' m', fmt(cfgAmbas.desnivelMaxLance)+' m', fmt(cfgNBR.desnivelMaxLance)+' m');
+    html += linhaTabela('Quantidade mínima de lances',
+      valorOuNao(cb,s=>s.lances), valorOuNao(ambas,s=>s.lances), valorOuNao(nbr,s=>s.lances));
+    html += linhaTabela('Patamares intermediários obrigatórios',
+      valorOuNao(cb,s=>s.patamaresIntermediarios), valorOuNao(ambas,s=>s.patamaresIntermediarios), valorOuNao(nbr,s=>s.patamaresIntermediarios));
+    html += linhaTabela('Situação',
+      cb ? '<span class="badge ok">Atende</span>' : '<span class="badge no">Não atende</span>',
+      ambas ? '<span class="badge ok">Atende ambas</span>' : '<span class="badge no">Não atende ambas</span>',
+      nbr ? '<span class="badge ok">Atende</span>' : '<span class="badge no">Não atende</span>');
+
+    document.getElementById('tabelaResultados').innerHTML = html;
+    renderAlternativas('CBPMESP — IT 11/2025', listaCB, 'alt-cb');
+    renderAlternativas('AMBAS', listaAmbas, 'alt-ambas');
+    renderAlternativas('ABNT NBR 9050', listaNBR, 'alt-nbr');
+
+    document.getElementById('alternativas').innerHTML =
+      blocoAlternativas('CBPMESP — IT 11/2025', listaCB) +
+      blocoAlternativas('AMBAS', listaAmbas) +
+      blocoAlternativas('ABNT NBR 9050', listaNBR);
+
+    document.getElementById('resultados').classList.add('show');
+    mostrarStatus('Cálculo concluído com as regras carregadas do banco.', 'ok');
+  }catch(erro){
+    mostrarStatus(erro.message, 'erro');
+    console.error(erro);
+  }
+}
+
+function blocoAlternativas(titulo, lista){
+  if(!lista.length){
+    return `<div class="alt-card"><h3>${titulo}</h3><div class="alt-item">Nenhuma combinação válida encontrada.</div></div>`;
+  }
+
+  const itens = lista.slice(0,6).map((s,i) => `
+    <div class="alt-item ${i===0?'recomendada':''}">
+      ${i===0?'<strong>Recomendada — </strong>':''}
+      ${s.E} espelhos • h ${fmt(s.h)} cm • piso ${fmt(s.pisoSugerido)} cm • ${fmt(s.comprimentoReto)} m reto
+    </div>
+  `).join('');
+
+  return `<div class="alt-card"><h3>${titulo}</h3><div class="alt-list">${itens}</div></div>`;
+}
+
+function renderAlternativas(){ /* mantida apenas para compatibilidade futura */ }
+
+function mostrarStatus(mensagem, tipo){
+  const status = document.getElementById('status');
+  status.textContent = mensagem;
+  status.className = 'status ' + tipo;
+}
+
+function limparCalculadora(){
+  document.getElementById('desnivel').value = '';
+  document.getElementById('espacoDisponivel').value = '';
+  document.getElementById('resultados').classList.remove('show');
+  document.getElementById('tabelaResultados').innerHTML = '';
+  document.getElementById('alternativas').innerHTML = '';
+  document.getElementById('status').className = 'status';
+  document.getElementById('desnivel').focus();
+}
+
+carregarRegrasEscadas();
+</script>
+</body>
+</html>
