@@ -1357,6 +1357,66 @@ function imprimirFerramentaAtual(){
 
     try{
 
+        const documentoIframe =
+            iframe.contentDocument ||
+            iframe.contentWindow.document;
+
+        let estiloImpressao =
+            documentoIframe.getElementById(
+                "sar-impressao-universal"
+            );
+
+        if(!estiloImpressao){
+
+            estiloImpressao =
+                documentoIframe.createElement("style");
+
+            estiloImpressao.id =
+                "sar-impressao-universal";
+
+            estiloImpressao.textContent = `
+                @media print {
+
+                    @page{
+                        size:A4 portrait;
+                        margin:6mm;
+                    }
+
+                    html,
+                    body{
+                        width:100% !important;
+                        height:auto !important;
+                        margin:0 !important;
+                        padding:0 !important;
+                        overflow:visible !important;
+                        background:#fff !important;
+                    }
+
+                    body{
+                        zoom:0.72;
+                    }
+
+                    button,
+                    [type="button"],
+                    [type="submit"],
+                    .botoes,
+                    .acoes,
+                    .actions,
+                    .no-print{
+                        display:none !important;
+                    }
+
+                    *{
+                        box-shadow:none !important;
+                    }
+                }
+            `;
+
+            documentoIframe.head.appendChild(
+                estiloImpressao
+            );
+        }
+
         iframe.contentWindow.focus();
         iframe.contentWindow.print();
 
@@ -1370,9 +1430,7 @@ function imprimirFerramentaAtual(){
         alert(
             "Não foi possível imprimir esta ferramenta."
         );
-
     }
-
 }
 
 
