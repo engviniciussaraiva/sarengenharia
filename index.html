@@ -127,10 +127,13 @@ transform:translateY(-1px);
 .sidebar-footer-btn:active{
 transform:translateY(0);
 }
-.sidebar-footer-btn.logout:hover
+.sidebar-footer-btn.logout:hover{
+    background:#fff0f0;
+}
+
 .sidebar-footer-brand{
-color:#555;
-line-height:1.35;
+    color:#555;
+    line-height:1.35;
 }
 .sidebar-footer-brand strong{
 display:block;
@@ -416,64 +419,69 @@ min-width:20px;
 
     <!-- MENU ESQUERDO -->
 
-<div class="portal-title">
-    Portal
-</div>
+<div class="sidebar" id="sidebar">
 
-<div id="menuDinamico"></div>
-
-<div class="sidebar-footer">
-
-    <div class="sidebar-footer-icons">
-
-        <button
-            class="sidebar-footer-btn"
-            type="button"
-            title="Configurações"
-            aria-label="Configurações"
-            onclick="abrirAreaRodape('CONFIGURACOES')"
-        >
-            ⚙️
-        </button>
-
-        <button
-            class="sidebar-footer-btn"
-            type="button"
-            title="Sobre o SAR"
-            aria-label="Sobre o SAR"
-            onclick="abrirAreaRodape('SOBRE')"
-        >
-            ℹ️
-        </button>
-
-        <button
-            class="sidebar-footer-btn"
-            type="button"
-            title="Ajuda"
-            aria-label="Ajuda"
-            onclick="abrirAreaRodape('AJUDA')"
-        >
-            ❓
-        </button>
-
-        <button
-            class="sidebar-footer-btn logout"
-            type="button"
-            title="Sair"
-            aria-label="Sair"
-            onclick="sairDoSistema()"
-        >
-            🚪
-        </button>
-
+    <div class="portal-title">
+        Portal
     </div>
 
-    <div class="sidebar-footer-brand">
-        <strong>SAR</strong>
-        <span>Sistema Avançado de Resposta</span>
-        <div class="sidebar-footer-version">
-            Versão Beta
+    <div id="menuDinamico"></div>
+
+    <div class="sidebar-footer">
+
+        <div class="sidebar-footer-icons">
+
+            <button
+                class="sidebar-footer-btn"
+                type="button"
+                title="Configurações"
+                aria-label="Configurações"
+                onclick="abrirAreaRodape('CONFIGURACOES')"
+            >
+                ⚙️
+            </button>
+
+            <button
+                class="sidebar-footer-btn"
+                type="button"
+                title="Sobre o SAR"
+                aria-label="Sobre o SAR"
+                onclick="abrirAreaRodape('SOBRE')"
+            >
+                ℹ️
+            </button>
+
+            <button
+                class="sidebar-footer-btn"
+                type="button"
+                title="Ajuda"
+                aria-label="Ajuda"
+                onclick="abrirAreaRodape('AJUDA')"
+            >
+                ❓
+            </button>
+
+            <button
+                class="sidebar-footer-btn logout"
+                type="button"
+                title="Sair"
+                aria-label="Sair"
+                onclick="sairDoSistema()"
+            >
+                🚪
+            </button>
+
         </div>
+
+        <div class="sidebar-footer-brand">
+            <strong>SAR</strong>
+            <span>Sistema Avançado de Resposta</span>
+
+            <div class="sidebar-footer-version">
+                Versão Beta
+            </div>
+        </div>
+
     </div>
 
 </div>
