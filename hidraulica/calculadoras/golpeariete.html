@@ -1,917 +1,352 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Golpe de Aríete e Esforços em Pipe Rack</title>
-  <style>
-    :root{
-      --azul:#0f4c91;
-      --azul-2:#0b3d73;
-      --azul-claro:#eef5ff;
-      --borda:#d7dee8;
-      --texto:#172033;
-      --fundo:#f4f7fb;
-      --verde:#159447;
-      --vermelho:#c8332c;
-      --amarelo:#fff7dd;
-      --sombra:0 2px 8px rgba(18,38,63,.08);
-    }
-
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Inter,Segoe UI,Arial,sans-serif;
-      background:var(--fundo);
-      color:var(--texto);
-    }
-
-    .pagina{
-      width:min(1600px, 98%);
-      margin:14px auto 30px;
-    }
-
-    .card{
-      background:#fff;
-      border:1px solid var(--borda);
-      border-radius:10px;
-      box-shadow:var(--sombra);
-      margin-bottom:12px;
-    }
-
-    .cabecalho{
-      padding:18px 22px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:20px;
-    }
-
-    .titulo-wrap{
-      display:flex;
-      align-items:center;
-      gap:14px;
-    }
-
-    .icone-gota{
-      width:34px;
-      height:34px;
-      color:var(--azul);
-      flex:0 0 auto;
-    }
-
-    h1{
-      font-size:26px;
-      line-height:1.1;
-      margin:0 0 4px;
-    }
-
-    .subtitulo{
-      color:#43516b;
-      font-size:15px;
-    }
-
-    .acoes{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
-    button{
-      font:inherit;
-      cursor:pointer;
-    }
-
-    .btn{
-      border:1px solid var(--azul);
-      background:#fff;
-      color:var(--azul);
-      border-radius:6px;
-      padding:11px 16px;
-      font-weight:700;
-    }
-
-    .btn:hover{background:var(--azul-claro)}
-    .btn-primario{
-      background:linear-gradient(180deg,#1760ad,#0d4787);
-      color:#fff;
-      border:none;
-    }
-
-    .btn-primario:hover{filter:brightness(.96)}
-    .btn-perigo{color:var(--vermelho);border-color:#f0b6b2}
-
-    .secao{
-      padding:16px 20px 14px;
-    }
-
-    .secao-titulo{
-      color:var(--azul);
-      font-size:17px;
-      margin:0 0 14px;
-      font-weight:800;
-    }
-
-    .dados-gerais{
-      display:grid;
-      grid-template-columns:1fr 1.15fr 1.15fr 1.25fr;
-      gap:18px;
-      align-items:start;
-    }
-
-    .campo label{
-      display:block;
-      font-size:14px;
-      font-weight:700;
-      margin:0 0 7px;
-    }
-
-    .linha-input{
-      display:flex;
-      align-items:stretch;
-    }
-
-    input, select{
-      width:100%;
-      min-height:44px;
-      border:1px solid var(--borda);
-      border-radius:6px;
-      background:#fff;
-      padding:9px 12px;
-      font:inherit;
-      color:var(--texto);
-      outline:none;
-    }
-
-    input:focus, select:focus{
-      border-color:#5b91d1;
-      box-shadow:0 0 0 3px rgba(48,110,184,.12);
-    }
-
-    .linha-input input{
-      border-radius:6px 0 0 6px;
-    }
-
-    .unidade{
-      display:flex;
-      align-items:center;
-      padding:0 12px;
-      border:1px solid var(--borda);
-      border-left:0;
-      border-radius:0 6px 6px 0;
-      background:#f7f9fc;
-      font-weight:700;
-      white-space:nowrap;
-    }
-
-    .aviso{
-      border:1px solid #b8d6ff;
-      background:#f3f8ff;
-      border-radius:7px;
-      padding:12px 14px;
-      font-size:14px;
-      line-height:1.4;
-    }
-
-    .aviso strong{
-      display:block;
-      color:var(--azul);
-      margin-bottom:6px;
-    }
-
-    .topo-tabela{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:16px;
-      margin-bottom:10px;
-      flex-wrap:wrap;
-    }
-
-    .unidades{
-      font-size:13px;
-      font-weight:700;
-    }
-
-    .tabela-wrap{
-      overflow-x:auto;
-      border:1px solid var(--borda);
-      border-radius:7px;
-    }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      min-width:1200px;
-    }
-
-    th{
-      background:linear-gradient(180deg,#13579d,#0d447e);
-      color:#fff;
-      font-size:12px;
-      text-transform:uppercase;
-      padding:12px 8px;
-      border-right:1px solid rgba(255,255,255,.25);
-      text-align:center;
-    }
-
-    td{
-      border-right:1px solid var(--borda);
-      border-top:1px solid var(--borda);
-      padding:8px;
-      text-align:center;
-      background:#fff;
-    }
-
-    td input, td select{
-      min-height:38px;
-      padding:7px 9px;
-      text-align:center;
-    }
-
-    .acoes-linha{
-      display:flex;
-      gap:8px;
-      justify-content:center;
-    }
-
-    .icone-btn{
-      border:0;
-      background:transparent;
-      font-size:18px;
-      padding:4px;
-    }
-
-    .editar{color:var(--azul)}
-    .excluir{color:var(--vermelho)}
-
-    .rodape-tabela{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      padding:12px 8px 4px;
-      font-size:14px;
-      font-weight:700;
-    }
-
-    .grade-resultados{
-      display:grid;
-      grid-template-columns:1.08fr 1.05fr .7fr;
-      gap:12px;
-    }
-
-    .resultado-card{
-      padding:14px 16px;
-      min-height:100%;
-    }
-
-    .resultado-lista{
-      border:1px solid var(--borda);
-      border-radius:6px;
-      overflow:hidden;
-    }
-
-    .resultado-linha{
-      display:grid;
-      grid-template-columns:1fr 100px 60px;
-      border-top:1px solid var(--borda);
-      min-height:40px;
-      align-items:center;
-    }
-
-    .resultado-linha:first-child{border-top:0}
-    .resultado-linha span{padding:8px 10px}
-    .resultado-linha .valor{
-      font-weight:800;
-      text-align:right;
-      border-left:1px solid var(--borda);
-    }
-    .resultado-linha .un{
-      text-align:center;
-      border-left:1px solid var(--borda);
-      font-size:13px;
-    }
-
-    .verificacao{
-      margin-top:12px;
-      border:1px solid #f0a4a1;
-      background:#fffafa;
-      border-radius:7px;
-      padding:14px;
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:16px;
-      align-items:center;
-    }
-
-    .verificacao h3{
-      margin:0 0 12px;
-      font-size:14px;
-      color:var(--vermelho);
-    }
-
-    .numero-grande{
-      font-size:28px;
-      color:var(--vermelho);
-      font-weight:900;
-      text-align:center;
-    }
-
-    .status{
-      border-left:1px solid #efb7b4;
-      padding-left:18px;
-    }
-
-    .status strong{
-      color:var(--vermelho);
-      font-size:22px;
-      display:block;
-      margin:8px 0;
-    }
-
-    .mini-tabela{
-      min-width:0;
-    }
-
-    .mini-tabela th{font-size:11px}
-    .mini-tabela td{font-size:14px}
-
-    .formula{
-      background:#f2f7ff;
-      border:1px solid #c8d8ef;
-      border-radius:7px;
-      padding:13px;
-      margin-top:12px;
-      line-height:1.5;
-      font-size:14px;
-    }
-
-    .critico{
-      background:linear-gradient(180deg,#fffdf6,#fff7da);
-      border:1px solid #f1cf68;
-      border-radius:7px;
-      padding:18px;
-      min-height:310px;
-    }
-
-    .critico .estrela{
-      font-size:34px;
-      color:#e5c44c;
-      float:left;
-      margin-right:12px;
-    }
-
-    .critico h3{margin:0 0 14px}
-    .critico .trecho{
-      font-size:22px;
-      font-weight:900;
-      margin-bottom:22px;
-    }
-
-    .critico .destaque{
-      font-size:24px;
-      font-weight:900;
-      margin:5px 0 18px;
-    }
-
-    .sim{color:var(--verde);font-weight:900}
-    .nao{color:var(--vermelho);font-weight:900}
-
-    .nota-final{
-      text-align:center;
-      font-size:13px;
-      margin-top:14px;
-      color:#35435a;
-    }
-
-    dialog{
-      width:min(760px,94vw);
-      border:0;
-      border-radius:10px;
-      padding:0;
-      box-shadow:0 18px 50px rgba(0,0,0,.25);
-    }
-
-    dialog::backdrop{background:rgba(0,0,0,.42)}
-
-    .modal-topo{
-      background:var(--azul);
-      color:#fff;
-      padding:15px 18px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-
-    .modal-corpo{
-      padding:18px;
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-    }
-
-    .modal-acoes{
-      grid-column:1/-1;
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
-      margin-top:5px;
-    }
-
-    @media (max-width:1100px){
-      .dados-gerais{grid-template-columns:1fr 1fr}
-      .grade-resultados{grid-template-columns:1fr}
-    }
-
-    @media (max-width:650px){
-      .cabecalho{align-items:flex-start;flex-direction:column}
-      .dados-gerais{grid-template-columns:1fr}
-      h1{font-size:21px}
-      .modal-corpo{grid-template-columns:1fr}
-    }
-
-    @media print{
-      body{background:#fff}
-      .pagina{width:100%;margin:0}
-      .acoes,.btn,.acoes-linha,.nota-final{display:none!important}
-      .card{box-shadow:none;break-inside:avoid}
-      .tabela-wrap{overflow:visible}
-      table{min-width:0;font-size:10px}
-      input,select{border:0;padding:0;background:transparent}
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Golpe de Aríete e Esforços em Pipe Rack</title>
+<style>
+:root{
+  --azul:#0f4c91;--azul2:#0a3b70;--fundo:#f3f6fa;--borda:#d7dee8;
+  --texto:#172033;--verde:#168a46;--vermelho:#c8342e;--amarelo:#fff8dd;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fundo);font-family:Segoe UI,Arial,sans-serif;color:var(--texto)}
+.app{width:min(1600px,98%);margin:14px auto 30px}
+.card{background:#fff;border:1px solid var(--borda);border-radius:10px;margin-bottom:12px;box-shadow:0 2px 8px rgba(18,38,63,.07)}
+.header{padding:18px 22px;display:flex;justify-content:space-between;gap:18px;align-items:center}
+h1{font-size:25px;margin:0 0 5px}.sub{color:#4a5870}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--azul);background:#fff;color:var(--azul);padding:10px 14px;border-radius:6px;font-weight:700;cursor:pointer}
+.btn:hover{background:#eef5ff}.btn-primary{background:var(--azul);color:#fff}.btn-danger{color:var(--vermelho);border-color:#e7aaa6}
+.section{padding:16px 20px}.section-title{margin:0 0 14px;color:var(--azul);font-size:17px}
+.grid-general{display:grid;grid-template-columns:1fr 1.2fr 1.1fr;gap:16px}
+label{display:block;font-weight:700;font-size:14px;margin-bottom:7px}
+input,select{width:100%;min-height:43px;border:1px solid var(--borda);border-radius:6px;padding:9px 11px;font:inherit}
+.input-unit{display:flex}.input-unit input{border-radius:6px 0 0 6px}.unit{display:flex;align-items:center;padding:0 11px;border:1px solid var(--borda);border-left:0;border-radius:0 6px 6px 0;background:#f7f9fc;font-weight:700}
+.note{background:#f4f8ff;border:1px solid #bcd3f1;border-radius:7px;padding:12px;font-size:14px;line-height:1.4}
+.note strong{color:var(--azul)}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.table-wrap{overflow:auto;border:1px solid var(--borda);border-radius:7px}
+table{width:100%;border-collapse:collapse;min-width:1250px}
+th{background:linear-gradient(#145a9f,#0d447e);color:#fff;text-transform:uppercase;font-size:11px;padding:11px 7px;text-align:center}
+td{padding:8px;border-top:1px solid var(--borda);border-right:1px solid var(--borda);text-align:center}
+.row-actions{display:flex;justify-content:center;gap:7px}
+.icon{border:0;background:transparent;cursor:pointer;font-size:17px}
+.yes{color:var(--verde);font-weight:800}.no{color:var(--vermelho);font-weight:800}
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:10px;font-weight:700}
+.results{display:grid;grid-template-columns:1.1fr 1fr .75fr;gap:12px}
+.result-card{padding:15px}
+.result-list{border:1px solid var(--borda);border-radius:6px;overflow:hidden}
+.result-line{display:grid;grid-template-columns:1fr 110px 60px;min-height:40px;border-top:1px solid var(--borda);align-items:center}
+.result-line:first-child{border-top:0}.result-line span{padding:8px}.result-line .v{font-weight:800;text-align:right;border-left:1px solid var(--borda)}.result-line .u{text-align:center;border-left:1px solid var(--borda)}
+.highlight{background:var(--amarelo);border:1px solid #efd16f;border-radius:7px;padding:16px;min-height:300px}
+.big{font-size:24px;font-weight:900;margin:6px 0 18px}.warn{color:var(--vermelho)}
+.footer-note{text-align:center;font-size:13px;color:#47536a;margin-top:12px}
+dialog{width:min(760px,94vw);border:0;border-radius:10px;padding:0;box-shadow:0 18px 50px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(0,0,0,.42)}
+.modal-head{background:var(--azul);color:#fff;padding:14px 17px;display:flex;justify-content:space-between;align-items:center}
+.modal-body{padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.modal-actions{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:800;background:#eef5ff;color:var(--azul)}
+@media(max-width:1100px){.grid-general{grid-template-columns:1fr 1fr}.results{grid-template-columns:1fr}}
+@media(max-width:700px){.header{flex-direction:column;align-items:flex-start}.grid-general,.modal-body{grid-template-columns:1fr}h1{font-size:21px}}
+@media print{body{background:#fff}.app{width:100%;margin:0}.actions,.btn,.row-actions,.footer-note{display:none!important}.card{box-shadow:none;break-inside:avoid}.table-wrap{overflow:visible}table{min-width:0;font-size:9px}}
+</style>
 </head>
 <body>
-  <main class="pagina" id="areaImpressao">
+<main class="app" id="areaImpressao">
 
-    <section class="card cabecalho">
-      <div class="titulo-wrap">
-        <svg class="icone-gota" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true">
-          <path d="M32 3C23 16 13 27 13 40a19 19 0 0 0 38 0C51 27 41 16 32 3Z"/>
-          <path d="M4 54c8 5 16 5 24 0 8 5 16 5 24 0 4 3 8 4 12 4v4c-4 0-8-1-12-3-8 4-16 4-24 0-8 4-16 4-24 0Z"/>
-        </svg>
-        <div>
-          <h1>CALCULADORA DE GOLPE DE ARÍETE E ESFORÇOS EM PIPE RACK</h1>
-          <div class="subtitulo">Cálculo simplificado de sobrepressão e forças para pré-dimensionamento de pipe racks</div>
-        </div>
-      </div>
+<section class="card header">
+  <div>
+    <h1>CALCULADORA DE GOLPE DE ARÍETE E ESFORÇOS EM PIPE RACK</h1>
+    <div class="sub">Cadastro hidráulico do ponto de consumo até a bomba</div>
+  </div>
+  <div class="actions">
+    <button class="btn" onclick="window.print()">🖨 Imprimir tela central</button>
+    <button class="btn" onclick="limparTudo()">↻ Limpar dados</button>
+  </div>
+</section>
 
-      <div class="acoes">
-        <button class="btn" type="button" onclick="window.print()">🖨 Imprimir tela central</button>
-        <button class="btn" type="button" onclick="limparTudo()">↻ Limpar dados</button>
-      </div>
-    </section>
-
-    <section class="card secao">
-      <h2 class="secao-titulo">DADOS GERAIS</h2>
-
-      <div class="dados-gerais">
-        <div class="campo">
-          <label for="shutoff">Shutoff da bomba (pressão a vazão zero)</label>
-          <div class="linha-input">
-            <input id="shutoff" type="number" step="0.01" placeholder="Ex.: 120,00" oninput="calcular()">
-            <span class="unidade">mca</span>
-          </div>
-        </div>
-
-        <div class="campo">
-          <label for="pontoFechamento">Ponto de fechamento da linha</label>
-          <select id="pontoFechamento" onchange="calcular()"></select>
-        </div>
-
-        <div class="campo">
-          <label for="condicaoFechamento">Condição do fechamento</label>
-          <select id="condicaoFechamento" onchange="alternarTempoFechamento();calcular()">
-            <option value="rapido">Fechamento rápido (conservador)</option>
-            <option value="conhecido">Tempo de fechamento conhecido</option>
-          </select>
-          <div id="tempoWrap" style="display:none;margin-top:8px">
-            <div class="linha-input">
-              <input id="tempoFechamento" type="number" min="0.01" step="0.01" value="1" oninput="calcular()">
-              <span class="unidade">s</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="aviso">
-          <strong>● Atenção</strong>
-          Cálculo conservador considerando interrupção rápida da vazão. O tempo real depende da válvula, do esguicho e da forma de operação.
-        </div>
-      </div>
-    </section>
-
-    <section class="card secao">
-      <h2 class="secao-titulo">CADASTRO DOS TRECHOS DA LINHA - PARTINDO DA BOMBA PARA O PONTO DE USO</h2>
-
-      <div class="topo-tabela">
-        <button class="btn btn-primario" type="button" onclick="abrirModal()">＋ Adicionar trecho</button>
-        <div class="unidades">Unidades: Vazão (LPM) &nbsp;|&nbsp; Pressão (mca) &nbsp;|&nbsp; Comprimento (m) &nbsp;|&nbsp; Diâmetro interno (mm)</div>
-      </div>
-
-      <div class="tabela-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Trecho</th>
-              <th>Vazão<br>(LPM)</th>
-              <th>Pressão inicial<br>(mca)</th>
-              <th>Pressão no fim do trecho<br>(mca)</th>
-              <th>Comprimento<br>(m)</th>
-              <th>Diâmetro<br>(mm)</th>
-              <th>Tipo do tubo</th>
-              <th>Velocidade<br>(m/s)</th>
-              <th>Trecho apoiado em<br>pipe rack alto</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="corpoTabela"></tbody>
-        </table>
-      </div>
-
-      <div class="rodape-tabela">
-        <div>Total de trechos: <span id="totalTrechos">0</span></div>
-        <div>Comprimento total: <span id="comprimentoTotal">0,00</span> m</div>
-      </div>
-    </section>
-
-    <section class="grade-resultados">
-      <div class="card resultado-card">
-        <h2 class="secao-titulo">RESULTADOS GERAIS</h2>
-
-        <div class="resultado-lista">
-          <div class="resultado-linha"><span>Velocidade equivalente da onda (a)</span><span class="valor" id="resOnda">0,00</span><span class="un">m/s</span></div>
-          <div class="resultado-linha"><span>Tempo crítico (2L/a)</span><span class="valor" id="resTempo">0,000</span><span class="un">s</span></div>
-          <div class="resultado-linha"><span>Sobrepressão estimada (ΔH)</span><span class="valor" id="resSobrepressao">0,00</span><span class="un">mca</span></div>
-          <div class="resultado-linha"><span>Pressão operacional no ponto de fechamento</span><span class="valor" id="resPressaoPonto">0,00</span><span class="un">mca</span></div>
-          <div class="resultado-linha"><span>Pressão máxima estimada (operacional + ΔH)</span><span class="valor" id="resPressaoMax">0,00</span><span class="un">mca</span></div>
-          <div class="resultado-linha"><span>Pressão máxima conservadora (shutoff + ΔH)</span><span class="valor" id="resConservadora">0,00</span><span class="un">mca</span></div>
-        </div>
-
-        <div class="verificacao">
-          <div>
-            <h3>ENVOLTÓRIA CONSERVADORA</h3>
-            <div>Pressão máxima conservadora</div>
-            <div class="numero-grande"><span id="resConservadoraGrande">0,00</span> <small>mca</small></div>
-          </div>
-          <div class="status">
-            <div>Situação</div>
-            <strong id="statusGeral">CALCULADO</strong>
-            <small>Verificar o valor com os limites dos componentes e com o projeto estrutural.</small>
-          </div>
-        </div>
-      </div>
-
-      <div class="card resultado-card">
-        <h2 class="secao-titulo">FORÇAS DINÂMICAS POR TRECHO</h2>
-        <div class="tabela-wrap">
-          <table class="mini-tabela">
-            <thead>
-              <tr>
-                <th>Trecho</th>
-                <th>Sobrepressão<br>(mca)</th>
-                <th>Força dinâmica<br>longitudinal (kN)</th>
-                <th>Pipe rack alto</th>
-              </tr>
-            </thead>
-            <tbody id="corpoResultados"></tbody>
-          </table>
-        </div>
-
-        <div class="formula">
-          A força dinâmica longitudinal simplificada foi calculada por:<br>
-          <strong>F = ΔP × A</strong><br>
-          onde ΔP = ρ × g × ΔH, ρ = 1.000 kg/m³ e g = 9,81 m/s².
-        </div>
-      </div>
-
-      <div class="card resultado-card">
-        <h2 class="secao-titulo">TRECHO CRÍTICO</h2>
-        <div class="critico">
-          <div class="estrela">★</div>
-          <h3>Trecho crítico:</h3>
-          <div class="trecho" id="critTrecho">—</div>
-
-          <div>Maior força dinâmica longitudinal:</div>
-          <div class="destaque"><span id="critForca">0,00</span> kN</div>
-
-          <div>Apoiado em pipe rack alto:</div>
-          <div class="destaque" id="critRack">—</div>
-
-          <div>Pressão máxima conservadora:</div>
-          <div class="destaque nao"><span id="critPressao">0,00</span> mca</div>
-        </div>
-      </div>
-    </section>
-
-    <div class="nota-final">
-      Cálculo simplificado conforme abordagem de Joukowsky. Resultados destinados a pré-dimensionamento. Para sistemas críticos, recomenda-se análise transitória detalhada.
+<section class="card section">
+  <h2 class="section-title">DADOS GERAIS</h2>
+  <div class="grid-general">
+    <div>
+      <label>Shutoff da bomba</label>
+      <div class="input-unit"><input id="shutoff" type="number" step="0.01" oninput="calcular()"><span class="unit">mca</span></div>
     </div>
-  </main>
+    <div>
+      <label>Condição de fixação da linha</label>
+      <select id="fixacao" onchange="calcular()">
+        <option value="1">Não informado — condição conservadora</option>
+        <option value="1">Firmemente presa / ancorada</option>
+        <option value="0.7">Guiada, com movimento longitudinal</option>
+        <option value="0.3">Apoiada com possibilidade de escorregamento</option>
+      </select>
+    </div>
+    <div class="note">
+      <strong>Sentido do cadastro:</strong><br>
+      Cadastre os trechos partindo do ponto de consumo em direção à bomba.
+      O primeiro trecho representa o local onde a vazão é interrompida.
+    </div>
+  </div>
+</section>
 
-  <dialog id="modalTrecho">
-    <form method="dialog" id="formTrecho">
-      <div class="modal-topo">
-        <strong id="tituloModal">Adicionar trecho</strong>
-        <button type="button" class="icone-btn" style="color:#fff" onclick="fecharModal()">✕</button>
-      </div>
+<section class="card section">
+  <h2 class="section-title">CADASTRO DOS TRECHOS DA LINHA — DO PONTO DE CONSUMO ATÉ A BOMBA</h2>
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="abrirTrecho()">＋ Adicionar trecho</button>
+    <div><span class="badge">Vazão: LPM</span> <span class="badge">Pressão: mca</span> <span class="badge">Diâmetro interno: mm</span></div>
+  </div>
 
-      <div class="modal-corpo">
-        <input type="hidden" id="indiceEdicao">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Trecho</th><th>Vazão</th><th>Pressão no início</th><th>Pressão no fim</th>
+          <th>Comprimento</th><th>Diâmetro</th><th>Tipo do tubo</th><th>Velocidade</th>
+          <th>Pipe rack alto</th><th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyTrechos"></tbody>
+    </table>
+  </div>
+  <div class="summary">
+    <div>Total de trechos: <span id="totalTrechos">0</span></div>
+    <div>Comprimento total: <span id="compTotal">0,00</span> m</div>
+  </div>
+</section>
 
-        <div class="campo">
-          <label for="mTrecho">Trecho</label>
-          <input id="mTrecho" required placeholder="Ex.: A1 - A2">
-        </div>
+<section class="card section">
+  <h2 class="section-title">VÁLVULA DE ALÍVIO DE PRESSÃO</h2>
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="abrirValvula()">＋ Inserir dados da válvula</button>
+    <div id="valvulaResumo">Nenhuma válvula cadastrada.</div>
+  </div>
+  <div class="table-wrap">
+    <table style="min-width:900px">
+      <thead>
+        <tr><th>Trecho</th><th>Pressão de abertura</th><th>Capacidade de descarga</th><th>Resposta</th><th>Ações</th></tr>
+      </thead>
+      <tbody id="tbodyValvulas"></tbody>
+    </table>
+  </div>
+</section>
 
-        <div class="campo">
-          <label for="mVazao">Vazão (LPM)</label>
-          <input id="mVazao" type="number" min="0" step="0.01" required>
-        </div>
+<section class="results">
+  <div class="card result-card">
+    <h2 class="section-title">RESULTADOS GERAIS</h2>
+    <div class="result-list">
+      <div class="result-line"><span>Velocidade equivalente da onda</span><span class="v" id="rOnda">0,00</span><span class="u">m/s</span></div>
+      <div class="result-line"><span>Tempo crítico</span><span class="v" id="rTempo">0,000</span><span class="u">s</span></div>
+      <div class="result-line"><span>Sobrepressão sem alívio</span><span class="v" id="rDH">0,00</span><span class="u">mca</span></div>
+      <div class="result-line"><span>Pressão máxima sem alívio</span><span class="v" id="rPSem">0,00</span><span class="u">mca</span></div>
+      <div class="result-line"><span>Pressão máxima estimada com alívio</span><span class="v" id="rPCom">0,00</span><span class="u">mca</span></div>
+      <div class="result-line"><span>Redução estimada pela válvula</span><span class="v" id="rReducao">0,00</span><span class="u">%</span></div>
+    </div>
+  </div>
 
-        <div class="campo">
-          <label for="mPressaoInicial">Pressão inicial (mca)</label>
-          <input id="mPressaoInicial" type="number" step="0.01" required>
-        </div>
+  <div class="card result-card">
+    <h2 class="section-title">FORÇAS POR TRECHO</h2>
+    <div class="table-wrap">
+      <table style="min-width:760px">
+        <thead><tr><th>Trecho</th><th>Força hidráulica</th><th>Força estimada transmitida</th><th>Pipe rack alto</th></tr></thead>
+        <tbody id="tbodyResultados"></tbody>
+      </table>
+    </div>
+  </div>
 
-        <div class="campo">
-          <label for="mPressaoFinal">Pressão no fim do trecho (mca)</label>
-          <input id="mPressaoFinal" type="number" step="0.01" required>
-        </div>
+  <div class="card result-card">
+    <h2 class="section-title">TRECHO CRÍTICO</h2>
+    <div class="highlight">
+      <div>Trecho:</div><div class="big" id="critTrecho">—</div>
+      <div>Força hidráulica:</div><div class="big"><span id="critHid">0,00</span> kN</div>
+      <div>Força transmitida ao rack:</div><div class="big"><span id="critTrans">0,00</span> kN</div>
+      <div>Pressão máxima com alívio:</div><div class="big warn"><span id="critPressao">0,00</span> mca</div>
+    </div>
+  </div>
+</section>
 
-        <div class="campo">
-          <label for="mComprimento">Comprimento (m)</label>
-          <input id="mComprimento" type="number" min="0.01" step="0.01" required>
-        </div>
+<div class="footer-note">
+  A influência da válvula de alívio é uma estimativa preliminar baseada na pressão de abertura, capacidade de descarga e rapidez de resposta. Para validação final, utilizar dados do fabricante e análise transitória detalhada.
+</div>
+</main>
 
-        <div class="campo">
-          <label for="mDiametro">Diâmetro interno (mm)</label>
-          <input id="mDiametro" type="number" min="1" step="0.01" required>
-        </div>
+<dialog id="dlgTrecho">
+<form method="dialog" id="formTrecho">
+  <div class="modal-head"><strong id="tituloTrecho">Adicionar trecho</strong><button type="button" class="icon" style="color:#fff" onclick="dlgTrecho.close()">✕</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="idxTrecho">
+    <div><label>Trecho</label><input id="tNome" required placeholder="Ex.: H1 - A1"></div>
+    <div><label>Vazão (LPM)</label><input id="tVazao" type="number" min="0" step="0.01" required></div>
+    <div><label>Pressão no início (mca)</label><input id="tPIni" type="number" step="0.01" required></div>
+    <div><label>Pressão no fim (mca)</label><input id="tPFim" type="number" step="0.01" required></div>
+    <div><label>Comprimento (m)</label><input id="tComp" type="number" min="0.01" step="0.01" required></div>
+    <div><label>Diâmetro interno (mm)</label><input id="tDiam" type="number" min="1" step="0.01" required></div>
+    <div><label>Tipo do tubo</label>
+      <select id="tTipo">
+        <option>Aço carbono</option><option>Aço galvanizado</option><option>Ferro fundido dúctil</option>
+        <option>PVC</option><option>CPVC</option><option>PEAD</option><option>Outro</option>
+      </select>
+    </div>
+    <div><label>Apoiado em pipe rack alto?</label><select id="tRack"><option>SIM</option><option>NÃO</option></select></div>
+    <div class="modal-actions"><button type="button" class="btn" onclick="dlgTrecho.close()">Cancelar</button><button class="btn btn-primary" type="submit">Salvar trecho</button></div>
+  </div>
+</form>
+</dialog>
 
-        <div class="campo">
-          <label for="mTipoTubo">Tipo do tubo</label>
-          <select id="mTipoTubo">
-            <option>Aço carbono - NBR 5590 SCH 10</option>
-            <option>Aço carbono - NBR 5590 SCH 40</option>
-            <option>Aço galvanizado - NBR 5580 classe média</option>
-            <option>Aço galvanizado - NBR 5580 classe pesada</option>
-            <option>Ferro fundido dúctil</option>
-            <option>PVC</option>
-            <option>CPVC</option>
-            <option>PEAD</option>
-            <option>Outro</option>
-          </select>
-        </div>
+<dialog id="dlgValvula">
+<form method="dialog" id="formValvula">
+  <div class="modal-head"><strong id="tituloValvula">Inserir válvula de alívio</strong><button type="button" class="icon" style="color:#fff" onclick="dlgValvula.close()">✕</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="idxValvula">
+    <div><label>Trecho onde está a válvula</label><select id="vTrecho" required></select></div>
+    <div><label>Pressão de abertura (mca)</label><input id="vAbertura" type="number" min="0" step="0.01" required></div>
+    <div><label>Capacidade de descarga (LPM)</label><input id="vCapacidade" type="number" min="0" step="0.01" required></div>
+    <div><label>Rapidez de resposta</label>
+      <select id="vResposta"><option value="0.9">Rápida</option><option value="0.7">Normal</option><option value="0.5">Lenta</option></select>
+    </div>
+    <div class="modal-actions"><button type="button" class="btn" onclick="dlgValvula.close()">Cancelar</button><button class="btn btn-primary" type="submit">Salvar válvula</button></div>
+  </div>
+</form>
+</dialog>
 
-        <div class="campo">
-          <label for="mPipeRack">Apoiado em pipe rack alto?</label>
-          <select id="mPipeRack">
-            <option value="SIM">SIM</option>
-            <option value="NÃO">NÃO</option>
-          </select>
-        </div>
+<script>
+const fmt=(n,c=2)=>Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:c,maximumFractionDigits:c});
+let trechos=[];
+let valvulas=[];
 
-        <div class="modal-acoes">
-          <button class="btn" type="button" onclick="fecharModal()">Cancelar</button>
-          <button class="btn btn-primario" type="submit">Salvar trecho</button>
-        </div>
-      </div>
-    </form>
-  </dialog>
+function area(t){const d=Number(t.diam)/1000;return Math.PI*d*d/4}
+function vel(t){const q=Number(t.vazao)/1000/60;return area(t)>0?q/area(t):0}
+function onda(tipo){
+  const s=tipo.toLowerCase();
+  if(s.includes('pead'))return 350;
+  if(s.includes('pvc'))return 430;
+  if(s.includes('cpvc'))return 500;
+  if(s.includes('ferro'))return 1050;
+  if(s.includes('aço')||s.includes('aco'))return 1120;
+  return 900;
+}
 
-  <script>
-    const fmt = (n, casas=2) =>
-      Number(n || 0).toLocaleString('pt-BR', {
-        minimumFractionDigits: casas,
-        maximumFractionDigits: casas
-      });
+function render(){
+  tbodyTrechos.innerHTML='';
+  trechos.forEach((t,i)=>{
+    tbodyTrechos.innerHTML+=`<tr>
+      <td><strong>${t.nome}</strong></td><td>${fmt(t.vazao,0)}</td><td>${fmt(t.pIni)}</td><td>${fmt(t.pFim)}</td>
+      <td>${fmt(t.comp)}</td><td>${fmt(t.diam)}</td><td>${t.tipo}</td><td><strong>${fmt(vel(t))}</strong></td>
+      <td class="${t.rack==='SIM'?'yes':'no'}">${t.rack}</td>
+      <td><div class="row-actions"><button class="icon" onclick="editarTrecho(${i})">✎</button><button class="icon" onclick="excluirTrecho(${i})">🗑</button></div></td>
+    </tr>`;
+  });
+  totalTrechos.textContent=trechos.length;
+  compTotal.textContent=fmt(trechos.reduce((s,t)=>s+Number(t.comp||0),0));
+  atualizarSelectTrechos();
+  renderValvulas();
+  calcular();
+}
 
-    let trechos = [];
+function atualizarSelectTrechos(){
+  const atual=vTrecho.value;
+  vTrecho.innerHTML='';
+  trechos.forEach((t,i)=>vTrecho.innerHTML+=`<option value="${i}">${t.nome}</option>`);
+  if([...vTrecho.options].some(o=>o.value===atual))vTrecho.value=atual;
+}
 
-    function velocidade(t){
-      const q = Number(t.vazao) / 1000 / 60;
-      const d = Number(t.diametro) / 1000;
-      const area = Math.PI * d * d / 4;
-      return area > 0 ? q / area : 0;
-    }
+function abrirTrecho(){
+  formTrecho.reset();idxTrecho.value='';tituloTrecho.textContent='Adicionar trecho';dlgTrecho.showModal();
+}
+function editarTrecho(i){
+  const t=trechos[i];idxTrecho.value=i;tituloTrecho.textContent='Editar trecho';
+  tNome.value=t.nome;tVazao.value=t.vazao;tPIni.value=t.pIni;tPFim.value=t.pFim;tComp.value=t.comp;tDiam.value=t.diam;tTipo.value=t.tipo;tRack.value=t.rack;
+  dlgTrecho.showModal();
+}
+function excluirTrecho(i){
+  if(!confirm('Excluir este trecho?'))return;
+  trechos.splice(i,1);
+  valvulas=valvulas.filter(v=>v.trecho!==i).map(v=>({...v,trecho:v.trecho>i?v.trecho-1:v.trecho}));
+  render();
+}
+formTrecho.addEventListener('submit',e=>{
+  e.preventDefault();
+  const o={nome:tNome.value.trim(),vazao:+tVazao.value,pIni:+tPIni.value,pFim:+tPFim.value,comp:+tComp.value,diam:+tDiam.value,tipo:tTipo.value,rack:tRack.value};
+  if(idxTrecho.value==='')trechos.push(o);else trechos[+idxTrecho.value]=o;
+  dlgTrecho.close();render();
+});
 
-    function areaInterna(t){
-      const d = Number(t.diametro) / 1000;
-      return Math.PI * d * d / 4;
-    }
+function abrirValvula(){
+  if(!trechos.length){alert('Cadastre ao menos um trecho antes de inserir a válvula.');return}
+  formValvula.reset();idxValvula.value='';tituloValvula.textContent='Inserir válvula de alívio';atualizarSelectTrechos();dlgValvula.showModal();
+}
+function editarValvula(i){
+  const v=valvulas[i];idxValvula.value=i;tituloValvula.textContent='Editar válvula de alívio';atualizarSelectTrechos();
+  vTrecho.value=v.trecho;vAbertura.value=v.abertura;vCapacidade.value=v.capacidade;vResposta.value=v.resposta;dlgValvula.showModal();
+}
+function excluirValvula(i){if(confirm('Excluir esta válvula?')){valvulas.splice(i,1);renderValvulas();calcular()}}
+formValvula.addEventListener('submit',e=>{
+  e.preventDefault();
+  const o={trecho:+vTrecho.value,abertura:+vAbertura.value,capacidade:+vCapacidade.value,resposta:+vResposta.value};
+  if(idxValvula.value==='')valvulas.push(o);else valvulas[+idxValvula.value]=o;
+  dlgValvula.close();renderValvulas();calcular();
+});
 
-    function velocidadeOndaPorMaterial(tipo){
-      const s = tipo.toLowerCase();
-      if (s.includes('pead')) return 350;
-      if (s.includes('pvc')) return 430;
-      if (s.includes('cpvc')) return 500;
-      if (s.includes('ferro')) return 1050;
-      if (s.includes('aço') || s.includes('aco')) return 1120;
-      return 900;
-    }
+function renderValvulas(){
+  tbodyValvulas.innerHTML='';
+  valvulas.forEach((v,i)=>{
+    const nomes={0.9:'Rápida',0.7:'Normal',0.5:'Lenta'};
+    tbodyValvulas.innerHTML+=`<tr><td>${trechos[v.trecho]?.nome||'—'}</td><td>${fmt(v.abertura)} mca</td><td>${fmt(v.capacidade,0)} LPM</td><td>${nomes[v.resposta]||'—'}</td><td><button class="icon" onclick="editarValvula(${i})">✎</button><button class="icon" onclick="excluirValvula(${i})">🗑</button></td></tr>`;
+  });
+  valvulaResumo.textContent=valvulas.length?`${valvulas.length} válvula(s) cadastrada(s).`:'Nenhuma válvula cadastrada.';
+}
 
-    function renderizarTabela(){
-      const corpo = document.getElementById('corpoTabela');
-      corpo.innerHTML = '';
+function calcular(){
+  if(!trechos.length){zerar();return}
+  const L=trechos.reduce((s,t)=>s+Number(t.comp||0),0);
+  const den=trechos.reduce((s,t)=>s+Number(t.comp||0)/onda(t.tipo),0);
+  const aEq=den>0?L/den:0;
+  const tc=aEq>0?2*L/aEq:0;
+  const dv=Math.max(...trechos.map(vel));
+  const dH=aEq*dv/9.81;
+  const shut=+shutoff.value||0;
+  const pSem=shut+dH;
 
-      trechos.forEach((t, i) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><strong>${t.nome}</strong></td>
-          <td>${fmt(t.vazao,0)}</td>
-          <td>${fmt(t.pIni)}</td>
-          <td>${fmt(t.pFim)}</td>
-          <td>${fmt(t.comprimento)}</td>
-          <td>${fmt(t.diametro)}</td>
-          <td style="text-align:left">${t.tubo}</td>
-          <td><strong>${fmt(velocidade(t))}</strong></td>
-          <td class="${t.rack==='SIM'?'sim':'nao'}">${t.rack}</td>
-          <td>
-            <div class="acoes-linha">
-              <button class="icone-btn editar" title="Editar" onclick="editarTrecho(${i})">✎</button>
-              <button class="icone-btn excluir" title="Excluir" onclick="excluirTrecho(${i})">🗑</button>
-            </div>
-          </td>`;
-        corpo.appendChild(tr);
-      });
-
-      document.getElementById('totalTrechos').textContent = trechos.length;
-      document.getElementById('comprimentoTotal').textContent =
-        fmt(trechos.reduce((s,t)=>s+Number(t.comprimento || 0),0));
-
-      atualizarPontos();
-      calcular();
-    }
-
-    function atualizarPontos(){
-      const sel = document.getElementById('pontoFechamento');
-      const atual = sel.value;
-      sel.innerHTML = '';
-
-      trechos.forEach((t, i)=>{
-        const opt = document.createElement('option');
-        const partes = t.nome.split('-').map(v=>v.trim());
-        opt.value = i;
-        opt.textContent = partes[1] || t.nome;
-        sel.appendChild(opt);
-      });
-
-      if ([...sel.options].some(o=>o.value===atual)) sel.value = atual;
-      else if (trechos.length) sel.value = trechos.length - 1;
-    }
-
-    function abrirModal(){
-      document.getElementById('tituloModal').textContent = 'Adicionar trecho';
-      document.getElementById('indiceEdicao').value = '';
-      document.getElementById('formTrecho').reset();
-      document.getElementById('modalTrecho').showModal();
-    }
-
-    function fecharModal(){
-      document.getElementById('modalTrecho').close();
-    }
-
-    function editarTrecho(i){
-      const t = trechos[i];
-      document.getElementById('tituloModal').textContent = 'Editar trecho';
-      document.getElementById('indiceEdicao').value = i;
-      document.getElementById('mTrecho').value = t.nome;
-      document.getElementById('mVazao').value = t.vazao;
-      document.getElementById('mPressaoInicial').value = t.pIni;
-      document.getElementById('mPressaoFinal').value = t.pFim;
-      document.getElementById('mComprimento').value = t.comprimento;
-      document.getElementById('mDiametro').value = t.diametro;
-      document.getElementById('mTipoTubo').value = t.tubo;
-      document.getElementById('mPipeRack').value = t.rack;
-      document.getElementById('modalTrecho').showModal();
-    }
-
-    function excluirTrecho(i){
-      if (!confirm(`Excluir o trecho ${trechos[i].nome}?`)) return;
-      trechos.splice(i,1);
-      renderizarTabela();
-    }
-
-    document.getElementById('formTrecho').addEventListener('submit', ev=>{
-      ev.preventDefault();
-
-      const obj = {
-        nome: document.getElementById('mTrecho').value.trim(),
-        vazao: Number(document.getElementById('mVazao').value),
-        pIni: Number(document.getElementById('mPressaoInicial').value),
-        pFim: Number(document.getElementById('mPressaoFinal').value),
-        comprimento: Number(document.getElementById('mComprimento').value),
-        diametro: Number(document.getElementById('mDiametro').value),
-        tubo: document.getElementById('mTipoTubo').value,
-        rack: document.getElementById('mPipeRack').value
-      };
-
-      const indice = document.getElementById('indiceEdicao').value;
-      if (indice === '') trechos.push(obj);
-      else trechos[Number(indice)] = obj;
-
-      fecharModal();
-      renderizarTabela();
+  let pCom=pSem;
+  let reducao=0;
+  if(valvulas.length){
+    const estimativas=valvulas.map(v=>{
+      const qTrecho=Math.max(trechos[v.trecho]?.vazao||0,1);
+      const capacidade=Math.min(1,v.capacidade/qTrecho);
+      const eficiencia=Math.max(0,Math.min(1,capacidade*v.resposta));
+      const alvo=Math.max(v.abertura, pSem-dH*eficiencia);
+      return alvo;
     });
+    pCom=Math.min(...estimativas,pSem);
+    reducao=pSem>0?(pSem-pCom)/pSem*100:0;
+  }
 
-    function alternarTempoFechamento(){
-      document.getElementById('tempoWrap').style.display =
-        document.getElementById('condicaoFechamento').value === 'conhecido'
-        ? 'block' : 'none';
-    }
+  rOnda.textContent=fmt(aEq);rTempo.textContent=fmt(tc,3);rDH.textContent=fmt(dH);
+  rPSem.textContent=fmt(pSem);rPCom.textContent=fmt(pCom);rReducao.textContent=fmt(reducao);
+  critPressao.textContent=fmt(pCom);
 
-    function calcular(){
-      if (!trechos.length){
-        zerarResultados();
-        return;
-      }
+  const fator=+fixacao.value||1;
+  tbodyResultados.innerHTML='';
+  let crit=null;
+  trechos.forEach(t=>{
+    const fHid=1000*9.81*dH*area(t)/1000;
+    const fTrans=fHid*fator;
+    tbodyResultados.innerHTML+=`<tr><td><strong>${t.nome}</strong></td><td>${fmt(fHid)} kN</td><td>${fmt(fTrans)} kN</td><td class="${t.rack==='SIM'?'yes':'no'}">${t.rack}</td></tr>`;
+    if(!crit||fTrans>crit.fTrans)crit={nome:t.nome,fHid,fTrans};
+  });
+  critTrecho.textContent=crit?.nome||'—';critHid.textContent=fmt(crit?.fHid||0);critTrans.textContent=fmt(crit?.fTrans||0);
+}
 
-      const idxFechamento = Math.max(0, Number(document.getElementById('pontoFechamento').value || trechos.length-1));
-      const percurso = trechos.slice(0, idxFechamento + 1);
-      const comprimentoTotal = percurso.reduce((s,t)=>s+Number(t.comprimento||0),0);
-
-      const denominador = percurso.reduce((s,t)=>s+(Number(t.comprimento||0)/velocidadeOndaPorMaterial(t.tubo)),0);
-      const aEq = denominador > 0 ? comprimentoTotal / denominador : 0;
-      const tempoCritico = aEq > 0 ? 2 * comprimentoTotal / aEq : 0;
-
-      const velocidades = percurso.map(velocidade);
-      const deltaV = velocidades.length ? Math.max(...velocidades) : 0;
-      let deltaH = aEq * deltaV / 9.81;
-
-      if (document.getElementById('condicaoFechamento').value === 'conhecido'){
-        const tf = Number(document.getElementById('tempoFechamento').value || 0);
-        if (tf > tempoCritico && tf > 0){
-          deltaH *= tempoCritico / tf;
-        }
-      }
-
-      const ponto = percurso[percurso.length - 1];
-      const pOperacional = Number(ponto?.pFim || 0);
-      const shutoff = Number(document.getElementById('shutoff').value || 0);
-      const pMax = pOperacional + deltaH;
-      const pCons = shutoff + deltaH;
-
-      document.getElementById('resOnda').textContent = fmt(aEq);
-      document.getElementById('resTempo').textContent = fmt(tempoCritico,3);
-      document.getElementById('resSobrepressao').textContent = fmt(deltaH);
-      document.getElementById('resPressaoPonto').textContent = fmt(pOperacional);
-      document.getElementById('resPressaoMax').textContent = fmt(pMax);
-      document.getElementById('resConservadora').textContent = fmt(pCons);
-      document.getElementById('resConservadoraGrande').textContent = fmt(pCons);
-      document.getElementById('critPressao').textContent = fmt(pCons);
-
-      const corpo = document.getElementById('corpoResultados');
-      corpo.innerHTML = '';
-
-      let critico = null;
-
-      percurso.forEach(t=>{
-        const forca = (1000 * 9.81 * deltaH * areaInterna(t)) / 1000;
-
-        if (!critico || forca > critico.forca){
-          critico = {trecho:t.nome, forca, rack:t.rack};
-        }
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><strong>${t.nome}</strong></td>
-          <td>${fmt(deltaH)}</td>
-          <td><strong>${fmt(forca)}</strong></td>
-          <td class="${t.rack==='SIM'?'sim':'nao'}">${t.rack}</td>`;
-        corpo.appendChild(tr);
-      });
-
-      document.getElementById('critTrecho').textContent = critico?.trecho || '—';
-      document.getElementById('critForca').textContent = fmt(critico?.forca || 0);
-      const rackEl = document.getElementById('critRack');
-      rackEl.textContent = critico?.rack || '—';
-      rackEl.className = `destaque ${critico?.rack==='SIM'?'sim':'nao'}`;
-
-      document.getElementById('statusGeral').textContent = 'CALCULADO';
-    }
-
-    function zerarResultados(){
-      ['resOnda','resTempo','resSobrepressao','resPressaoPonto','resPressaoMax',
-       'resConservadora','resConservadoraGrande','critForca','critPressao']
-       .forEach(id=>document.getElementById(id).textContent='0,00');
-
-      document.getElementById('critTrecho').textContent='—';
-      document.getElementById('critRack').textContent='—';
-      document.getElementById('corpoResultados').innerHTML='';
-      document.getElementById('statusGeral').textContent='SEM DADOS';
-    }
-
-    function limparTudo(){
-      if (!confirm('Limpar todos os dados da calculadora?')) return;
-      trechos = [];
-      document.getElementById('shutoff').value = '';
-      renderizarTabela();
-    }
-
-    renderizarTabela();
-    zerarResultados();
-  </script>
+function zerar(){
+  ['rOnda','rTempo','rDH','rPSem','rPCom','rReducao','critHid','critTrans','critPressao'].forEach(id=>document.getElementById(id).textContent='0,00');
+  critTrecho.textContent='—';tbodyResultados.innerHTML='';
+}
+function limparTudo(){
+  if(!confirm('Limpar todos os dados?'))return;
+  trechos=[];valvulas=[];shutoff.value='';render();
+}
+render();
+</script>
 </body>
 </html>
-
