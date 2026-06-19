@@ -689,27 +689,6 @@
           </strong>
         </div>
 
-        <div class="sar-fatork-resultado-linha">
-          <span>Equivalente:</span>
-          <strong id="fatorkResultadoPsi">
-            0,00 gpm/√psi
-          </strong>
-        </div>
-
-        <div class="sar-fatork-resultado-linha">
-          <span>Vazão considerada:</span>
-          <strong id="fatorkResultadoVazao">
-            0,00 L/min
-          </strong>
-        </div>
-
-        <div class="sar-fatork-resultado-linha">
-          <span>Pressão considerada:</span>
-          <strong id="fatorkResultadoPressao">
-            0,00 bar
-          </strong>
-        </div>
-
         <div class="sar-fatork-memoria">
           <h3>Memória de cálculo</h3>
 
@@ -1158,15 +1137,6 @@
     const fatorkResultadoMca =
       document.getElementById("fatorkResultadoMca");
 
-    const fatorkResultadoPsi =
-      document.getElementById("fatorkResultadoPsi");
-
-    const fatorkResultadoVazao =
-      document.getElementById("fatorkResultadoVazao");
-
-    const fatorkResultadoPressao =
-      document.getElementById("fatorkResultadoPressao");
-
     const fatorkSubstituicao =
       document.getElementById("fatorkSubstituicao");
 
@@ -1591,15 +1561,6 @@
 
       fatorkResultadoMca.textContent =
         `${fatorkFormatarNumero(kLminMca)} L/min/√mca`;
-
-      fatorkResultadoPsi.textContent =
-        `${fatorkFormatarNumero(kGpmPsi)} gpm/√psi`;
-
-      fatorkResultadoVazao.textContent =
-        `${fatorkFormatarNumero(vazaoLmin)} L/min`;
-
-      fatorkResultadoPressao.textContent =
-        `${fatorkFormatarNumero(pressaoBar)} bar`;
 
       fatorkSubstituicao.textContent =
         `K = ${fatorkFormatarNumero(vazaoLmin)} ÷ ` +
