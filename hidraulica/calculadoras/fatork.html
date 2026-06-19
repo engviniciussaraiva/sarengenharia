@@ -1,1 +1,2855 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Fator K de Descarga</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f1f4f4;
+      color: #263737;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    .sar-fatork {
+      width: 100%;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px;
+      border: 1px solid #315858;
+      border-radius: 14px;
+      background: #ffffff;
+    }
+
+    /* CABEÇALHO */
+
+    .sar-fatork-cabecalho {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #dbe3e3;
+    }
+
+    .sar-fatork-icone {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 54px;
+      height: 54px;
+      flex: 0 0 54px;
+      border-radius: 12px;
+      background: #eaf1f0;
+      color: #294f4f;
+      font-size: 27px;
+      font-weight: 700;
+    }
+
+    .sar-fatork-cabecalho h1 {
+      margin: 0 0 6px;
+      color: #294f4f;
+      font-size: 24px;
+      line-height: 1.25;
+    }
+
+    .sar-fatork-cabecalho p {
+      margin: 0;
+      color: #647474;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    /* SUBABAS */
+
+    .sar-fatork-abas {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      padding: 5px;
+      border: 1px solid #d7dfdf;
+      border-radius: 9px;
+      background: #f4f7f7;
+    }
+
+    .sar-fatork-aba {
+      flex: 1;
+      min-height: 42px;
+      padding: 10px 14px;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+      background: transparent;
+      color: #526363;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .sar-fatork-aba.ativa {
+      background: #315858;
+      color: #ffffff;
+    }
+
+    .sar-fatork-painel {
+      display: none;
+    }
+
+    .sar-fatork-painel.ativo {
+      display: block;
+    }
+
+    /* BLOCOS */
+
+    .sar-fatork-bloco {
+      margin-bottom: 16px;
+      padding: 18px;
+      border: 1px solid #d7dfdf;
+      border-radius: 10px;
+      background: #fafbfb;
+    }
+
+    .sar-fatork-titulo-secao {
+      margin-bottom: 14px;
+      color: #294f4f;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .sar-fatork-grade {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .sar-fatork-grade-filtros {
+      display: grid;
+      grid-template-columns: 2fr repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .sar-fatork-campo {
+      min-width: 0;
+    }
+
+    .sar-fatork-campo label {
+      display: block;
+      margin-bottom: 7px;
+      color: #263737;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .sar-fatork-input-unidade {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 150px;
+      width: 100%;
+      min-height: 46px;
+      overflow: hidden;
+      border: 1px solid #acbaba;
+      border-radius: 7px;
+      background: #ffffff;
+      transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+    }
+
+    .sar-fatork-input-unidade:focus-within,
+    .sar-fatork-input:focus,
+    .sar-fatork-select:focus,
+    .sar-fatork-textarea:focus {
+      border-color: #315858;
+      box-shadow: 0 0 0 3px rgba(49, 88, 88, 0.12);
+      outline: 0;
+    }
+
+    .sar-fatork-input-unidade input,
+    .sar-fatork-input-unidade select {
+      width: 100%;
+      min-width: 0;
+      padding: 11px 12px;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #263737;
+      font-size: 16px;
+    }
+
+    .sar-fatork-input-unidade select {
+      border-left: 1px solid #d0d9d9;
+      background: #edf2f2;
+      color: #294f4f;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .sar-fatork-input,
+    .sar-fatork-select,
+    .sar-fatork-textarea {
+      width: 100%;
+      min-height: 43px;
+      padding: 10px 11px;
+      border: 1px solid #acbaba;
+      border-radius: 7px;
+      background: #ffffff;
+      color: #263737;
+    }
+
+    .sar-fatork-textarea {
+      min-height: 88px;
+      resize: vertical;
+    }
+
+    .sar-fatork-conversao {
+      min-height: 18px;
+      margin-top: 9px;
+      color: #536767;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .sar-fatork-ajuda {
+      margin: 8px 0 0;
+      color: #697777;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    /* MENSAGENS */
+
+    .sar-fatork-mensagem {
+      display: none;
+      margin-bottom: 16px;
+      padding: 13px 15px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .sar-fatork-mensagem.erro {
+      border: 1px solid #e0b5b5;
+      background: #fff1f1;
+      color: #8b2929;
+    }
+
+    .sar-fatork-mensagem.sucesso {
+      border: 1px solid #b8d7c6;
+      background: #eef8f2;
+      color: #285c3e;
+    }
+
+    /* RESULTADO */
+
+    .sar-fatork-resultado {
+      display: none;
+      margin-top: 20px;
+      overflow: hidden;
+      border: 1px solid #cbd7d7;
+      border-radius: 10px;
+      background: #ffffff;
+    }
+
+    .sar-fatork-resultado-titulo {
+      padding: 14px 18px;
+      background: #315858;
+      color: #ffffff;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .sar-fatork-resultado-linha {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      padding: 13px 18px;
+      border-bottom: 1px solid #e1e7e7;
+    }
+
+    .sar-fatork-resultado-linha span {
+      color: #526363;
+      font-size: 14px;
+    }
+
+    .sar-fatork-resultado-linha strong {
+      color: #263f3f;
+      font-size: 16px;
+      text-align: right;
+    }
+
+    .sar-fatork-resultado-linha.destaque {
+      padding-top: 17px;
+      padding-bottom: 17px;
+      background: #edf4f3;
+    }
+
+    .sar-fatork-resultado-linha.destaque span {
+      color: #294f4f;
+      font-weight: 700;
+    }
+
+    .sar-fatork-resultado-linha.destaque strong {
+      color: #234949;
+      font-size: 20px;
+    }
+
+    .sar-fatork-memoria {
+      padding: 17px 18px;
+      background: #fafbfb;
+      color: #596969;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .sar-fatork-memoria h3 {
+      margin: 0 0 10px;
+      color: #354e4e;
+      font-size: 15px;
+    }
+
+    .sar-fatork-formula {
+      margin: 7px 0;
+      padding: 9px 12px;
+      border-left: 4px solid #315858;
+      background: #edf4f3;
+      color: #294f4f;
+      font-weight: 700;
+    }
+
+    .sar-fatork-conclusao {
+      margin-top: 12px;
+      text-align: justify;
+    }
+
+    /* BOTÕES */
+
+    .sar-fatork-botoes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .sar-fatork-botao {
+      flex: 1 1 160px;
+      min-height: 45px;
+      padding: 11px 18px;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      transition:
+        opacity 0.15s,
+        transform 0.15s,
+        background-color 0.15s;
+    }
+
+    .sar-fatork-botao:hover:not(:disabled) {
+      opacity: 0.92;
+    }
+
+    .sar-fatork-botao:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .sar-fatork-botao:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .sar-fatork-botao-principal {
+      background: #315858;
+      color: #ffffff;
+    }
+
+    .sar-fatork-botao-secundario {
+      background: #d9dede;
+      color: #354444;
+    }
+
+    .sar-fatork-botao-claro {
+      border: 1px solid #b8c6c6;
+      background: #ffffff;
+      color: #315858;
+    }
+
+    /* BANCO */
+
+    .sar-fatork-banco-status {
+      margin-bottom: 12px;
+      color: #647474;
+      font-size: 13px;
+    }
+
+    .sar-fatork-tabela-wrap {
+      overflow-x: auto;
+      border: 1px solid #d7dfdf;
+      border-radius: 9px;
+      background: #ffffff;
+    }
+
+    .sar-fatork-tabela {
+      width: 100%;
+      min-width: 900px;
+      border-collapse: collapse;
+    }
+
+    .sar-fatork-tabela th,
+    .sar-fatork-tabela td {
+      padding: 11px 12px;
+      border-bottom: 1px solid #e1e7e7;
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+    }
+
+    .sar-fatork-tabela th {
+      background: #edf2f2;
+      color: #294f4f;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .sar-fatork-tabela tbody tr {
+      cursor: pointer;
+    }
+
+    .sar-fatork-tabela tbody tr:hover {
+      background: #f4f8f7;
+    }
+
+    .sar-fatork-tabela tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .sar-fatork-sem-dados {
+      padding: 24px;
+      color: #697777;
+      text-align: center;
+    }
+
+    /* MODAL */
+
+    .sar-fatork-modal-fundo {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      inset: 0;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(20, 35, 35, 0.6);
+    }
+
+    .sar-fatork-modal-fundo.aberto {
+      display: flex;
+    }
+
+    .sar-fatork-modal {
+      width: 100%;
+      max-width: 720px;
+      max-height: 92vh;
+      overflow-y: auto;
+      border-radius: 12px;
+      background: #ffffff;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    }
+
+    .sar-fatork-modal-cabecalho {
+      padding: 16px 18px;
+      border-bottom: 1px solid #dbe3e3;
+      color: #294f4f;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .sar-fatork-modal-corpo {
+      padding: 18px;
+    }
+
+    .sar-fatork-modal-botoes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 0 18px 18px;
+    }
+
+    /* RESPONSIVO */
+
+    @media (max-width: 760px) {
+      body {
+        padding: 10px;
+      }
+
+      .sar-fatork {
+        padding: 16px;
+        border-radius: 10px;
+      }
+
+      .sar-fatork-cabecalho {
+        align-items: flex-start;
+      }
+
+      .sar-fatork-cabecalho h1 {
+        font-size: 20px;
+      }
+
+      .sar-fatork-grade,
+      .sar-fatork-grade-filtros {
+        grid-template-columns: 1fr;
+      }
+
+      .sar-fatork-abas {
+        flex-direction: column;
+      }
+
+      .sar-fatork-resultado-linha {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .sar-fatork-resultado-linha strong {
+        text-align: left;
+      }
+
+      .sar-fatork-botoes,
+      .sar-fatork-modal-botoes {
+        flex-direction: column;
+      }
+
+      .sar-fatork-botao {
+        flex-basis: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="sar-fatork">
+
+    <div class="sar-fatork-cabecalho">
+      <div class="sar-fatork-icone">K</div>
+
+      <div>
+        <h1>Fator K de Descarga</h1>
+
+        <p>
+          Determine o Fator K do equipamento a partir da vazão
+          e da pressão de operação.
+        </p>
+      </div>
+    </div>
+
+    <div class="sar-fatork-abas" role="tablist">
+      <button
+        type="button"
+        class="sar-fatork-aba ativa"
+        data-painel="fatorkCalculadora"
+      >
+        Determinar ou calcular
+      </button>
+
+      <button
+        type="button"
+        class="sar-fatork-aba"
+        data-painel="fatorkBanco"
+      >
+        Banco de dados
+      </button>
+    </div>
+
+    <!-- CALCULADORA -->
+
+    <section
+      id="fatorkCalculadora"
+      class="sar-fatork-painel ativo"
+    >
+
+      <section class="sar-fatork-bloco">
+        <div class="sar-fatork-titulo-secao">
+          Dados hidráulicos
+        </div>
+
+        <div class="sar-fatork-grade">
+
+          <div class="sar-fatork-campo">
+            <label for="fatorkVazao">
+              Vazão do equipamento
+            </label>
+
+            <div class="sar-fatork-input-unidade">
+              <input
+                type="text"
+                id="fatorkVazao"
+                inputmode="decimal"
+                autocomplete="off"
+                placeholder="Ex.: 120,00"
+              >
+
+              <select
+                id="fatorkUnidadeVazao"
+                aria-label="Unidade da vazão"
+              >
+                <option value="lmin">L/min</option>
+                <option value="ls">L/s</option>
+                <option value="m3h">m³/h</option>
+                <option value="gpm">gpm</option>
+              </select>
+            </div>
+
+            <div
+              id="fatorkConversaoVazao"
+              class="sar-fatork-conversao"
+            ></div>
+          </div>
+
+          <div class="sar-fatork-campo">
+            <label for="fatorkPressao">
+              Pressão no equipamento
+            </label>
+
+            <div class="sar-fatork-input-unidade">
+              <input
+                type="text"
+                id="fatorkPressao"
+                inputmode="decimal"
+                autocomplete="off"
+                placeholder="Ex.: 2,25"
+              >
+
+              <select
+                id="fatorkUnidadePressao"
+                aria-label="Unidade da pressão"
+              >
+                <option value="bar">bar</option>
+                <option value="mca">mca</option>
+                <option value="kpa">kPa</option>
+                <option value="mpa">MPa</option>
+                <option value="psi">psi</option>
+              </select>
+            </div>
+
+            <div
+              id="fatorkConversaoPressao"
+              class="sar-fatork-conversao"
+            ></div>
+          </div>
+
+        </div>
+
+        <p class="sar-fatork-ajuda">
+          O cálculo utiliza internamente a vazão em L/min e a pressão em bar.
+        </p>
+      </section>
+
+      <div
+        id="fatorkMensagem"
+        class="sar-fatork-mensagem"
+        role="alert"
+      ></div>
+
+      <section
+        id="fatorkResultado"
+        class="sar-fatork-resultado"
+      >
+        <div class="sar-fatork-resultado-titulo">
+          Fator K do equipamento
+        </div>
+
+        <div class="sar-fatork-resultado-linha destaque">
+          <span>Fator K:</span>
+          <strong id="fatorkResultadoBar">
+            0,00 L/min/√bar
+          </strong>
+        </div>
+
+        <div class="sar-fatork-resultado-linha">
+          <span>Equivalente:</span>
+          <strong id="fatorkResultadoMca">
+            0,00 L/min/√mca
+          </strong>
+        </div>
+
+        <div class="sar-fatork-resultado-linha">
+          <span>Equivalente:</span>
+          <strong id="fatorkResultadoPsi">
+            0,00 gpm/√psi
+          </strong>
+        </div>
+
+        <div class="sar-fatork-resultado-linha">
+          <span>Vazão considerada:</span>
+          <strong id="fatorkResultadoVazao">
+            0,00 L/min
+          </strong>
+        </div>
+
+        <div class="sar-fatork-resultado-linha">
+          <span>Pressão considerada:</span>
+          <strong id="fatorkResultadoPressao">
+            0,00 bar
+          </strong>
+        </div>
+
+        <div class="sar-fatork-memoria">
+          <h3>Memória de cálculo</h3>
+
+          <div class="sar-fatork-formula">
+            K = Q ÷ √P
+          </div>
+
+          <div id="fatorkSubstituicao">
+            K = 0,00 ÷ √0,00
+          </div>
+
+          <div
+            id="fatorkConclusao"
+            class="sar-fatork-conclusao"
+          ></div>
+        </div>
+      </section>
+
+      <div class="sar-fatork-botoes">
+        <button
+          type="button"
+          id="fatorkBotaoCalcular"
+          class="sar-fatork-botao sar-fatork-botao-principal"
+        >
+          Calcular
+        </button>
+
+        <button
+          type="button"
+          id="fatorkBotaoCopiar"
+          class="sar-fatork-botao sar-fatork-botao-claro"
+          disabled
+        >
+          Copiar resultado
+        </button>
+
+        <button
+          type="button"
+          id="fatorkBotaoImprimir"
+          class="sar-fatork-botao sar-fatork-botao-principal"
+          disabled
+        >
+          Imprimir
+        </button>
+
+        <button
+          type="button"
+          id="fatorkBotaoLimpar"
+          class="sar-fatork-botao sar-fatork-botao-secundario"
+        >
+          Limpar
+        </button>
+      </div>
+
+    </section>
+
+    <!-- BANCO -->
+
+    <section
+      id="fatorkBanco"
+      class="sar-fatork-painel"
+    >
+
+      <section class="sar-fatork-bloco">
+        <div class="sar-fatork-titulo-secao">
+          Consulta de equipamentos
+        </div>
+
+        <div class="sar-fatork-grade-filtros">
+
+          <div class="sar-fatork-campo">
+            <label for="fatorkPesquisaBanco">
+              Pesquisa
+            </label>
+
+            <input
+              type="search"
+              id="fatorkPesquisaBanco"
+              class="sar-fatork-input"
+              placeholder="Equipamento, fabricante ou modelo"
+            >
+          </div>
+
+          <div class="sar-fatork-campo">
+            <label for="fatorkFiltroCategoria">
+              Categoria
+            </label>
+
+            <select
+              id="fatorkFiltroCategoria"
+              class="sar-fatork-select"
+            >
+              <option value="">Todas</option>
+            </select>
+          </div>
+
+          <div class="sar-fatork-campo">
+            <label for="fatorkFiltroFabricante">
+              Fabricante
+            </label>
+
+            <select
+              id="fatorkFiltroFabricante"
+              class="sar-fatork-select"
+            >
+              <option value="">Todos</option>
+            </select>
+          </div>
+
+          <div class="sar-fatork-campo">
+            <label for="fatorkFiltroDiametro">
+              Diâmetro nominal
+            </label>
+
+            <select
+              id="fatorkFiltroDiametro"
+              class="sar-fatork-select"
+            >
+              <option value="">Todos</option>
+            </select>
+          </div>
+
+        </div>
+
+        <div class="sar-fatork-botoes">
+          <button
+            type="button"
+            id="fatorkBotaoLimparFiltros"
+            class="sar-fatork-botao sar-fatork-botao-secundario"
+          >
+            Limpar filtros
+          </button>
+
+          <button
+            type="button"
+            id="fatorkBotaoAtualizarBanco"
+            class="sar-fatork-botao sar-fatork-botao-claro"
+          >
+            Atualizar banco
+          </button>
+        </div>
+      </section>
+
+      <div
+        id="fatorkBancoStatus"
+        class="sar-fatork-banco-status"
+      >
+        Carregando banco de dados...
+      </div>
+
+      <div class="sar-fatork-tabela-wrap">
+        <table class="sar-fatork-tabela">
+          <thead>
+            <tr>
+              <th>Equipamento</th>
+              <th>Categoria</th>
+              <th>Fabricante</th>
+              <th>Modelo</th>
+              <th>DN</th>
+              <th>K L/min/√bar</th>
+              <th>K L/min/√mca</th>
+              <th>K gpm/√psi</th>
+            </tr>
+          </thead>
+
+          <tbody id="fatorkTabelaCorpo">
+            <tr>
+              <td colspan="8" class="sar-fatork-sem-dados">
+                Carregando...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- MODAL DE IMPRESSÃO -->
+
+  <div
+    id="fatorkModalImpressao"
+    class="sar-fatork-modal-fundo"
+    aria-hidden="true"
+  >
+    <div
+      class="sar-fatork-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="fatorkModalTitulo"
+    >
+      <div
+        id="fatorkModalTitulo"
+        class="sar-fatork-modal-cabecalho"
+      >
+        Preparar relatório
+      </div>
+
+      <div class="sar-fatork-modal-corpo">
+
+        <div class="sar-fatork-grade">
+
+          <div class="sar-fatork-campo">
+            <label for="fatorkRelatorioTitulo">
+              Título do relatório
+            </label>
+
+            <input
+              type="text"
+              id="fatorkRelatorioTitulo"
+              class="sar-fatork-input"
+              value="Determinação do Fator K de Descarga"
+            >
+          </div>
+
+          <div class="sar-fatork-campo">
+            <label for="fatorkRelatorioData">
+              Data
+            </label>
+
+            <input
+              type="date"
+              id="fatorkRelatorioData"
+              class="sar-fatork-input"
+            >
+          </div>
+
+          <div class="sar-fatork-campo">
+            <label for="fatorkRelatorioCliente">
+              Cliente
+            </label>
+
+            <input
+              type="text"
+              id="fatorkRelatorioCliente"
+              class="sar-fatork-input"
+            >
+          </div>
+
+          <div class="sar-fatork-campo">
+            <label for="fatorkRelatorioResponsavel">
+              Responsável
+            </label>
+
+            <input
+              type="text"
+              id="fatorkRelatorioResponsavel"
+              class="sar-fatork-input"
+            >
+          </div>
+
+          <div class="sar-fatork-campo">
+            <label for="fatorkRelatorioReferencia">
+              Referência
+            </label>
+
+            <input
+              type="text"
+              id="fatorkRelatorioReferencia"
+              class="sar-fatork-input"
+            >
+          </div>
+
+          <div class="sar-fatork-campo">
+            <label for="fatorkRelatorioEquipamento">
+              Nome do equipamento
+            </label>
+
+            <input
+              type="text"
+              id="fatorkRelatorioEquipamento"
+              class="sar-fatork-input"
+            >
+          </div>
+
+          <div class="sar-fatork-campo">
+            <label for="fatorkRelatorioFabricante">
+              Fabricante
+            </label>
+
+            <input
+              type="text"
+              id="fatorkRelatorioFabricante"
+              class="sar-fatork-input"
+            >
+          </div>
+
+          <div class="sar-fatork-campo">
+            <label for="fatorkRelatorioModelo">
+              Modelo
+            </label>
+
+            <input
+              type="text"
+              id="fatorkRelatorioModelo"
+              class="sar-fatork-input"
+            >
+          </div>
+
+          <div class="sar-fatork-campo">
+            <label for="fatorkRelatorioDiametro">
+              Diâmetro nominal
+            </label>
+
+            <input
+              type="text"
+              id="fatorkRelatorioDiametro"
+              class="sar-fatork-input"
+            >
+          </div>
+
+        </div>
+
+        <div class="sar-fatork-campo" style="margin-top: 14px;">
+          <label for="fatorkRelatorioObservacao">
+            Observação
+          </label>
+
+          <textarea
+            id="fatorkRelatorioObservacao"
+            class="sar-fatork-textarea"
+          ></textarea>
+        </div>
+
+      </div>
+
+      <div class="sar-fatork-modal-botoes">
+        <button
+          type="button"
+          id="fatorkModalCancelar"
+          class="sar-fatork-botao sar-fatork-botao-secundario"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          id="fatorkModalSemIdentificacao"
+          class="sar-fatork-botao sar-fatork-botao-claro"
+        >
+          Imprimir sem identificação
+        </button>
+
+        <button
+          type="button"
+          id="fatorkModalContinuar"
+          class="sar-fatork-botao sar-fatork-botao-principal"
+        >
+          Continuar impressão
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DETALHES DO BANCO -->
+
+  <div
+    id="fatorkModalBanco"
+    class="sar-fatork-modal-fundo"
+    aria-hidden="true"
+  >
+    <div
+      class="sar-fatork-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="fatorkModalBancoTitulo"
+    >
+      <div
+        id="fatorkModalBancoTitulo"
+        class="sar-fatork-modal-cabecalho"
+      >
+        Dados do equipamento
+      </div>
+
+      <div
+        id="fatorkModalBancoConteudo"
+        class="sar-fatork-modal-corpo"
+      ></div>
+
+      <div class="sar-fatork-modal-botoes">
+        <button
+          type="button"
+          id="fatorkModalBancoFechar"
+          class="sar-fatork-botao sar-fatork-botao-secundario"
+        >
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /*
+      BANCO CSV
+    */
+
+    const FATORK_URL_CSV =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMzy4thrXA3EZ6_kP1KwXTejPBNrrLP961DKB4qMlrqDmVocLQlmKafViegPUvI47UyqT5UnsJc2Lu/pub?output=csv";
+
+    /*
+      CONSTANTES
+    */
+
+    const FATORK_LITROS_POR_GALAO_US = 3.785411784;
+    const FATORK_BAR_POR_MCA = 0.0980665;
+    const FATORK_BAR_POR_PSI = 0.0689475729;
+
+    /*
+      ELEMENTOS
+    */
+
+    const fatorkAbas =
+      document.querySelectorAll(".sar-fatork-aba");
+
+    const fatorkPaineis =
+      document.querySelectorAll(".sar-fatork-painel");
+
+    const fatorkVazao =
+      document.getElementById("fatorkVazao");
+
+    const fatorkUnidadeVazao =
+      document.getElementById("fatorkUnidadeVazao");
+
+    const fatorkPressao =
+      document.getElementById("fatorkPressao");
+
+    const fatorkUnidadePressao =
+      document.getElementById("fatorkUnidadePressao");
+
+    const fatorkConversaoVazao =
+      document.getElementById("fatorkConversaoVazao");
+
+    const fatorkConversaoPressao =
+      document.getElementById("fatorkConversaoPressao");
+
+    const fatorkMensagem =
+      document.getElementById("fatorkMensagem");
+
+    const fatorkResultado =
+      document.getElementById("fatorkResultado");
+
+    const fatorkResultadoBar =
+      document.getElementById("fatorkResultadoBar");
+
+    const fatorkResultadoMca =
+      document.getElementById("fatorkResultadoMca");
+
+    const fatorkResultadoPsi =
+      document.getElementById("fatorkResultadoPsi");
+
+    const fatorkResultadoVazao =
+      document.getElementById("fatorkResultadoVazao");
+
+    const fatorkResultadoPressao =
+      document.getElementById("fatorkResultadoPressao");
+
+    const fatorkSubstituicao =
+      document.getElementById("fatorkSubstituicao");
+
+    const fatorkConclusao =
+      document.getElementById("fatorkConclusao");
+
+    const fatorkBotaoCalcular =
+      document.getElementById("fatorkBotaoCalcular");
+
+    const fatorkBotaoCopiar =
+      document.getElementById("fatorkBotaoCopiar");
+
+    const fatorkBotaoImprimir =
+      document.getElementById("fatorkBotaoImprimir");
+
+    const fatorkBotaoLimpar =
+      document.getElementById("fatorkBotaoLimpar");
+
+    const fatorkPesquisaBanco =
+      document.getElementById("fatorkPesquisaBanco");
+
+    const fatorkFiltroCategoria =
+      document.getElementById("fatorkFiltroCategoria");
+
+    const fatorkFiltroFabricante =
+      document.getElementById("fatorkFiltroFabricante");
+
+    const fatorkFiltroDiametro =
+      document.getElementById("fatorkFiltroDiametro");
+
+    const fatorkBotaoLimparFiltros =
+      document.getElementById("fatorkBotaoLimparFiltros");
+
+    const fatorkBotaoAtualizarBanco =
+      document.getElementById("fatorkBotaoAtualizarBanco");
+
+    const fatorkBancoStatus =
+      document.getElementById("fatorkBancoStatus");
+
+    const fatorkTabelaCorpo =
+      document.getElementById("fatorkTabelaCorpo");
+
+    const fatorkModalImpressao =
+      document.getElementById("fatorkModalImpressao");
+
+    const fatorkModalCancelar =
+      document.getElementById("fatorkModalCancelar");
+
+    const fatorkModalSemIdentificacao =
+      document.getElementById("fatorkModalSemIdentificacao");
+
+    const fatorkModalContinuar =
+      document.getElementById("fatorkModalContinuar");
+
+    const fatorkRelatorioTitulo =
+      document.getElementById("fatorkRelatorioTitulo");
+
+    const fatorkRelatorioData =
+      document.getElementById("fatorkRelatorioData");
+
+    const fatorkRelatorioCliente =
+      document.getElementById("fatorkRelatorioCliente");
+
+    const fatorkRelatorioResponsavel =
+      document.getElementById("fatorkRelatorioResponsavel");
+
+    const fatorkRelatorioReferencia =
+      document.getElementById("fatorkRelatorioReferencia");
+
+    const fatorkRelatorioEquipamento =
+      document.getElementById("fatorkRelatorioEquipamento");
+
+    const fatorkRelatorioFabricante =
+      document.getElementById("fatorkRelatorioFabricante");
+
+    const fatorkRelatorioModelo =
+      document.getElementById("fatorkRelatorioModelo");
+
+    const fatorkRelatorioDiametro =
+      document.getElementById("fatorkRelatorioDiametro");
+
+    const fatorkRelatorioObservacao =
+      document.getElementById("fatorkRelatorioObservacao");
+
+    const fatorkModalBanco =
+      document.getElementById("fatorkModalBanco");
+
+    const fatorkModalBancoConteudo =
+      document.getElementById("fatorkModalBancoConteudo");
+
+    const fatorkModalBancoFechar =
+      document.getElementById("fatorkModalBancoFechar");
+
+    /*
+      ESTADO
+    */
+
+    let fatorkUltimoResultado = null;
+    let fatorkBancoDados = [];
+
+    /*
+      UTILITÁRIOS
+    */
+
+    function fatorkConverterNumero(valor) {
+      if (typeof valor !== "string") {
+        return Number(valor);
+      }
+
+      let texto = valor
+        .trim()
+        .replace(/\s/g, "");
+
+      if (texto.includes(",") && texto.includes(".")) {
+        texto = texto
+          .replace(/\./g, "")
+          .replace(",", ".");
+      } else if (texto.includes(",")) {
+        texto = texto.replace(",", ".");
+      }
+
+      return Number(texto);
+    }
+
+    function fatorkFormatarNumero(valor, casas = 2) {
+      return Number(valor).toLocaleString("pt-BR", {
+        minimumFractionDigits: casas,
+        maximumFractionDigits: casas
+      });
+    }
+
+    function fatorkNormalizarTexto(valor) {
+      return String(valor ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+    }
+
+    function fatorkEscaparHtml(valor) {
+      return String(valor ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function fatorkDataHojeIso() {
+      const hoje = new Date();
+      const ano = hoje.getFullYear();
+      const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+      const dia = String(hoje.getDate()).padStart(2, "0");
+
+      return `${ano}-${mes}-${dia}`;
+    }
+
+    function fatorkFormatarDataBr(dataIso) {
+      if (!dataIso) {
+        return "";
+      }
+
+      const partes = dataIso.split("-");
+
+      if (partes.length !== 3) {
+        return dataIso;
+      }
+
+      return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+
+    /*
+      ABAS
+    */
+
+    function fatorkAbrirPainel(idPainel) {
+      fatorkAbas.forEach(function (aba) {
+        aba.classList.toggle(
+          "ativa",
+          aba.dataset.painel === idPainel
+        );
+      });
+
+      fatorkPaineis.forEach(function (painel) {
+        painel.classList.toggle(
+          "ativo",
+          painel.id === idPainel
+        );
+      });
+    }
+
+    /*
+      MENSAGENS
+    */
+
+    function fatorkOcultarMensagem() {
+      fatorkMensagem.style.display = "none";
+      fatorkMensagem.className = "sar-fatork-mensagem";
+      fatorkMensagem.textContent = "";
+    }
+
+    function fatorkExibirMensagem(texto, tipo = "erro") {
+      fatorkMensagem.className =
+        `sar-fatork-mensagem ${tipo}`;
+
+      fatorkMensagem.textContent =
+        tipo === "erro"
+          ? `⚠️ ${texto}`
+          : texto;
+
+      fatorkMensagem.style.display = "block";
+    }
+
+    /*
+      CONVERSÕES
+    */
+
+    function fatorkConverterVazaoParaLmin(valor, unidade) {
+      switch (unidade) {
+        case "lmin":
+          return valor;
+
+        case "ls":
+          return valor * 60;
+
+        case "m3h":
+          return valor * 1000 / 60;
+
+        case "gpm":
+          return valor * FATORK_LITROS_POR_GALAO_US;
+
+        default:
+          return NaN;
+      }
+    }
+
+    function fatorkConverterPressaoParaBar(valor, unidade) {
+      switch (unidade) {
+        case "bar":
+          return valor;
+
+        case "mca":
+          return valor * FATORK_BAR_POR_MCA;
+
+        case "kpa":
+          return valor / 100;
+
+        case "mpa":
+          return valor * 10;
+
+        case "psi":
+          return valor * FATORK_BAR_POR_PSI;
+
+        default:
+          return NaN;
+      }
+    }
+
+    function fatorkRotuloVazao(unidade) {
+      const rotulos = {
+        lmin: "L/min",
+        ls: "L/s",
+        m3h: "m³/h",
+        gpm: "gpm"
+      };
+
+      return rotulos[unidade] || unidade;
+    }
+
+    function fatorkRotuloPressao(unidade) {
+      const rotulos = {
+        bar: "bar",
+        mca: "mca",
+        kpa: "kPa",
+        mpa: "MPa",
+        psi: "psi"
+      };
+
+      return rotulos[unidade] || unidade;
+    }
+
+    function fatorkAtualizarConversoes() {
+      const vazaoOriginal =
+        fatorkConverterNumero(fatorkVazao.value);
+
+      const pressaoOriginal =
+        fatorkConverterNumero(fatorkPressao.value);
+
+      fatorkConversaoVazao.innerHTML = "";
+      fatorkConversaoPressao.innerHTML = "";
+
+      if (
+        Number.isFinite(vazaoOriginal) &&
+        vazaoOriginal > 0
+      ) {
+        const vazaoLmin =
+          fatorkConverterVazaoParaLmin(
+            vazaoOriginal,
+            fatorkUnidadeVazao.value
+          );
+
+        fatorkConversaoVazao.innerHTML = `
+          Conversão automática:
+          <strong>
+            ${fatorkFormatarNumero(vazaoLmin)} L/min
+          </strong>
+        `;
+      }
+
+      if (
+        Number.isFinite(pressaoOriginal) &&
+        pressaoOriginal > 0
+      ) {
+        const pressaoBar =
+          fatorkConverterPressaoParaBar(
+            pressaoOriginal,
+            fatorkUnidadePressao.value
+          );
+
+        fatorkConversaoPressao.innerHTML = `
+          Conversão automática:
+          <strong>
+            ${fatorkFormatarNumero(pressaoBar)} bar
+          </strong>
+        `;
+      }
+    }
+
+    /*
+      CÁLCULO
+    */
+
+    function fatorkOcultarResultado() {
+      fatorkResultado.style.display = "none";
+      fatorkBotaoCopiar.disabled = true;
+      fatorkBotaoImprimir.disabled = true;
+      fatorkUltimoResultado = null;
+    }
+
+    function fatorkCalcular() {
+      fatorkOcultarMensagem();
+
+      const vazaoOriginal =
+        fatorkConverterNumero(fatorkVazao.value);
+
+      const pressaoOriginal =
+        fatorkConverterNumero(fatorkPressao.value);
+
+      if (
+        !Number.isFinite(vazaoOriginal) ||
+        vazaoOriginal <= 0 ||
+        !Number.isFinite(pressaoOriginal) ||
+        pressaoOriginal <= 0
+      ) {
+        fatorkOcultarResultado();
+
+        fatorkExibirMensagem(
+          "Informe uma vazão e uma pressão válidas, maiores que zero."
+        );
+
+        return;
+      }
+
+      const unidadeVazao =
+        fatorkUnidadeVazao.value;
+
+      const unidadePressao =
+        fatorkUnidadePressao.value;
+
+      const vazaoLmin =
+        fatorkConverterVazaoParaLmin(
+          vazaoOriginal,
+          unidadeVazao
+        );
+
+      const pressaoBar =
+        fatorkConverterPressaoParaBar(
+          pressaoOriginal,
+          unidadePressao
+        );
+
+      if (
+        !Number.isFinite(vazaoLmin) ||
+        vazaoLmin <= 0 ||
+        !Number.isFinite(pressaoBar) ||
+        pressaoBar <= 0
+      ) {
+        fatorkOcultarResultado();
+
+        fatorkExibirMensagem(
+          "Não foi possível converter os dados informados."
+        );
+
+        return;
+      }
+
+      const kLminBar =
+        vazaoLmin / Math.sqrt(pressaoBar);
+
+      const kLminMca =
+        kLminBar * Math.sqrt(FATORK_BAR_POR_MCA);
+
+      const kGpmPsi =
+        kLminBar *
+        Math.sqrt(FATORK_BAR_POR_PSI) /
+        FATORK_LITROS_POR_GALAO_US;
+
+      const conclusao =
+        `Para a vazão de ` +
+        `${fatorkFormatarNumero(vazaoOriginal)} ` +
+        `${fatorkRotuloVazao(unidadeVazao)} e pressão de ` +
+        `${fatorkFormatarNumero(pressaoOriginal)} ` +
+        `${fatorkRotuloPressao(unidadePressao)}, o equipamento ` +
+        `apresenta Fator K de descarga igual a ` +
+        `${fatorkFormatarNumero(kLminBar)} L/min/√bar, ` +
+        `equivalente a ` +
+        `${fatorkFormatarNumero(kLminMca)} L/min/√mca e ` +
+        `${fatorkFormatarNumero(kGpmPsi)} gpm/√psi.`;
+
+      fatorkResultadoBar.textContent =
+        `${fatorkFormatarNumero(kLminBar)} L/min/√bar`;
+
+      fatorkResultadoMca.textContent =
+        `${fatorkFormatarNumero(kLminMca)} L/min/√mca`;
+
+      fatorkResultadoPsi.textContent =
+        `${fatorkFormatarNumero(kGpmPsi)} gpm/√psi`;
+
+      fatorkResultadoVazao.textContent =
+        `${fatorkFormatarNumero(vazaoLmin)} L/min`;
+
+      fatorkResultadoPressao.textContent =
+        `${fatorkFormatarNumero(pressaoBar)} bar`;
+
+      fatorkSubstituicao.textContent =
+        `K = ${fatorkFormatarNumero(vazaoLmin)} ÷ ` +
+        `√${fatorkFormatarNumero(pressaoBar)} = ` +
+        `${fatorkFormatarNumero(kLminBar)} L/min/√bar`;
+
+      fatorkConclusao.textContent =
+        conclusao;
+
+      fatorkUltimoResultado = {
+        vazaoOriginal,
+        unidadeVazao,
+        pressaoOriginal,
+        unidadePressao,
+        vazaoLmin,
+        pressaoBar,
+        kLminBar,
+        kLminMca,
+        kGpmPsi,
+        conclusao
+      };
+
+      fatorkResultado.style.display = "block";
+      fatorkBotaoCopiar.disabled = false;
+      fatorkBotaoImprimir.disabled = false;
+    }
+
+    function fatorkLimpar() {
+      fatorkVazao.value = "";
+      fatorkPressao.value = "";
+      fatorkUnidadeVazao.value = "lmin";
+      fatorkUnidadePressao.value = "bar";
+
+      fatorkConversaoVazao.innerHTML = "";
+      fatorkConversaoPressao.innerHTML = "";
+
+      fatorkOcultarMensagem();
+      fatorkOcultarResultado();
+
+      fatorkVazao.focus();
+    }
+
+    async function fatorkCopiarResultado() {
+      if (!fatorkUltimoResultado) {
+        return;
+      }
+
+      const r = fatorkUltimoResultado;
+
+      const texto = [
+        "FATOR K DE DESCARGA",
+        "",
+        `Vazão informada: ${fatorkFormatarNumero(r.vazaoOriginal)} ${fatorkRotuloVazao(r.unidadeVazao)}`,
+        `Pressão informada: ${fatorkFormatarNumero(r.pressaoOriginal)} ${fatorkRotuloPressao(r.unidadePressao)}`,
+        "",
+        "Fator K do equipamento:",
+        `${fatorkFormatarNumero(r.kLminBar)} L/min/√bar`,
+        `${fatorkFormatarNumero(r.kLminMca)} L/min/√mca`,
+        `${fatorkFormatarNumero(r.kGpmPsi)} gpm/√psi`,
+        "",
+        "Fórmula:",
+        "K = Q ÷ √P",
+        "",
+        r.conclusao
+      ].join("\n");
+
+      try {
+        await navigator.clipboard.writeText(texto);
+
+        fatorkExibirMensagem(
+          "Resultado copiado.",
+          "sucesso"
+        );
+      } catch (erro) {
+        fatorkExibirMensagem(
+          "Não foi possível copiar automaticamente o resultado."
+        );
+      }
+    }
+
+    /*
+      IMPRESSÃO
+    */
+
+    function fatorkAbrirModalImpressao() {
+      if (!fatorkUltimoResultado) {
+        fatorkExibirMensagem(
+          "Realize um cálculo válido antes de imprimir."
+        );
+
+        return;
+      }
+
+      fatorkRelatorioData.value =
+        fatorkRelatorioData.value ||
+        fatorkDataHojeIso();
+
+      fatorkModalImpressao.classList.add("aberto");
+      fatorkModalImpressao.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+    }
+
+    function fatorkFecharModalImpressao() {
+      fatorkModalImpressao.classList.remove("aberto");
+      fatorkModalImpressao.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+    }
+
+    function fatorkGerarLinhasIdentificacao(dados) {
+      const linhas = [
+        ["Cliente", dados.cliente],
+        ["Responsável", dados.responsavel],
+        ["Referência", dados.referencia],
+        ["Data", dados.data],
+        ["Equipamento", dados.equipamento],
+        ["Fabricante", dados.fabricante],
+        ["Modelo", dados.modelo],
+        ["Diâmetro nominal", dados.diametro]
+      ].filter(function (item) {
+        return String(item[1] || "").trim() !== "";
+      });
+
+      if (linhas.length === 0 && !dados.observacao) {
+        return "";
+      }
+
+      const linhasHtml = linhas.map(function (item) {
+        return `
+          <div class="linha-identificacao">
+            <span>${fatorkEscaparHtml(item[0])}:</span>
+            <strong>${fatorkEscaparHtml(item[1])}</strong>
+          </div>
+        `;
+      }).join("");
+
+      const observacaoHtml =
+        dados.observacao
+          ? `
+            <div class="observacao">
+              <strong>Observação:</strong>
+              ${fatorkEscaparHtml(dados.observacao)}
+            </div>
+          `
+          : "";
+
+      return `
+        <section class="identificacao">
+          <div class="secao-titulo">
+            Identificação
+          </div>
+
+          ${linhasHtml}
+          ${observacaoHtml}
+        </section>
+      `;
+    }
+
+    function fatorkImprimir(usarIdentificacao) {
+      if (!fatorkUltimoResultado) {
+        return;
+      }
+
+      const janela =
+        window.open("", "_blank");
+
+      if (!janela) {
+        fatorkExibirMensagem(
+          "O navegador bloqueou a impressão. Permita a abertura de janelas para este site."
+        );
+
+        return;
+      }
+
+      const r = fatorkUltimoResultado;
+
+      const dados = usarIdentificacao
+        ? {
+            titulo:
+              fatorkRelatorioTitulo.value.trim() ||
+              "Determinação do Fator K de Descarga",
+            cliente:
+              fatorkRelatorioCliente.value.trim(),
+            responsavel:
+              fatorkRelatorioResponsavel.value.trim(),
+            referencia:
+              fatorkRelatorioReferencia.value.trim(),
+            data:
+              fatorkFormatarDataBr(
+                fatorkRelatorioData.value
+              ),
+            equipamento:
+              fatorkRelatorioEquipamento.value.trim(),
+            fabricante:
+              fatorkRelatorioFabricante.value.trim(),
+            modelo:
+              fatorkRelatorioModelo.value.trim(),
+            diametro:
+              fatorkRelatorioDiametro.value.trim(),
+            observacao:
+              fatorkRelatorioObservacao.value.trim()
+          }
+        : {
+            titulo:
+              "Determinação do Fator K de Descarga",
+            cliente: "",
+            responsavel: "",
+            referencia: "",
+            data:
+              new Date().toLocaleDateString("pt-BR"),
+            equipamento: "",
+            fabricante: "",
+            modelo: "",
+            diametro: "",
+            observacao: ""
+          };
+
+      const identificacaoHtml =
+        fatorkGerarLinhasIdentificacao(dados);
+
+      janela.document.write(`
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+
+        <head>
+          <meta charset="UTF-8">
+
+          <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+          >
+
+          <title>
+            ${fatorkEscaparHtml(dados.titulo)}
+          </title>
+
+          <style>
+            @page {
+              size: A4;
+              margin: 17mm;
+            }
+
+            * {
+              box-sizing: border-box;
+            }
+
+            body {
+              margin: 0;
+              color: #263737;
+              background: #ffffff;
+              font-family: Arial, Helvetica, sans-serif;
+            }
+
+            .relatorio {
+              width: 100%;
+              max-width: 760px;
+              margin: 0 auto;
+            }
+
+            .cabecalho {
+              padding-bottom: 14px;
+              border-bottom: 2px solid #315858;
+            }
+
+            .marca {
+              margin-bottom: 5px;
+              color: #315858;
+              font-size: 12px;
+              font-weight: bold;
+              text-transform: uppercase;
+              letter-spacing: 0.8px;
+            }
+
+            .cabecalho h1 {
+              margin: 0;
+              color: #294f4f;
+              font-size: 23px;
+              line-height: 1.3;
+            }
+
+            .cabecalho p {
+              margin: 7px 0 0;
+              color: #657474;
+              font-size: 12px;
+            }
+
+            .identificacao,
+            .resultado,
+            .memoria {
+              margin-top: 22px;
+              overflow: hidden;
+              border: 1px solid #bdcccc;
+              border-radius: 8px;
+            }
+
+            .secao-titulo,
+            .resultado-titulo {
+              padding: 12px 15px;
+              background: #315858;
+              color: #ffffff;
+              font-size: 15px;
+              font-weight: bold;
+            }
+
+            .linha-identificacao,
+            .linha {
+              display: flex;
+              justify-content: space-between;
+              gap: 20px;
+              padding: 11px 15px;
+              border-bottom: 1px solid #dce4e4;
+            }
+
+            .linha-identificacao:last-child,
+            .linha:last-child {
+              border-bottom: 0;
+            }
+
+            .linha-identificacao span,
+            .linha span {
+              color: #526363;
+              font-size: 13px;
+            }
+
+            .linha-identificacao strong,
+            .linha strong {
+              color: #263f3f;
+              font-size: 14px;
+              text-align: right;
+            }
+
+            .linha.destaque {
+              padding-top: 15px;
+              padding-bottom: 15px;
+              background: #edf4f3;
+            }
+
+            .linha.destaque span {
+              color: #294f4f;
+              font-weight: bold;
+            }
+
+            .linha.destaque strong {
+              color: #234949;
+              font-size: 17px;
+            }
+
+            .observacao {
+              padding: 12px 15px;
+              color: #526363;
+              font-size: 13px;
+              line-height: 1.55;
+              white-space: pre-wrap;
+            }
+
+            .memoria-corpo {
+              padding: 15px;
+              color: #526363;
+              font-size: 13px;
+              line-height: 1.6;
+            }
+
+            .formula {
+              margin: 8px 0;
+              padding: 9px 11px;
+              border-left: 4px solid #315858;
+              background: #edf4f3;
+              color: #294f4f;
+              font-weight: bold;
+            }
+
+            .conclusao {
+              margin-top: 12px;
+              text-align: justify;
+            }
+
+            .rodape {
+              margin-top: 35px;
+              padding-top: 12px;
+              border-top: 1px solid #dce4e4;
+              color: #748181;
+              font-size: 10px;
+              text-align: center;
+            }
+
+            @media print {
+              body {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+              }
+            }
+          </style>
+        </head>
+
+        <body>
+
+          <div class="relatorio">
+
+            <header class="cabecalho">
+              <div class="marca">
+                SAR Engenharia
+              </div>
+
+              <h1>
+                ${fatorkEscaparHtml(dados.titulo)}
+              </h1>
+
+              <p>
+                Relatório de cálculo do Fator K de descarga
+              </p>
+            </header>
+
+            ${identificacaoHtml}
+
+            <section class="resultado">
+              <div class="resultado-titulo">
+                Resultado do cálculo
+              </div>
+
+              <div class="linha">
+                <span>Vazão informada:</span>
+
+                <strong>
+                  ${fatorkFormatarNumero(r.vazaoOriginal)}
+                  ${fatorkRotuloVazao(r.unidadeVazao)}
+                </strong>
+              </div>
+
+              <div class="linha">
+                <span>Pressão informada:</span>
+
+                <strong>
+                  ${fatorkFormatarNumero(r.pressaoOriginal)}
+                  ${fatorkRotuloPressao(r.unidadePressao)}
+                </strong>
+              </div>
+
+              <div class="linha destaque">
+                <span>Fator K:</span>
+
+                <strong>
+                  ${fatorkFormatarNumero(r.kLminBar)}
+                  L/min/√bar
+                </strong>
+              </div>
+
+              <div class="linha">
+                <span>Equivalente:</span>
+
+                <strong>
+                  ${fatorkFormatarNumero(r.kLminMca)}
+                  L/min/√mca
+                </strong>
+              </div>
+
+              <div class="linha">
+                <span>Equivalente:</span>
+
+                <strong>
+                  ${fatorkFormatarNumero(r.kGpmPsi)}
+                  gpm/√psi
+                </strong>
+              </div>
+            </section>
+
+            <section class="memoria">
+              <div class="secao-titulo">
+                Memória de cálculo
+              </div>
+
+              <div class="memoria-corpo">
+                <div class="formula">
+                  K = Q ÷ √P
+                </div>
+
+                <div>
+                  K =
+                  ${fatorkFormatarNumero(r.vazaoLmin)}
+                  ÷
+                  √${fatorkFormatarNumero(r.pressaoBar)}
+                  =
+                  ${fatorkFormatarNumero(r.kLminBar)}
+                  L/min/√bar
+                </div>
+
+                <div class="conclusao">
+                  ${fatorkEscaparHtml(r.conclusao)}
+                </div>
+              </div>
+            </section>
+
+            <div class="rodape">
+              Relatório gerado pelo SAR Engenharia —
+              Sistema Avançado de Resposta.
+            </div>
+
+          </div>
+
+          <script>
+            window.onload = function () {
+              setTimeout(function () {
+                window.print();
+              }, 400);
+            };
+          <\/script>
+
+        </body>
+        </html>
+      `);
+
+      janela.document.close();
+      fatorkFecharModalImpressao();
+    }
+
+    /*
+      CSV
+    */
+
+    function fatorkDetectarSeparador(texto) {
+      const primeiraLinha =
+        texto.split(/\r?\n/)[0] || "";
+
+      const quantidadePontoVirgula =
+        (primeiraLinha.match(/;/g) || []).length;
+
+      const quantidadeVirgula =
+        (primeiraLinha.match(/,/g) || []).length;
+
+      return quantidadePontoVirgula > quantidadeVirgula
+        ? ";"
+        : ",";
+    }
+
+    function fatorkParseCsv(texto) {
+      const separador =
+        fatorkDetectarSeparador(texto);
+
+      const linhas = [];
+      let linha = [];
+      let campo = "";
+      let dentroAspas = false;
+
+      for (let i = 0; i < texto.length; i++) {
+        const caractere = texto[i];
+        const proximo = texto[i + 1];
+
+        if (caractere === '"') {
+          if (dentroAspas && proximo === '"') {
+            campo += '"';
+            i++;
+          } else {
+            dentroAspas = !dentroAspas;
+          }
+
+          continue;
+        }
+
+        if (
+          caractere === separador &&
+          !dentroAspas
+        ) {
+          linha.push(campo);
+          campo = "";
+          continue;
+        }
+
+        if (
+          (caractere === "\n" || caractere === "\r") &&
+          !dentroAspas
+        ) {
+          if (
+            caractere === "\r" &&
+            proximo === "\n"
+          ) {
+            i++;
+          }
+
+          linha.push(campo);
+
+          if (
+            linha.some(function (item) {
+              return item.trim() !== "";
+            })
+          ) {
+            linhas.push(linha);
+          }
+
+          linha = [];
+          campo = "";
+          continue;
+        }
+
+        campo += caractere;
+      }
+
+      linha.push(campo);
+
+      if (
+        linha.some(function (item) {
+          return item.trim() !== "";
+        })
+      ) {
+        linhas.push(linha);
+      }
+
+      if (linhas.length === 0) {
+        return [];
+      }
+
+      const cabecalhos =
+        linhas[0].map(function (item) {
+          return item.trim();
+        });
+
+      return linhas.slice(1).map(function (valores) {
+        const objeto = {};
+
+        cabecalhos.forEach(function (cabecalho, indice) {
+          objeto[cabecalho] =
+            String(valores[indice] ?? "").trim();
+        });
+
+        return objeto;
+      });
+    }
+
+    function fatorkLerCampo(registro, nomes) {
+      const chaves = Object.keys(registro);
+
+      for (const nome of nomes) {
+        const chaveEncontrada =
+          chaves.find(function (chave) {
+            return fatorkNormalizarTexto(chave) ===
+              fatorkNormalizarTexto(nome);
+          });
+
+        if (chaveEncontrada) {
+          return registro[chaveEncontrada];
+        }
+      }
+
+      return "";
+    }
+
+    function fatorkPrepararRegistro(registro) {
+      const kBarTexto =
+        fatorkLerCampo(registro, [
+          "FATOR_K_LMIN_BAR",
+          "K_LMIN_BAR",
+          "FATOR K LMIN BAR"
+        ]);
+
+      const kMcaTexto =
+        fatorkLerCampo(registro, [
+          "FATOR_K_LMIN_MCA",
+          "K_LMIN_MCA",
+          "FATOR K LMIN MCA"
+        ]);
+
+      const kPsiTexto =
+        fatorkLerCampo(registro, [
+          "FATOR_K_GPM_PSI",
+          "K_GPM_PSI",
+          "FATOR K GPM PSI"
+        ]);
+
+      let kBar =
+        fatorkConverterNumero(kBarTexto);
+
+      let kMca =
+        fatorkConverterNumero(kMcaTexto);
+
+      let kPsi =
+        fatorkConverterNumero(kPsiTexto);
+
+      if (
+        Number.isFinite(kBar) &&
+        kBar > 0
+      ) {
+        if (!Number.isFinite(kMca) || kMca <= 0) {
+          kMca =
+            kBar * Math.sqrt(FATORK_BAR_POR_MCA);
+        }
+
+        if (!Number.isFinite(kPsi) || kPsi <= 0) {
+          kPsi =
+            kBar *
+            Math.sqrt(FATORK_BAR_POR_PSI) /
+            FATORK_LITROS_POR_GALAO_US;
+        }
+      }
+
+      return {
+        id:
+          fatorkLerCampo(registro, ["ID"]),
+        categoria:
+          fatorkLerCampo(registro, ["CATEGORIA"]),
+        equipamento:
+          fatorkLerCampo(registro, ["EQUIPAMENTO"]),
+        fabricante:
+          fatorkLerCampo(registro, ["FABRICANTE"]),
+        modelo:
+          fatorkLerCampo(registro, ["MODELO"]),
+        diametro:
+          fatorkLerCampo(registro, [
+            "DIAMETRO_NOMINAL",
+            "DIÂMETRO_NOMINAL",
+            "DIAMETRO",
+            "DN"
+          ]),
+        kBar,
+        kMca,
+        kPsi,
+        aplicacao:
+          fatorkLerCampo(registro, ["APLICACAO", "APLICAÇÃO"]),
+        referencia:
+          fatorkLerCampo(registro, ["REFERENCIA", "REFERÊNCIA"]),
+        observacao:
+          fatorkLerCampo(registro, ["OBSERVACAO", "OBSERVAÇÃO"]),
+        status:
+          fatorkLerCampo(registro, ["STATUS"]),
+        ordem:
+          fatorkConverterNumero(
+            fatorkLerCampo(registro, ["ORDEM"])
+          )
+      };
+    }
+
+    async function fatorkCarregarBanco() {
+      fatorkBancoStatus.textContent =
+        "Carregando banco de dados...";
+
+      fatorkTabelaCorpo.innerHTML = `
+        <tr>
+          <td colspan="8" class="sar-fatork-sem-dados">
+            Carregando...
+          </td>
+        </tr>
+      `;
+
+      try {
+        const urlSemCache =
+          `${FATORK_URL_CSV}&t=${Date.now()}`;
+
+        const resposta =
+          await fetch(urlSemCache, {
+            cache: "no-store"
+          });
+
+        if (!resposta.ok) {
+          throw new Error(
+            `Erro HTTP ${resposta.status}`
+          );
+        }
+
+        const texto =
+          await resposta.text();
+
+        const registros =
+          fatorkParseCsv(texto)
+            .map(fatorkPrepararRegistro)
+            .filter(function (item) {
+              const status =
+                fatorkNormalizarTexto(item.status);
+
+              return status === "" ||
+                status === "ativo";
+            })
+            .sort(function (a, b) {
+              const ordemA =
+                Number.isFinite(a.ordem)
+                  ? a.ordem
+                  : 999999;
+
+              const ordemB =
+                Number.isFinite(b.ordem)
+                  ? b.ordem
+                  : 999999;
+
+              if (ordemA !== ordemB) {
+                return ordemA - ordemB;
+              }
+
+              return a.equipamento.localeCompare(
+                b.equipamento,
+                "pt-BR"
+              );
+            });
+
+        fatorkBancoDados = registros;
+
+        fatorkPreencherFiltros();
+        fatorkRenderizarBanco();
+
+        fatorkBancoStatus.textContent =
+          `${registros.length} equipamento(s) ativo(s) carregado(s).`;
+      } catch (erro) {
+        console.error(
+          "Erro ao carregar banco Fator K:",
+          erro
+        );
+
+        fatorkBancoDados = [];
+
+        fatorkBancoStatus.textContent =
+          "Não foi possível carregar o banco de dados.";
+
+        fatorkTabelaCorpo.innerHTML = `
+          <tr>
+            <td colspan="8" class="sar-fatork-sem-dados">
+              Verifique o link CSV publicado e tente novamente.
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    function fatorkValoresUnicos(campo) {
+      return [
+        ...new Set(
+          fatorkBancoDados
+            .map(function (item) {
+              return String(item[campo] || "").trim();
+            })
+            .filter(Boolean)
+        )
+      ].sort(function (a, b) {
+        return a.localeCompare(b, "pt-BR");
+      });
+    }
+
+    function fatorkPreencherSelect(
+      select,
+      valores,
+      rotuloInicial
+    ) {
+      const valorAtual =
+        select.value;
+
+      select.innerHTML =
+        `<option value="">${rotuloInicial}</option>`;
+
+      valores.forEach(function (valor) {
+        const option =
+          document.createElement("option");
+
+        option.value = valor;
+        option.textContent = valor;
+
+        select.appendChild(option);
+      });
+
+      if (
+        valores.includes(valorAtual)
+      ) {
+        select.value = valorAtual;
+      }
+    }
+
+    function fatorkPreencherFiltros() {
+      fatorkPreencherSelect(
+        fatorkFiltroCategoria,
+        fatorkValoresUnicos("categoria"),
+        "Todas"
+      );
+
+      fatorkPreencherSelect(
+        fatorkFiltroFabricante,
+        fatorkValoresUnicos("fabricante"),
+        "Todos"
+      );
+
+      fatorkPreencherSelect(
+        fatorkFiltroDiametro,
+        fatorkValoresUnicos("diametro"),
+        "Todos"
+      );
+    }
+
+    function fatorkObterBancoFiltrado() {
+      const pesquisa =
+        fatorkNormalizarTexto(
+          fatorkPesquisaBanco.value
+        );
+
+      const categoria =
+        fatorkFiltroCategoria.value;
+
+      const fabricante =
+        fatorkFiltroFabricante.value;
+
+      const diametro =
+        fatorkFiltroDiametro.value;
+
+      return fatorkBancoDados.filter(function (item) {
+        const textoPesquisa =
+          fatorkNormalizarTexto([
+            item.equipamento,
+            item.categoria,
+            item.fabricante,
+            item.modelo,
+            item.diametro,
+            item.aplicacao,
+            item.referencia
+          ].join(" "));
+
+        const atendePesquisa =
+          pesquisa === "" ||
+          textoPesquisa.includes(pesquisa);
+
+        const atendeCategoria =
+          categoria === "" ||
+          item.categoria === categoria;
+
+        const atendeFabricante =
+          fabricante === "" ||
+          item.fabricante === fabricante;
+
+        const atendeDiametro =
+          diametro === "" ||
+          item.diametro === diametro;
+
+        return (
+          atendePesquisa &&
+          atendeCategoria &&
+          atendeFabricante &&
+          atendeDiametro
+        );
+      });
+    }
+
+    function fatorkRenderizarBanco() {
+      const registros =
+        fatorkObterBancoFiltrado();
+
+      if (registros.length === 0) {
+        fatorkTabelaCorpo.innerHTML = `
+          <tr>
+            <td colspan="8" class="sar-fatork-sem-dados">
+              Nenhum equipamento encontrado.
+            </td>
+          </tr>
+        `;
+
+        return;
+      }
+
+      fatorkTabelaCorpo.innerHTML =
+        registros.map(function (item, indice) {
+          const indiceOriginal =
+            fatorkBancoDados.indexOf(item);
+
+          const kBar =
+            Number.isFinite(item.kBar)
+              ? fatorkFormatarNumero(item.kBar)
+              : "—";
+
+          const kMca =
+            Number.isFinite(item.kMca)
+              ? fatorkFormatarNumero(item.kMca)
+              : "—";
+
+          const kPsi =
+            Number.isFinite(item.kPsi)
+              ? fatorkFormatarNumero(item.kPsi)
+              : "—";
+
+          return `
+            <tr data-indice="${indiceOriginal}">
+              <td>${fatorkEscaparHtml(item.equipamento || "—")}</td>
+              <td>${fatorkEscaparHtml(item.categoria || "—")}</td>
+              <td>${fatorkEscaparHtml(item.fabricante || "—")}</td>
+              <td>${fatorkEscaparHtml(item.modelo || "—")}</td>
+              <td>${fatorkEscaparHtml(item.diametro || "—")}</td>
+              <td>${kBar}</td>
+              <td>${kMca}</td>
+              <td>${kPsi}</td>
+            </tr>
+          `;
+        }).join("");
+
+      fatorkTabelaCorpo
+        .querySelectorAll("tr[data-indice]")
+        .forEach(function (linha) {
+          linha.addEventListener(
+            "click",
+            function () {
+              const indice =
+                Number(linha.dataset.indice);
+
+              fatorkAbrirDetalhesBanco(
+                fatorkBancoDados[indice]
+              );
+            }
+          );
+        });
+    }
+
+    function fatorkAbrirDetalhesBanco(item) {
+      if (!item) {
+        return;
+      }
+
+      const linha = function (rotulo, valor) {
+        if (
+          String(valor ?? "").trim() === ""
+        ) {
+          return "";
+        }
+
+        return `
+          <div class="sar-fatork-resultado-linha">
+            <span>${fatorkEscaparHtml(rotulo)}:</span>
+            <strong>${fatorkEscaparHtml(valor)}</strong>
+          </div>
+        `;
+      };
+
+      fatorkModalBancoConteudo.innerHTML = `
+        <div class="sar-fatork-resultado" style="display:block; margin-top:0;">
+          <div class="sar-fatork-resultado-titulo">
+            ${fatorkEscaparHtml(item.equipamento || "Equipamento")}
+          </div>
+
+          ${linha("Categoria", item.categoria)}
+          ${linha("Fabricante", item.fabricante)}
+          ${linha("Modelo", item.modelo)}
+          ${linha("Diâmetro nominal", item.diametro)}
+
+          ${linha(
+            "K",
+            Number.isFinite(item.kBar)
+              ? `${fatorkFormatarNumero(item.kBar)} L/min/√bar`
+              : ""
+          )}
+
+          ${linha(
+            "Equivalente",
+            Number.isFinite(item.kMca)
+              ? `${fatorkFormatarNumero(item.kMca)} L/min/√mca`
+              : ""
+          )}
+
+          ${linha(
+            "Equivalente",
+            Number.isFinite(item.kPsi)
+              ? `${fatorkFormatarNumero(item.kPsi)} gpm/√psi`
+              : ""
+          )}
+
+          ${linha("Aplicação", item.aplicacao)}
+          ${linha("Referência", item.referencia)}
+          ${linha("Observação", item.observacao)}
+        </div>
+      `;
+
+      fatorkModalBanco.classList.add("aberto");
+      fatorkModalBanco.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+    }
+
+    function fatorkFecharDetalhesBanco() {
+      fatorkModalBanco.classList.remove("aberto");
+      fatorkModalBanco.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+    }
+
+    function fatorkLimparFiltrosBanco() {
+      fatorkPesquisaBanco.value = "";
+      fatorkFiltroCategoria.value = "";
+      fatorkFiltroFabricante.value = "";
+      fatorkFiltroDiametro.value = "";
+
+      fatorkRenderizarBanco();
+    }
+
+    /*
+      EVENTOS
+    */
+
+    fatorkAbas.forEach(function (aba) {
+      aba.addEventListener("click", function () {
+        fatorkAbrirPainel(
+          aba.dataset.painel
+        );
+      });
+    });
+
+    fatorkVazao.addEventListener(
+      "input",
+      fatorkAtualizarConversoes
+    );
+
+    fatorkPressao.addEventListener(
+      "input",
+      fatorkAtualizarConversoes
+    );
+
+    fatorkUnidadeVazao.addEventListener(
+      "change",
+      fatorkAtualizarConversoes
+    );
+
+    fatorkUnidadePressao.addEventListener(
+      "change",
+      fatorkAtualizarConversoes
+    );
+
+    fatorkVazao.addEventListener(
+      "keydown",
+      function (evento) {
+        if (evento.key === "Enter") {
+          fatorkCalcular();
+        }
+      }
+    );
+
+    fatorkPressao.addEventListener(
+      "keydown",
+      function (evento) {
+        if (evento.key === "Enter") {
+          fatorkCalcular();
+        }
+      }
+    );
+
+    fatorkBotaoCalcular.addEventListener(
+      "click",
+      fatorkCalcular
+    );
+
+    fatorkBotaoCopiar.addEventListener(
+      "click",
+      fatorkCopiarResultado
+    );
+
+    fatorkBotaoImprimir.addEventListener(
+      "click",
+      fatorkAbrirModalImpressao
+    );
+
+    fatorkBotaoLimpar.addEventListener(
+      "click",
+      fatorkLimpar
+    );
+
+    fatorkModalCancelar.addEventListener(
+      "click",
+      fatorkFecharModalImpressao
+    );
+
+    fatorkModalSemIdentificacao.addEventListener(
+      "click",
+      function () {
+        fatorkImprimir(false);
+      }
+    );
+
+    fatorkModalContinuar.addEventListener(
+      "click",
+      function () {
+        fatorkImprimir(true);
+      }
+    );
+
+    fatorkModalImpressao.addEventListener(
+      "click",
+      function (evento) {
+        if (
+          evento.target === fatorkModalImpressao
+        ) {
+          fatorkFecharModalImpressao();
+        }
+      }
+    );
+
+    fatorkPesquisaBanco.addEventListener(
+      "input",
+      fatorkRenderizarBanco
+    );
+
+    fatorkFiltroCategoria.addEventListener(
+      "change",
+      fatorkRenderizarBanco
+    );
+
+    fatorkFiltroFabricante.addEventListener(
+      "change",
+      fatorkRenderizarBanco
+    );
+
+    fatorkFiltroDiametro.addEventListener(
+      "change",
+      fatorkRenderizarBanco
+    );
+
+    fatorkBotaoLimparFiltros.addEventListener(
+      "click",
+      fatorkLimparFiltrosBanco
+    );
+
+    fatorkBotaoAtualizarBanco.addEventListener(
+      "click",
+      fatorkCarregarBanco
+    );
+
+    fatorkModalBancoFechar.addEventListener(
+      "click",
+      fatorkFecharDetalhesBanco
+    );
+
+    fatorkModalBanco.addEventListener(
+      "click",
+      function (evento) {
+        if (
+          evento.target === fatorkModalBanco
+        ) {
+          fatorkFecharDetalhesBanco();
+        }
+      }
+    );
+
+    document.addEventListener(
+      "keydown",
+      function (evento) {
+        if (evento.key !== "Escape") {
+          return;
+        }
+
+        fatorkFecharModalImpressao();
+        fatorkFecharDetalhesBanco();
+      }
+    );
+
+    /*
+      INICIALIZAÇÃO
+    */
+
+    fatorkRelatorioData.value =
+      fatorkDataHojeIso();
+
+    fatorkCarregarBanco();
+  </script>
+
+</body>
+</html>
