@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Tabela de Tubos</title>
+
+<style>
+:root{
+    --verde:#315858;
+    --verde-claro:#eef5f5;
+    --verde-hover:#264747;
+    --texto:#2f3a3a;
+    --cinza:#6f7a7a;
+    --borda:#d9e0e0;
+    --fundo:#f5f7f7;
+    --branco:#ffffff;
+    --vermelho:#b84242;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+html,
+body{
+    width:100%;
+    min-height:100%;
+    margin:0;
+}
+
+body{
+    font-family:Segoe UI, Arial, sans-serif;
+    background:var(--fundo);
+    color:var(--texto);
+    padding:18px;
+}
+
+.pagina{
+    width:100%;
+    max-width:1700px;
+    margin:0 auto;
+}
+
+.cabecalho{
+    background:var(--branco);
+    border:1px solid var(--borda);
+    border-radius:10px;
+    padding:20px 22px;
+    margin-bottom:14px;
+}
+
+.cabecalho h1{
+    margin:0 0 6px;
+    color:var(--verde);
+    font-size:27px;
+}
+
+.cabecalho p{
+    margin:0;
+    color:var(--cinza);
+    font-size:14px;
+}
+
+.painel{
+    background:var(--branco);
+    border:1px solid var(--borda);
+    border-radius:10px;
+    padding:18px;
+    margin-bottom:14px;
+}
+
+.titulo-secao{
+    margin:0 0 14px;
+    color:var(--verde);
+    font-size:17px;
+}
+
+.filtros{
+    display:grid;
+    grid-template-columns:1.4fr 1fr 1fr 1fr auto;
+    gap:12px;
+    align-items:end;
+}
+
+.campo label{
+    display:block;
+    margin-bottom:6px;
+    font-size:13px;
+    font-weight:700;
+    color:#455252;
+}
+
+input,
+select{
+    width:100%;
+    height:42px;
+    border:1px solid var(--borda);
+    border-radius:6px;
+    background:#fff;
+    padding:0 11px;
+    font:inherit;
+    color:var(--texto);
+    outline:none;
+}
+
+input:focus,
+select:focus{
+    border-color:#7da6a6;
+    box-shadow:0 0 0 3px rgba(49,88,88,.10);
+}
+
+.botao{
+    height:42px;
+    padding:0 16px;
+    border:1px solid var(--verde);
+    border-radius:6px;
+    background:var(--verde);
+    color:#fff;
+    font:inherit;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.botao:hover{
+    background:var(--verde-hover);
+}
+
+.botao-secundario{
+    background:#fff;
+    color:var(--verde);
+}
+
+.botao-secundario:hover{
+    background:var(--verde-claro);
+}
+
+.resumo{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:14px;
+}
+
+.indicador{
+    background:var(--verde-claro);
+    color:var(--verde);
+    border:1px solid #cedddd;
+    border-radius:999px;
+    padding:7px 11px;
+    font-size:13px;
+    font-weight:700;
+}
+
+.estado{
+    padding:28px 20px;
+    text-align:center;
+    color:var(--cinza);
+}
+
+.estado.erro{
+    color:var(--vermelho);
+}
+
+.tabela-container{
+    overflow:auto;
+    border:1px solid var(--borda);
+    border-radius:8px;
+    background:#fff;
+}
+
+table{
+    width:100%;
+    min-width:1550px;
+    border-collapse:collapse;
+}
+
+thead th{
+    position:sticky;
+    top:0;
+    z-index:2;
+    background:var(--verde);
+    color:#fff;
+    padding:12px 9px;
+    border-right:1px solid rgba(255,255,255,.16);
+    font-size:12px;
+    line-height:1.25;
+    text-transform:uppercase;
+    white-space:nowrap;
+    text-align:center;
+}
+
+tbody td{
+    padding:10px 9px;
+    border-top:1px solid var(--borda);
+    border-right:1px solid #edf0f0;
+    font-size:13px;
+    text-align:center;
+    white-space:nowrap;
+}
+
+tbody tr:nth-child(even){
+    background:#fafcfc;
+}
+
+tbody tr:hover{
+    background:#eef5f5;
+}
+
+td.texto{
+    text-align:left;
+}
+
+.diametro{
+    font-weight:800;
+    color:var(--verde);
+}
+
+.rodape{
+    margin-top:10px;
+    color:var(--cinza);
+    font-size:12px;
+    text-align:center;
+}
+
+@media(max-width:950px){
+    body{
+        padding:10px;
+    }
+
+    .filtros{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .filtros .botao{
+        width:100%;
+    }
+}
+
+@media(max-width:560px){
+    .filtros{
+        grid-template-columns:1fr;
+    }
+
+    .cabecalho h1{
+        font-size:22px;
+    }
+}
+
+@media print{
+    @page{
+        size:A4 landscape;
+        margin:6mm;
+    }
+
+    body{
+        padding:0;
+        background:#fff;
+        zoom:.58;
+    }
+
+    .painel-filtros{
+        display:none !important;
+    }
+
+    .cabecalho,
+    .painel{
+        border:none;
+        box-shadow:none;
+        padding:8px 0;
+    }
+
+    .tabela-container{
+        overflow:visible;
+        border:none;
+    }
+
+    table{
+        min-width:0;
+    }
+
+    thead th{
+        position:static;
+    }
+
+    .rodape{
+        display:none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="pagina">
+
+    <section class="cabecalho">
+        <h1>Tabela de Tubos</h1>
+        <p>
+            Biblioteca técnica de dimensões, pesos, capacidade hidráulica,
+            espaçamento entre apoios e coeficiente de Hazen-Williams.
+        </p>
+    </section>
+
+    <section class="painel painel-filtros">
+
+        <h2 class="titulo-secao">Consulta</h2>
+
+        <div class="filtros">
+
+            <div class="campo">
+                <label for="pesquisa">Pesquisar</label>
+                <input
+                    id="pesquisa"
+                    type="search"
+                    placeholder="Ex.: aço carbono, SCH 40, 2 polegadas..."
+                    oninput="aplicarFiltros()"
+                >
+            </div>
+
+            <div class="campo">
+                <label for="filtroMaterial">Material</label>
+                <select id="filtroMaterial" onchange="aplicarFiltros()">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="filtroNorma">Norma / classe</label>
+                <select id="filtroNorma" onchange="aplicarFiltros()">
+                    <option value="">Todas</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="filtroDiametro">Diâmetro nominal</label>
+                <select id="filtroDiametro" onchange="aplicarFiltros()">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+
+            <button
+                class="botao botao-secundario"
+                type="button"
+                onclick="limparFiltros()"
+            >
+                Limpar
+            </button>
+
+        </div>
+
+        <div class="resumo">
+            <span class="indicador">
+                Registros exibidos:
+                <strong id="quantidadeExibida">0</strong>
+            </span>
+
+            <span class="indicador">
+                Total no banco:
+                <strong id="quantidadeTotal">0</strong>
+            </span>
+        </div>
+
+    </section>
+
+    <section class="painel">
+
+        <div id="estado" class="estado">
+            Carregando biblioteca de tubos...
+        </div>
+
+        <div
+            id="tabelaContainer"
+            class="tabela-container"
+            style="display:none"
+        >
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>Norma / classe</th>
+                        <th>Ø nominal</th>
+                        <th>Ø externo<br>(mm)</th>
+                        <th>Espessura<br>(mm)</th>
+                        <th>Ø interno<br>(mm)</th>
+                        <th>Área interna<br>(cm²)</th>
+                        <th>Área externa da seção<br>(cm²)</th>
+                        <th>Área superficial externa<br>(m²/m)</th>
+                        <th>Volume interno<br>(L/m)</th>
+                        <th>Peso vazio<br>(kg/m)</th>
+                        <th>Peso cheio<br>(kg/m)</th>
+                        <th>Vazão a 5 m/s<br>(L/min)</th>
+                        <th>Apoio horizontal<br>(m)</th>
+                        <th>Apoio vertical<br>(m)</th>
+                        <th>Fator C<br>Hazen-Williams</th>
+                        <th>Observação</th>
+                    </tr>
+                </thead>
+
+                <tbody id="corpoTabela"></tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <div class="rodape">
+        Os dados exibidos são provenientes do banco
+        SAR_HIDRAULICA_BIBLIOTECA_TUBOS.
+    </div>
+
+</div>
+
+<script>
+
+const URL_BIBLIOTECA_TUBOS =
+'https://docs.google.com/spreadsheets/d/e/2PACX-1vSu83uk0c1Rz3bojXA6LIK8Uwq3E-dg6OmWpm7QgfBBJNL3claiEqqnSGD83ZbGFsxlGJN3jr_vQqyi/pub?output=csv';
+
+let tubos = [];
+
+/* =========================================
+   NORMALIZAR TEXTOS
+========================================= */
+
+function normalizar(valor){
+
+    return String(valor ?? '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim()
+        .toUpperCase();
+}
+
+
+/* =========================================
+   LEITOR CSV
+   Aceita campos entre aspas e vírgulas
+   decimais existentes na planilha.
+========================================= */
+
+function lerCSV(texto){
+
+    const linhas = [];
+    let linha = [];
+    let campo = '';
+    let dentroAspas = false;
+
+    for(let i = 0; i < texto.length; i++){
+
+        const caractere = texto[i];
+        const proximo = texto[i + 1];
+
+        if(caractere === '"'){
+
+            if(dentroAspas && proximo === '"'){
+                campo += '"';
+                i++;
+            }else{
+                dentroAspas = !dentroAspas;
+            }
+
+            continue;
+        }
+
+        if(caractere === ',' && !dentroAspas){
+
+            linha.push(campo);
+            campo = '';
+            continue;
+        }
+
+        if(
+            (caractere === '\n' || caractere === '\r') &&
+            !dentroAspas
+        ){
+
+            if(
+                caractere === '\r' &&
+                proximo === '\n'
+            ){
+                i++;
+            }
+
+            linha.push(campo);
+
+            if(
+                linha.some(valor =>
+                    String(valor).trim() !== ''
+                )
+            ){
+                linhas.push(linha);
+            }
+
+            linha = [];
+            campo = '';
+            continue;
+        }
+
+        campo += caractere;
+    }
+
+    if(campo !== '' || linha.length > 0){
+
+        linha.push(campo);
+
+        if(
+            linha.some(valor =>
+                String(valor).trim() !== ''
+            )
+        ){
+            linhas.push(linha);
+        }
+    }
+
+    return linhas;
+}
+
+
+/* =========================================
+   BUSCAR VALOR POR POSSÍVEIS CABEÇALHOS
+========================================= */
+
+function obter(registro, nomes){
+
+    for(const nome of nomes){
+
+        const chave = Object.keys(registro)
+            .find(coluna =>
+                normalizar(coluna) ===
+                normalizar(nome)
+            );
+
+        if(chave !== undefined){
+            return String(registro[chave] ?? '').trim();
+        }
+    }
+
+    return '';
+}
+
+
+/* =========================================
+   CARREGAR BANCO
+========================================= */
+
+async function carregarBiblioteca(){
+
+    try{
+
+        const resposta = await fetch(
+            URL_BIBLIOTECA_TUBOS,
+            { cache:'no-store' }
+        );
+
+        if(!resposta.ok){
+            throw new Error(
+                'Falha ao acessar o banco de tubos.'
+            );
+        }
+
+        const texto = await resposta.text();
+        const matriz = lerCSV(texto);
+
+        if(matriz.length < 2){
+            throw new Error(
+                'O banco não possui registros publicados.'
+            );
+        }
+
+        const cabecalhos = matriz[0]
+            .map(valor => String(valor).trim());
+
+        tubos = matriz
+            .slice(1)
+            .map(linha => {
+
+                const registro = {};
+
+                cabecalhos.forEach(
+                    (cabecalho, indice) => {
+                        registro[cabecalho] =
+                            String(
+                                linha[indice] ?? ''
+                            ).trim();
+                    }
+                );
+
+                return registro;
+            })
+            .filter(registro => {
+
+                const ativo = normalizar(
+                    obter(
+                        registro,
+                        ['ATIVO', 'STATUS']
+                    )
+                );
+
+                return (
+                    ativo === '' ||
+                    ativo === 'ATIVO' ||
+                    ativo === 'SIM' ||
+                    ativo === 'TRUE'
+                );
+            });
+
+        tubos.sort((a, b) => {
+
+            const ordemA = Number(
+                obter(a, ['ORDEM']) || 999999
+            );
+
+            const ordemB = Number(
+                obter(b, ['ORDEM']) || 999999
+            );
+
+            return ordemA - ordemB;
+        });
+
+        preencherFiltros();
+        aplicarFiltros();
+
+        document.getElementById(
+            'quantidadeTotal'
+        ).textContent = tubos.length;
+
+        document.getElementById(
+            'estado'
+        ).style.display = 'none';
+
+        document.getElementById(
+            'tabelaContainer'
+        ).style.display = 'block';
+
+    }catch(erro){
+
+        console.error(
+            'Erro ao carregar biblioteca:',
+            erro
+        );
+
+        const estado =
+            document.getElementById('estado');
+
+        estado.className = 'estado erro';
+        estado.innerHTML = `
+            Não foi possível carregar a biblioteca de tubos.<br>
+            <small>
+                Verifique se a planilha está publicada como CSV
+                e se os nomes das colunas estão corretos.
+            </small>
+        `;
+    }
+}
+
+
+/* =========================================
+   PREENCHER FILTROS
+========================================= */
+
+function preencherFiltros(){
+
+    const materiais = new Set();
+    const normas = new Set();
+    const diametros = new Set();
+
+    tubos.forEach(registro => {
+
+        const material = obter(
+            registro,
+            ['MATERIAL']
+        );
+
+        const norma = obter(
+            registro,
+            ['NORMA_CLASSE', 'NORMA / CLASSE']
+        );
+
+        const diametro = obter(
+            registro,
+            [
+                'DIAMETRO_NOMINAL',
+                'Ø NOMINAL',
+                'DIÂMETRO NOMINAL'
+            ]
+        );
+
+        if(material){
+            materiais.add(material);
+        }
+
+        if(norma){
+            normas.add(norma);
+        }
+
+        if(diametro){
+            diametros.add(diametro);
+        }
+    });
+
+    preencherSelect(
+        'filtroMaterial',
+        [...materiais].sort(
+            (a,b) => a.localeCompare(b, 'pt-BR')
+        )
+    );
+
+    preencherSelect(
+        'filtroNorma',
+        [...normas].sort(
+            (a,b) => a.localeCompare(b, 'pt-BR')
+        )
+    );
+
+    preencherSelect(
+        'filtroDiametro',
+        [...diametros]
+    );
+}
+
+
+function preencherSelect(id, valores){
+
+    const select = document.getElementById(id);
+    const primeiraOpcao = select.options[0];
+
+    select.innerHTML = '';
+    select.appendChild(primeiraOpcao);
+
+    valores.forEach(valor => {
+
+        const option =
+            document.createElement('option');
+
+        option.value = valor;
+        option.textContent = valor;
+
+        select.appendChild(option);
+    });
+}
+
+
+/* =========================================
+   FILTRAR E RENDERIZAR
+========================================= */
+
+function aplicarFiltros(){
+
+    const pesquisa = normalizar(
+        document.getElementById(
+            'pesquisa'
+        ).value
+    );
+
+    const material = normalizar(
+        document.getElementById(
+            'filtroMaterial'
+        ).value
+    );
+
+    const norma = normalizar(
+        document.getElementById(
+            'filtroNorma'
+        ).value
+    );
+
+    const diametro = normalizar(
+        document.getElementById(
+            'filtroDiametro'
+        ).value
+    );
+
+    const filtrados = tubos.filter(registro => {
+
+        const valorMaterial = normalizar(
+            obter(registro, ['MATERIAL'])
+        );
+
+        const valorNorma = normalizar(
+            obter(
+                registro,
+                ['NORMA_CLASSE', 'NORMA / CLASSE']
+            )
+        );
+
+        const valorDiametro = normalizar(
+            obter(
+                registro,
+                [
+                    'DIAMETRO_NOMINAL',
+                    'Ø NOMINAL',
+                    'DIÂMETRO NOMINAL'
+                ]
+            )
+        );
+
+        const textoCompleto = normalizar(
+            Object.values(registro).join(' ')
+        );
+
+        return (
+            (!pesquisa ||
+                textoCompleto.includes(pesquisa)) &&
+            (!material ||
+                valorMaterial === material) &&
+            (!norma ||
+                valorNorma === norma) &&
+            (!diametro ||
+                valorDiametro === diametro)
+        );
+    });
+
+    renderizarTabela(filtrados);
+
+    document.getElementById(
+        'quantidadeExibida'
+    ).textContent = filtrados.length;
+}
+
+
+function renderizarTabela(lista){
+
+    const corpo =
+        document.getElementById('corpoTabela');
+
+    corpo.innerHTML = '';
+
+    if(lista.length === 0){
+
+        corpo.innerHTML = `
+            <tr>
+                <td colspan="17">
+                    Nenhum tubo encontrado para os filtros selecionados.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    lista.forEach(registro => {
+
+        const linha =
+            document.createElement('tr');
+
+        const valores = [
+            {
+                valor:obter(registro, ['MATERIAL']),
+                classe:'texto'
+            },
+            {
+                valor:obter(
+                    registro,
+                    ['NORMA_CLASSE', 'NORMA / CLASSE']
+                ),
+                classe:'texto'
+            },
+            {
+                valor:obter(
+                    registro,
+                    [
+                        'DIAMETRO_NOMINAL',
+                        'Ø NOMINAL',
+                        'DIÂMETRO NOMINAL'
+                    ]
+                ),
+                classe:'diametro'
+            },
+            {
+                valor:obter(
+                    registro,
+                    [
+                        'DIAMETRO_EXTERNO_MM',
+                        'Ø EXTERNO (MM)'
+                    ]
+                )
+            },
+            {
+                valor:obter(
+                    registro,
+                    [
+                        'ESPESSURA_MM',
+                        'ESPESSURA (MM)'
+                    ]
+                )
+            },
+            {
+                valor:obter(
+                    registro,
+                    [
+                        'DIAMETRO_INTERNO_MM',
+                        'Ø INTERNO (MM)'
+                    ]
+                )
+            },
+            {
+                valor:obter(
+                    registro,
+                    [
+                        'AREA_INTERNA_CM2',
+                        'ÁREA INTERNA (CM²)'
+                    ]
+                )
+            },
+            {
+                valor:obter(
+                    registro,
+                    [
+                        'AREA_EXTERNA_SECAO_CM2',
+                        'ÁREA EXTERNA DA SEÇÃO (CM²)'
+                    ]
+                )
+            },
+            {
+                valor:obter(
+                    registro,
+                    [
+                        'AREA_SUPERFICIAL_EXTERNA_M2_M',
+                        'ÁREA SUPERFICIAL EXTERNA (M²/M)'
+                    ]
+                )
+            },
+            {
+                valor:obter(
+                    registro,
+                    [
+                        'VOLUME_INTERNO_L_M',
+                        'VOLUME INTERNO (L/M)'
+                    ]
+                )
+            },
+            {
+                valor:obter(
+                    registro,
+                    [
+                        'PESO_VAZIO_KG_M',
+                        'PESO VAZIO (KG/M)'
+                    ]
+                )
+            },
+            {
+                valor:obter(
+                    registro,
+                    [
+                        'PESO_CHEIO_KG_M',
+                        'PESO CHEIO (KG/M)'
+                    ]
+                )
+            },
+            {
+                valor:obter(
+                    registro,
+                    [
+                        'VAZAO_MAX_5MS_LPM',
+                        'VAZÃO A 5 M/S (L/MIN)'
+                    ]
+                )
+            },
+            {
+                valor:obter(
+                    registro,
+                    [
+                        'DISTANCIA_APOIOS_HORIZONTAL_M',
+                        'DISTÂNCIA APOIOS HORIZONTAL (M)'
+                    ]
+                )
+            },
+            {
+                valor:obter(
+                    registro,
+                    [
+                        'DISTANCIA_APOIOS_VERTICAL_M',
+                        'DISTÂNCIA APOIOS VERTICAL (M)'
+                    ]
+                )
+            },
+            {
+                valor:obter(
+                    registro,
+                    [
+                        'FATOR_C_HAZEN',
+                        'FATOR C HAZEN'
+                    ]
+                )
+            },
+            {
+                valor:obter(
+                    registro,
+                    ['OBSERVACAO', 'OBSERVAÇÃO']
+                ),
+                classe:'texto'
+            }
+        ];
+
+        valores.forEach(item => {
+
+            const celula =
+                document.createElement('td');
+
+            celula.textContent =
+                item.valor || '—';
+
+            if(item.classe){
+                celula.className = item.classe;
+            }
+
+            linha.appendChild(celula);
+        });
+
+        corpo.appendChild(linha);
+    });
+}
+
+
+/* =========================================
+   LIMPAR FILTROS
+========================================= */
+
+function limparFiltros(){
+
+    document.getElementById(
+        'pesquisa'
+    ).value = '';
+
+    document.getElementById(
+        'filtroMaterial'
+    ).value = '';
+
+    document.getElementById(
+        'filtroNorma'
+    ).value = '';
+
+    document.getElementById(
+        'filtroDiametro'
+    ).value = '';
+
+    aplicarFiltros();
+}
+
+
+carregarBiblioteca();
+
+</script>
+
+</body>
+</html>
