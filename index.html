@@ -558,7 +558,7 @@ id="menuRodape"
 
         <p>Sistema Avançado de Resposta</p>
 
-        <p><b>Versão Alpha</b></p>
+        <p><b>VALIDAR VERSÃO IMPRESSAO FINAL / TERMINAR ESCADAS / TIRAR BOTÃO DO CALCULO DE BOMBAS</b></p>
 
         <br>
 
@@ -1075,19 +1075,20 @@ async function carregarSubabas(modulo, abaPai){
         subtabs.innerHTML = htmlSubabas;
         subtabs.style.display = "flex";
 
-        /*
-          Abre automaticamente a primeira
-          subaba ativa.
-        */
+        
+/*
+  Exibe as subabas, mas não abre nenhuma
+  automaticamente.
+*/
 
-        const primeiraSubaba =
-            subtabs.querySelector(".subtab");
+document.getElementById("mainContent").innerHTML = `
+    <div class="welcome">
+        <h1>${abaPai}</h1>
+        <p>Selecione uma ferramenta acima.</p>
+    </div>
+`;
 
-        if(primeiraSubaba){
-            primeiraSubaba.click();
-        }
-
-        return true;
+return true;
 
     }catch(erro){
 
