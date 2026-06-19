@@ -172,7 +172,7 @@ select:focus{
 
 table{
     width:100%;
-    min-width:1550px;
+    min-width:1320px;
     border-collapse:collapse;
 }
 
@@ -182,12 +182,12 @@ thead th{
     z-index:2;
     background:var(--verde);
     color:#fff;
-    padding:12px 9px;
+    padding:10px 7px;
     border-right:1px solid rgba(255,255,255,.16);
-    font-size:12px;
-    line-height:1.25;
+    font-size:11px;
+    line-height:1.2;
     text-transform:uppercase;
-    white-space:nowrap;
+    white-space:normal;
     text-align:center;
 }
 
@@ -197,7 +197,7 @@ tbody td{
     border-right:1px solid #edf0f0;
     font-size:13px;
     text-align:center;
-    white-space:nowrap;
+    white-space:normal;
 }
 
 tbody tr:nth-child(even){
@@ -215,13 +215,6 @@ td.texto{
 .diametro{
     font-weight:800;
     color:var(--verde);
-}
-
-.rodape{
-    margin-top:10px;
-    color:var(--cinza);
-    font-size:12px;
-    text-align:center;
 }
 
 @media(max-width:950px){
@@ -284,9 +277,6 @@ td.texto{
         position:static;
     }
 
-    .rodape{
-        display:none;
-    }
 }
 </style>
 </head>
@@ -379,26 +369,27 @@ td.texto{
             <table>
 
                 <thead>
-                    <tr>
-                        <th>Material</th>
-                        <th>Norma / classe</th>
-                        <th>Ø nominal</th>
-                        <th>Ø externo<br>(mm)</th>
-                        <th>Espessura<br>(mm)</th>
-                        <th>Ø interno<br>(mm)</th>
-                        <th>Área interna<br>(cm²)</th>
-                        <th>Área externa da seção<br>(cm²)</th>
-                        <th>Área superficial externa<br>(m²/m)</th>
-                        <th>Volume interno<br>(L/m)</th>
-                        <th>Peso vazio<br>(kg/m)</th>
-                        <th>Peso cheio<br>(kg/m)</th>
-                        <th>Vazão a 5 m/s<br>(L/min)</th>
-                        <th>Apoio horizontal<br>(m)</th>
-                        <th>Apoio vertical<br>(m)</th>
-                        <th>Fator C<br>Hazen-Williams</th>
-                        <th>Observação</th>
-                    </tr>
-                </thead>
+    <tr>
+        <th>Material</th>
+        <th>Norma /<br>classe</th>
+        <th>Ø<br>nominal</th>
+        <th>Ø externo<br>(mm)</th>
+        <th>Espessura<br>(mm)</th>
+        <th>Ø interno<br>(mm)</th>
+        <th>Área interna<br>(cm²)</th>
+        <th>Área externa<br>da seção<br>(cm²)</th>
+        <th>Área superficial<br>externa<br>(m²/m)</th>
+        <th>Volume interno<br>(L/m)</th>
+        <th>Peso vazio<br>(kg/m)</th>
+        <th>Peso cheio<br>(kg/m)</th>
+        <th>Vazão a 5 m/s<br>(L/min)</th>
+        <th>Apoio<br>horizontal<br>(m)</th>
+        <th>Apoio<br>vertical<br>(m)</th>
+        <th>Fator C<br>Hazen-Williams</th>
+        <th>Observação</th>
+    </tr>
+</thead>
+
 
                 <tbody id="corpoTabela"></tbody>
 
@@ -408,10 +399,7 @@ td.texto{
 
     </section>
 
-    <div class="rodape">
-        Os dados exibidos são provenientes do banco
-        SAR_HIDRAULICA_BIBLIOTECA_TUBOS.
-    </div>
+    
 
 </div>
 
