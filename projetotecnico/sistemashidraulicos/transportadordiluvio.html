@@ -90,14 +90,21 @@ body{
 
 input, select{
   width:100%;
-  height:34px;
+  height:40px;
   border:1px solid #222;
-  border-radius:3px;
-  padding:6px 8px;
-  font-size:14px;
+  border-radius:4px;
+  padding:8px 10px;
+  font-size:17px;
   background:#fff;
   text-align:center;
 }
+
+.dados-iniciais input,
+.dados-iniciais select{
+  text-align:left;
+}
+
+
 
 input[readonly]{
   background:#f8faf9;
@@ -212,7 +219,7 @@ tr:nth-child(even){
   <div class="card">
     <h2 class="section-title">Dados</h2>
 
-    <div class="grid-3">
+    <div class="grid-3 dados-iniciais"> 
       <div class="field">
         <label>Referência</label>
         <input id="referencia" type="text">
@@ -635,3 +642,4 @@ function limpar(){
 
 </body>
 </html>
+
