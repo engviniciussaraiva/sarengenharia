@@ -206,6 +206,9 @@ tr:nth-child(even){
   .grid-3,.grid-4{grid-template-columns:1fr}
 }
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
 </head>
 
 <body>
@@ -633,8 +636,40 @@ function limpar(){
   document.getElementById("tempo").value = 90;
   calcular();
 }
+
+const SUPABASE_URL = "https://bjtxbpmrmhfvpmdsthxr.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdHhicG1ybWhmdnBtZHN0aHhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzIyNTgsImV4cCI6MjA5NzU0ODI1OH0.zHZvSLzt6sWCrrKMW_zQXdqj8KCPF8OjTcsyza07dPI";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+async function carregarBicosSupabase(){
+  const { data, error } = await supabaseClient
+    .from("sar_diluvio_bicos")
+    .select("*")
+    .eq("ativo", true)
+    .eq("ativo_calculo", true);
+
+  if(error){
+    console.error("Erro Supabase:", error);
+    alert("Erro ao carregar bicos do Supabase.");
+    return;
+  }
+
+  console.log("Bicos carregados:", data);
+  alert(`Bicos carregados: ${data.length}`);
+}
+  
+  
+carregarBicosSupabase();
+
+  
 </script>
 
+
+  
 </body>
 </html>
 
