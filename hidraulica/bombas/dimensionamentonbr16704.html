@@ -12,14 +12,105 @@
 <div class="pagina">
 <section class="card cabecalho"><div class="icone">⚡</div><div><h1>Dimensionamento de Bomba — NBR 16704</h1><p>Cálculo teórico de potência, parâmetros de seleção da curva, bomba jockey, motor diesel e verificação de NPSH.</p></div></section>
 <section class="card bloco"><h2>1. Cálculo teórico da bomba principal</h2><div class="duas-colunas"><div><div class="subcard"><h3>Vazão do projeto</h3><div class="grid-2"><div class="campo"><label>Vazão em metros cúbicos por hora</label><div class="input-unidade"><input id="qM3h" type="number" step="0.01" placeholder="Ex.: 30,00" oninput="sincronizarVazao('m3h')"><span class="unidade">m³/h</span></div></div><div class="campo"><label>Vazão em litros por minuto</label><div class="input-unidade"><input id="qLpm" type="number" step="0.01" placeholder="Ex.: 500,00" oninput="sincronizarVazao('lpm')"><span class="unidade">lpm</span></div></div></div></div><div class="subcard"><h3>Pressão ou altura manométrica</h3><div class="grid-2"><div class="campo"><label>Altura manométrica</label><div class="input-unidade"><input id="hMca" type="number" step="0.01" placeholder="Ex.: 60,00" oninput="sincronizarPressao('mca')"><span class="unidade">m.c.a.</span></div></div><div class="campo"><label>Pressão</label><div class="input-unidade"><input id="pBar" type="number" step="0.01" placeholder="Ex.: 5,88" oninput="sincronizarPressao('bar')"><span class="unidade">bar</span></div></div></div></div><div class="subcard"><h3>Rendimento</h3><div class="campo"><label>Rendimento estimado da bomba</label><div class="input-unidade"><input id="rend" type="number" step="0.01" value="70" oninput="calcularTudo()"><span class="unidade">%</span></div><div class="ajuda">O rendimento deve ser maior que 0% e menor ou igual a 100%.</div></div></div></div><div class="resultado-box"><h3>Resultado da bomba principal</h3><div class="linha"><span>Vazão adotada</span><strong id="rVazao">—</strong></div><div class="linha"><span>Altura manométrica</span><strong id="rPressao">—</strong></div><div class="linha"><span>Potência hidráulica</span><strong id="rPHid">—</strong></div><div class="linha"><span>Potência teórica no eixo</span><strong id="rPEixoKw">—</strong></div><div class="linha"><span>Potência teórica</span><strong id="rPEixoCv">—</strong></div><div class="linha"><span>Potência teórica</span><strong id="rPEixoHp">—</strong></div><div class="valor-destaque"><span>Potência comercial preliminar</span><strong id="rPotComercial">—</strong></div><div class="acoes"><button type="button" onclick="calcularTudo()">Calcular</button><button class="botao-secundario" type="button" onclick="limpar()">Limpar</button></div></div></div></section>
-<section class="card bloco"><h2>2. Bomba jockey — indicação preliminar</h2><div class="duas-colunas"><div class="resultado-box"><h3>Critério adotado</h3><div class="linha"><span>Vazão mínima</span><strong>20,00 L/min</strong></div><div class="linha"><span>Vazão mínima</span><strong>1,20 m³/h</strong></div><div class="linha"><span>Pressão sugerida</span><strong>Pressão do projeto + 10%</strong></div><div class="linha"><span>Aplicação</span><strong>Pressurização / automação</strong></div></div><div class="resultado-box"><h3>Resultado da jockey</h3><div class="linha"><span>Pressão sugerida</span><strong id="jPressao">—</strong></div><div class="linha"><span>Pressão sugerida</span><strong id="jBar">—</strong></div><div class="linha"><span>Potência teórica</span><strong id="jCv">—</strong></div><div class="linha"><span>Potência teórica</span><strong id="jHp">—</strong></div><div class="alerta" style="margin-top:12px">A bomba jockey é uma indicação para manutenção de pressão e regulagem da automação. A seleção final depende do catálogo do fabricante.</div></div></div></section>
+
+<section class="card bloco">
+    <h2>2. Bomba jockey — indicação preliminar</h2>
+
+    <div class="duas-colunas">
+
+        <div>
+            <div class="subcard">
+                <h3>Vazão da jockey</h3>
+
+                <div class="grid-2">
+                    <div class="campo">
+                        <label>Vazão em metros cúbicos por hora</label>
+                        <div class="input-unidade">
+                            <input type="text" value="1,20" readonly>
+                            <span class="unidade">m³/h</span>
+                        </div>
+                    </div>
+
+                    <div class="campo">
+                        <label>Vazão em litros por minuto</label>
+                        <div class="input-unidade">
+                            <input type="text" value="20,00" readonly>
+                            <span class="unidade">lpm</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subcard">
+                <h3>Pressão ou altura manométrica</h3>
+
+                <div class="grid-2">
+                    <div class="campo">
+                        <label>Altura manométrica sugerida</label>
+                        <div class="input-unidade">
+                            <input id="jMcaEntrada" type="text" value="—" readonly>
+                            <span class="unidade">m.c.a.</span>
+                        </div>
+                    </div>
+
+                    <div class="campo">
+                        <label>Pressão sugerida</label>
+                        <div class="input-unidade">
+                            <input id="jBarEntrada" type="text" value="—" readonly>
+                            <span class="unidade">bar</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ajuda">
+                    Critério adotado: pressão do projeto + 10%, para facilitar a regulagem da automação.
+                </div>
+            </div>
+
+            <div class="subcard">
+                <h3>Rendimento</h3>
+
+                <div class="campo">
+                    <label>Rendimento estimado da bomba jockey</label>
+                    <div class="input-unidade">
+                        <input id="jRendimento" type="number" step="0.01" value="50" oninput="calcularTudo()">
+                        <span class="unidade">%</span>
+                    </div>
+                    <div class="ajuda">Valor apenas para estimativa teórica da potência.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="resultado-box">
+            <h3>Resultado da bomba jockey</h3>
+
+            <div class="linha"><span>Vazão adotada</span><strong id="jVazaoResultado">20,00 L/min (1,20 m³/h)</strong></div>
+            <div class="linha"><span>Altura manométrica</span><strong id="jPressao">—</strong></div>
+            <div class="linha"><span>Pressão</span><strong id="jBar">—</strong></div>
+            <div class="linha"><span>Potência teórica</span><strong id="jKw">—</strong></div>
+            <div class="linha"><span>Potência teórica</span><strong id="jCv">—</strong></div>
+            <div class="linha"><span>Potência teórica</span><strong id="jHp">—</strong></div>
+
+            <div class="valor-destaque">
+                <span>Potência comercial preliminar</span>
+                <strong id="jPotComercial">—</strong>
+            </div>
+
+            <div class="alerta" style="margin-top:12px;">
+                A bomba jockey é uma indicação para manutenção de pressão e regulagem da automação.
+                A seleção final depende do catálogo do fabricante.
+            </div>
+        </div>
+
+    </div>
+</section>
 <section class="card bloco"><h2>3. Parâmetros para seleção da curva — NBR 16704</h2><div class="parametros"><div class="parametro"><h3>Faixa operacional ideal</h3><p>A curva da bomba deve trabalhar preferencialmente entre 70% e 120% da vazão nominal.</p><div class="formula" id="faixaOperacional">70%: — | 120%: —</div></div><div class="parametro"><h3>Verificação a 150% da vazão</h3><p>Ao operar a 150% da vazão nominal, a bomba deve fornecer no mínimo 65% da pressão nominal.</p><div class="formula" id="ver150">Q150: — | H mínima: —</div></div><div class="parametro"><h3>Shutoff — vazão zero</h3><p>Com 0% de vazão, a pressão máxima de fechamento não deve exceder 140% da pressão nominal.</p><div class="formula" id="verShutoff">H máx. shutoff: —</div></div></div><div class="alerta" style="margin-top:14px">Estes valores são parâmetros de seleção da curva. O usuário deve comparar com a curva real da bomba fornecida pelo fabricante.</div></section>
 <section class="card bloco"><h2>4. Motor diesel e suprimento de combustível</h2><div class="duas-colunas"><div class="subcard"><h3>Dados para estimativa</h3><div class="grid-2"><div class="campo"><label>Fator para motor a combustão</label><div class="input-unidade"><input id="fatorDiesel" type="number" step="0.01" value="1.25" oninput="calcularTudo()"><span class="unidade">x</span></div></div><div class="campo"><label>Autonomia do sistema</label><div class="input-unidade"><input id="tempoDiesel" type="number" step="1" value="60" oninput="calcularTudo()"><span class="unidade">min</span></div></div><div class="campo"><label>Consumo específico estimado</label><div class="input-unidade"><input id="consumoEspecifico" type="number" step="0.01" value="0.27" oninput="calcularTudo()"><span class="unidade">L/cv.h</span></div></div><div class="campo"><label>Reserva adicional</label><div class="input-unidade"><input id="reservaDiesel" type="number" step="1" value="20" oninput="calcularTudo()"><span class="unidade">%</span></div></div></div></div><div class="resultado-box"><h3>Resultado diesel</h3><div class="linha"><span>Potência teórica elétrica</span><strong id="dBase">—</strong></div><div class="linha"><span>Potência mínima diesel</span><strong id="dPotencia">—</strong></div><div class="linha"><span>Consumo estimado</span><strong id="dConsumoHora">—</strong></div><div class="linha"><span>Consumo no período</span><strong id="dConsumoPeriodo">—</strong></div><div class="linha"><span>Volume com reserva</span><strong id="dVolume">—</strong></div><div class="alerta" style="margin-top:12px">O consumo é estimativo. Para projeto executivo, confirmar consumo e potência no catálogo do motor diesel selecionado.</div></div></div></section>
 <section class="card bloco"><h2>5. Verificação de NPSH</h2><div class="duas-colunas"><div class="subcard"><h3>Dados padrão do local e da instalação</h3><div class="grid-2"><div class="campo"><label>Pressão atmosférica local</label><div class="input-unidade"><input id="pressaoAtmosferica" type="number" step="0.01" value="10.33" oninput="calcularTudo()"><span class="unidade">mca</span></div><div class="ajuda">Valor padrão ao nível do mar. Editável conforme altitude/local.</div></div><div class="campo"><label>Temperatura da água</label><div class="input-unidade"><input id="tempAgua" type="number" step="0.1" value="20" oninput="calcularTudo()"><span class="unidade">°C</span></div></div><div class="campo"><label>Altura positiva da água na sucção</label><div class="input-unidade"><input id="alturaSuccao" type="number" step="0.01" value="0" oninput="calcularTudo()"><span class="unidade">m</span></div><div class="ajuda">Use positivo se o nível da RTI estiver acima do eixo da bomba. Use negativo se estiver abaixo.</div></div><div class="campo"><label>Perda de carga total na sucção</label><div class="input-unidade"><input id="perdaSuccao" type="number" step="0.01" oninput="calcularTudo()"><span class="unidade">m</span></div></div></div></div><div class="subcard"><h3>Dados do fabricante e resultado</h3><div class="grid-2"><div class="campo"><label>NPSHr da bomba</label><div class="input-unidade"><input id="npshr" type="number" step="0.01" oninput="calcularTudo()"><span class="unidade">m</span></div></div><div class="campo"><label>Margem recomendada</label><div class="input-unidade"><input id="margemNpsh" type="number" step="0.01" value="0.50" oninput="calcularTudo()"><span class="unidade">m</span></div></div></div><div class="resultado-box" style="margin-top:14px"><div class="linha"><span>NPSH disponível</span><strong id="nDisp">—</strong></div><div class="linha"><span>Requisito NPSHr + margem</span><strong id="nReq">—</strong></div><div class="linha"><span>Margem disponível</span><strong id="nMargem">—</strong></div><div class="linha"><span>Situação</span><strong id="nSituacao">—</strong></div></div></div></div></section>
 <p class="nota-final">Layout e cálculos preliminares para seleção. A seleção final deve ser confirmada com curva de bomba, catálogo do fabricante e critérios aplicáveis do projeto.</p>
 </div>
 <script>
-let travando=false;function n(v){return Number(String(v||'').replace(',','.'))||0}function fmt(v,c=2){if(!isFinite(v))v=0;return Number(v).toLocaleString('pt-BR',{minimumFractionDigits:c,maximumFractionDigits:c})}function sincronizarVazao(origem){if(travando)return;travando=true;if(origem==='m3h'){const q=n(qM3h.value);qLpm.value=q?fmt(q*1000/60):''}else{const q=n(qLpm.value);qM3h.value=q?fmt(q*60/1000):''}travando=false;calcularTudo()}function sincronizarPressao(origem){if(travando)return;travando=true;if(origem==='mca'){const h=n(hMca.value);pBar.value=h?fmt(h/10.197):''}else{const p=n(pBar.value);hMca.value=p?fmt(p*10.197):''}travando=false;calcularTudo()}function potenciaComercial(cv){const lista=[0.5,0.75,1,1.5,2,3,4,5,7.5,10,12.5,15,20,25,30,40,50,60,75,100,125,150,175,200,250,300,350,400,450,500];return lista.find(v=>v>=cv)||Math.ceil(cv/50)*50}function pressaoVaporMca(temp){const tabela=[[0,0.06],[10,0.12],[20,0.24],[30,0.43],[40,0.75],[50,1.26],[60,2.03]];if(temp<=0)return 0.06;if(temp>=60)return 2.03;for(let i=0;i<tabela.length-1;i++){const[t1,p1]=tabela[i];const[t2,p2]=tabela[i+1];if(temp>=t1&&temp<=t2)return p1+(p2-p1)*(temp-t1)/(t2-t1)}return 0.24}function calcularTudo(){const qL=n(qLpm.value);const qM=qL*60/1000;const h=n(hMca.value);const rendimento=n(rend.value);const eta=rendimento>0?rendimento/100:0;let pHidKw=0,pEixoKw=0,pCv=0,pHp=0;if(qM>0&&h>0&&eta>0){pHidKw=qM*h*9.81/3600;pEixoKw=pHidKw/eta;pCv=pEixoKw/0.7355;pHp=pEixoKw/0.7457}rVazao.textContent=qL?`${fmt(qL)} L/min (${fmt(qM)} m³/h)`:'—';rPressao.textContent=h?`${fmt(h)} mca (${fmt(h/10.197)} bar)`:'—';rPHid.textContent=pHidKw?`${fmt(pHidKw)} kW`:'—';rPEixoKw.textContent=pEixoKw?`${fmt(pEixoKw)} kW`:'—';rPEixoCv.textContent=pCv?`${fmt(pCv)} cv`:'—';rPEixoHp.textContent=pHp?`${fmt(pHp)} hp`:'—';rPotComercial.textContent=pCv?`${fmt(potenciaComercial(pCv),1)} cv`:'—';const hJ=h*1.10;const qJm3h=1.2;const pJkw=qJm3h*hJ*9.81/3600/0.50;const jcv=pJkw/0.7355;const jhp=pJkw/0.7457;jPressao.textContent=h?`${fmt(hJ)} mca`:'—';jBar.textContent=h?`${fmt(hJ/10.197)} bar`:'—';jCv.textContent=h?`${fmt(jcv)} cv`:'—';jHp.textContent=h?`${fmt(jhp)} hp`:'—';faixaOperacional.textContent=qL?`70%: ${fmt(qL*0.70)} L/min | 120%: ${fmt(qL*1.20)} L/min`:'70%: — | 120%: —';ver150.textContent=(qL&&h)?`Q150: ${fmt(qL*1.50)} L/min | H mínima: ${fmt(h*0.65)} mca`:'Q150: — | H mínima: —';verShutoff.textContent=h?`H máx. shutoff: ${fmt(h*1.40)} mca (${fmt((h*1.40)/10.197)} bar)`:'H máx. shutoff: —';const fator=n(fatorDiesel.value)||1.25;const tempoH=(n(tempoDiesel.value)||0)/60;const consumoEsp=n(consumoEspecifico.value)||0.27;const reserva=(n(reservaDiesel.value)||0)/100;const potDiesel=pCv*fator;const consumoHora=potDiesel*consumoEsp;const consumoPeriodo=consumoHora*tempoH;const volume=consumoPeriodo*(1+reserva);dBase.textContent=pCv?`${fmt(pCv)} cv`:'—';dPotencia.textContent=pCv?`${fmt(potDiesel)} cv (${fmt(potDiesel*0.9863)} hp)`:'—';dConsumoHora.textContent=pCv?`${fmt(consumoHora)} L/h`:'—';dConsumoPeriodo.textContent=pCv?`${fmt(consumoPeriodo)} L`:'—';dVolume.textContent=pCv?`${fmt(volume)} L`:'—';const atm=n(pressaoAtmosferica.value);const temp=n(tempAgua.value);const altura=n(alturaSuccao.value);const perdas=n(perdaSuccao.value);const npshReqFab=n(npshr.value);const margem=n(margemNpsh.value);const vapor=pressaoVaporMca(temp);const npsha=atm+altura-perdas-vapor;const req=npshReqFab+margem;const margemDisp=npsha-req;nDisp.textContent=`${fmt(npsha)} m`;nReq.textContent=`${fmt(req)} m`;nMargem.textContent=`${fmt(margemDisp)} m`;if(npshReqFab<=0){nSituacao.textContent='Informe o NPSHr';nSituacao.className='status-alerta'}else if(margemDisp>=0){nSituacao.textContent='OK — não indica cavitação';nSituacao.className='status-ok'}else{nSituacao.textContent='ATENÇÃO — risco de cavitação';nSituacao.className='status-erro'}}function limpar(){[qM3h,qLpm,hMca,pBar].forEach(el=>el.value='');calcularTudo()}calcularTudo();
+let travando=false;function n(v){return Number(String(v||'').replace(',','.'))||0}function fmt(v,c=2){if(!isFinite(v))v=0;return Number(v).toLocaleString('pt-BR',{minimumFractionDigits:c,maximumFractionDigits:c})}function sincronizarVazao(origem){if(travando)return;travando=true;if(origem==='m3h'){const q=n(qM3h.value);qLpm.value=q?fmt(q*1000/60):''}else{const q=n(qLpm.value);qM3h.value=q?fmt(q*60/1000):''}travando=false;calcularTudo()}function sincronizarPressao(origem){if(travando)return;travando=true;if(origem==='mca'){const h=n(hMca.value);pBar.value=h?fmt(h/10.197):''}else{const p=n(pBar.value);hMca.value=p?fmt(p*10.197):''}travando=false;calcularTudo()}function potenciaComercial(cv){const lista=[0.5,0.75,1,1.5,2,3,4,5,7.5,10,12.5,15,20,25,30,40,50,60,75,100,125,150,175,200,250,300,350,400,450,500];return lista.find(v=>v>=cv)||Math.ceil(cv/50)*50}function pressaoVaporMca(temp){const tabela=[[0,0.06],[10,0.12],[20,0.24],[30,0.43],[40,0.75],[50,1.26],[60,2.03]];if(temp<=0)return 0.06;if(temp>=60)return 2.03;for(let i=0;i<tabela.length-1;i++){const[t1,p1]=tabela[i];const[t2,p2]=tabela[i+1];if(temp>=t1&&temp<=t2)return p1+(p2-p1)*(temp-t1)/(t2-t1)}return 0.24}function calcularTudo(){const qL=n(qLpm.value);const qM=qL*60/1000;const h=n(hMca.value);const rendimento=n(rend.value);const eta=rendimento>0?rendimento/100:0;let pHidKw=0,pEixoKw=0,pCv=0,pHp=0;if(qM>0&&h>0&&eta>0){pHidKw=qM*h*9.81/3600;pEixoKw=pHidKw/eta;pCv=pEixoKw/0.7355;pHp=pEixoKw/0.7457}rVazao.textContent=qL?`${fmt(qL)} L/min (${fmt(qM)} m³/h)`:'—';rPressao.textContent=h?`${fmt(h)} mca (${fmt(h/10.197)} bar)`:'—';rPHid.textContent=pHidKw?`${fmt(pHidKw)} kW`:'—';rPEixoKw.textContent=pEixoKw?`${fmt(pEixoKw)} kW`:'—';rPEixoCv.textContent=pCv?`${fmt(pCv)} cv`:'—';rPEixoHp.textContent=pHp?`${fmt(pHp)} hp`:'—';rPotComercial.textContent=pCv?`${fmt(potenciaComercial(pCv),1)} cv`:'—';const hJ=h*1.10;const qJm3h=1.2;const etaJ=(n(jRendimento.value)||50)/100;const pJkw=etaJ>0?qJm3h*hJ*9.81/3600/etaJ:0;const jcv=pJkw/0.7355;const jhp=pJkw/0.7457;jMcaEntrada.value=h?fmt(hJ):'—';jBarEntrada.value=h?fmt(hJ/10.197):'—';jVazaoResultado.textContent='20,00 L/min (1,20 m³/h)';jPressao.textContent=h?`${fmt(hJ)} mca`:'—';jBar.textContent=h?`${fmt(hJ/10.197)} bar`:'—';jKw.textContent=h?`${fmt(pJkw)} kW`:'—';jCv.textContent=h?`${fmt(jcv)} cv`:'—';jHp.textContent=h?`${fmt(jhp)} hp`:'—';jPotComercial.textContent=h?`${fmt(potenciaComercial(jcv),1)} cv`:'—';faixaOperacional.textContent=qL?`70%: ${fmt(qL*0.70)} L/min | 120%: ${fmt(qL*1.20)} L/min`:'70%: — | 120%: —';ver150.textContent=(qL&&h)?`Q150: ${fmt(qL*1.50)} L/min | H mínima: ${fmt(h*0.65)} mca`:'Q150: — | H mínima: —';verShutoff.textContent=h?`H máx. shutoff: ${fmt(h*1.40)} mca (${fmt((h*1.40)/10.197)} bar)`:'H máx. shutoff: —';const fator=n(fatorDiesel.value)||1.25;const tempoH=(n(tempoDiesel.value)||0)/60;const consumoEsp=n(consumoEspecifico.value)||0.27;const reserva=(n(reservaDiesel.value)||0)/100;const potDiesel=pCv*fator;const consumoHora=potDiesel*consumoEsp;const consumoPeriodo=consumoHora*tempoH;const volume=consumoPeriodo*(1+reserva);dBase.textContent=pCv?`${fmt(pCv)} cv`:'—';dPotencia.textContent=pCv?`${fmt(potDiesel)} cv (${fmt(potDiesel*0.9863)} hp)`:'—';dConsumoHora.textContent=pCv?`${fmt(consumoHora)} L/h`:'—';dConsumoPeriodo.textContent=pCv?`${fmt(consumoPeriodo)} L`:'—';dVolume.textContent=pCv?`${fmt(volume)} L`:'—';const atm=n(pressaoAtmosferica.value);const temp=n(tempAgua.value);const altura=n(alturaSuccao.value);const perdas=n(perdaSuccao.value);const npshReqFab=n(npshr.value);const margem=n(margemNpsh.value);const vapor=pressaoVaporMca(temp);const npsha=atm+altura-perdas-vapor;const req=npshReqFab+margem;const margemDisp=npsha-req;nDisp.textContent=`${fmt(npsha)} m`;nReq.textContent=`${fmt(req)} m`;nMargem.textContent=`${fmt(margemDisp)} m`;if(npshReqFab<=0){nSituacao.textContent='Informe o NPSHr';nSituacao.className='status-alerta'}else if(margemDisp>=0){nSituacao.textContent='OK — não indica cavitação';nSituacao.className='status-ok'}else{nSituacao.textContent='ATENÇÃO — risco de cavitação';nSituacao.className='status-erro'}}function limpar(){[qM3h,qLpm,hMca,pBar].forEach(el=>el.value='');calcularTudo()}calcularTudo();
 </script>
 </body>
 </html>
