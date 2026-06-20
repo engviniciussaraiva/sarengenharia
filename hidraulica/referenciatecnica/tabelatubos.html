@@ -383,8 +383,6 @@ td.texto{
         <th>Peso vazio<br>(kg/m)</th>
         <th>Peso cheio<br>(kg/m)</th>
         <th>Vazão a 5 m/s<br>(L/min)</th>
-        <th>Apoio<br>horizontal<br>(m)</th>
-        <th>Apoio<br>vertical<br>(m)</th>
         <th>Fator C<br>Hazen-Williams</th>
         <th>Observação</th>
     </tr>
@@ -948,24 +946,7 @@ function renderizarTabela(lista){
                     ]
                 )
             },
-            {
-                valor:obter(
-                    registro,
-                    [
-                        'DISTANCIA_APOIOS_HORIZONTAL_M',
-                        'DISTÂNCIA APOIOS HORIZONTAL (M)'
-                    ]
-                )
-            },
-            {
-                valor:obter(
-                    registro,
-                    [
-                        'DISTANCIA_APOIOS_VERTICAL_M',
-                        'DISTÂNCIA APOIOS VERTICAL (M)'
-                    ]
-                )
-            },
+            
             {
                 valor:obter(
                     registro,
