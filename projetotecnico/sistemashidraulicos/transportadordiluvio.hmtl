@@ -1,1 +1,637 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dilúvio em Transportadores</title>
 
+<style>
+:root{
+  --sar-green:#2f5f5b;
+  --sar-green-2:#3d7b72;
+  --sar-light:#f4f7f6;
+  --sar-border:#d7e2df;
+  --sar-text:#1f2933;
+  --sar-muted:#667085;
+  --sar-yellow:#fff566;
+  --sar-result:#dff3d5;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:#f3f6f5;
+  color:var(--sar-text);
+}
+
+.wrap{
+  max-width:1280px;
+  margin:0 auto;
+  padding:18px;
+}
+
+.header{
+  background:linear-gradient(135deg,var(--sar-green),var(--sar-green-2));
+  color:#fff;
+  border-radius:12px;
+  padding:18px 22px;
+  margin-bottom:16px;
+  box-shadow:0 6px 18px rgba(0,0,0,.12);
+}
+
+.header h1{
+  margin:0;
+  font-size:22px;
+}
+
+.header p{
+  margin:6px 0 0;
+  opacity:.9;
+}
+
+.card{
+  background:#fff;
+  border:1px solid var(--sar-border);
+  border-radius:12px;
+  padding:18px;
+  margin-bottom:16px;
+  box-shadow:0 3px 12px rgba(0,0,0,.05);
+}
+
+.section-title{
+  font-size:16px;
+  font-weight:800;
+  margin:0 0 14px;
+  color:var(--sar-green);
+  border-left:5px solid var(--sar-green);
+  padding-left:10px;
+}
+
+.grid-3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+
+.grid-4{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+}
+
+.field label{
+  display:block;
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:6px;
+}
+
+input, select{
+  width:100%;
+  height:34px;
+  border:1px solid #222;
+  border-radius:3px;
+  padding:6px 8px;
+  font-size:14px;
+  background:#fff;
+  text-align:center;
+}
+
+input[readonly]{
+  background:#f8faf9;
+}
+
+.result{
+  background:var(--sar-result)!important;
+  font-weight:800;
+}
+
+.warn{
+  background:var(--sar-yellow)!important;
+}
+
+.actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+  margin-top:18px;
+}
+
+button{
+  border:0;
+  border-radius:8px;
+  padding:11px 24px;
+  font-weight:800;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.btn-clean{
+  background:#e9eeee;
+  color:#344054;
+}
+
+.btn-insert{
+  background:var(--sar-green);
+  color:#fff;
+}
+
+.btn-calc{
+  background:#173f3b;
+  color:#fff;
+}
+
+.table-wrap{
+  overflow:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:12px;
+  font-size:13px;
+  background:#fff;
+}
+
+th{
+  background:#2f5f5b;
+  color:#fff;
+  padding:9px;
+  border:1px solid #244b47;
+  white-space:nowrap;
+}
+
+td{
+  border:1px solid var(--sar-border);
+  padding:8px;
+  text-align:center;
+  white-space:nowrap;
+}
+
+tr:nth-child(even){
+  background:#f7fbfa;
+}
+
+.badge{
+  padding:4px 8px;
+  border-radius:999px;
+  font-weight:800;
+  font-size:12px;
+}
+
+.ok{background:#d1fadf;color:#05603a}
+.att{background:#fef0c7;color:#93370d}
+.rev{background:#fee4e2;color:#b42318}
+
+.memoria{
+  width:100%;
+  min-height:180px;
+  border:1px solid var(--sar-border);
+  border-radius:8px;
+  padding:12px;
+  font-family:Consolas, monospace;
+  resize:vertical;
+}
+
+@media(max-width:900px){
+  .grid-3,.grid-4{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <h1>Dimensionamento de Sistema de Dilúvio para Transportadores Enclausurados</h1>
+    <p>SAR Engenharia · Projeto Técnico · Sistemas Hidráulicos · Proteção por Dilúvio</p>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Dados</h2>
+
+    <div class="grid-3">
+      <div class="field">
+        <label>Referência</label>
+        <input id="referencia" type="text">
+      </div>
+
+      <div class="field">
+        <label>Local protegido</label>
+        <select id="localProtegido">
+          <option>Túnel / Aéreo / Transportador Enclausurado</option>
+          <option>Transportador aberto</option>
+          <option>Casa de transferência</option>
+          <option>Outro</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Identificação Trecho/Chave</label>
+        <input id="chave" type="text" placeholder="Ex.: TC-01 / CH-01">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Projeto</h2>
+
+    <div class="grid-4">
+      <div class="field">
+        <label>Comprimento da área protegida (m)</label>
+        <input id="comprimento" type="number" step="0.01" oninput="calcular()">
+      </div>
+
+      <div class="field">
+        <label>Largura da área protegida (m)</label>
+        <input id="largura" type="number" step="0.01" oninput="calcular()">
+      </div>
+
+      <div class="field">
+        <label>Altura entre a área e o defletor (m)</label>
+        <input id="altura" type="number" step="0.01" oninput="calcular()">
+      </div>
+
+      <div class="field">
+        <label>Densidade (L/min/m²)</label>
+        <select id="densidade" onchange="calcular()">
+          <option value="10">10</option>
+          <option value="12">12</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Área protegida (m²)</label>
+        <input id="area" class="result" readonly>
+      </div>
+
+      <div class="field">
+        <label>Vazão total mínima (L/min)</label>
+        <input id="vazaoTotal" class="result" readonly>
+      </div>
+
+      <div class="field">
+        <label>Modelo do Bico</label>
+        <input id="modeloBico" readonly>
+      </div>
+
+      <div class="field">
+        <label>Tipo</label>
+        <input id="tipoBico" readonly value="Média Velocidade">
+      </div>
+
+      <div class="field">
+        <label>Ângulo abertura defletor (°)</label>
+        <input id="angulo" readonly>
+      </div>
+
+      <div class="field">
+        <label>Fator K de descarga</label>
+        <input id="fatorK" readonly>
+      </div>
+
+      <div class="field">
+        <label>Diâmetro da descarga (mm)</label>
+        <input id="diametroDescarga" readonly>
+      </div>
+
+      <div class="field">
+        <label>Diâmetro de entrada disponível</label>
+        <input id="diametroEntrada" readonly>
+      </div>
+
+      <div class="field">
+        <label>Distância planejada entre bicos (m)</label>
+        <input id="distPlanejada" readonly>
+      </div>
+
+      <div class="field">
+        <label>Nº de bicos planejado</label>
+        <input id="bicosPlanejado" readonly>
+      </div>
+
+      <div class="field">
+        <label>Nº de bicos projetado</label>
+        <input id="bicosProjetado" class="warn" type="number" step="1" oninput="calcular()">
+      </div>
+
+      <div class="field">
+        <label>Distância entre bicos real (m)</label>
+        <input id="distReal" readonly>
+      </div>
+
+      <div class="field">
+        <label>Vazão min planejada por bico (L/min)</label>
+        <input id="vazaoPlanejadaBico" readonly>
+      </div>
+
+      <div class="field">
+        <label>Pressão min planejada no bico (mca)</label>
+        <input id="pressaoPlanejada" readonly>
+      </div>
+
+      <div class="field">
+        <label>Pressão ajustada no bico (mca)</label>
+        <input id="pressaoAjustada" readonly>
+      </div>
+
+      <div class="field">
+        <label>Vazão min real por bico (L/min)</label>
+        <input id="vazaoRealBico" readonly>
+      </div>
+
+      <div class="field">
+        <label>Tempo de operação (min)</label>
+        <input id="tempo" type="number" value="90" oninput="calcular()">
+      </div>
+
+      <div class="field">
+        <label>Volume mínimo reservatório (m³)</label>
+        <input id="volumeReservatorio" class="result" readonly>
+      </div>
+
+      <div class="field">
+        <label>Status</label>
+        <input id="status" readonly>
+      </div>
+
+      <div class="field">
+        <label>Observação automática</label>
+        <input id="observacao" readonly>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-clean" onclick="limpar()">Limpar</button>
+      <button class="btn-calc" onclick="calcular()">Calcular</button>
+      <button class="btn-insert" onclick="inserirLinha()">Inserir</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Trechos Inseridos</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Referência</th>
+            <th>Local</th>
+            <th>Trecho/Chave</th>
+            <th>Compr. (m)</th>
+            <th>Larg. (m)</th>
+            <th>Altura (m)</th>
+            <th>Dens.</th>
+            <th>Área</th>
+            <th>Vazão</th>
+            <th>Bico</th>
+            <th>Ângulo</th>
+            <th>K</th>
+            <th>Bicos</th>
+            <th>Espaç.</th>
+            <th>Pressão</th>
+            <th>Reserv. (m³)</th>
+            <th>Status</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody id="tabela"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Memória Base</h2>
+    <textarea id="memoria" class="memoria" readonly></textarea>
+  </div>
+
+</div>
+
+<script>
+const bicos = [
+  {modelo:"MV-10", angulo:90,  k:28.0, diametro:"6.35", entrada:'1/2"', abertura:1.80},
+  {modelo:"MV-15", angulo:90,  k:35.0, diametro:"7.14", entrada:'1/2"', abertura:2.20},
+  {modelo:"MV-25", angulo:110, k:42.9, diametro:"8.33", entrada:'1/2"', abertura:2.68},
+  {modelo:"MV-30", angulo:120, k:50.0, diametro:"9.50", entrada:'1/2"', abertura:3.00}
+];
+
+let linhas = [];
+
+function n(id){
+  const v = parseFloat(document.getElementById(id).value);
+  return isNaN(v) ? 0 : v;
+}
+
+function fmt(v, c=2){
+  return Number(v || 0).toLocaleString("pt-BR", {
+    minimumFractionDigits:c,
+    maximumFractionDigits:c
+  });
+}
+
+function escolherBico(vazaoTotal, comprimento, largura, altura){
+  let melhor = null;
+
+  bicos.forEach(b => {
+    const espacamentoPlanejado = Math.max(1.2, Math.min(b.abertura, altura * Math.tan((b.angulo/2) * Math.PI/180) * 2));
+    const qtdPlanejada = Math.max(1, Math.ceil(comprimento / espacamentoPlanejado));
+    const vazaoPorBico = vazaoTotal / qtdPlanejada;
+    const pressao = Math.pow(vazaoPorBico / b.k, 2);
+
+    const distanciaIdeal10 = Math.abs(10 - pressao);
+    const penalidadePoucoBico = qtdPlanejada < 2 ? 20 : 0;
+    const penalidadePressaoAlta = pressao > 15 ? 50 : pressao > 12 ? 15 : 0;
+    const penalidadePressaoMuitoBaixa = pressao < 5 ? 10 : 0;
+
+    const score = distanciaIdeal10 + penalidadePoucoBico + penalidadePressaoAlta + penalidadePressaoMuitoBaixa;
+
+    const item = {
+      ...b,
+      espacamentoPlanejado,
+      qtdPlanejada,
+      vazaoPorBico,
+      pressao,
+      score
+    };
+
+    if(!melhor || item.score < melhor.score){
+      melhor = item;
+    }
+  });
+
+  return melhor;
+}
+
+function classificarPressao(p){
+  if(p <= 10) return "Recomendado";
+  if(p <= 12) return "Aceitável";
+  if(p <= 15) return "Revisar";
+  return "Não recomendado";
+}
+
+function calcular(){
+  const comprimento = n("comprimento");
+  const largura = n("largura");
+  const altura = n("altura");
+  const densidade = n("densidade");
+  const tempo = n("tempo");
+
+  const area = comprimento * largura;
+  const vazaoTotal = area * densidade;
+
+  let escolhido = escolherBico(vazaoTotal, comprimento, largura, altura);
+
+  if(!escolhido || vazaoTotal <= 0){
+    document.getElementById("area").value = "";
+    document.getElementById("vazaoTotal").value = "";
+    return;
+  }
+
+  let bicosProjetado = parseInt(document.getElementById("bicosProjetado").value);
+  if(!bicosProjetado || bicosProjetado < escolhido.qtdPlanejada){
+    bicosProjetado = escolhido.qtdPlanejada;
+    document.getElementById("bicosProjetado").value = bicosProjetado;
+  }
+
+  const distReal = bicosProjetado > 0 ? comprimento / bicosProjetado : 0;
+  const vazaoRealBico = bicosProjetado > 0 ? vazaoTotal / bicosProjetado : 0;
+  const pressaoAjustada = Math.pow(vazaoRealBico / escolhido.k, 2);
+  const volumeM3 = (vazaoTotal * tempo) / 1000;
+  const status = classificarPressao(pressaoAjustada);
+
+  document.getElementById("area").value = fmt(area);
+  document.getElementById("vazaoTotal").value = fmt(vazaoTotal);
+  document.getElementById("modeloBico").value = escolhido.modelo;
+  document.getElementById("angulo").value = escolhido.angulo;
+  document.getElementById("fatorK").value = escolhido.k;
+  document.getElementById("diametroDescarga").value = escolhido.diametro;
+  document.getElementById("diametroEntrada").value = escolhido.entrada;
+  document.getElementById("distPlanejada").value = fmt(escolhido.espacamentoPlanejado);
+  document.getElementById("bicosPlanejado").value = escolhido.qtdPlanejada;
+  document.getElementById("distReal").value = fmt(distReal);
+  document.getElementById("vazaoPlanejadaBico").value = fmt(escolhido.vazaoPorBico);
+  document.getElementById("pressaoPlanejada").value = fmt(escolhido.pressao);
+  document.getElementById("pressaoAjustada").value = fmt(pressaoAjustada);
+  document.getElementById("vazaoRealBico").value = fmt(vazaoRealBico);
+  document.getElementById("volumeReservatorio").value = fmt(volumeM3);
+  document.getElementById("status").value = status;
+
+  document.getElementById("observacao").value =
+    status === "Recomendado" ? "Pressão próxima do ideal." :
+    status === "Aceitável" ? "Pressão aceitável, verificar margem." :
+    status === "Revisar" ? "Pressão elevada, avaliar mais bicos." :
+    "Rever seleção e quantidade de bicos.";
+
+  atualizarMemoria();
+}
+
+function dadosAtuais(){
+  calcular();
+
+  return {
+    referencia: document.getElementById("referencia").value,
+    local: document.getElementById("localProtegido").value,
+    chave: document.getElementById("chave").value,
+    comprimento: n("comprimento"),
+    largura: n("largura"),
+    altura: n("altura"),
+    densidade: n("densidade"),
+    area: document.getElementById("area").value,
+    vazao: document.getElementById("vazaoTotal").value,
+    modelo: document.getElementById("modeloBico").value,
+    angulo: document.getElementById("angulo").value,
+    k: document.getElementById("fatorK").value,
+    bicos: document.getElementById("bicosProjetado").value,
+    espacamento: document.getElementById("distReal").value,
+    pressao: document.getElementById("pressaoAjustada").value,
+    reservatorio: document.getElementById("volumeReservatorio").value,
+    status: document.getElementById("status").value
+  };
+}
+
+function inserirLinha(){
+  const d = dadosAtuais();
+
+  if(!d.referencia || !d.chave || d.comprimento <= 0 || d.largura <= 0){
+    alert("Informe referência, trecho/chave, comprimento e largura.");
+    return;
+  }
+
+  linhas.push(d);
+  desenharTabela();
+  atualizarMemoria();
+}
+
+function desenharTabela(){
+  const tbody = document.getElementById("tabela");
+  tbody.innerHTML = "";
+
+  linhas.forEach((l,i) => {
+    const classe = l.status === "Recomendado" ? "ok" : l.status === "Aceitável" ? "att" : "rev";
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${l.referencia}</td>
+        <td>${l.local}</td>
+        <td>${l.chave}</td>
+        <td>${fmt(l.comprimento)}</td>
+        <td>${fmt(l.largura)}</td>
+        <td>${fmt(l.altura)}</td>
+        <td>${fmt(l.densidade)}</td>
+        <td>${l.area}</td>
+        <td>${l.vazao}</td>
+        <td>${l.modelo}</td>
+        <td>${l.angulo}°</td>
+        <td>${l.k}</td>
+        <td>${l.bicos}</td>
+        <td>${l.espacamento}</td>
+        <td>${l.pressao}</td>
+        <td>${l.reservatorio}</td>
+        <td><span class="badge ${classe}">${l.status}</span></td>
+        <td><button class="btn-clean" onclick="removerLinha(${i})">Remover</button></td>
+      </tr>
+    `;
+  });
+}
+
+function removerLinha(i){
+  linhas.splice(i,1);
+  desenharTabela();
+  atualizarMemoria();
+}
+
+function atualizarMemoria(){
+  let txt = "MEMÓRIA DE CÁLCULO - SISTEMA DE DILÚVIO EM TRANSPORTADORES\\n\\n";
+
+  linhas.forEach((l, i) => {
+    txt += `${i+1}. ${l.chave}\\n`;
+    txt += `Local protegido: ${l.local}\\n`;
+    txt += `Área protegida: ${l.area} m²\\n`;
+    txt += `Vazão mínima: ${l.vazao} L/min\\n`;
+    txt += `Bico selecionado: ${l.modelo} / Ângulo ${l.angulo}° / K ${l.k}\\n`;
+    txt += `Quantidade de bicos: ${l.bicos}\\n`;
+    txt += `Espaçamento real: ${l.espacamento} m\\n`;
+    txt += `Pressão ajustada: ${l.pressao} mca\\n`;
+    txt += `Volume mínimo de reservatório: ${l.reservatorio} m³\\n`;
+    txt += `Status: ${l.status}\\n\\n`;
+  });
+
+  document.getElementById("memoria").value = txt;
+}
+
+function limpar(){
+  document.querySelectorAll("input").forEach(i => {
+    if(!i.readOnly && i.id !== "tempo") i.value = "";
+  });
+
+  document.getElementById("tempo").value = 90;
+  calcular();
+}
+</script>
+
+</body>
+</html>
