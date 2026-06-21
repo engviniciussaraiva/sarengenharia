@@ -216,6 +216,18 @@ tr:nth-child(even){
 @media(max-width:900px){
   .grid-3,.grid-4{grid-template-columns:1fr}
 }
+
+.btn-table{
+  width:32px;
+  height:28px;
+  padding:0;
+  font-size:14px;
+  border-radius:6px;
+  margin:2px;
+}
+
+
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -388,27 +400,27 @@ tr:nth-child(even){
     <div class="table-wrap">
       <table>
         <thead>
-          <tr>
-            <th>Referência</th>
-            <th>Local</th>
-            <th>Trecho/Chave</th>
-            <th>Compr. (m)</th>
-            <th>Larg. (m)</th>
-            <th>Altura (m)</th>
-            <th>Dens.</th>
-            <th>Área</th>
-            <th>Vazão</th>
-            <th>Bico</th>
-            <th>Ângulo</th>
-            <th>K</th>
-            <th>Bicos</th>
-            <th>Espaç.</th>
-            <th>Pressão</th>
-            <th>Reserv. (m³)</th>
-            <th>Status</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
+  <tr>
+    <th>Referência</th>
+    <th>Local</th>
+    <th>Trecho/<br>Chave</th>
+    <th>Compr.<br>(m)</th>
+    <th>Larg.<br>(m)</th>
+    <th>Altura<br>(m)</th>
+    <th>Dens.<br>(L/min/m²)</th>
+    <th>Área<br>(m²)</th>
+    <th>Vazão<br>(L/min)</th>
+    <th>Bico</th>
+    <th>Ângulo<br>(°)</th>
+    <th>K</th>
+    <th>Bicos</th>
+    <th>Distância<br>(m)</th>
+    <th>Pressão<br>(mca)</th>
+    <th>Reserv.<br>(m³)</th>
+    <th>Ação</th>
+  </tr>
+</thead>
+
         <tbody id="tabela"></tbody>
       </table>
     </div>
@@ -745,8 +757,11 @@ function desenharTabela(){
         <td>${l.espacamento}</td>
         <td>${l.pressao}</td>
         <td>${l.reservatorio}</td>
-        <td><span class="badge ${classe}">${l.status}</span></td>
-        <td><button class="btn-clean" onclick="removerLinha(${i})">Remover</button></td>
+        
+        <td>
+<button class="btn-clean btn-table" title="Editar" onclick="editarLinha(${i})">✏️</button>
+<button class="btn-clean btn-table" title="Remover" onclick="removerLinha(${i})">🗑️</button>
+</td> 
       </tr>
     `;
   });
