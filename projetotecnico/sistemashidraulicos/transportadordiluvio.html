@@ -267,12 +267,8 @@ tr:nth-child(even){
 
       <div class="field">
         <label>Densidade (L/min/m²)</label>
-        <select id="densidade" onchange="calcular()">
-          <option value="10">10</option>
-          <option value="12">12</option>
-          <option value="15">15</option>
-          <option value="20">20</option>
-        </select>
+        <input id="densidade" class="warn" type="number" step="0.01" value="12" oninput="calcular()">
+
       </div>
 
       <div class="field">
@@ -355,7 +351,7 @@ tr:nth-child(even){
 
       <div class="field">
         <label>Tempo de operação (min)</label>
-        <input id="tempo" type="number" value="90" oninput="calcular()">
+        <input id="tempo" class="warn" type="number" value="90" oninput="calcular()">
       </div>
 
       <div class="field">
@@ -364,7 +360,7 @@ tr:nth-child(even){
       </div>
 
       <div class="field">
-        <label>Observação automática</label>
+        <label>Nota Técnica</label>
         <input id="observacao" class="obs-alerta" readonly>
       </div>
     </div>
@@ -770,13 +766,29 @@ function atualizarMemoria(){
 }
 
 function limpar(){
+  selecaoManual = false;
+
   document.querySelectorAll("input").forEach(i => {
-    if(!i.readOnly && i.id !== "tempo") i.value = "";
+    i.value = "";
   });
 
+  document.querySelectorAll("select").forEach(s => {
+    s.selectedIndex = 0;
+  });
+
+  document.getElementById("densidade").value = 12;
   document.getElementById("tempo").value = 90;
-  calcular();
+
+  document.getElementById("modeloBico").innerHTML = "";
+  document.getElementById("angulo").innerHTML = "";
+
+  window.STATUS_CALCULO = "";
+
+  atualizarMemoria();
 }
+
+
+
 
 const SUPABASE_URL = "https://bjtxbpmrmhfvpmdsthxr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdHhicG1ybWhmdnBtZHN0aHhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzIyNTgsImV4cCI6MjA5NzU0ODI1OH0.zHZvSLzt6sWCrrKMW_zQXdqj8KCPF8OjTcsyza07dPI";
