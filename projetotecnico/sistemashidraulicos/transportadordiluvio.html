@@ -13,7 +13,7 @@
   --sar-border:#d7e2df;
   --sar-text:#1f2933;
   --sar-muted:#667085;
-  --sar-yellow:#fff566;
+  --sar-yellow:#fff9c4;
   --sar-result:#dff3d5;
 }
 
@@ -79,6 +79,12 @@ body{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:16px;
+}
+
+.obs-alerta{
+  border:2px solid #ff0000 !important;
+  color:#b42318;
+  font-weight:700;
 }
 
 .field label{
@@ -281,7 +287,9 @@ tr:nth-child(even){
 
       <div class="field">
         <label>Modelo do Bico</label>
-        <input id="modeloBico" readonly>
+        <select id="modeloBico" class="warn" onchange="calcular()">
+</select>
+
       </div>
 
       <div class="field">
@@ -291,7 +299,9 @@ tr:nth-child(even){
 
       <div class="field">
         <label>Ângulo abertura defletor (°)</label>
-        <input id="angulo" readonly>
+        <select id="angulo" class="warn" onchange="calcular()">
+</select>
+
       </div>
 
       <div class="field">
@@ -304,12 +314,7 @@ tr:nth-child(even){
         <input id="diametroDescarga" readonly>
       </div>
 
-      <div class="field">
-        <label>Diâmetro de entrada disponível</label>
-        <input id="diametroEntrada" readonly>
-      </div>
-
-      <div class="field">
+            <div class="field">
         <label>Distância planejada entre bicos (m)</label>
         <input id="distPlanejada" readonly>
       </div>
@@ -360,20 +365,14 @@ tr:nth-child(even){
       </div>
 
       <div class="field">
-        <label>Status</label>
-        <input id="status" readonly>
-      </div>
-
-      <div class="field">
         <label>Observação automática</label>
-        <input id="observacao" readonly>
+        <input id="observacao" class="obs-alerta" readonly>
       </div>
     </div>
 
     <div class="actions">
       <button class="btn-clean" onclick="limpar()">Limpar</button>
-      <button class="btn-calc" onclick="calcular()">Calcular</button>
-      <button class="btn-insert" onclick="inserirLinha()">Inserir</button>
+<button class="btn-insert" onclick="inserirLinha()">Inserir</button>
     </div>
   </div>
 
