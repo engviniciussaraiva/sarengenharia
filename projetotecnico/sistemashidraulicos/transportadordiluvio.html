@@ -501,6 +501,40 @@ function classificarPressao(p){
   return "Não recomendado";
 }
 
+
+function preencherDropsBico(escolhido){
+  const listaBicos = window.BICOS_SUPABASE || bicos;
+
+  const selectModelo = document.getElementById("modeloBico");
+  const selectAngulo = document.getElementById("angulo");
+
+  if(selectModelo.options.length === 0){
+    const modelos = [...new Set(listaBicos.map(b => b.modelo))];
+
+    modelos.forEach(modelo => {
+      selectModelo.innerHTML += `<option value="${modelo}">${modelo}</option>`;
+    });
+  }
+
+  selectModelo.value = escolhido.modelo;
+
+  selectAngulo.innerHTML = "";
+
+  listaBicos
+    .filter(b => b.modelo === selectModelo.value)
+    .forEach(b => {
+      selectAngulo.innerHTML += `
+        <option value="${b.angulo_graus}">${b.angulo_graus}</option>
+      `;
+    });
+
+  selectAngulo.value = escolhido.angulo;
+
+  document.getElementById("tipoBico").value = escolhido.tipo || "Média Velocidade";
+}
+
+
+
 function calcular(){
   const comprimento = n("comprimento");
   const largura = n("largura");
@@ -533,9 +567,7 @@ function calcular(){
 
   document.getElementById("area").value = fmt(area);
   document.getElementById("vazaoTotal").value = fmt(vazaoTotal);
-  document.getElementById("modeloBico").value = escolhido.modelo;
-document.getElementById("tipoBico").value = escolhido.tipo || "Média Velocidade";
-document.getElementById("angulo").value = escolhido.angulo;
+  preencherDropsBico(escolhido);
 document.getElementById("fatorK").value = escolhido.k;
 document.getElementById("diametroDescarga").value = escolhido.diametro;
 document.getElementById("diametroEntrada").value = escolhido.entrada || "";
