@@ -452,8 +452,14 @@ function escolherBico(vazaoTotal, comprimento, largura, altura){
 
     if(!angulo || !k) return;
 
-    const aberturaCalculada = altura * Math.tan((angulo / 2) * Math.PI / 180) * 2;
-    const espacamentoPlanejado = Math.max(1.2, aberturaCalculada);
+    const aberturaCalculada =
+  altura * Math.tan((angulo / 2) * Math.PI / 180) * 2;
+
+const coberturaUtil =
+  aberturaCalculada * 0.90; // 10% de transpasse
+
+const espacamentoPlanejado =
+  Math.min(3.00, Math.max(1.2, coberturaUtil));
 
     const qtdPlanejada = Math.max(1, Math.ceil(comprimento / espacamentoPlanejado));
     const vazaoPorBico = vazaoTotal / qtdPlanejada;
@@ -580,10 +586,14 @@ function calcular(){
       const tipo = bicoManual.tipo || "Média Velocidade";
 
       const aberturaCalculada =
-        altura * Math.tan((angulo / 2) * Math.PI / 180) * 2;
+  altura * Math.tan((angulo / 2) * Math.PI / 180) * 2;
 
-      const espacamentoPlanejado =
-        Math.max(1.2, aberturaCalculada);
+const coberturaUtil =
+  aberturaCalculada * 0.90; // 10% de transpasse
+
+const espacamentoPlanejado =
+  Math.min(3.00, Math.max(1.2, coberturaUtil));
+
 
       const qtdPlanejada =
         Math.max(1, Math.ceil(comprimento / espacamentoPlanejado));
@@ -622,8 +632,12 @@ function calcular(){
   const vazaoRealBico =
     bicosProjetado > 0 ? vazaoTotal / bicosProjetado : 0;
 
-  const pressaoAjustada =
-    Math.pow(vazaoRealBico / escolhido.k, 2);
+  const pressaoCalculada =
+  Math.pow(vazaoRealBico / escolhido.k, 2);
+
+const pressaoAjustada =
+  Math.max(10, pressaoCalculada);
+
 
   const volumeM3 =
     (vazaoTotal * tempo) / 1000;
@@ -644,7 +658,11 @@ function calcular(){
   document.getElementById("vazaoPlanejadaBico").value = fmt(escolhido.vazaoPorBico);
   document.getElementById("pressaoPlanejada").value = fmt(escolhido.pressao);
   document.getElementById("pressaoAjustada").value = fmt(pressaoAjustada);
-  document.getElementById("vazaoRealBico").value = fmt(vazaoRealBico);
+  const vazaoRealAjustada =
+  escolhido.k * Math.sqrt(pressaoAjustada);
+
+document.getElementById("vazaoRealBico").value = fmt(vazaoRealAjustada);
+
   document.getElementById("volumeReservatorio").value = fmt(volumeM3);
 
   document.getElementById("observacao").value =
