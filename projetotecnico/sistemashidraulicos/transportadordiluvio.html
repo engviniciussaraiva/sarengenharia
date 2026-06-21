@@ -463,7 +463,7 @@ const espacamentoPlanejado =
 
     const qtdPlanejada = Math.max(1, Math.ceil(comprimento / espacamentoPlanejado));
     const vazaoPorBico = vazaoTotal / qtdPlanejada;
-    const pressao = Math.pow(vazaoPorBico / k, 2);
+    const pressao = Math.pow(vazaoPorBico / k, 2) * 10.197;
 
     const distanciaIdeal10 = Math.abs(10 - pressao);
     const penalidadePoucoBico = qtdPlanejada < 2 ? 20 : 0;
@@ -602,7 +602,7 @@ const espacamentoPlanejado =
         vazaoTotal / qtdPlanejada;
 
       const pressao =
-        Math.pow(vazaoPorBico / k, 2);
+        Math.pow(vazaoPorBico / k, 2)* 10.197;
 
       escolhido = {
         modelo: bicoManual.modelo,
@@ -633,7 +633,7 @@ const espacamentoPlanejado =
     bicosProjetado > 0 ? vazaoTotal / bicosProjetado : 0;
 
   const pressaoCalculada =
-  Math.pow(vazaoRealBico / escolhido.k, 2);
+  Math.pow(vazaoRealBico / escolhido.k, 2)*10.197;
 
 const pressaoAjustada =
   Math.max(10, pressaoCalculada);
@@ -659,7 +659,7 @@ const pressaoAjustada =
   document.getElementById("pressaoPlanejada").value = fmt(escolhido.pressao);
   document.getElementById("pressaoAjustada").value = fmt(pressaoAjustada);
   const vazaoRealAjustada =
-  escolhido.k * Math.sqrt(pressaoAjustada);
+  escolhido.k * Math.sqrt(pressaoAjustada/10.197);
 
 document.getElementById("vazaoRealBico").value = fmt(vazaoRealAjustada);
 
