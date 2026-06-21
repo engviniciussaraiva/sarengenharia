@@ -441,21 +441,44 @@ function fmt(v, c=2){
 function escolherBico(vazaoTotal, comprimento, largura, altura){
   let melhor = null;
 
-  bicos.forEach(b => {
-    const espacamentoPlanejado = Math.max(1.2, Math.min(b.abertura, altura * Math.tan((b.angulo/2) * Math.PI/180) * 2));
+  const listaBicos = window.BICOS_SUPABASE || bicos;
+
+  listaBicos.forEach(b => {
+    const modelo = b.modelo || "";
+    const tipo = b.tipo || "";
+    const angulo = Number(b.angulo_graus || b.angulo || 0);
+    const k = Number(b.fator_k || b.k || 0);
+    const diametro = b.diametro_descarga_mm || b.diametro || "";
+    const pressaoMinima = Number(b.pressao_min_mca || 0);
+
+    if(!angulo || !k) return;
+
+    const aberturaCalculada = altura * Math.tan((angulo / 2) * Math.PI / 180) * 2;
+    const espacamentoPlanejado = Math.max(1.2, aberturaCalculada);
+
     const qtdPlanejada = Math.max(1, Math.ceil(comprimento / espacamentoPlanejado));
     const vazaoPorBico = vazaoTotal / qtdPlanejada;
-    const pressao = Math.pow(vazaoPorBico / b.k, 2);
+    const pressao = Math.pow(vazaoPorBico / k, 2);
 
     const distanciaIdeal10 = Math.abs(10 - pressao);
     const penalidadePoucoBico = qtdPlanejada < 2 ? 20 : 0;
     const penalidadePressaoAlta = pressao > 15 ? 50 : pressao > 12 ? 15 : 0;
-    const penalidadePressaoMuitoBaixa = pressao < 5 ? 10 : 0;
+    const penalidadePressaoBaixa = pressao < pressaoMinima ? 30 : 0;
 
-    const score = distanciaIdeal10 + penalidadePoucoBico + penalidadePressaoAlta + penalidadePressaoMuitoBaixa;
+    const score =
+      distanciaIdeal10 +
+      penalidadePoucoBico +
+      penalidadePressaoAlta +
+      penalidadePressaoBaixa;
 
     const item = {
-      ...b,
+      modelo,
+      tipo,
+      angulo,
+      k,
+      diametro,
+      entrada: "",
+      pressaoMinima,
       espacamentoPlanejado,
       qtdPlanejada,
       vazaoPorBico,
@@ -470,6 +493,7 @@ function escolherBico(vazaoTotal, comprimento, largura, altura){
 
   return melhor;
 }
+
 
 function classificarPressao(p){
   if(p <= 10) return "Recomendado";
@@ -511,10 +535,11 @@ function calcular(){
   document.getElementById("area").value = fmt(area);
   document.getElementById("vazaoTotal").value = fmt(vazaoTotal);
   document.getElementById("modeloBico").value = escolhido.modelo;
-  document.getElementById("angulo").value = escolhido.angulo;
-  document.getElementById("fatorK").value = escolhido.k;
-  document.getElementById("diametroDescarga").value = escolhido.diametro;
-  document.getElementById("diametroEntrada").value = escolhido.entrada;
+document.getElementById("tipoBico").value = escolhido.tipo || "Média Velocidade";
+document.getElementById("angulo").value = escolhido.angulo;
+document.getElementById("fatorK").value = escolhido.k;
+document.getElementById("diametroDescarga").value = escolhido.diametro;
+document.getElementById("diametroEntrada").value = escolhido.entrada || "";
   document.getElementById("distPlanejada").value = fmt(escolhido.espacamentoPlanejado);
   document.getElementById("bicosPlanejado").value = escolhido.qtdPlanejada;
   document.getElementById("distReal").value = fmt(distReal);
@@ -659,7 +684,8 @@ async function carregarBicosSupabase(){
   }
 
   console.log("Bicos carregados:", data);
-  alert(`Bicos carregados: ${data.length}`);
+  window.BICOS_SUPABASE = data;
+console.log("Bicos carregados:", data);
 }
   
   
@@ -672,4 +698,5 @@ carregarBicosSupabase();
   
 </body>
 </html>
+
 
