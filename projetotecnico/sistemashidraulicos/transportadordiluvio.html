@@ -635,9 +635,12 @@ const espacamentoPlanejado =
 const pressaoAjustada =
   Math.max(10, pressaoCalculada);
 
+const vazaoRealAjustada =
+  escolhido.k * Math.sqrt(pressaoAjustada / 10.197);
 
-  const volumeM3 =
+const volumeM3 =
   (vazaoRealAjustada * bicosProjetado * tempo) / 1000;
+
 
   const status =
     classificarPressao(pressaoAjustada);
@@ -655,8 +658,7 @@ const pressaoAjustada =
   document.getElementById("vazaoPlanejadaBico").value = fmt(escolhido.vazaoPorBico);
   document.getElementById("pressaoPlanejada").value = fmt(escolhido.pressao);
   document.getElementById("pressaoAjustada").value = fmt(pressaoAjustada);
-  const vazaoRealAjustada =
-  escolhido.k * Math.sqrt(pressaoAjustada/10.197);
+
 
 document.getElementById("vazaoRealBico").value = fmt(vazaoRealAjustada);
 
