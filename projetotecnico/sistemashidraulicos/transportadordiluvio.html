@@ -51,6 +51,11 @@ body{
   opacity:.9;
 }
 
+.field-wide{
+  grid-column: span 2;
+}
+
+
 .card{
   background:#fff;
   border:1px solid var(--sar-border);
@@ -365,10 +370,10 @@ tr:nth-child(even){
         <input id="volumeReservatorio" class="result" readonly>
       </div>
 
-      <div class="field">
-        <label>Nota Técnica</label>
-        <input id="observacao" class="obs-alerta" readonly>
-      </div>
+      <div class="field field-wide">
+  <label>Nota Técnica</label>
+  <input id="observacao" class="obs-alerta" readonly>
+</div>
     </div>
 
     <div class="actions">
