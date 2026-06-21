@@ -350,9 +350,15 @@ tr:nth-child(even){
       </div>
 
       <div class="field">
-        <label>Tempo de operação (min)</label>
-        <input id="tempo" class="warn" type="number" value="90" oninput="calcular()">
-      </div>
+  <label>Vazão projetada total (L/min)</label>
+  <input id="vazaoProjetadaTotal" class="result" readonly>
+</div>
+
+<div class="field">
+  <label>Tempo de operação (min)</label>
+  <input id="tempo" class="warn" type="number" value="60" oninput="calcular()">
+</div>
+
 
       <div class="field">
         <label>Volume mínimo reservatório (m³)</label>
@@ -411,12 +417,7 @@ tr:nth-child(even){
 </div>
 
 <script>
-const bicos = [
-  {modelo:"MV-10", angulo:90,  k:28.0, diametro:"6.35", entrada:'1/2"', abertura:1.80},
-  {modelo:"MV-15", angulo:90,  k:35.0, diametro:"7.14", entrada:'1/2"', abertura:2.20},
-  {modelo:"MV-25", angulo:110, k:42.9, diametro:"8.33", entrada:'1/2"', abertura:2.68},
-  {modelo:"MV-30", angulo:120, k:50.0, diametro:"9.50", entrada:'1/2"', abertura:3.00}
-];
+const bicos = [];
 
 let linhas = [];
 let selecaoManual = false; 
@@ -636,7 +637,7 @@ const pressaoAjustada =
 
 
   const volumeM3 =
-    (vazaoTotal * tempo) / 1000;
+  (vazaoRealAjustada * bicosProjetado * tempo) / 1000;
 
   const status =
     classificarPressao(pressaoAjustada);
@@ -658,6 +659,10 @@ const pressaoAjustada =
   escolhido.k * Math.sqrt(pressaoAjustada/10.197);
 
 document.getElementById("vazaoRealBico").value = fmt(vazaoRealAjustada);
+
+document.getElementById("vazaoProjetadaTotal").value =
+  fmt(vazaoRealAjustada * bicosProjetado);
+
 
   document.getElementById("volumeReservatorio").value = fmt(volumeM3);
 
@@ -777,7 +782,7 @@ function limpar(){
   });
 
   document.getElementById("densidade").value = 12;
-  document.getElementById("tempo").value = 90;
+  document.getElementById("tempo").value = 60;
 
   document.getElementById("modeloBico").innerHTML = "";
   document.getElementById("angulo").innerHTML = "";
