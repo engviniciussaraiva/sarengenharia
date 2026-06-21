@@ -287,8 +287,8 @@ tr:nth-child(even){
 
       <div class="field">
         <label>Modelo do Bico</label>
-        <select id="modeloBico" class="warn" onchange="calcular()">
-</select>
+        <select id="modeloBico" class="warn" onchange="selecaoManual=true; calcular()">
+</select> 
 
       </div>
 
@@ -299,9 +299,8 @@ tr:nth-child(even){
 
       <div class="field">
         <label>Ângulo abertura defletor (°)</label>
-        <select id="angulo" class="warn" onchange="calcular()">
-</select>
-
+        <select id="angulo" class="warn" onchange="selecaoManual=true; calcular()">
+</select> 
       </div>
 
       <div class="field">
@@ -424,6 +423,7 @@ const bicos = [
 ];
 
 let linhas = [];
+let selecaoManual = false; 
 
 function n(id){
   const v = parseFloat(document.getElementById(id).value);
@@ -503,49 +503,42 @@ function classificarPressao(p){
 
 
 function preencherDropsBico(escolhido){
-
   const listaBicos = window.BICOS_SUPABASE || bicos;
 
   const selectModelo = document.getElementById("modeloBico");
   const selectAngulo = document.getElementById("angulo");
 
-  if(selectModelo.options.length === 0){
-    const modelos = [...new Set(listaBicos.map(b => b.modelo))];
+  const modeloAntes = selectModelo.value;
+  const anguloAntes = selectAngulo.value;
 
-    modelos.forEach(modelo => {
-      selectModelo.innerHTML += `<option value="${modelo}">${modelo}</option>`;
-    });
-  }
+  selectModelo.innerHTML = "";
 
-  if(!selectModelo.value){
-    selectModelo.value = escolhido.modelo;
-  }
+  const modelos = [...new Set(listaBicos.map(b => b.modelo))];
 
-  const angulosDoModelo = listaBicos.filter(b => b.modelo === selectModelo.value);
+  modelos.forEach(modelo => {
+    selectModelo.innerHTML += `<option value="${modelo}">${modelo}</option>`;
+  });
 
-  const anguloAtual = selectAngulo.value;
+  selectModelo.value = selecaoManual && modeloAntes ? modeloAntes : escolhido.modelo;
 
   selectAngulo.innerHTML = "";
 
-  angulosDoModelo.forEach(b => {
-    selectAngulo.innerHTML += `
-      <option value="${b.angulo_graus}">${b.angulo_graus}</option>
-    `;
-  });
+  listaBicos
+    .filter(b => b.modelo === selectModelo.value)
+    .forEach(b => {
+      selectAngulo.innerHTML += `
+        <option value="${b.angulo_graus}">${b.angulo_graus}</option>
+      `;
+    });
 
-  if(anguloAtual){
-    selectAngulo.value = anguloAtual;
-  }else{
-    selectAngulo.value = escolhido.angulo;
-  }
+  selectAngulo.value = selecaoManual && anguloAntes ? anguloAntes : escolhido.angulo;
 
   document.getElementById("tipoBico").value = escolhido.tipo || "Média Velocidade";
 }
 
 
-
-
 function calcular(){
+
   const comprimento = n("comprimento");
   const largura = n("largura");
   const altura = n("altura");
@@ -555,34 +548,96 @@ function calcular(){
   const area = comprimento * largura;
   const vazaoTotal = area * densidade;
 
-  let escolhido = escolherBico(vazaoTotal, comprimento, largura, altura);
-
-  if(!escolhido || vazaoTotal <= 0){
+  if(vazaoTotal <= 0 || comprimento <= 0 || largura <= 0 || altura <= 0){
     document.getElementById("area").value = "";
     document.getElementById("vazaoTotal").value = "";
     return;
   }
 
+  let escolhido = escolherBico(vazaoTotal, comprimento, largura, altura);
+
+  if(!escolhido){
+    return;
+  }
+
+  preencherDropsBico(escolhido);
+
+  if(selecaoManual){
+    const listaBicos = window.BICOS_SUPABASE || bicos;
+
+    const modeloManual = document.getElementById("modeloBico").value;
+    const anguloManual = Number(document.getElementById("angulo").value);
+
+    const bicoManual = listaBicos.find(b =>
+      b.modelo === modeloManual &&
+      Number(b.angulo_graus || b.angulo) === anguloManual
+    );
+
+    if(bicoManual){
+      const angulo = Number(bicoManual.angulo_graus || bicoManual.angulo);
+      const k = Number(bicoManual.fator_k || bicoManual.k);
+      const diametro = bicoManual.diametro_descarga_mm || bicoManual.diametro || "";
+      const tipo = bicoManual.tipo || "Média Velocidade";
+
+      const aberturaCalculada =
+        altura * Math.tan((angulo / 2) * Math.PI / 180) * 2;
+
+      const espacamentoPlanejado =
+        Math.max(1.2, aberturaCalculada);
+
+      const qtdPlanejada =
+        Math.max(1, Math.ceil(comprimento / espacamentoPlanejado));
+
+      const vazaoPorBico =
+        vazaoTotal / qtdPlanejada;
+
+      const pressao =
+        Math.pow(vazaoPorBico / k, 2);
+
+      escolhido = {
+        modelo: bicoManual.modelo,
+        tipo,
+        angulo,
+        k,
+        diametro,
+        entrada: "",
+        espacamentoPlanejado,
+        qtdPlanejada,
+        vazaoPorBico,
+        pressao
+      };
+    }
+  }
+
   let bicosProjetado = parseInt(document.getElementById("bicosProjetado").value);
 
-if(!bicosProjetado){
-  bicosProjetado = escolhido.qtdPlanejada;
-  document.getElementById("bicosProjetado").value = bicosProjetado;
-}
+  if(!bicosProjetado || bicosProjetado < escolhido.qtdPlanejada){
+    bicosProjetado = escolhido.qtdPlanejada;
+    document.getElementById("bicosProjetado").value = bicosProjetado;
+  }
 
+  const distReal =
+    bicosProjetado > 0 ? comprimento / bicosProjetado : 0;
 
-  const distReal = bicosProjetado > 0 ? comprimento / bicosProjetado : 0;
-  const vazaoRealBico = bicosProjetado > 0 ? vazaoTotal / bicosProjetado : 0;
-  const pressaoAjustada = Math.pow(vazaoRealBico / escolhido.k, 2);
-  const volumeM3 = (vazaoTotal * tempo) / 1000;
-  const status = classificarPressao(pressaoAjustada);
+  const vazaoRealBico =
+    bicosProjetado > 0 ? vazaoTotal / bicosProjetado : 0;
+
+  const pressaoAjustada =
+    Math.pow(vazaoRealBico / escolhido.k, 2);
+
+  const volumeM3 =
+    (vazaoTotal * tempo) / 1000;
+
+  const status =
+    classificarPressao(pressaoAjustada);
+
+  window.STATUS_CALCULO = status;
 
   document.getElementById("area").value = fmt(area);
   document.getElementById("vazaoTotal").value = fmt(vazaoTotal);
-  preencherDropsBico(escolhido);
-document.getElementById("fatorK").value = escolhido.k;
-document.getElementById("diametroDescarga").value = escolhido.diametro;
-document.getElementById("diametroEntrada").value = escolhido.entrada || "";
+  document.getElementById("tipoBico").value = escolhido.tipo || "Média Velocidade";
+  document.getElementById("fatorK").value = escolhido.k;
+  document.getElementById("diametroDescarga").value = escolhido.diametro;
   document.getElementById("distPlanejada").value = fmt(escolhido.espacamentoPlanejado);
   document.getElementById("bicosPlanejado").value = escolhido.qtdPlanejada;
   document.getElementById("distReal").value = fmt(distReal);
@@ -591,7 +646,6 @@ document.getElementById("diametroEntrada").value = escolhido.entrada || "";
   document.getElementById("pressaoAjustada").value = fmt(pressaoAjustada);
   document.getElementById("vazaoRealBico").value = fmt(vazaoRealBico);
   document.getElementById("volumeReservatorio").value = fmt(volumeM3);
-  document.getElementById("status").value = status;
 
   document.getElementById("observacao").value =
     status === "Recomendado" ? "Pressão próxima do ideal." :
@@ -601,6 +655,7 @@ document.getElementById("diametroEntrada").value = escolhido.entrada || "";
 
   atualizarMemoria();
 }
+
 
 function dadosAtuais(){
   calcular();
@@ -622,7 +677,7 @@ function dadosAtuais(){
     espacamento: document.getElementById("distReal").value,
     pressao: document.getElementById("pressaoAjustada").value,
     reservatorio: document.getElementById("volumeReservatorio").value,
-    status: document.getElementById("status").value
+    status: window.STATUS_CALCULO || "" 
   };
 }
 
