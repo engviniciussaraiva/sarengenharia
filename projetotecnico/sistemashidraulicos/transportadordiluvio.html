@@ -503,6 +503,7 @@ function classificarPressao(p){
 
 
 function preencherDropsBico(escolhido){
+
   const listaBicos = window.BICOS_SUPABASE || bicos;
 
   const selectModelo = document.getElementById("modeloBico");
@@ -516,22 +517,31 @@ function preencherDropsBico(escolhido){
     });
   }
 
-  selectModelo.value = escolhido.modelo;
+  if(!selectModelo.value){
+    selectModelo.value = escolhido.modelo;
+  }
+
+  const angulosDoModelo = listaBicos.filter(b => b.modelo === selectModelo.value);
+
+  const anguloAtual = selectAngulo.value;
 
   selectAngulo.innerHTML = "";
 
-  listaBicos
-    .filter(b => b.modelo === selectModelo.value)
-    .forEach(b => {
-      selectAngulo.innerHTML += `
-        <option value="${b.angulo_graus}">${b.angulo_graus}</option>
-      `;
-    });
+  angulosDoModelo.forEach(b => {
+    selectAngulo.innerHTML += `
+      <option value="${b.angulo_graus}">${b.angulo_graus}</option>
+    `;
+  });
 
-  selectAngulo.value = escolhido.angulo;
+  if(anguloAtual){
+    selectAngulo.value = anguloAtual;
+  }else{
+    selectAngulo.value = escolhido.angulo;
+  }
 
   document.getElementById("tipoBico").value = escolhido.tipo || "Média Velocidade";
 }
+
 
 
 
@@ -554,10 +564,12 @@ function calcular(){
   }
 
   let bicosProjetado = parseInt(document.getElementById("bicosProjetado").value);
-  if(!bicosProjetado || bicosProjetado < escolhido.qtdPlanejada){
-    bicosProjetado = escolhido.qtdPlanejada;
-    document.getElementById("bicosProjetado").value = bicosProjetado;
-  }
+
+if(!bicosProjetado){
+  bicosProjetado = escolhido.qtdPlanejada;
+  document.getElementById("bicosProjetado").value = bicosProjetado;
+}
+
 
   const distReal = bicosProjetado > 0 ? comprimento / bicosProjetado : 0;
   const vazaoRealBico = bicosProjetado > 0 ? vazaoTotal / bicosProjetado : 0;
