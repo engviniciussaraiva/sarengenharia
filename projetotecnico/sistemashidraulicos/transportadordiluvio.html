@@ -395,7 +395,7 @@ tr:nth-child(even){
   </div>
 
   <div class="card">
-    <h2 class="section-title">Trechos Inseridos</h2>
+    <h2 class="section-title">Tabela Resumo</h2>
 
     <div class="table-wrap">
       <table>
@@ -759,9 +759,11 @@ function desenharTabela(){
         <td>${l.reservatorio}</td>
         
         <td>
-<button class="btn-clean btn-table" title="Editar" onclick="editarLinha(${i})">✏️</button>
-<button class="btn-clean btn-table" title="Remover" onclick="removerLinha(${i})">🗑️</button>
-</td> 
+  <button class="btn-clean btn-table" title="Editar chave" onclick="editarLinha(${i})">✏️</button>
+  <button class="btn-clean btn-table" title="Remover chave" onclick="removerLinha(${i})">🗑️</button>
+  <button class="btn-clean btn-table" title="Cálculo hidráulico" onclick="calculoHidraulicoChave(${i})">📈</button>
+</td>
+
       </tr>
     `;
   });
@@ -772,6 +774,11 @@ function removerLinha(i){
   desenharTabela();
   atualizarMemoria();
 }
+
+function calculoHidraulicoChave(i){
+  alert("Cálculo hidráulico da chave: " + linhas[i].chave);
+}
+
 
 function atualizarMemoria(){
   let txt = "MEMÓRIA DE CÁLCULO - SISTEMA DE DILÚVIO EM TRANSPORTADORES\\n\\n";
