@@ -1156,6 +1156,17 @@ function calcularVelocidade(vazaoLpm, dnMm){
   return qM3s / areaM2;
 }
 
+function calcularPerdaMetro(vazaoLpm, dnMm, c=120){
+  const qM3s = vazaoLpm / 1000 / 60;
+  const dM = dnMm / 1000;
+
+  if(qM3s <= 0 || dM <= 0 || c <= 0) return 0;
+
+  return 10.67 * Math.pow(qM3s, 1.852) /
+    (Math.pow(c, 1.852) * Math.pow(dM, 4.87));
+}
+
+
 function recalcularComprimentoTotal(input){
   const linha = input.closest("tr");
 
