@@ -923,6 +923,68 @@ function exportarTabelaResumoCSV(){
     return;
   }
 
+  const cabecalho = [
+    "Referência",
+    "Local",
+    "Trecho/Chave",
+    "Comprimento (m)",
+    "Largura (m)",
+    "Altura (m)",
+    "Densidade (L/min/m²)",
+    "Área (m²)",
+    "Vazão projetada (L/min)",
+    "Bico",
+    "Ângulo (°)",
+    "Fator K",
+    "Bicos",
+    "Distância (m)",
+    "Pressão (mca)",
+    "Reservatório (m³)"
+  ];
+
+  const linhasCSV = linhas.map(l => [
+    l.referencia,
+    l.local,
+    l.chave,
+    fmt(l.comprimento),
+    fmt(l.largura),
+    fmt(l.altura),
+    fmt(l.densidade),
+    l.area,
+    l.vazao,
+    l.modelo,
+    l.angulo,
+    l.k,
+    l.bicos,
+    l.espacamento,
+    l.pressao,
+    l.reservatorio
+  ]);
+
+  const csv = [
+    cabecalho.join(";"),
+    ...linhasCSV.map(linha =>
+      linha.map(campo => `"${String(campo).replace(/"/g, '""')}"`).join(";")
+    )
+  ].join("\n");
+
+  const blob = new Blob(["\uFEFF" + csv], {
+    type: "text/csv;charset=utf-8;"
+  });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = "tabela_resumo_diluvio.csv";
+  document.body.appendChild(a);
+  a.click();
+
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+
   alert("Exportação Excel/CSV será gerada a partir da Tabela Resumo.");
 }
 
