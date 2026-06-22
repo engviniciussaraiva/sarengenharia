@@ -371,7 +371,7 @@ tr:nth-child(even){
       </div>
 
       <div class="field">
-        <label>Pressão min planejada no bico (mca)</label>
+        <label>Pressão calculada no bico (mca)</label>
         <input id="pressaoPlanejada" readonly>
       </div>
 
@@ -704,7 +704,7 @@ const volumeM3 =
   document.getElementById("bicosPlanejado").value = escolhido.qtdPlanejada;
   document.getElementById("distReal").value = fmt(distReal);
   document.getElementById("vazaoPlanejadaBico").value = fmt(escolhido.vazaoPorBico);
-  document.getElementById("pressaoPlanejada").value = fmt(escolhido.pressao);
+  document.getElementById("pressaoPlanejada").value = fmt(pressaoCalculada);
   document.getElementById("pressaoAjustada").value = fmt(pressaoAjustada);
 
 
