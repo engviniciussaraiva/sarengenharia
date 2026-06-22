@@ -1146,6 +1146,17 @@ function editarLinha(i){
   });
 }
 
+function calcularVelocidade(vazaoLpm, dnMm){
+  const qM3s = vazaoLpm / 1000 / 60;
+  const diametroM = dnMm / 1000;
+  const areaM2 = Math.PI * Math.pow(diametroM, 2) / 4;
+
+  if(areaM2 <= 0) return 0;
+
+  return qM3s / areaM2;
+}
+
+
 function calculoHidraulicoChave(i){
   const l = linhas[i];
 
@@ -1166,6 +1177,9 @@ function calculoHidraulicoChave(i){
     const compEq = 0;
     const compTotal = compReal + compEq;
 
+const dn = 50;
+const velocidade = calcularVelocidade(vazaoAcumulada, dn); 
+
     linhasTabela += `
       <tr>
         <td>B${n}-B${n+1}</td>
@@ -1173,18 +1187,23 @@ function calculoHidraulicoChave(i){
         <td>${fmt(k)}</td>
         <td>${fmt(vazaoBico)}</td>
         <td>${fmt(vazaoAcumulada)}</td>
-        <td><input class="hidraulica-edit" type="number" value="50"></td>
+        <td><input class="hidraulica-edit" type="number" value="${dn}"></td> 
         <td>${fmt(compReal)}</td>
         <td><input class="hidraulica-edit" type="number" value="${fmt(compEq)}"></td>
         <td>${fmt(compTotal)}</td>
         <td>0,0000</td>
         <td>0,0000</td>
-        <td><input class="hidraulica-edit" type="number" value="0"></td>
+        <td><input class="hidraulica-edit" type="text" value="0,00"></td>
         <td>${fmt(pressaoAtual)}</td>
-        <td>0,00</td>
+        <td>${fmt(velocidade)}</td> 
       </tr>
     `;
   }
+
+const dnManometro = 50;
+const vazaoBicoFinal = k * Math.sqrt(pressaoAtual / 10.197);
+const velocidadeManometro = calcularVelocidade(vazaoAcumulada, dnManometro);
+
 
   linhasTabela += `
     <tr>
@@ -1193,32 +1212,36 @@ function calculoHidraulicoChave(i){
       <td>${fmt(k)}</td>
       <td>${fmt(k * Math.sqrt(pressaoAtual / 10.197))}</td>
       <td>${fmt(vazaoAcumulada)}</td>
-      <td><input class="hidraulica-edit" type="number" value="50"></td>
+      <td><input class="hidraulica-edit" type="number" value="${dnManometro}"></td>
       <td><input class="hidraulica-edit" type="number" value="${fmt(espacamento)}"></td>
-      <td><input class="hidraulica-edit" type="number" value="0"></td>
+      <td><input class="hidraulica-edit" type="text" value="0,00"></td>
       <td>${fmt(espacamento)}</td>
       <td>0,0000</td>
       <td>0,0000</td>
-      <td><input class="hidraulica-edit" type="number" value="0"></td>
+      <td><input class="hidraulica-edit" type="text" value="0,00"></td>
       <td>${fmt(pressaoAtual)}</td>
-      <td>0,00</td>
+      <td>${fmt(velocidadeManometro)}</td> 
     </tr>
 
     <tr>
+const dnPontoM = 65;
+const velocidadePontoM = calcularVelocidade(vazaoAcumulada, dnPontoM);
+
+
       <td>Manômetro-Ponto M</td>
       <td>${fmt(pressaoAtual)}</td>
       <td>-</td>
       <td>-</td>
       <td>${fmt(vazaoAcumulada)}</td>
-      <td><input class="hidraulica-edit" type="number" value="65"></td>
-      <td><input class="hidraulica-edit" type="number" value="0"></td>
-      <td><input class="hidraulica-edit" type="number" value="0"></td>
+      <td><input class="hidraulica-edit" type="number" value="${dnPontoM}"></td>
+      <td><input class="hidraulica-edit" type="text" value="0,00"></td>
+      <td><input class="hidraulica-edit" type="text" value="0,00"></td>
       <td>0,00</td>
       <td>0,0000</td>
       <td>0,0000</td>
-      <td><input class="hidraulica-edit" type="number" value="0"></td>
+      <td><input class="hidraulica-edit" type="text" value="0,00"></td>
       <td>${fmt(pressaoAtual)}</td>
-      <td>0,00</td>
+      <td>${fmt(velocidadePontoM)}</td> 
     </tr>
   `;
 
