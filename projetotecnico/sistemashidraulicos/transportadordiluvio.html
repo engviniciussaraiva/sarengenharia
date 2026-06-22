@@ -246,6 +246,10 @@ tr:nth-child(even){
   background:#fff9c4;
 }
 
+.field-full{
+  grid-column: 1 / -1;
+}
+
 
 </style>
 
@@ -394,23 +398,20 @@ tr:nth-child(even){
   <input id="tempo" class="warn" type="number" value="60" oninput="calcular()">
 </div>
 
-<div class="field">
-  <label>Ponto de Referência na Linha</label>
-  <input id="pontoReferencia" class="warn" type="text" placeholder="Ex.: Ponto M">
-</div>
-
-
-
       <div class="field">
         <label>Volume mínimo reservatório (m³)</label>
         <input id="volumeReservatorio" class="result" readonly>
       </div>
 
-      <div class="field field-wide">
+<div class="field">
+  <label>Ponto de Referência na Rede Principal</label>
+  <input id="pontoReferencia" class="warn" type="text" placeholder="Ex.: Ponto M">
+</div>
+
+      <div class="field field-full">
   <label>Nota Técnica</label>
   <input id="observacao" class="obs-alerta" readonly>
 </div>
-    </div>
 
     <div class="actions">
       <button class="btn-clean" onclick="limpar()">Limpar</button>
