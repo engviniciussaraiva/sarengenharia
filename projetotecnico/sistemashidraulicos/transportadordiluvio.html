@@ -1180,99 +1180,129 @@ function recalcularComprimentoTotal(input){
   compTotalCell.textContent = fmt(compReal + compEq);
 }
 
+function valorNum(v){
+  return parseFloat(String(v || "0").replace(",", ".")) || 0;
+}
 
-function calculoHidraulicoChave(i){
+function alterarDN(input){
+  const tabela = input.closest("table");
+  const linhasTabela = [...tabela.querySelectorAll("tbody tr")];
+  const linhaAtual = input.closest("tr");
+  const idx = linhasTabela.indexOf(linhaAtual);
+  const novoDN = input.value;
 
-  const l = linhas[i];
+  for(let i = idx; i < linhasTabela.length; i++){
+    const dnInput = linhasTabela[i].querySelector(".dn-edit");
+    if(dnInput) dnInput.value = novoDN;
+  }
 
-  const qtd = Number(l.bicos || 0);
-  const k = Number(String(l.k).replace(",", "."));
-  const pressaoInicial = Number(String(l.pressao).replace(",", "."));
-  const espacamento = Number(String(l.espacamento).replace(",", "."));
+  recalcularTabelaHidraulica(tabela);
+}
 
-  let linhasTabela = "";
-  let pressaoAtual = pressaoInicial;
+function recalcularTabelaHidraulica(tabela){
+  const k = valorNum(tabela.dataset.k);
+  let pressaoAtual = valorNum(tabela.dataset.pressaoInicial);
   let vazaoAcumulada = 0;
 
-  for(let n = 1; n <= qtd; n++){
-    const vazaoBico = k * Math.sqrt(pressaoAtual / 10.197);
-    vazaoAcumulada += vazaoBico;
+  const linhasTabela = [...tabela.querySelectorAll("tbody tr")];
 
-    const dn = 50;
-    const compReal = espacamento;
-    const compEq = 0;
+  linhasTabela.forEach((tr, idx) => {
+    const temBico = tr.dataset.temBico === "sim";
+
+    const dn = valorNum(tr.querySelector(".dn-edit")?.value);
+    const compReal = valorNum(tr.querySelector(".comp-real-edit")?.value || tr.querySelector(".comp-real")?.textContent);
+    const compEq = valorNum(tr.querySelector(".comp-eq")?.value);
+    const elevacao = valorNum(tr.querySelector(".elevacao-edit")?.value);
+
     const compTotal = compReal + compEq;
-    const elevacao = 0;
+
+    let vazaoBico = 0;
+
+    if(temBico){
+      vazaoBico = k * Math.sqrt(pressaoAtual / 10.197);
+      vazaoAcumulada += vazaoBico;
+    }
 
     const velocidade = calcularVelocidade(vazaoAcumulada, dn);
     const perdaMetro = calcularPerdaMetro(vazaoAcumulada, dn);
     const perdaTotal = perdaMetro * compTotal;
-    const pressaoRequerida = pressaoAtual + perdaTotal + elevacao;
+    const pressaoReq = pressaoAtual + perdaTotal + elevacao;
 
+    tr.querySelector(".pressao").textContent = fmt(pressaoAtual);
+    tr.querySelector(".vazao-bico").textContent = temBico ? fmt(vazaoBico) : "-";
+    tr.querySelector(".vazao-acum").textContent = fmt(vazaoAcumulada);
+    tr.querySelector(".comp-total").textContent = fmt(compTotal);
+    tr.querySelector(".perda-metro").textContent = fmt(perdaMetro,4);
+    tr.querySelector(".perda-total").textContent = fmt(perdaTotal,4);
+    tr.querySelector(".pressao-req").textContent = fmt(pressaoReq);
+    tr.querySelector(".velocidade").textContent = fmt(velocidade);
+
+    pressaoAtual = pressaoReq;
+  });
+}
+
+function calculoHidraulicoChave(i){
+  const l = linhas[i];
+
+  const qtd = Number(l.bicos || 0);
+  const k = valorNum(l.k);
+  const pressaoInicial = valorNum(l.pressao);
+  const espacamento = valorNum(l.espacamento);
+  const pontoRef = document.getElementById("pontoReferencia").value || "Ponto M";
+  const calcId = `calc-chave-${i}`;
+
+  let linhasTabela = "";
+
+  for(let n = 1; n <= qtd; n++){
     const referenciaTrecho = n < qtd ? `B${n}-B${n+1}` : `B${n}-Manômetro`;
 
     linhasTabela += `
-      <tr>
+      <tr data-tem-bico="sim">
         <td>${referenciaTrecho}</td>
-        <td>${fmt(pressaoAtual)}</td>
+        <td class="pressao">0,00</td>
         <td>${fmt(k)}</td>
-        <td>${fmt(vazaoBico)}</td>
-        <td>${fmt(vazaoAcumulada)}</td>
-        <td><input class="hidraulica-edit" type="number" value="${dn}"></td>
-        <td class="comp-real">${fmt(compReal)}</td>
-        <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
-        <td class="comp-total">${fmt(compTotal)}</td>
-        <td>${fmt(perdaMetro,4)}</td>
-        <td>${fmt(perdaTotal,4)}</td>
-        <td><input class="hidraulica-edit" type="text" value="0,00"></td>
-        <td>${fmt(pressaoRequerida)}</td>
-        <td>${fmt(velocidade)}</td>
+        <td class="vazao-bico">0,00</td>
+        <td class="vazao-acum">0,00</td>
+        <td><input class="hidraulica-edit dn-edit" type="number" value="50" oninput="alterarDN(this)"></td>
+        <td class="comp-real">${fmt(espacamento)}</td>
+        <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
+        <td class="comp-total">0,00</td>
+        <td class="perda-metro">0,0000</td>
+        <td class="perda-total">0,0000</td>
+        <td><input class="hidraulica-edit elevacao-edit" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
+        <td class="pressao-req">0,00</td>
+        <td class="velocidade">0,00</td>
       </tr>
     `;
-
-    pressaoAtual = pressaoRequerida;
   }
 
-  const dnPontoM = 65;
-  const compRealPontoM = 0;
-  const compEqPontoM = 0;
-  const compTotalPontoM = compRealPontoM + compEqPontoM;
-  const elevacaoPontoM = 0;
-
-  const velocidadePontoM = calcularVelocidade(vazaoAcumulada, dnPontoM);
-  const perdaMetroPontoM = calcularPerdaMetro(vazaoAcumulada, dnPontoM);
-  const perdaTotalPontoM = perdaMetroPontoM * compTotalPontoM;
-  const pressaoRequeridaPontoM = pressaoAtual + perdaTotalPontoM + elevacaoPontoM;
-
-  const pontoRef = document.getElementById("pontoReferencia").value || "Ponto M";
-
   linhasTabela += `
-    <tr>
+    <tr data-tem-bico="nao">
       <td>Manômetro-${pontoRef}</td>
-      <td>${fmt(pressaoAtual)}</td>
+      <td class="pressao">0,00</td>
       <td>-</td>
-      <td>-</td>
-      <td>${fmt(vazaoAcumulada)}</td>
-      <td><input class="hidraulica-edit" type="number" value="${dnPontoM}"></td>
-      <td><input class="hidraulica-edit comp-real" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
-      <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
+      <td class="vazao-bico">-</td>
+      <td class="vazao-acum">0,00</td>
+      <td><input class="hidraulica-edit dn-edit" type="number" value="65" oninput="alterarDN(this)"></td>
+      <td><input class="hidraulica-edit comp-real-edit" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
+      <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
       <td class="comp-total">0,00</td>
-      <td>${fmt(perdaMetroPontoM,4)}</td>
-      <td>${fmt(perdaTotalPontoM,4)}</td>
-      <td><input class="hidraulica-edit" type="text" value="0,00"></td>
-      <td>${fmt(pressaoRequeridaPontoM)}</td>
-      <td>${fmt(velocidadePontoM)}</td>
+      <td class="perda-metro">0,0000</td>
+      <td class="perda-total">0,0000</td>
+      <td><input class="hidraulica-edit elevacao-edit" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
+      <td class="pressao-req">0,00</td>
+      <td class="velocidade">0,00</td>
     </tr>
   `;
 
-  document.getElementById("calculoHidraulicoConteudo").innerHTML = `
+  const html = `
     <div class="hidraulica-title">${l.chave}</div>
     <div class="hidraulica-subtitle">
       Bico: ${l.modelo} · K: ${l.k} · Ângulo: ${l.angulo}° · Quantidade: ${l.bicos}
     </div>
 
     <div class="table-wrap">
-      <table>
+      <table data-k="${k}" data-pressao-inicial="${pressaoInicial}">
         <thead>
           <tr>
             <th>Referência</th>
@@ -1291,17 +1321,27 @@ function calculoHidraulicoChave(i){
             <th>Veloc.</th>
           </tr>
         </thead>
-        <tbody>
-          ${linhasTabela}
-        </tbody>
+        <tbody>${linhasTabela}</tbody>
       </table>
     </div>
   `;
+
+  let bloco = document.getElementById(calcId);
+
+  if(!bloco){
+    bloco = document.createElement("div");
+    bloco.id = calcId;
+    bloco.className = "card";
+    document.getElementById("calculoHidraulicoConteudo").appendChild(bloco);
+  }
+
+  bloco.innerHTML = html;
+
+  const tabela = bloco.querySelector("table");
+  recalcularTabelaHidraulica(tabela);
 }
+
   
-
-
-
 
 function atualizarMemoria(){
   let txt = "MEMÓRIA DE CÁLCULO - SISTEMA DE DILÚVIO EM TRANSPORTADORES\\n\\n";
