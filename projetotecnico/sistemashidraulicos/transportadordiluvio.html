@@ -250,6 +250,15 @@ tr:nth-child(even){
   grid-column: 1 / -1;
 }
 
+.obrigatorio{
+  background:#eaf3ff !important;
+}
+
+.check{
+  background:#dff3d5 !important;
+  font-weight:800;
+  color:#14532d;
+}
 
 </style>
 
@@ -271,17 +280,17 @@ tr:nth-child(even){
     <div class="grid-3 dados-iniciais"> 
       <div class="field">
         <label>Referência</label>
-        <input id="referencia" type="text">
+        <input id="referencia" class="obrigatorio"  type="text">
       </div>
 
       <div class="field">
         <label>Local protegido</label>
-<input id="localProtegido" type="text" placeholder="Ex.: Túnel / Aéreo / Transportador">         
+<input id="localProtegido" class="obrigatorio"  type="text" placeholder="Ex.: Túnel / Aéreo / Transportador">         
       </div>
 
       <div class="field">
         <label>Identificação Trecho/Chave</label>
-        <input id="chave" type="text" placeholder="Ex.: TC-01 / CH-01">
+        <input id="chave" class="obrigatorio"  type="text" placeholder="Ex.: TC-01 / CH-01">
       </div>
     </div>
       <h2 class="section-title" style="margin-top:18px;">Rede de Dilúvio</h2>
@@ -291,17 +300,17 @@ tr:nth-child(even){
 
       <div class="field">
         <label>Comprimento da área protegida (m)</label>
-        <input id="comprimento" type="number" step="0.01" oninput="calcular()">
+        <input id="comprimento" class="obrigatorio"  type="number" step="0.01" oninput="calcular()">
       </div>
 
       <div class="field">
         <label>Largura da área protegida (m)</label>
-        <input id="largura" type="number" step="0.01" oninput="calcular()">
+        <input id="largura" class="obrigatorio"  type="number" step="0.01" oninput="calcular()">
       </div>
 
       <div class="field">
         <label>Altura entre a área e o defletor (m)</label>
-        <input id="altura" type="number" step="0.01" oninput="calcular()">
+        <input id="altura" class="obrigatorio"  type="number" step="0.01" oninput="calcular()">
       </div>
 
       <div class="field">
@@ -380,7 +389,7 @@ tr:nth-child(even){
 
       <div class="field">
         <label>Pressão ajustada no bico (mca)</label>
-        <input id="pressaoAjustada" readonly>
+        <input id="pressaoAjustada" class="check" readonly>
       </div>
 
       <div class="field">
@@ -405,8 +414,21 @@ tr:nth-child(even){
 
 <div class="field">
   <label>Ponto de Referência na Rede Principal</label>
-  <input id="pontoReferencia" class="warn" type="text" placeholder="Ex.: Ponto M">
+  <input id="pontoReferencia" class="obrigatorio"  class="warn" type="text" placeholder="Ex.: Ponto M">
 </div>
+
+<div class="field">
+  <label>&nbsp;</label>
+  <div style="font-size:12px;color:#667085;line-height:1.7;">
+    <span style="background:#eaf3ff;padding:3px 8px;border-radius:4px;">Azul</span>
+    preenchimento obrigatório<br>
+    <span style="background:#dff3d5;padding:3px 8px;border-radius:4px;">Verde</span>
+    ponto de checagem<br>
+    <span style="background:#fff9c4;padding:3px 8px;border-radius:4px;">Amarelo</span>
+    editável após cálculo
+  </div>
+</div>
+
 
       <div class="field field-full">
   <label>Nota Técnica</label>
