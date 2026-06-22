@@ -302,6 +302,26 @@ tr:nth-child(even){
   margin-right:5px;
 }
 
+.card-header-line{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.card-header-line .section-title{
+  margin:0;
+}
+
+.btn-export{
+  background:#e9eeee;
+  color:#344054;
+  padding:8px 12px;
+  font-size:13px;
+  border-radius:8px;
+}
+
 
 </style>
 
@@ -482,7 +502,15 @@ tr:nth-child(even){
   </div>
 
   <div class="card">
-    <h2 class="section-title">Tabela Resumo</h2>
+    <div class="card-header-line">
+  <h2 class="section-title">Tabela Resumo</h2>
+
+  <div>
+    <button class="btn-export" onclick="exportarTabelaResumoCSV()">📊 Excel</button>
+    <button class="btn-export" onclick="exportarTabelaResumoDXF()">📐 DXF</button>
+  </div>
+</div>
+
 
     <div class="table-wrap">
       <table>
@@ -888,6 +916,26 @@ function desenharTabela(){
     `;
   });
 }
+
+function exportarTabelaResumoCSV(){
+  if(linhas.length === 0){
+    alert("Não há dados na Tabela Resumo para exportar.");
+    return;
+  }
+
+  alert("Exportação Excel/CSV será gerada a partir da Tabela Resumo.");
+}
+
+function exportarTabelaResumoDXF(){
+  if(linhas.length === 0){
+    alert("Não há dados na Tabela Resumo para exportar em DXF.");
+    return;
+  }
+
+  alert("Exportação DXF será gerada a partir da Tabela Resumo.");
+}
+
+
 
 function removerLinha(i){
   linhas.splice(i,1);
