@@ -1034,12 +1034,14 @@ function exportarTabelaResumoDXF(){
     'RTI'
   ];
 
-  let px = 0;
+  const larguras = [35, 70, 35, 22, 22, 22, 25, 28, 30, 22, 22, 25, 25, 28, 28];
 
-  colunas.forEach(c=>{
-    texto(c,px,y);
-    px += 25;
-  });
+let px = 0;
+
+colunas.forEach((c, idx)=>{
+  texto(c, px, y);
+  px += larguras[idx];
+});
 
   y -= 6;
 
@@ -1065,10 +1067,17 @@ function exportarTabelaResumoDXF(){
       l.reservatorio
     ];
 
-    dados.forEach(v=>{
-      texto(String(v),px,y);
-      px += 25;
-    });
+    dados.forEach((v, idx)=>{
+  let valor = String(v);
+
+  if(idx === 1 && valor.length > 28){
+    valor = valor.substring(0,28);
+  }
+
+  texto(valor, px, y);
+  px += larguras[idx];
+});
+
 
     y -= 6;
   });
@@ -1137,31 +1146,42 @@ function editarLinha(i){
   });
 }
 
-
-
 function calculoHidraulicoChave(i){
   const l = linhas[i];
+
   const qtd = Number(l.bicos || 0);
+  const k = Number(String(l.k).replace(",", "."));
+  const pressaoInicial = Number(String(l.pressao).replace(",", "."));
+  const espacamento = Number(String(l.espacamento).replace(",", "."));
 
   let linhasTabela = "";
+  let pressaoAtual = pressaoInicial;
+  let vazaoAcumulada = 0;
 
   for(let n = 1; n < qtd; n++){
+    const vazaoBico = k * Math.sqrt(pressaoAtual / 10.197);
+    vazaoAcumulada += vazaoBico;
+
+    const compReal = espacamento;
+    const compEq = 0;
+    const compTotal = compReal + compEq;
+
     linhasTabela += `
       <tr>
         <td>B${n}-B${n+1}</td>
-        <td>auto</td>
-        <td>${l.k}</td>
-        <td>auto</td>
-        <td>auto</td>
+        <td>${fmt(pressaoAtual)}</td>
+        <td>${fmt(k)}</td>
+        <td>${fmt(vazaoBico)}</td>
+        <td>${fmt(vazaoAcumulada)}</td>
         <td><input class="hidraulica-edit" type="number" value="50"></td>
-        <td>${l.espacamento}</td>
+        <td>${fmt(compReal)}</td>
+        <td><input class="hidraulica-edit" type="number" value="${fmt(compEq)}"></td>
+        <td>${fmt(compTotal)}</td>
+        <td>0,0000</td>
+        <td>0,0000</td>
         <td><input class="hidraulica-edit" type="number" value="0"></td>
-        <td>auto</td>
-        <td>auto</td>
-        <td>auto</td>
-        <td><input class="hidraulica-edit" type="number" value="0"></td>
-        <td>auto</td>
-        <td>auto</td>
+        <td>${fmt(pressaoAtual)}</td>
+        <td>0,00</td>
       </tr>
     `;
   }
@@ -1169,36 +1189,36 @@ function calculoHidraulicoChave(i){
   linhasTabela += `
     <tr>
       <td>B${qtd}-Manômetro</td>
-      <td>auto</td>
-      <td>${l.k}</td>
-      <td>auto</td>
-      <td>auto</td>
+      <td>${fmt(pressaoAtual)}</td>
+      <td>${fmt(k)}</td>
+      <td>${fmt(k * Math.sqrt(pressaoAtual / 10.197))}</td>
+      <td>${fmt(vazaoAcumulada)}</td>
       <td><input class="hidraulica-edit" type="number" value="50"></td>
-      <td><input class="hidraulica-edit" type="number" value="${l.espacamento}"></td>
+      <td><input class="hidraulica-edit" type="number" value="${fmt(espacamento)}"></td>
       <td><input class="hidraulica-edit" type="number" value="0"></td>
-      <td>auto</td>
-      <td>auto</td>
-      <td>auto</td>
+      <td>${fmt(espacamento)}</td>
+      <td>0,0000</td>
+      <td>0,0000</td>
       <td><input class="hidraulica-edit" type="number" value="0"></td>
-      <td>auto</td>
-      <td>auto</td>
+      <td>${fmt(pressaoAtual)}</td>
+      <td>0,00</td>
     </tr>
 
     <tr>
       <td>Manômetro-Ponto M</td>
-      <td>auto</td>
+      <td>${fmt(pressaoAtual)}</td>
       <td>-</td>
       <td>-</td>
-      <td>auto</td>
+      <td>${fmt(vazaoAcumulada)}</td>
       <td><input class="hidraulica-edit" type="number" value="65"></td>
       <td><input class="hidraulica-edit" type="number" value="0"></td>
       <td><input class="hidraulica-edit" type="number" value="0"></td>
-      <td>auto</td>
-      <td>auto</td>
-      <td>auto</td>
+      <td>0,00</td>
+      <td>0,0000</td>
+      <td>0,0000</td>
       <td><input class="hidraulica-edit" type="number" value="0"></td>
-      <td>auto</td>
-      <td>auto</td>
+      <td>${fmt(pressaoAtual)}</td>
+      <td>0,00</td>
     </tr>
   `;
 
@@ -1235,6 +1255,10 @@ function calculoHidraulicoChave(i){
     </div>
   `;
 }
+
+
+
+
 
 
 
