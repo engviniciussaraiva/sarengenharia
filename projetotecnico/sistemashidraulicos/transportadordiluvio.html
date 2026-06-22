@@ -1156,6 +1156,19 @@ function calcularVelocidade(vazaoLpm, dnMm){
   return qM3s / areaM2;
 }
 
+function recalcularComprimentoTotal(input){
+  const linha = input.closest("tr");
+
+  const compRealInput = linha.querySelector(".comp-real");
+  const compEqInput = linha.querySelector(".comp-eq");
+  const compTotalCell = linha.querySelector(".comp-total");
+
+  const compReal = parseFloat(String(compRealInput.value || compRealInput.textContent).replace(",", ".")) || 0;
+  const compEq = parseFloat(String(compEqInput.value || compEqInput.textContent).replace(",", ".")) || 0;
+
+  compTotalCell.textContent = fmt(compReal + compEq);
+}
+
 
 function calculoHidraulicoChave(i){
   const l = linhas[i];
@@ -1188,9 +1201,10 @@ const velocidade = calcularVelocidade(vazaoAcumulada, dn);
         <td>${fmt(vazaoBico)}</td>
         <td>${fmt(vazaoAcumulada)}</td>
         <td><input class="hidraulica-edit" type="number" value="${dn}"></td> 
-        <td>${fmt(compReal)}</td>
-        <td><input class="hidraulica-edit" type="number" value="${fmt(compEq)}"></td>
-        <td>${fmt(compTotal)}</td>
+<td class="comp-real">${fmt(compReal)}</td>
+<td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
+<td class="comp-total">${fmt(compTotal)}</td>  
+
         <td>0,0000</td>
         <td>0,0000</td>
         <td><input class="hidraulica-edit" type="text" value="0,00"></td>
@@ -1216,9 +1230,10 @@ linhasTabela += `
     <td>${fmt(vazaoBicoFinal)}</td>
     <td>${fmt(vazaoAcumulada)}</td>
     <td><input class="hidraulica-edit" type="number" value="${dnManometro}"></td>
-    <td><input class="hidraulica-edit" type="text" value="${fmt(espacamento)}"></td>
-    <td><input class="hidraulica-edit" type="text" value="0,00"></td>
-    <td>${fmt(espacamento)}</td>
+   <td><input class="hidraulica-edit comp-real" type="text" value="${fmt(espacamento)}" oninput="recalcularComprimentoTotal(this)"></td>
+<td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
+<td class="comp-total">${fmt(espacamento)}</td>
+
     <td>0,0000</td>
     <td>0,0000</td>
     <td><input class="hidraulica-edit" type="text" value="0,00"></td>
@@ -1233,9 +1248,10 @@ linhasTabela += `
     <td>-</td>
     <td>${fmt(vazaoAcumulada)}</td>
     <td><input class="hidraulica-edit" type="number" value="${dnPontoM}"></td>
-    <td><input class="hidraulica-edit" type="text" value="0,00"></td>
-    <td><input class="hidraulica-edit" type="text" value="0,00"></td>
-    <td>0,00</td>
+    <td><input class="hidraulica-edit comp-real" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
+<td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
+<td class="comp-total">0,00</td>
+
     <td>0,0000</td>
     <td>0,0000</td>
     <td><input class="hidraulica-edit" type="text" value="0,00"></td>
