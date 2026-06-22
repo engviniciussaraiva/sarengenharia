@@ -986,12 +986,113 @@ function exportarTabelaResumoCSV(){
 
 
 function exportarTabelaResumoDXF(){
+
   if(linhas.length === 0){
-    alert("Não há dados na Tabela Resumo para exportar em DXF.");
+    alert("Não há dados para exportar.");
     return;
   }
 
-  alert("Exportação DXF será gerada a partir da Tabela Resumo.");
+  let dxf = '';
+
+  dxf += '0\nSECTION\n2\nHEADER\n0\nENDSEC\n';
+  dxf += '0\nSECTION\n2\nTABLES\n0\nENDSEC\n';
+  dxf += '0\nSECTION\n2\nENTITIES\n';
+
+  let x = 0;
+  let y = 0;
+
+  function texto(txt, px, py, h=2.5){
+    dxf += '0\nTEXT\n';
+    dxf += '8\n0\n';
+    dxf += `10\n${px}\n`;
+    dxf += `20\n${py}\n`;
+    dxf += '30\n0\n';
+    dxf += `40\n${h}\n`;
+    dxf += `1\n${txt}\n`;
+  }
+
+  texto('SAR ENGENHARIA',0,0,4);
+  texto('TABELA RESUMO - REDE DE DILUVIO',0,-6,3);
+
+  y = -15;
+
+  const colunas = [
+    'Ref',
+    'Local',
+    'Chave',
+    'Comp',
+    'Larg',
+    'Alt',
+    'Area',
+    'Vazao',
+    'Bico',
+    'Ang',
+    'K',
+    'Bicos',
+    'Dist',
+    'Press',
+    'RTI'
+  ];
+
+  let px = 0;
+
+  colunas.forEach(c=>{
+    texto(c,px,y);
+    px += 25;
+  });
+
+  y -= 6;
+
+  linhas.forEach(l=>{
+
+    let px = 0;
+
+    const dados = [
+      l.referencia,
+      l.local,
+      l.chave,
+      l.comprimento,
+      l.largura,
+      l.altura,
+      l.area,
+      l.vazao,
+      l.modelo,
+      l.angulo,
+      l.k,
+      l.bicos,
+      l.espacamento,
+      l.pressao,
+      l.reservatorio
+    ];
+
+    dados.forEach(v=>{
+      texto(String(v),px,y);
+      px += 25;
+    });
+
+    y -= 6;
+  });
+
+  dxf += '0\nENDSEC\n';
+  dxf += '0\nEOF\n';
+
+  const blob = new Blob(
+    [dxf],
+    {type:'application/dxf'}
+  );
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+
+  a.href = url;
+  a.download = 'tabela_resumo_diluvio.dxf';
+
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  URL.revokeObjectURL(url);
 }
 
 
