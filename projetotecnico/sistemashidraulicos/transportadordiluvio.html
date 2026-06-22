@@ -263,10 +263,24 @@ tr:nth-child(even){
 .legenda-campos{
   font-size:12px;
   color:#667085;
-  line-height:1.5;
   align-self:end;
-  padding-bottom:2px;
 }
+
+.legenda-linha{
+  height:40px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  border:1px solid transparent;
+}
+
+.legenda-tag{
+  padding:3px 8px;
+  border-radius:5px;
+  font-size:12px;
+  white-space:nowrap;
+}
+
 
 .legenda-campos span{
   display:inline-block;
@@ -435,11 +449,11 @@ tr:nth-child(even){
 </div>
 
 <div class="field legenda-campos">
-  <label>&nbsp;</label>
-  <div>
-    <span style="background:#eaf3ff;">Azul</span> obrigatório
-    <span style="background:#dff3d5;">Verde</span> checagem
-    <span style="background:#fff9c4;">Amarelo</span> editável
+  <label>Legenda</label>
+  <div class="legenda-linha">
+    <span class="legenda-tag" style="background:#eaf3ff;">Obrigatório</span>
+    <span class="legenda-tag" style="background:#dff3d5;">Checagem</span>
+    <span class="legenda-tag" style="background:#fff9c4;">Editável</span>
   </div>
 </div>
 
