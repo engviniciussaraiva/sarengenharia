@@ -1203,6 +1203,9 @@ function calculoHidraulicoChave(i){
 
 const dn = 50;
 const velocidade = calcularVelocidade(vazaoAcumulada, dn); 
+const perdaMetro = calcularPerdaMetro(vazaoAcumulada, dn);
+const perdaTotal = perdaMetro * compTotal;
+
 
     linhasTabela += `
       <tr>
@@ -1216,8 +1219,8 @@ const velocidade = calcularVelocidade(vazaoAcumulada, dn);
 <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
 <td class="comp-total">${fmt(compTotal)}</td>  
 
-        <td>0,0000</td>
-        <td>0,0000</td>
+       <td>${fmt(perdaMetro,4)}</td>
+<td>${fmt(perdaTotal,4)}</td> 
         <td><input class="hidraulica-edit" type="text" value="0,00"></td>
         <td>${fmt(pressaoAtual)}</td>
         <td>${fmt(velocidade)}</td> 
@@ -1229,9 +1232,15 @@ const vazaoBicoFinal = k * Math.sqrt(pressaoAtual / 10.197);
 vazaoAcumulada += vazaoBicoFinal;
 
 const velocidadeManometro = calcularVelocidade(vazaoAcumulada, dnManometro);
+const perdaMetroManometro = calcularPerdaMetro(vazaoAcumulada, dnManometro);
+const perdaTotalManometro = perdaMetroManometro * espacamento;
+
 
 const dnPontoM = 65;
 const velocidadePontoM = calcularVelocidade(vazaoAcumulada, dnPontoM);
+const compTotalPontoM = 0;
+const perdaMetroPontoM = calcularPerdaMetro(vazaoAcumulada, dnPontoM);
+const perdaTotalPontoM = perdaMetroPontoM * compTotalPontoM;
 
 linhasTabela += `
   <tr>
@@ -1245,8 +1254,8 @@ linhasTabela += `
 <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
 <td class="comp-total">${fmt(espacamento)}</td>
 
-    <td>0,0000</td>
-    <td>0,0000</td>
+   <td>${fmt(perdaMetroManometro,4)}</td>
+<td>${fmt(perdaTotalManometro,4)}</td> 
     <td><input class="hidraulica-edit" type="text" value="0,00"></td>
     <td>${fmt(pressaoAtual)}</td>
     <td>${fmt(velocidadeManometro)}</td>
@@ -1263,8 +1272,8 @@ linhasTabela += `
 <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
 <td class="comp-total">0,00</td>
 
-    <td>0,0000</td>
-    <td>0,0000</td>
+    <td>${fmt(perdaMetroPontoM,4)}</td>
+<td>${fmt(perdaTotalPontoM,4)}</td> 
     <td><input class="hidraulica-edit" type="text" value="0,00"></td>
     <td>${fmt(pressaoAtual)}</td>
     <td>${fmt(velocidadePontoM)}</td>
