@@ -1264,7 +1264,10 @@ function calculoHidraulicoChave(i){
         <td class="vazao-bico">0,00</td>
         <td class="vazao-acum">0,00</td>
         <td><input class="hidraulica-edit dn-edit" type="number" value="50" oninput="alterarDN(this)"></td>
-        <td class="comp-real">${fmt(espacamento)}</td>
+        <td>
+  <input class="hidraulica-edit comp-real-edit" type="text" value="${fmt(espacamento)}" oninput="recalcularTabelaHidraulica(this.closest('table'))">
+</td>
+
         <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
         <td class="comp-total">0,00</td>
         <td class="perda-metro">0,0000</td>
