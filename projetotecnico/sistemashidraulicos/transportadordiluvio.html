@@ -226,6 +226,25 @@ tr:nth-child(even){
   margin:2px;
 }
 
+.hidraulica-title{
+  font-weight:800;
+  color:#2f5f5b;
+  margin:10px 0;
+}
+
+.hidraulica-subtitle{
+  font-size:13px;
+  color:#667085;
+  margin-bottom:10px;
+}
+
+.hidraulica-edit{
+  width:70px;
+  height:28px;
+  padding:3px;
+  font-size:13px;
+  background:#fff9c4;
+}
 
 
 </style>
@@ -425,6 +444,18 @@ tr:nth-child(even){
       </table>
     </div>
   </div>
+
+<div class="card" id="cardCalculoHidraulico">
+  <h2 class="section-title">Cálculo Hidráulico das Chaves</h2>
+
+  <div id="calculoHidraulicoConteudo">
+    <p style="color:#667085;font-size:14px;">
+      Clique no botão 📈 da Tabela Resumo para gerar o cálculo hidráulico da chave.
+    </p>
+  </div>
+</div>
+
+
 
   <div class="card">
     <h2 class="section-title">Memória Base</h2>
@@ -776,8 +807,102 @@ function removerLinha(i){
 }
 
 function calculoHidraulicoChave(i){
-  alert("Cálculo hidráulico da chave: " + linhas[i].chave);
+  const l = linhas[i];
+  const qtd = Number(l.bicos || 0);
+
+  let linhasTabela = "";
+
+  for(let n = 1; n < qtd; n++){
+    linhasTabela += `
+      <tr>
+        <td>B${n}-B${n+1}</td>
+        <td>auto</td>
+        <td>${l.k}</td>
+        <td>auto</td>
+        <td>auto</td>
+        <td><input class="hidraulica-edit" type="number" value="50"></td>
+        <td>${l.espacamento}</td>
+        <td><input class="hidraulica-edit" type="number" value="0"></td>
+        <td>auto</td>
+        <td>auto</td>
+        <td>auto</td>
+        <td><input class="hidraulica-edit" type="number" value="0"></td>
+        <td>auto</td>
+        <td>auto</td>
+      </tr>
+    `;
+  }
+
+  linhasTabela += `
+    <tr>
+      <td>B${qtd}-Manômetro</td>
+      <td>auto</td>
+      <td>${l.k}</td>
+      <td>auto</td>
+      <td>auto</td>
+      <td><input class="hidraulica-edit" type="number" value="50"></td>
+      <td><input class="hidraulica-edit" type="number" value="${l.espacamento}"></td>
+      <td><input class="hidraulica-edit" type="number" value="0"></td>
+      <td>auto</td>
+      <td>auto</td>
+      <td>auto</td>
+      <td><input class="hidraulica-edit" type="number" value="0"></td>
+      <td>auto</td>
+      <td>auto</td>
+    </tr>
+
+    <tr>
+      <td>Manômetro-Ponto M</td>
+      <td>auto</td>
+      <td>-</td>
+      <td>-</td>
+      <td>auto</td>
+      <td><input class="hidraulica-edit" type="number" value="65"></td>
+      <td><input class="hidraulica-edit" type="number" value="0"></td>
+      <td><input class="hidraulica-edit" type="number" value="0"></td>
+      <td>auto</td>
+      <td>auto</td>
+      <td>auto</td>
+      <td><input class="hidraulica-edit" type="number" value="0"></td>
+      <td>auto</td>
+      <td>auto</td>
+    </tr>
+  `;
+
+  document.getElementById("calculoHidraulicoConteudo").innerHTML = `
+    <div class="hidraulica-title">${l.chave}</div>
+    <div class="hidraulica-subtitle">
+      Bico: ${l.modelo} · K: ${l.k} · Ângulo: ${l.angulo}° · Quantidade: ${l.bicos}
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Referência</th>
+            <th>Pressão<br>(mca)</th>
+            <th>K</th>
+            <th>Vazão<br>Bico</th>
+            <th>Vazão<br>Acum.</th>
+            <th>DN<br>(mm)</th>
+            <th>Comp.<br>Real</th>
+            <th>Comp.<br>Eq.</th>
+            <th>Comp.<br>Total</th>
+            <th>Perda<br>(m/m)</th>
+            <th>Perda<br>Total</th>
+            <th>Elevação<br>(m)</th>
+            <th>Pressão<br>Req.</th>
+            <th>Veloc.</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${linhasTabela}
+        </tbody>
+      </table>
+    </div>
+  `;
 }
+
 
 
 function atualizarMemoria(){
