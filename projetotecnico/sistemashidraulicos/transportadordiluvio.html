@@ -1182,6 +1182,7 @@ function recalcularComprimentoTotal(input){
 
 
 function calculoHidraulicoChave(i){
+
   const l = linhas[i];
 
   const qtd = Number(l.bicos || 0);
@@ -1193,92 +1194,76 @@ function calculoHidraulicoChave(i){
   let pressaoAtual = pressaoInicial;
   let vazaoAcumulada = 0;
 
-  for(let n = 1; n < qtd; n++){
+  for(let n = 1; n <= qtd; n++){
     const vazaoBico = k * Math.sqrt(pressaoAtual / 10.197);
     vazaoAcumulada += vazaoBico;
 
+    const dn = 50;
     const compReal = espacamento;
     const compEq = 0;
     const compTotal = compReal + compEq;
+    const elevacao = 0;
 
-const dn = 50;
-const velocidade = calcularVelocidade(vazaoAcumulada, dn); 
-const perdaMetro = calcularPerdaMetro(vazaoAcumulada, dn);
-const perdaTotal = perdaMetro * compTotal;
+    const velocidade = calcularVelocidade(vazaoAcumulada, dn);
+    const perdaMetro = calcularPerdaMetro(vazaoAcumulada, dn);
+    const perdaTotal = perdaMetro * compTotal;
+    const pressaoRequerida = pressaoAtual + perdaTotal + elevacao;
 
+    const referenciaTrecho = n < qtd ? `B${n}-B${n+1}` : `B${n}-Manômetro`;
 
     linhasTabela += `
       <tr>
-        <td>B${n}-B${n+1}</td>
+        <td>${referenciaTrecho}</td>
         <td>${fmt(pressaoAtual)}</td>
         <td>${fmt(k)}</td>
         <td>${fmt(vazaoBico)}</td>
         <td>${fmt(vazaoAcumulada)}</td>
-        <td><input class="hidraulica-edit" type="number" value="${dn}"></td> 
-<td class="comp-real">${fmt(compReal)}</td>
-<td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
-<td class="comp-total">${fmt(compTotal)}</td>  
-
-       <td>${fmt(perdaMetro,4)}</td>
-<td>${fmt(perdaTotal,4)}</td> 
+        <td><input class="hidraulica-edit" type="number" value="${dn}"></td>
+        <td class="comp-real">${fmt(compReal)}</td>
+        <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
+        <td class="comp-total">${fmt(compTotal)}</td>
+        <td>${fmt(perdaMetro,4)}</td>
+        <td>${fmt(perdaTotal,4)}</td>
         <td><input class="hidraulica-edit" type="text" value="0,00"></td>
-        <td>${fmt(pressaoAtual)}</td>
-        <td>${fmt(velocidade)}</td> 
+        <td>${fmt(pressaoRequerida)}</td>
+        <td>${fmt(velocidade)}</td>
       </tr>
     `;
+
+    pressaoAtual = pressaoRequerida;
   }
-const dnManometro = 50;
-const vazaoBicoFinal = k * Math.sqrt(pressaoAtual / 10.197);
-vazaoAcumulada += vazaoBicoFinal;
 
-const velocidadeManometro = calcularVelocidade(vazaoAcumulada, dnManometro);
-const perdaMetroManometro = calcularPerdaMetro(vazaoAcumulada, dnManometro);
-const perdaTotalManometro = perdaMetroManometro * espacamento;
+  const dnPontoM = 65;
+  const compRealPontoM = 0;
+  const compEqPontoM = 0;
+  const compTotalPontoM = compRealPontoM + compEqPontoM;
+  const elevacaoPontoM = 0;
 
+  const velocidadePontoM = calcularVelocidade(vazaoAcumulada, dnPontoM);
+  const perdaMetroPontoM = calcularPerdaMetro(vazaoAcumulada, dnPontoM);
+  const perdaTotalPontoM = perdaMetroPontoM * compTotalPontoM;
+  const pressaoRequeridaPontoM = pressaoAtual + perdaTotalPontoM + elevacaoPontoM;
 
-const dnPontoM = 65;
-const velocidadePontoM = calcularVelocidade(vazaoAcumulada, dnPontoM);
-const compTotalPontoM = 0;
-const perdaMetroPontoM = calcularPerdaMetro(vazaoAcumulada, dnPontoM);
-const perdaTotalPontoM = perdaMetroPontoM * compTotalPontoM;
+  const pontoRef = document.getElementById("pontoReferencia").value || "Ponto M";
 
-linhasTabela += `
-  <tr>
-    <td>B${qtd}-Manômetro</td>
-    <td>${fmt(pressaoAtual)}</td>
-    <td>${fmt(k)}</td>
-    <td>${fmt(vazaoBicoFinal)}</td>
-    <td>${fmt(vazaoAcumulada)}</td>
-    <td><input class="hidraulica-edit" type="number" value="${dnManometro}"></td>
-   <td><input class="hidraulica-edit comp-real" type="text" value="${fmt(espacamento)}" oninput="recalcularComprimentoTotal(this)"></td>
-<td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
-<td class="comp-total">${fmt(espacamento)}</td>
-
-   <td>${fmt(perdaMetroManometro,4)}</td>
-<td>${fmt(perdaTotalManometro,4)}</td> 
-    <td><input class="hidraulica-edit" type="text" value="0,00"></td>
-    <td>${fmt(pressaoAtual)}</td>
-    <td>${fmt(velocidadeManometro)}</td>
-  </tr>
-
-  <tr>
-    <td>Manômetro-Ponto M</td>
-    <td>${fmt(pressaoAtual)}</td>
-    <td>-</td>
-    <td>-</td>
-    <td>${fmt(vazaoAcumulada)}</td>
-    <td><input class="hidraulica-edit" type="number" value="${dnPontoM}"></td>
-    <td><input class="hidraulica-edit comp-real" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
-<td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
-<td class="comp-total">0,00</td>
-
-    <td>${fmt(perdaMetroPontoM,4)}</td>
-<td>${fmt(perdaTotalPontoM,4)}</td> 
-    <td><input class="hidraulica-edit" type="text" value="0,00"></td>
-    <td>${fmt(pressaoAtual)}</td>
-    <td>${fmt(velocidadePontoM)}</td>
-  </tr>
-`;
+  linhasTabela += `
+    <tr>
+      <td>Manômetro-${pontoRef}</td>
+      <td>${fmt(pressaoAtual)}</td>
+      <td>-</td>
+      <td>-</td>
+      <td>${fmt(vazaoAcumulada)}</td>
+      <td><input class="hidraulica-edit" type="number" value="${dnPontoM}"></td>
+      <td><input class="hidraulica-edit comp-real" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
+      <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularComprimentoTotal(this)"></td>
+      <td class="comp-total">0,00</td>
+      <td>${fmt(perdaMetroPontoM,4)}</td>
+      <td>${fmt(perdaTotalPontoM,4)}</td>
+      <td><input class="hidraulica-edit" type="text" value="0,00"></td>
+      <td>${fmt(pressaoRequeridaPontoM)}</td>
+      <td>${fmt(velocidadePontoM)}</td>
+    </tr>
+  `;
 
   document.getElementById("calculoHidraulicoConteudo").innerHTML = `
     <div class="hidraulica-title">${l.chave}</div>
@@ -1313,9 +1298,7 @@ linhasTabela += `
     </div>
   `;
 }
-
-
-
+  
 
 
 
