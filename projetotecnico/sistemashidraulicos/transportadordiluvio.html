@@ -132,10 +132,13 @@ input[readonly]{
 
 .actions{
   display:flex;
-  justify-content:flex-end;
+  justify-content:center;
   gap:12px;
-  margin-top:18px;
+  margin-top:14px;
+  margin-bottom:0;
+  padding-top:2px;
 }
+
 
 button{
   border:0;
@@ -247,8 +250,10 @@ tr:nth-child(even){
 }
 
 .field-full{
-  grid-column: 1 / -1;
+  grid-column:1 / -1;
+  margin-bottom:0;
 }
+
 
 .obrigatorio{
   background:#eaf3ff !important;
@@ -742,6 +747,7 @@ const pressaoAjustada =
 const vazaoRealAjustada =
   escolhido.k * Math.sqrt(pressaoAjustada / 10.197);
 
+
 const volumeM3 =
   (vazaoRealAjustada * bicosProjetado * tempo) / 1000;
 
@@ -772,13 +778,16 @@ document.getElementById("vazaoProjetadaTotal").value =
 
   document.getElementById("volumeReservatorio").value = fmt(volumeM3);
 
-  document.getElementById("observacao").value =
+document.getElementById("observacao").value =
   pressaoCalculada < 10
     ? "Pressão calculada abaixo de 10 mca. Adotada pressão mínima de 10 mca para operação."
-    : status === "Recomendado" ? "Pressão próxima do ideal." :
-      status === "Aceitável" ? "Pressão aceitável, verificar margem." :
-      status === "Revisar" ? "Pressão elevada, avaliar mais bicos." :
-      "Rever seleção e quantidade de bicos.";
+    : pressaoCalculada > 15
+      ? "Pressão inicial no bico elevada, reavaliar o modelo."
+      : status === "Recomendado" ? "Pressão próxima do ideal." :
+        status === "Aceitável" ? "Pressão aceitável, verificar margem." :
+        status === "Revisar" ? "Pressão elevada, avaliar mais bicos." :
+        "Rever seleção e quantidade de bicos.";
+
 
 
   atualizarMemoria();
