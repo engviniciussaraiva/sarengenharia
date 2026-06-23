@@ -477,8 +477,26 @@ tr:nth-child(even){
 
 <div class="field">
   <label>Ponto de Referência na Rede Principal</label>
-  <input id="pontoReferencia" class="obrigatorio" type="text" placeholder="Ex.: Ponto M">
+  <input id="pontoReferencia" class="obrigatorio" type="text" placeholder="Ponto de ligação na rede">
 </div>
+
+<div class="field">
+  <label>Material da Tubulação</label>
+
+  <select id="materialTubulacao" class="obrigatorio">
+    <option value="">Selecione...</option>
+
+    <option>Aço Carbono Sch 10</option>
+    <option>Aço Carbono Sch 30</option>
+    <option>Aço Carbono Sch 40</option>
+    <option>Aço Carbono Sch 80</option>
+
+    <option>Galvanizado Leve</option>
+    <option>Galvanizado Médio</option>
+    <option>Galvanizado Pesado</option>
+  </select>
+</div>
+
 
 <div class="field legenda-campos">
   <label>Legenda</label>
@@ -866,15 +884,21 @@ function inserirLinha(){
   const pontoReferencia =
   document.getElementById("pontoReferencia").value.trim();
 
+const materialTubulacao =
+  document.getElementById("materialTubulacao").value;
+
+
 if(
   !d.referencia ||
   !d.chave ||
   !pontoReferencia ||
+  !materialTubulacao ||
   d.comprimento <= 0 ||
   d.largura <= 0
-){
+)
+{
   alert(
-    "Informe Referência, Trecho/Chave, Ponto de Referência, Comprimento e Largura."
+    "Informe Referência, Trecho/Chave, Ponto de Referência, Material da Tubulação, Comprimento e Largura."
   );
   return;
 }
