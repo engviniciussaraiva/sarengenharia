@@ -1210,8 +1210,8 @@ function buscarTubo(material, dn){
 
 
 function calcularVelocidade(vazaoLpm, diMm){
-  const qM3s = vazaoLpm / 1000 / 60;
-  const diametroM = dnMm / 1000;
+const qM3s = vazaoLpm / 1000 / 60;
+const diametroM = diMm / 1000; 
   const areaM2 = Math.PI * Math.pow(diametroM, 2) / 4;
 
   if(areaM2 <= 0) return 0;
@@ -1220,8 +1220,8 @@ function calcularVelocidade(vazaoLpm, diMm){
 }
 
 function calcularPerdaMetro(vazaoLpm, diMm, c=120){
-  const qM3s = vazaoLpm / 1000 / 60;
-  const dM = dnMm / 1000;
+const qM3s = vazaoLpm / 1000 / 60;
+const dM = diMm / 1000; 
 
   if(qM3s <= 0 || dM <= 0 || c <= 0) return 0;
 
