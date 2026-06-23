@@ -1195,10 +1195,10 @@ document.getElementById("materialTubulacao").value =
 
 function buscarTubo(material, dn){
 
-  console.log("MATERIAL RECEBIDO:", material);
-  console.log("DN RECEBIDO:", dn);
+  
+  
 
-  console.log("TUBOS DISPONÍVEIS:", window.TUBOS_SUPABASE?.length);
+ 
 
   if(!window.TUBOS_SUPABASE) return null;
 
@@ -1212,9 +1212,6 @@ function buscarTubo(material, dn){
 
   }) || null;
 
-  console.log("RESULTADO BUSCA:", resultado);
-
-  return resultado;
 }
 
 
@@ -1582,7 +1579,7 @@ async function carregarTubosSupabase(){
 
   window.TUBOS_SUPABASE = data;
 
-console.log("TUBOS:", data); 
+
 
 }
   
