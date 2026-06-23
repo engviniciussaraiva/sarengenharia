@@ -1197,6 +1197,9 @@ function buscarTubo(material, dn){
 
   if(!window.TUBOS_SUPABASE) return null;
 
+console.log("Material tela:", material);
+console.log("DN:", dn); 
+
   return window.TUBOS_SUPABASE.find(t => {
 
     return (
