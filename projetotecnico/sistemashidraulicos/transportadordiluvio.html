@@ -519,6 +519,7 @@ tr:nth-child(even){
     <th>Referência</th>
     <th>Local</th>
     <th>Trecho/<br>Chave</th>
+<th>Ponto<br>Ref.</th>
     <th>Compr.<br>(m)</th>
     <th>Larg.<br>(m)</th>
     <th>Altura<br>(m)</th>
@@ -840,6 +841,7 @@ function dadosAtuais(){
     referencia: document.getElementById("referencia").value,
     local: document.getElementById("localProtegido").value,
     chave: document.getElementById("chave").value,
+pontoReferencia: document.getElementById("pontoReferencia").value.trim(),
     comprimento: n("comprimento"),
     largura: n("largura"),
     altura: n("altura"),
@@ -904,6 +906,7 @@ function desenharTabela(){
         <td>${l.referencia}</td>
         <td>${l.local}</td>
         <td>${l.chave}</td>
+<td>${l.pontoReferencia}</td>
         <td>${fmt(l.comprimento)}</td>
         <td>${fmt(l.largura)}</td>
         <td>${fmt(l.altura)}</td>
@@ -1281,14 +1284,9 @@ function calculoHidraulicoChave(i){
   const k = valorNum(l.k);
   const pressaoInicial = valorNum(l.pressao);
   const espacamento = valorNum(l.espacamento);
-  const pontoRef =
-  document.getElementById("pontoReferencia").value.trim();
 
-if(!pontoRef){
-  alert("Informe o Ponto de Referência da Rede Principal.");
-  return;
-}
-
+const pontoRef = l.pontoReferencia;
+  
   const calcId = `calc-chave-${i}`;
 
   let linhasTabela = "";
