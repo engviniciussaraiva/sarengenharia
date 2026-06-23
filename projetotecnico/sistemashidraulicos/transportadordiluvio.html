@@ -860,6 +860,9 @@ function dadosAtuais(){
     local: document.getElementById("localProtegido").value,
     chave: document.getElementById("chave").value,
 pontoReferencia: document.getElementById("pontoReferencia").value.trim(),
+materialTubulacao:
+  document.getElementById("materialTubulacao").value,
+
     comprimento: n("comprimento"),
     largura: n("largura"),
     altura: n("altura"),
@@ -1303,6 +1306,8 @@ function dnMinimoPorBicosAcumulados(qtd){
 
 function calculoHidraulicoChave(i){
   const l = linhas[i];
+
+console.log("Material:", l.materialTubulacao);  
 
   const qtd = Number(l.bicos || 0);
   const k = valorNum(l.k);
