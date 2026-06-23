@@ -1307,8 +1307,6 @@ function dnMinimoPorBicosAcumulados(qtd){
 function calculoHidraulicoChave(i){
   const l = linhas[i];
 
-console.log("Material:", l.materialTubulacao);  
-
   const qtd = Number(l.bicos || 0);
   const k = valorNum(l.k);
   const pressaoInicial = valorNum(l.pressao);
@@ -1466,44 +1464,42 @@ const supabaseClient = window.supabase.createClient(
 );
 
 async function carregarBicosSupabase(){
+
+const { data, error } = await supabaseClient
+.from("sar_diluvio_bicos")
+.select("*")
+.eq("ativo", true)
+.eq("ativo_calculo", true);
+
+if(error){
+console.error("Erro Supabase:", error);
+alert("Erro ao carregar bicos do Supabase.");
+return;
+}
+
+window.BICOS_SUPABASE = data;
+} 
+
+async function carregarTubosSupabase(){
+
   const { data, error } = await supabaseClient
-    .from("sar_diluvio_bicos")
-    .select("*")
-    .eq("ativo", true)
-    .eq("ativo_calculo", true);
+    .from("vw_tubos_ativos")
+    .select("*");
 
   if(error){
-    console.error("Erro Supabase:", error);
-    alert("Erro ao carregar bicos do Supabase.");
+    console.error(error);
     return;
   }
 
-  console.log("Bicos carregados:", data);
-  window.BICOS_SUPABASE = data;
-console.log("Bicos carregados:", data);
+  window.TUBOS_SUPABASE = data;
+
+  alert("Tubos carregados: " + data.length);
 }
   
-
-function diametroInternoPorDN(dn){
-
-  const tabela = {
-    40: 40.94,
-    50: 52.50,
-    65: 62.68,
-    80: 77.92,
-    90: 90.00,
-    100: 102.26,
-    125: 128.20,
-    150: 154.08,
-    200: 202.74
-  };
-
-  return tabela[dn] || dn;
-}
-
 
   
 carregarBicosSupabase();
+carregarTubosSupabase();
 
   
 </script>
