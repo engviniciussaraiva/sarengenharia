@@ -1188,6 +1188,22 @@ function editarLinha(i){
   });
 }
 
+function buscarTubo(material, dn){
+
+  if(!window.TUBOS_SUPABASE) return null;
+
+  return window.TUBOS_SUPABASE.find(t => {
+
+    return (
+      String(t.modo_exibicao || "").trim() === String(material).trim()
+      &&
+      Number(t.dn_mm) === Number(dn)
+    );
+
+  }) || null;
+}
+
+
 function calcularVelocidade(vazaoLpm, dnMm){
   const qM3s = vazaoLpm / 1000 / 60;
   const diametroM = dnMm / 1000;
@@ -1328,9 +1344,21 @@ const pontoRef = l.pontoReferencia;
         <td>${fmt(k)}</td>
         <td class="vazao-bico">0,00</td>
         <td class="vazao-acum">0,00</td>
-        <td><input class="hidraulica-edit dn-edit" type="number" value="${dnMinimoPorBicosAcumulados(n)}" oninput="alterarDN(this)"></td>
-        <td>
-  <input class="hidraulica-edit comp-real-edit" type="text" value="${fmt(espacamento)}" oninput="recalcularTabelaHidraulica(this.closest('table'))">
+        
+<td>
+<input class="hidraulica-edit dn-edit"
+type="number"
+value="${dnMinimoPorBicosAcumulados(n)}"
+oninput="alterarDN(this)">
+</td>
+
+<td class="di-mm check">0,00</td>
+
+<td>
+<input class="hidraulica-edit comp-real-edit"
+
+
+type="text" value="${fmt(espacamento)}" oninput="recalcularTabelaHidraulica(this.closest('table'))">
 </td>
 
         <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
@@ -1351,8 +1379,23 @@ const pontoRef = l.pontoReferencia;
       <td>-</td>
       <td class="vazao-bico">-</td>
       <td class="vazao-acum">0,00</td>
-      <td><input class="hidraulica-edit dn-edit" type="number" value="${dnMinimoPorBicosAcumulados(qtd)}" oninput="alterarDN(this)"></td>
-      <td><input class="hidraulica-edit comp-real-edit" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
+      <td>
+<input class="hidraulica-edit dn-edit"
+type="number"
+value="${dnMinimoPorBicosAcumulados(qtd)}"
+oninput="alterarDN(this)">
+</td>
+
+<td class="di-mm check">0,00</td>
+
+<td>
+<input class="hidraulica-edit comp-real-edit"
+type="text"
+value="0,00"
+oninput="recalcularTabelaHidraulica(this.closest('table'))">
+</td>
+
+
       <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
       <td class="comp-total">0,00</td>
       <td class="perda-metro">0,0000</td>
@@ -1366,8 +1409,11 @@ const pontoRef = l.pontoReferencia;
   const html = `
     <div class="hidraulica-title">${l.chave}</div>
     <div class="hidraulica-subtitle">
-      Bico: ${l.modelo} · K: ${l.k} · Ângulo: ${l.angulo}° · Quantidade: ${l.bicos}
-    </div>
+  Bico: ${l.modelo} · K: ${l.k} · Ângulo: ${l.angulo}° · Quantidade: ${l.bicos}
+  <br>
+  Tubulação: ${l.materialTubulacao}
+</div>
+
 
     <div class="table-wrap">
       <table data-k="${k}" data-pressao-inicial="${pressaoInicial}">
@@ -1379,6 +1425,7 @@ const pontoRef = l.pontoReferencia;
             <th>Vazão<br>Bico</th>
             <th>Vazão<br>Acum.</th>
             <th>DN<br>(mm)</th>
+<th>DI<br>(mm)</th> 
             <th>Comp.<br>Real</th>
             <th>Comp.<br>Eq.</th>
             <th>Comp.<br>Total</th>
@@ -1493,7 +1540,6 @@ async function carregarTubosSupabase(){
 
   window.TUBOS_SUPABASE = data;
 
-  alert("Tubos carregados: " + data.length);
 }
   
 
