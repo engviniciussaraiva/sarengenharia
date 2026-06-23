@@ -1162,6 +1162,11 @@ function editarLinha(i){
   document.getElementById("referencia").value = l.referencia;
   document.getElementById("localProtegido").value = l.local;
   document.getElementById("chave").value = l.chave;
+document.getElementById("pontoReferencia").value =
+  l.pontoReferencia || "";
+
+document.getElementById("materialTubulacao").value =
+  l.materialTubulacao || "";
 
   document.getElementById("comprimento").value = l.comprimento;
   document.getElementById("largura").value = l.largura;
@@ -1204,7 +1209,7 @@ function buscarTubo(material, dn){
 }
 
 
-function calcularVelocidade(vazaoLpm, dnMm){
+function calcularVelocidade(vazaoLpm, diMm){
   const qM3s = vazaoLpm / 1000 / 60;
   const diametroM = dnMm / 1000;
   const areaM2 = Math.PI * Math.pow(diametroM, 2) / 4;
@@ -1214,7 +1219,7 @@ function calcularVelocidade(vazaoLpm, dnMm){
   return qM3s / areaM2;
 }
 
-function calcularPerdaMetro(vazaoLpm, dnMm, c=120){
+function calcularPerdaMetro(vazaoLpm, diMm, c=120){
   const qM3s = vazaoLpm / 1000 / 60;
   const dM = dnMm / 1000;
 
@@ -1245,6 +1250,8 @@ function valorNum(v){
 function alterarDN(input){
   const tabela = input.closest("table");
   const linhasTabela = [...tabela.querySelectorAll("tbody tr")];
+const material =
+  tabela.dataset.material;
   const linhaAtual = input.closest("tr");
   const idx = linhasTabela.indexOf(linhaAtual);
   const novoDN = input.value;
@@ -1264,6 +1271,8 @@ function recalcularTabelaHidraulica(tabela){
 
   const linhasTabela = [...tabela.querySelectorAll("tbody tr")];
 
+const material = tabela.dataset.material; 
+
   linhasTabela.forEach((tr, idx) => {
     const temBico = tr.dataset.temBico === "sim";
 
@@ -1281,14 +1290,33 @@ function recalcularTabelaHidraulica(tabela){
       vazaoAcumulada += vazaoBico;
     }
 
-    const di =
-  diametroInternoPorDN(dn);
+const tubo =
+  buscarTubo(material, dn);
+
+const di =
+  tubo
+    ? Number(tubo.diametro_interno_mm)
+    : 0;
+
+const fatorC =
+  tubo
+    ? Number(tubo.fator_c)
+    : 120;
+
+tr.querySelector(".di-mm").textContent =
+  fmt(di);
 
 const velocidade =
   calcularVelocidade(vazaoAcumulada, di);
 
 const perdaMetro =
-  calcularPerdaMetro(vazaoAcumulada, di);
+  calcularPerdaMetro(
+    vazaoAcumulada,
+    di,
+    fatorC
+  );
+
+
 
     const perdaTotal = perdaMetro * compTotal;
     const pressaoReq = pressaoAtual + perdaTotal + elevacao;
@@ -1411,12 +1439,15 @@ oninput="recalcularTabelaHidraulica(this.closest('table'))">
     <div class="hidraulica-subtitle">
   Bico: ${l.modelo} · K: ${l.k} · Ângulo: ${l.angulo}° · Quantidade: ${l.bicos}
   <br>
-  Tubulação: ${l.materialTubulacao}
+  Tubulação: ${l.materialTubulacao} · Hazen-Williams C = 120
 </div>
 
 
     <div class="table-wrap">
-      <table data-k="${k}" data-pressao-inicial="${pressaoInicial}">
+      <table
+data-k="${k}"
+data-pressao-inicial="${pressaoInicial}"
+data-material="${l.materialTubulacao}"> 
         <thead>
           <tr>
             <th>Referência</th>
