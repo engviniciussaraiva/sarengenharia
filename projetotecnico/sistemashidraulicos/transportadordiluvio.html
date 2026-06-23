@@ -861,10 +861,22 @@ function dadosAtuais(){
 function inserirLinha(){
   const d = dadosAtuais();
 
-  if(!d.referencia || !d.chave || d.comprimento <= 0 || d.largura <= 0){
-    alert("Informe referência, trecho/chave, comprimento e largura.");
-    return;
-  }
+  const pontoReferencia =
+  document.getElementById("pontoReferencia").value.trim();
+
+if(
+  !d.referencia ||
+  !d.chave ||
+  !pontoReferencia ||
+  d.comprimento <= 0 ||
+  d.largura <= 0
+){
+  alert(
+    "Informe Referência, Trecho/Chave, Ponto de Referência, Comprimento e Largura."
+  );
+  return;
+}
+
 
   linhas.push(d);
   desenharTabela();
@@ -1223,8 +1235,15 @@ function recalcularTabelaHidraulica(tabela){
       vazaoAcumulada += vazaoBico;
     }
 
-    const velocidade = calcularVelocidade(vazaoAcumulada, dn);
-    const perdaMetro = calcularPerdaMetro(vazaoAcumulada, dn);
+    const di =
+  diametroInternoPorDN(dn);
+
+const velocidade =
+  calcularVelocidade(vazaoAcumulada, di);
+
+const perdaMetro =
+  calcularPerdaMetro(vazaoAcumulada, di);
+
     const perdaTotal = perdaMetro * compTotal;
     const pressaoReq = pressaoAtual + perdaTotal + elevacao;
 
@@ -1241,6 +1260,20 @@ function recalcularTabelaHidraulica(tabela){
   });
 }
 
+function dnMinimoPorBicosAcumulados(qtd){
+  if(qtd <= 5) return 40;
+  if(qtd <= 10) return 50;
+  if(qtd <= 20) return 65;
+  if(qtd <= 40) return 80;
+  if(qtd <= 65) return 90;
+  if(qtd <= 100) return 100;
+  if(qtd <= 160) return 125;
+  if(qtd <= 275) return 150;
+  return 200;
+}
+
+
+
 function calculoHidraulicoChave(i){
   const l = linhas[i];
 
@@ -1248,7 +1281,14 @@ function calculoHidraulicoChave(i){
   const k = valorNum(l.k);
   const pressaoInicial = valorNum(l.pressao);
   const espacamento = valorNum(l.espacamento);
-  const pontoRef = document.getElementById("pontoReferencia").value || "Ponto M";
+  const pontoRef =
+  document.getElementById("pontoReferencia").value.trim();
+
+if(!pontoRef){
+  alert("Informe o Ponto de Referência da Rede Principal.");
+  return;
+}
+
   const calcId = `calc-chave-${i}`;
 
   let linhasTabela = "";
@@ -1263,7 +1303,7 @@ function calculoHidraulicoChave(i){
         <td>${fmt(k)}</td>
         <td class="vazao-bico">0,00</td>
         <td class="vazao-acum">0,00</td>
-        <td><input class="hidraulica-edit dn-edit" type="number" value="50" oninput="alterarDN(this)"></td>
+        <td><input class="hidraulica-edit dn-edit" type="number" value="${dnMinimoPorBicosAcumulados(n)}" oninput="alterarDN(this)"></td>
         <td>
   <input class="hidraulica-edit comp-real-edit" type="text" value="${fmt(espacamento)}" oninput="recalcularTabelaHidraulica(this.closest('table'))">
 </td>
@@ -1286,7 +1326,7 @@ function calculoHidraulicoChave(i){
       <td>-</td>
       <td class="vazao-bico">-</td>
       <td class="vazao-acum">0,00</td>
-      <td><input class="hidraulica-edit dn-edit" type="number" value="65" oninput="alterarDN(this)"></td>
+      <td><input class="hidraulica-edit dn-edit" type="number" value="${dnMinimoPorBicosAcumulados(qtd)}" oninput="alterarDN(this)"></td>
       <td><input class="hidraulica-edit comp-real-edit" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
       <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
       <td class="comp-total">0,00</td>
@@ -1416,6 +1456,25 @@ async function carregarBicosSupabase(){
 console.log("Bicos carregados:", data);
 }
   
+
+function diametroInternoPorDN(dn){
+
+  const tabela = {
+    40: 40.94,
+    50: 52.50,
+    65: 62.68,
+    80: 77.92,
+    90: 90.00,
+    100: 102.26,
+    125: 128.20,
+    150: 154.08,
+    200: 202.74
+  };
+
+  return tabela[dn] || dn;
+}
+
+
   
 carregarBicosSupabase();
 
