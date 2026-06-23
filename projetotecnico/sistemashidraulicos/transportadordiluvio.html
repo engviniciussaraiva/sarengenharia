@@ -1196,10 +1196,9 @@ document.getElementById("materialTubulacao").value =
 function buscarTubo(material, dn){
 
   if(!window.TUBOS_SUPABASE) return null;
-
-console.log("Material tela:", material);
-console.log("DN:", dn); 
-
+console.log("MATERIAL RECEBIDO:", material);
+console.log("DN RECEBIDO:", dn); 
+console.log(window.TUBOS_SUPABASE[0]); 
   return window.TUBOS_SUPABASE.find(t => {
 
     return (
