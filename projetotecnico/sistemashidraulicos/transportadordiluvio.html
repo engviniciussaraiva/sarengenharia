@@ -564,14 +564,9 @@ tr:nth-child(even){
   <h2 class="section-title">Cálculo Hidráulico das Chaves</h2>
 
   <div id="calculoHidraulicoConteudo">
-    <p style="color:#667085;font-size:14px;">
-      Clique no botão 📈 da Tabela Resumo para gerar o cálculo hidráulico da chave.
-    </p>
-  </div>
-</div>
 
 <div style="margin:12px 0;">
-  <label><b>Trechos adicionais após o manômetro:</b></label>
+  <label><b>Adicionar trechos após o manômetro:</b></label>
 
   <input
     id="trechosAdicionais"
@@ -582,6 +577,16 @@ tr:nth-child(even){
     style="width:70px;text-align:center;margin-left:8px;"
   >
 </div>
+
+
+
+    <p style="color:#667085;font-size:14px;">
+      Clique no botão 📈 da Tabela Resumo para gerar o cálculo hidráulico da chave.
+    </p>
+  </div>
+</div>
+
+
 
 
 
@@ -1363,6 +1368,69 @@ function dnMinimoPorBicosAcumulados(qtd){
   return 200;
 }
 
+function criarLinhaFinal(referencia,dn){
+
+  return `
+    <tr data-tem-bico="nao">
+
+      <td>${referencia}</td>
+
+      <td class="pressao">0,00</td>
+
+      <td>-</td>
+
+      <td class="vazao-bico">-</td>
+
+      <td class="vazao-acum">0,00</td>
+
+      <td>
+        <input
+          class="hidraulica-edit dn-edit"
+          type="number"
+          value="${dn}"
+          oninput="alterarDN(this)">
+      </td>
+
+      <td class="di-mm">0,00</td>
+
+      <td>
+        <input
+          class="hidraulica-edit comp-real-edit"
+          type="text"
+          value="0,00"
+          oninput="recalcularTabelaHidraulica(this.closest('table'))">
+      </td>
+
+      <td>
+        <input
+          class="hidraulica-edit comp-eq"
+          type="text"
+          value="0,00"
+          oninput="recalcularTabelaHidraulica(this.closest('table'))">
+      </td>
+
+      <td class="comp-total">0,00</td>
+
+      <td class="perda-metro">0,0000</td>
+
+      <td class="perda-total">0,0000</td>
+
+      <td>
+        <input
+          class="hidraulica-edit elevacao-edit"
+          type="text"
+          value="0,00"
+          oninput="recalcularTabelaHidraulica(this.closest('table'))">
+      </td>
+
+      <td class="pressao-req">0,00</td>
+
+      <td class="velocidade">0,00</td>
+
+    </tr>
+  `;
+}
+
 
 
 function calculoHidraulicoChave(i){
@@ -1423,43 +1491,49 @@ type="text" value="${fmt(espacamento)}" oninput="recalcularTabelaHidraulica(this
     `;
   }
 
-  if(trechosAdicionais === 0){
+if(trechosAdicionais === 0){
 
-  linhasTabela += `
-    <tr data-tem-bico="nao">
-      <td>Manômetro-${pontoRef}</td>
-      <td class="pressao">0,00</td>
-      <td>-</td>
-      <td class="vazao-bico">-</td>
-      <td class="vazao-acum">0,00</td>
+  linhasTabela += criarLinhaFinal(
+    `Manômetro-${pontoRef}`,
+    dnMinimoPorBicosAcumulados(qtd)
+  );
 
-      <td>
-        <input class="hidraulica-edit dn-edit"
-        type="number"
-        value="${dnMinimoPorBicosAcumulados(qtd)}"
-        oninput="alterarDN(this)">
-      </td>
+}else{
 
-      <td class="di-mm">0,00</td>
+  for(let p=1; p<=trechosAdicionais; p++){
 
-      <td>
-        <input class="hidraulica-edit comp-real-edit"
-        type="text"
-        value="0,00"
-        oninput="recalcularTabelaHidraulica(this.closest('table'))">
-      </td>
+    const origem =
+      p === 1
+        ? "Manômetro"
+        : `P${p-1}`;
 
-      <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
-      <td class="comp-total">0,00</td>
-      <td class="perda-metro">0,0000</td>
-      <td class="perda-total">0,0000</td>
-      <td><input class="hidraulica-edit elevacao-edit" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
-      <td class="pressao-req">0,00</td>
-      <td class="velocidade">0,00</td>
-    </tr>
-  `;
+    const destino =
+      p === trechosAdicionais
+        ? pontoRef
+        : `P${p}`;
+
+    linhasTabela += criarLinhaFinal(
+      `${origem}-${destino}`,
+      dnMinimoPorBicosAcumulados(qtd)
+    );
+
+  }
 
 }
+
+
+}
+
+const tuboCabecalho =
+  buscarTubo(
+    l.materialTubulacao,
+    dnMinimoPorBicosAcumulados(1)
+  );
+
+const fatorCCabecalho =
+  tuboCabecalho
+    ? tuboCabecalho.fator_c
+    : "-";
 
 
   const html = `
@@ -1467,7 +1541,7 @@ type="text" value="${fmt(espacamento)}" oninput="recalcularTabelaHidraulica(this
     <div class="hidraulica-subtitle">
   Bico: ${l.modelo} · K: ${l.k} · Ângulo: ${l.angulo}° · Quantidade: ${l.bicos}
   <br>
-  Tubulação: ${l.materialTubulacao} · Hazen-Williams C = 120
+  Tubulação: ${l.materialTubulacao} · Hazen-Williams C = ${fatorCCabecalho}
 </div>
 
 
