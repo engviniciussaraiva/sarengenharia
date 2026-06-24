@@ -570,6 +570,19 @@ tr:nth-child(even){
   </div>
 </div>
 
+<div style="margin:12px 0;">
+  <label><b>Trechos adicionais após o manômetro:</b></label>
+
+  <input
+    id="trechosAdicionais"
+    type="number"
+    min="0"
+    max="5"
+    value="0"
+    style="width:70px;text-align:center;margin-left:8px;"
+  >
+</div>
+
 
 
   <div class="card">
@@ -1296,7 +1309,6 @@ const material = tabela.dataset.material;
 const tubo =
   buscarTubo(material, dn);
 
-console.log("TUBO ENCONTRADO:", tubo); 
 
 const di =
   tubo
@@ -1363,6 +1375,12 @@ function calculoHidraulicoChave(i){
 
 const pontoRef = l.pontoReferencia;
   
+const trechosAdicionais =
+  Number(
+    document.getElementById("trechosAdicionais")?.value || 0
+  );
+
+
   const calcId = `calc-chave-${i}`;
 
   let linhasTabela = "";
@@ -1385,7 +1403,7 @@ value="${dnMinimoPorBicosAcumulados(n)}"
 oninput="alterarDN(this)">
 </td>
 
-<td class="di-mm check">0,00</td>
+<td class="di-mm">0,00</td>
 
 <td>
 <input class="hidraulica-edit comp-real-edit"
@@ -1405,6 +1423,8 @@ type="text" value="${fmt(espacamento)}" oninput="recalcularTabelaHidraulica(this
     `;
   }
 
+  if(trechosAdicionais === 0){
+
   linhasTabela += `
     <tr data-tem-bico="nao">
       <td>Manômetro-${pontoRef}</td>
@@ -1412,22 +1432,22 @@ type="text" value="${fmt(espacamento)}" oninput="recalcularTabelaHidraulica(this
       <td>-</td>
       <td class="vazao-bico">-</td>
       <td class="vazao-acum">0,00</td>
+
       <td>
-<input class="hidraulica-edit dn-edit"
-type="number"
-value="${dnMinimoPorBicosAcumulados(qtd)}"
-oninput="alterarDN(this)">
-</td>
+        <input class="hidraulica-edit dn-edit"
+        type="number"
+        value="${dnMinimoPorBicosAcumulados(qtd)}"
+        oninput="alterarDN(this)">
+      </td>
 
-<td class="di-mm check">0,00</td>
+      <td class="di-mm">0,00</td>
 
-<td>
-<input class="hidraulica-edit comp-real-edit"
-type="text"
-value="0,00"
-oninput="recalcularTabelaHidraulica(this.closest('table'))">
-</td>
-
+      <td>
+        <input class="hidraulica-edit comp-real-edit"
+        type="text"
+        value="0,00"
+        oninput="recalcularTabelaHidraulica(this.closest('table'))">
+      </td>
 
       <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
       <td class="comp-total">0,00</td>
@@ -1438,6 +1458,9 @@ oninput="recalcularTabelaHidraulica(this.closest('table'))">
       <td class="velocidade">0,00</td>
     </tr>
   `;
+
+}
+
 
   const html = `
     <div class="hidraulica-title">${l.chave}</div>
