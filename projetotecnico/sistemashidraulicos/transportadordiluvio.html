@@ -327,6 +327,8 @@ tr:nth-child(even){
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 </head>
 
 <body>
@@ -1548,7 +1550,49 @@ const fatorCCabecalho =
 
 
   const html = `
-    <div class="hidraulica-title">${l.chave}</div>
+    <div style="
+  font-size:13px;
+  font-weight:700;
+  color:#667085;
+  margin-bottom:6px;
+">
+  Dimensionamento Hidráulico do Chuveiro Automático Tipo Dilúvio
+</div>
+
+<div style="
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+">
+
+  <div>
+    <button
+      class="btn-export"
+      onclick="exportarPDFChave('${calcId}')">
+      📄 PDF
+    </button>
+  </div>
+
+  <div>
+    <button
+      class="btn-export"
+      onclick="exportarExcelChave('${calcId}')">
+      📊 Excel
+    </button>
+
+    <button
+      class="btn-export"
+      onclick="exportarDXFChave('${calcId}')">
+      📐 DXF
+    </button>
+  </div>
+
+</div>
+
+
+<div class="hidraulica-title">${l.chave}</div>
+
     <div class="hidraulica-subtitle">
   Bico: ${l.modelo} · K: ${l.k} · Ângulo: ${l.angulo}° · Quantidade: ${l.bicos}
   <br>
@@ -1700,6 +1744,27 @@ async function carregarTubosSupabase(){
 
 }
   
+function exportarPDFChave(id){
+
+  const elemento =
+    document.getElementById(id);
+
+  html2pdf()
+    .set({
+      margin:10,
+      filename:id + ".pdf",
+      image:{type:"jpeg",quality:1},
+      html2canvas:{scale:2},
+      jsPDF:{
+        unit:"mm",
+        format:"a4",
+        orientation:"landscape"
+      }
+    })
+    .from(elemento)
+    .save();
+
+}
 
   
 carregarBicosSupabase();
