@@ -1551,44 +1551,43 @@ const fatorCCabecalho =
 
   const html = `
     <div style="
-  font-size:13px;
-  font-weight:700;
-  color:#667085;
-  margin-bottom:6px;
-">
+font-size:16px;
+font-weight:800;
+color:#2f5f5b;
+margin-bottom:10px;
+"> 
   Dimensionamento Hidráulico do Chuveiro Automático Tipo Dilúvio
 </div>
 
 <div style="
   display:flex;
-  justify-content:space-between;
-  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
   margin-bottom:10px;
 ">
 
-  <div>
-    <button
-      class="btn-export"
-      onclick="exportarPDFChave('${calcId}')">
-      📄 PDF
-    </button>
-  </div>
+  <button
+    class="btn-export"
+    onclick="exportarPDFChave('${calcId}')">
+    📄 PDF
+  </button>
 
-  <div>
-    <button
-      class="btn-export"
-      onclick="exportarExcelChave('${calcId}')">
-      📊 Excel
-    </button>
+  <button
+    class="btn-export"
+    onclick="exportarExcelChave('${calcId}')">
+    📊 Excel
+  </button>
 
-    <button
-      class="btn-export"
-      onclick="exportarDXFChave('${calcId}')">
-      📐 DXF
-    </button>
-  </div>
+  <button
+    class="btn-export"
+    onclick="exportarDXFChave('${calcId}')">
+    📐 DXF
+  </button>
 
 </div>
+
+
+
 
 
 <div class="hidraulica-title">${l.chave}</div>
