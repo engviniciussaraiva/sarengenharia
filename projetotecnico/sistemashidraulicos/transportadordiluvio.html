@@ -1353,8 +1353,21 @@ const perdaMetro =
     tr.querySelector(".velocidade").textContent = fmt(velocidade);
 
     pressaoAtual = pressaoReq;
+  
   });
+
+  const infoPressao =
+    tabela.parentElement.querySelector(".info-pressao-manometro");
+
+  if(infoPressao){
+
+    infoPressao.textContent =
+      `Pressão de trabalho no manômetro: ${fmt(pressaoAtual)} m.c.a. = ${fmt(pressaoAtual/10)} kgf/cm²`;
+
+  }
+
 }
+
 
 function dnMinimoPorBicosAcumulados(qtd){
   if(qtd <= 5) return 40;
@@ -1569,6 +1582,29 @@ data-material="${l.materialTubulacao}">
         </thead>
         <tbody>${linhasTabela}</tbody>
       </table>
+<div class="info-pressao-manometro"
+     style="
+       margin-top:10px;
+       font-size:14px;
+       font-weight:600;
+       color:#173f3b;
+     ">
+</div>
+
+
+
+<div style="
+  margin-top:10px;
+  font-size:14px;
+  font-weight:600;
+  color:#173f3b;
+">
+  Pressão de trabalho no manômetro:
+  ${pressaoAtual.toFixed(2).replace(".", ",")} m.c.a.
+  =
+  ${(pressaoAtual/10).toFixed(2).replace(".", ",")} kgf/cm²
+</div>
+
     </div>
   `;
 
