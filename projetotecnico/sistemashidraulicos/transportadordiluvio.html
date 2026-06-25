@@ -1550,12 +1550,15 @@ const fatorCCabecalho =
 
 
   const html = `
-    <div style="
+<div class="pdf-chave">
+
+<div style="
 font-size:16px;
 font-weight:800;
 color:#2f5f5b;
 margin-bottom:10px;
-"> 
+">
+
   Dimensionamento Hidráulico do Chuveiro Automático Tipo Dilúvio
 </div>
 
@@ -1636,7 +1639,7 @@ data-material="${l.materialTubulacao}">
 
 
 
-
+ </div>
     </div>
   `;
 
@@ -1746,7 +1749,8 @@ async function carregarTubosSupabase(){
 function exportarPDFChave(id){
 
   const elemento =
-    document.getElementById(id);
+  document.getElementById(id).querySelector(".pdf-chave");
+
 
   html2pdf()
     .set({
@@ -1757,7 +1761,7 @@ function exportarPDFChave(id){
       jsPDF:{
         unit:"mm",
         format:"a4",
-        orientation:"landscape"
+        orientation:"portrait" 
       }
     })
     .from(elemento)
