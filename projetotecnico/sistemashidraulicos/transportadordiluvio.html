@@ -327,7 +327,6 @@ tr:nth-child(even){
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 </head>
 
@@ -1570,10 +1569,10 @@ margin-bottom:10px;
 ">
 
   <button
-    class="btn-export"
-    onclick="exportarPDFChave('${calcId}')">
-    📄 PDF
-  </button>
+class="btn-export"
+onclick="abrirPDFTecnico(${i})">
+📄 PDF Técnico
+</button>
 
   <button
     class="btn-export"
@@ -1746,30 +1745,141 @@ async function carregarTubosSupabase(){
 
 }
   
-function exportarPDFChave(id){
+  function abrirPDFTecnico(indice){
 
-  const elemento =
-  document.getElementById(id).querySelector(".pdf-chave");
+  const l = linhas[indice];
 
+  const janela = window.open("", "_blank");
 
-  html2pdf()
-    .set({
-      margin:10,
-      filename:id + ".pdf",
-      image:{type:"jpeg",quality:1},
-      html2canvas:{scale:2},
-      jsPDF:{
-        unit:"mm",
-        format:"a4",
-        orientation:"portrait" 
-      }
-    })
-    .from(elemento)
-    .save();
+  janela.document.write(`
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Dimensionamento Hidráulico</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    margin:35px;
+    color:#222;
+}
+
+h1{
+    font-size:24px;
+    text-align:center;
+    margin-bottom:5px;
+}
+
+h2{
+    font-size:16px;
+    text-align:center;
+    margin-top:0;
+    color:#555;
+}
+
+.info{
+    margin-top:30px;
+    margin-bottom:25px;
+    line-height:1.8;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12px;
+}
+
+th{
+    background:#2f5f5b;
+    color:white;
+    border:1px solid #666;
+    padding:6px;
+}
+
+td{
+    border:1px solid #999;
+    padding:5px;
+    text-align:center;
+}
+
+.rodape{
+
+    margin-top:40px;
+
+    display:flex;
+    justify-content:space-between;
+
+    font-size:12px;
 
 }
 
-  
+</style>
+
+</head>
+
+<body>
+
+<h1>SAR Engenharia</h1>
+
+<h2>Dimensionamento Hidráulico do Chuveiro Automático Tipo Dilúvio</h2>
+
+<div class="info">
+
+<b>Referência:</b> ${l.referencia}<br>
+
+<b>Local:</b> ${l.local}<br>
+
+<b>Trecho:</b> ${l.chave}<br>
+
+<b>Ponto de referência:</b> ${l.pontoReferencia}<br>
+
+<b>Material:</b> ${l.materialTubulacao}
+
+</div>
+
+<br><br>
+
+<div id="tabela"></div>
+
+<div class="rodape">
+
+<div>
+
+Emitido pelo SAR Engenharia
+
+</div>
+
+<div>
+
+${new Date().toLocaleString("pt-BR")}
+
+</div>
+
+</div>
+
+</body>
+
+</html>
+
+`);
+
+  janela.document.close();
+
+const tabelaOriginal =
+document.querySelector("#calc-chave-"+indice+" table");
+
+janela.document.getElementById("tabela").innerHTML =
+tabelaOriginal.outerHTML;
+
+
+}
+
 carregarBicosSupabase();
 carregarTubosSupabase();
 
