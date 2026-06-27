@@ -1,282 +1,1223 @@
-ChatGPT
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-TUBULACOES PRESSAO Página1
-
-
-eu tenho essa, ajuste ela por gentileza, que ja vai ficar para que possamos usar em hidrantes, espuma, etc
-
-OLHA A BAGUNÇA,  PRECISA PARA AS LINHAS SEM VALOR COLOCAR ESPAÇO VAGO OU ZERO E ME MANDA SEPARADO EM ;
-E POR GENTILEZA SEM PULAR LINHAS
-
-
-aco-nbr-5590-schedule.pdf
-PDF
-
-tabela-tubo-schedule.pdf
-PDF
-esses são dois fornecedores de tubo confiável veja se ajuda, porém na nossa planilha temos muito mais informações
-
-Excelente. Esses PDFs ajudaram muito. 👍
-
-O mais importante que descobrimos é que eles possuem exatamente as informações que precisamos para transformar a sua biblioteca em uma base hidráulica séria. 
-
- 
-
-
-Mas eu faria um ajuste na estratégia:
-
-Não usar PRESSAO_MAX_BAR fixa
-Porque os fornecedores misturam:
-
-API 5L
-
-ASTM A106
-
-ASTM A333
-
-diferentes graus de aço
-
-diferentes tensões admissíveis
-
-Então essa pressão muda conforme material e especificação. 
-
-
-Para o SAR, eu deixaria:
-
-PRESSAO_MAX_BAR
-como informação comercial, mas não usaria em cálculos.
-
-O que realmente importa para o motor hidráulico
-Da sua tabela:
-
-DN_MM
-DIAMETRO_EXTERNO_MM
-ESPESSURA_PAREDE_MM
-DIAMETRO_INTERNO_MM
-AREA_INTERNA_M2
-FATOR_C
-Esses são os campos ouro.
-
-O que achei muito interessante
-O PDF da Special Tubos possui Sch 30 reais para:
-
-8"
-10"
-12"
-14"
-16"
-18"
-20"
-ou seja, agora conseguimos cadastrar Sch 30 corretamente, sem inventar valores. 
-
- 
-
-
-Minha recomendação para a biblioteca do SAR
-Criar as famílias:
-
-AÇO CARBONO SCH 10
-AÇO CARBONO SCH 30
-AÇO CARBONO SCH 40
-AÇO CARBONO SCH 80
-
-AÇO GALVANIZADO LEVE
-AÇO GALVANIZADO MÉDIO
-AÇO GALVANIZADO PESADO
-
-PVC CLASSE 15
-PVC CLASSE 20
-PVC CLASSE 25
-
-PEAD SDR 17
-PEAD SDR 13,6
-PEAD SDR 11
-E parar aí por enquanto.
-
-Com isso você cobre praticamente:
-
-hidrantes
-
-sprinklers
-
-dilúvio
-
-espuma
-
-água industrial
-
-bombeamento
-
-Minha conclusão:
-
-✅ Os PDFs são confiáveis.
-
-✅ Servem para validar Sch 10, 30, 40 e 80.
-
-✅ Vale a pena alimentar o banco agora até 24".
-
-✅ Depois disso eu partiria para Sch 40 imediatamente, porque será a série mais usada pelo SAR em hidrantes e espuma.
-
-Inclusive, depois que você terminar o Sch 10, eu consigo gerar o Sch 40 inteiro já no formato exato do seu banco (linhas separadas por ;, sem pular linhas, com AREA_INTERNA_M2 correta).
-
-
-acrescenti aqui no final 
-me envia as linhas para eu por no que já temos de schd
-
-OK AS COLUNAS FICARAM NESSA POSIÇÃO, PODE ME ENVIAR OS VALORES PARA QUE EU COPIE DIRETAMENTE 
-
-
-TUBO_5580_TUPY.pdf
-PDF
-
-NÃO AGORA QUE EU QUERO QUE VOCÊ CALCULE ESSE PONTO PARA OS SCHEDULE
-
-VC COSEGUE LER ISSO 
-
-para o pvc esta dificil, daqui extrai somente o classe 20
-suporta 100 mca de pressão, só isso que consegui
-
-gera esse PBS SOMENTE PARA CLASSE 20 DAQUI
-O QUE FALTAR VAMOS POR ZERO, DEPOIS VOLTAMOS EM CATALOGOS, ESTAMOS PARADOS EM BUSCA DE INFORMAÇÃO QUE PARA DILUVIO QUE É APARENTE NEM FAZ SENTIDO PERDER TEMPO
-
-Imagem gerada: Tabela de especificações PVC-PBS Classe 20
-
-
-Editar
-
-
-PARA O SOLDAVEL CADASTRA CLASSE 15 - PRESSAO MAX 75 MCA
-EM CIMA DESSA TABELA 
-O QUE FALTAR FICA 0
-COM ISSO JÁ VAMOS AVANÇAR UMA ETERNIDADE
-
-O PROJETO VAI SER O MESMO? 
-
-DESCULPA AQUI?
-
-ESSE INDICADO COM A SETA?
-
-
-
-
-
-
-
-SUCESSO 
-
-
-
-
-
-Texto colado.txt
-Documento
-esse é o código hoje 
-
-
-Texto colado.txt
-Documento
-esta tudo aqui, não esta?
-
-
-Texto colado.txt
-Documento
-me indica exatamente onde coloca 
-
-acho que eu certo
-
-agoar antes de segur precidsamos limpar esses códigos temporarios né//////////
-já temos dois
-
-esses dois em verde e deixa o winow.bicos
-
-esta certo aqui?
-
-antes de tudo isso,  aqui nós não temos qeu por a coluna do dimetro interno depos do DN?
-
-pode ser 
-Bico: MV - 46 · K: 78.9 · Ângulo: 80° · Quantidade: 12
-Tubulação: Aço Carbono Sch 10 · Hazen-Williams C = 120
-
-a planilha de calculo vai ficar com tudo isso , só vai aumentar DI (mm) depois de DN...
-O DN onde o usuario seleciona o DI automaico sem edição. ok
-
-ok pode seguir com os passos mas o DI deve vir assim, pois é banco
-
-
-Texto colado.txt
-Documento
-vou te mandar o código para você me enviar as posições exatas 
-
-
-Texto colado.txt
-Documento
-DA UMA OLHDA QUE ME PERDI NO PASSO 3 
-
-veio assim  esta faltando hazen willi
-
-
-Texto colado.txt
-Documento
-mais facil eu te mandar o código, faça uma checagem geral 
-
-
-Texto colado.txt
-Documento
-veja todo o código 
-
-
-Texto colado.txt
-Documento
-ficou bemzuado...  não ta puxando nada na verdade
-
-revise o código completo 
-
-
-SAR_BIBLIOTECA_TUBULACOES - Google Planilhas.pdf
-PDF
-ESSE É O BANCO
-
-
-Texto colado.txt
-Documento
-VOU TE ENVIAR O CÓDIGO COMPLETO NOVAMENTE
-
-
-eeb88979-57ca-4001-9044-de15d801ee5d.png
-bf8573f2-c8d6-4222-b7ab-503dfb7e2685.png
-
-Texto colado.txt
-Documento
-VOCe esta me perguntando muita coisa que eu não entendo porra nenuma
-coidog 
-supabse
-
-
-
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dilúvio em Transportadores</title>
+
+<style>
+:root{
+  --sar-green:#2f5f5b;
+  --sar-green-2:#3d7b72;
+  --sar-light:#f4f7f6;
+  --sar-border:#d7e2df;
+  --sar-text:#1f2933;
+  --sar-muted:#667085;
+  --sar-yellow:#fff9c4;
+  --sar-result:#dff3d5;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:#f3f6f5;
+  color:var(--sar-text);
+}
+
+.wrap{
+  max-width:1280px;
+  margin:0 auto;
+  padding:18px;
+}
+
+.header{
+  background:linear-gradient(135deg,var(--sar-green),var(--sar-green-2));
+  color:#fff;
+  border-radius:12px;
+  padding:18px 22px;
+  margin-bottom:16px;
+  box-shadow:0 6px 18px rgba(0,0,0,.12);
+}
+
+.header h1{
+  margin:0;
+  font-size:22px;
+}
+
+.header p{
+  margin:6px 0 0;
+  opacity:.9;
+}
+
+.field-wide{
+  grid-column: span 2;
+}
+
+
+.card{
+  background:#fff;
+  border:1px solid var(--sar-border);
+  border-radius:12px;
+  padding:18px;
+  margin-bottom:16px;
+  box-shadow:0 3px 12px rgba(0,0,0,.05);
+}
+
+.section-title{
+  font-size:16px;
+  font-weight:800;
+  margin:0 0 14px;
+  color:var(--sar-green);
+  border-left:5px solid var(--sar-green);
+  padding-left:10px;
+}
+
+.grid-3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+
+.grid-4{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+}
+
+.obs-alerta{
+  border:2px solid #ff0000 !important;
+  color:#b42318;
+  font-weight:700;
+}
+
+.field label{
+  display:block;
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:6px;
+}
+
+input, select{
+  width:100%;
+  height:40px;
+  border:1px solid #222;
+  border-radius:4px;
+  padding:8px 10px;
+  font-size:17px;
+  background:#fff;
+  text-align:center;
+}
+
+.dados-iniciais input,
+.dados-iniciais select{
+  text-align:left;
+}
+
+
+
+input[readonly]{
+  background:#f8faf9;
+}
+
+.result{
+  background:var(--sar-result)!important;
+  font-weight:800;
+}
+
+.warn{
+  background:var(--sar-yellow)!important;
+}
+
+.actions{
+  grid-column:1 / -1;
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-top:8px;
+  margin-bottom:10px;
+  padding-top:0;
+}
+
+.actions button{
+  min-width:110px;
+  height:44px;
+  padding:8px 18px;
+}
+
+
+button{
+  border:0;
+  border-radius:8px;
+  padding:11px 24px;
+  font-weight:800;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.btn-clean{
+  background:#e9eeee;
+  color:#344054;
+}
+
+.btn-insert{
+  background:var(--sar-green);
+  color:#fff;
+}
+
+.btn-calc{
+  background:#173f3b;
+  color:#fff;
+}
+
+.table-wrap{
+  overflow:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:12px;
+  font-size:13px;
+  background:#fff;
+}
+
+th{
+  background:#2f5f5b;
+  color:#fff;
+  padding:9px;
+  border:1px solid #244b47;
+  white-space:nowrap;
+}
+
+td{
+  border:1px solid var(--sar-border);
+  padding:8px;
+  text-align:center;
+  white-space:nowrap;
+}
+
+tr:nth-child(even){
+  background:#f7fbfa;
+}
+
+.badge{
+  padding:4px 8px;
+  border-radius:999px;
+  font-weight:800;
+  font-size:12px;
+}
+
+.ok{background:#d1fadf;color:#05603a}
+.att{background:#fef0c7;color:#93370d}
+.rev{background:#fee4e2;color:#b42318}
+
+.memoria{
+  width:100%;
+  min-height:180px;
+  border:1px solid var(--sar-border);
+  border-radius:8px;
+  padding:12px;
+  font-family:Consolas, monospace;
+  resize:vertical;
+}
+
+@media(max-width:900px){
+  .grid-3,.grid-4{grid-template-columns:1fr}
+}
+
+.btn-table{
+  width:32px;
+  height:28px;
+  padding:0;
+  font-size:14px;
+  border-radius:6px;
+  margin:2px;
+}
+
+.hidraulica-title{
+  font-weight:800;
+  color:#2f5f5b;
+  margin:10px 0;
+}
+
+.hidraulica-subtitle{
+  font-size:13px;
+  color:#667085;
+  margin-bottom:10px;
+}
+
+.hidraulica-edit{
+  width:70px;
+  height:28px;
+  padding:3px;
+  font-size:13px;
+  background:#fff9c4;
+}
+
+.field-full{
+  grid-column:1 / -1;
+  margin-bottom:0;
+}
+
+
+.obrigatorio{
+  background:#eaf3ff !important;
+}
+
+.check{
+  background:#dff3d5 !important;
+  font-weight:800;
+  color:#14532d;
+}
+
+.legenda-campos{
+  font-size:12px;
+  color:#667085;
+  align-self:end;
+}
+
+.legenda-linha{
+  height:40px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  border:1px solid transparent;
+}
+
+.legenda-tag{
+  padding:3px 8px;
+  border-radius:5px;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+
+.legenda-campos span{
+  display:inline-block;
+  min-width:58px;
+  padding:2px 6px;
+  border-radius:4px;
+  margin-right:5px;
+}
+
+.card-header-line{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.card-header-line .section-title{
+  margin:0;
+}
+
+.btn-export{
+  background:#e9eeee;
+  color:#344054;
+  padding:8px 12px;
+  font-size:13px;
+  border-radius:8px;
+}
+
+
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+</head>
+
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <h1>Dimensionamento de Sistema de Dilúvio para Transportadores Enclausurados</h1>
+    <p>SAR Engenharia · Projeto Técnico · Sistemas Hidráulicos · Proteção por Dilúvio</p>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Dados</h2>
+
+    <div class="grid-3 dados-iniciais"> 
+      <div class="field">
+        <label>Referência</label>
+        <input id="referencia" class="obrigatorio"  type="text">
+      </div>
+
+      <div class="field">
+        <label>Local protegido</label>
+<input id="localProtegido" class="obrigatorio"  type="text" placeholder="Ex.: Túnel / Aéreo / Transportador">         
+      </div>
+
+      <div class="field">
+        <label>Identificação Trecho/Chave</label>
+        <input id="chave" class="obrigatorio"  type="text" placeholder="Ex.: TC-01 / CH-01">
+      </div>
+    </div>
+      <h2 class="section-title" style="margin-top:18px;">Rede de Dilúvio</h2>
+
+    <div class="grid-4">
+
+
+      <div class="field">
+        <label>Comprimento da área protegida (m)</label>
+        <input id="comprimento" class="obrigatorio"  type="number" step="0.01" oninput="calcular()">
+      </div>
+
+      <div class="field">
+        <label>Largura da área protegida (m)</label>
+        <input id="largura" class="obrigatorio"  type="number" step="0.01" oninput="calcular()">
+      </div>
+
+      <div class="field">
+        <label>Altura entre a área e o defletor (m)</label>
+        <input id="altura" class="obrigatorio"  type="number" step="0.01" oninput="calcular()">
+      </div>
+
+      <div class="field">
+        <label>Densidade (L/min/m²)</label>
+        <input id="densidade" class="warn" type="number" step="0.01" value="12" oninput="calcular()">
+
+      </div>
+
+      <div class="field">
+        <label>Área protegida (m²)</label>
+        <input id="area" class="result" readonly>
+      </div>
+
+      <div class="field">
+        <label>Vazão total mínima (L/min)</label>
+        <input id="vazaoTotal" class="result" readonly>
+      </div>
+
+      <div class="field">
+        <label>Modelo do Bico</label>
+        <select id="modeloBico" class="warn" onchange="selecaoManual=true; calcular()">
+</select> 
+
+      </div>
+
+      <div class="field">
+        <label>Tipo</label>
+        <input id="tipoBico" readonly value="Média Velocidade">
+      </div>
+
+      <div class="field">
+        <label>Ângulo abertura defletor (°)</label>
+        <select id="angulo" class="warn" onchange="selecaoManual=true; calcular()">
+</select> 
+      </div>
+
+      <div class="field">
+        <label>Fator K de descarga</label>
+        <input id="fatorK" readonly>
+      </div>
+
+      <div class="field">
+        <label>Diâmetro da descarga (mm)</label>
+        <input id="diametroDescarga" readonly>
+      </div>
+
+            <div class="field">
+        <label>Distância planejada entre bicos (m)</label>
+        <input id="distPlanejada" readonly>
+      </div>
+
+      <div class="field">
+        <label>Nº de bicos planejado</label>
+        <input id="bicosPlanejado" readonly>
+      </div>
+
+      <div class="field">
+        <label>Nº de bicos projetado</label>
+        <input id="bicosProjetado" class="warn" type="number" step="1" oninput="calcular()">
+      </div>
+
+      <div class="field">
+        <label>Distância entre bicos real (m)</label>
+        <input id="distReal" readonly>
+      </div>
+
+      <div class="field">
+        <label>Vazão min planejada por bico (L/min)</label>
+        <input id="vazaoPlanejadaBico" readonly>
+      </div>
+
+      <div class="field">
+        <label>Pressão calculada no bico (mca)</label>
+        <input id="pressaoPlanejada" readonly>
+      </div>
+
+      <div class="field">
+        <label>Pressão ajustada no bico (mca)</label>
+        <input id="pressaoAjustada" class="check" readonly>
+      </div>
+
+      <div class="field">
+        <label>Vazão min real por bico (L/min)</label>
+        <input id="vazaoRealBico" readonly>
+      </div>
+
+      <div class="field">
+  <label>Vazão projetada total (L/min)</label>
+  <input id="vazaoProjetadaTotal" class="result" readonly>
+</div>
+
+<div class="field">
+  <label>Tempo de operação (min)</label>
+  <input id="tempo" class="warn" type="number" value="60" oninput="calcular()">
+</div>
+
+      <div class="field">
+        <label>Volume mínimo reservatório (m³)</label>
+        <input id="volumeReservatorio" class="result" readonly>
+      </div>
+
+<div class="field">
+  <label>Ponto de Referência na Rede Principal</label>
+  <input id="pontoReferencia" class="obrigatorio" type="text" placeholder="Ponto de ligação na rede">
+</div>
+
+<div class="field">
+  <label>Material da Tubulação</label>
+
+  <select id="materialTubulacao" class="obrigatorio">
+    <option value="">Selecione...</option>
+
+    <option>Aço Carbono Sch 10</option>
+    <option>Aço Carbono Sch 30</option>
+    <option>Aço Carbono Sch 40</option>
+    <option>Aço Carbono Sch 80</option>
+
+    <option>Galvanizado Leve</option>
+    <option>Galvanizado Médio</option>
+    <option>Galvanizado Pesado</option>
+  </select>
+</div>
+
+
+<div class="field legenda-campos">
+  <label>Legenda</label>
+  <div class="legenda-linha">
+    <span class="legenda-tag" style="background:#eaf3ff;">Obrigatório</span>
+    <span class="legenda-tag" style="background:#dff3d5;">Checagem</span>
+    <span class="legenda-tag" style="background:#fff9c4;">Editável</span>
+  </div>
+</div>
+
+
+      <div class="field field-full">
+  <label>Nota Técnica</label>
+  <input id="observacao" class="obs-alerta" readonly>
+</div>
+
+    <div class="actions">
+      <button class="btn-clean" onclick="limpar()">Limpar</button>
+<button class="btn-insert" onclick="inserirLinha()">Inserir</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header-line">
+  <h2 class="section-title">Tabela Resumo</h2>
+
+  <div>
+    <button class="btn-export" onclick="exportarTabelaResumoCSV()">📊 Excel</button>
+    <button class="btn-export" onclick="exportarTabelaResumoDXF()">📐 DXF</button>
+  </div>
+</div>
+
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+  <tr>
+    <th>Referência</th>
+    <th>Local</th>
+    <th>Trecho/<br>Chave</th>
+<th>Ponto<br>Ref.</th>
+    <th>Compr.<br>(m)</th>
+    <th>Larg.<br>(m)</th>
+    <th>Altura<br>(m)</th>
+    <th>Dens.<br>(L/min/m²)</th>
+    <th>Área<br>(m²)</th>
+    <th>Vazão<br>(L/min)</th>
+    <th>Bico</th>
+    <th>Ângulo<br>(°)</th>
+    <th>K</th>
+    <th>Bicos</th>
+    <th>Distância<br>(m)</th>
+    <th>Pressão<br>(mca)</th>
+    <th>Reserv.<br>(m³)</th>
+    <th>Ação</th>
+  </tr>
+</thead>
+
+        <tbody id="tabela"></tbody>
+      </table>
+    </div>
+  </div>
+
+<div class="card" id="cardCalculoHidraulico">
+  <h2 class="section-title">Cálculo Hidráulico das Chaves</h2>
+
+  <div id="calculoHidraulicoConteudo">
+
+<div style="margin:12px 0;">
+  <label><b>Adicionar trechos após o manômetro:</b></label>
+
+  <input
+    id="trechosAdicionais"
+    type="number"
+    min="0"
+    max="5"
+    value="0"
+    style="width:70px;text-align:center;margin-left:8px;"
+  >
+</div>
+
+
+
+    <p style="color:#667085;font-size:14px;">
+      Clique no botão 📈 da Tabela Resumo para gerar o cálculo hidráulico da chave.
+    </p>
+  </div>
+</div>
+
+
+
+
+
+  <div class="card">
+    <h2 class="section-title">Memória Base</h2>
+    <textarea id="memoria" class="memoria" readonly></textarea>
+  </div>
+
+</div>
+
+<script>
+const bicos = [];
+
+let linhas = [];
+let selecaoManual = false; 
+
+function n(id){
+  const v = parseFloat(document.getElementById(id).value);
+  return isNaN(v) ? 0 : v;
+}
+
+function fmt(v, c=2){
+  return Number(v || 0).toLocaleString("pt-BR", {
+    minimumFractionDigits:c,
+    maximumFractionDigits:c
+  });
+}
+
+function escolherBico(vazaoTotal, comprimento, largura, altura){
+  let melhor = null;
+
+  const listaBicos = window.BICOS_SUPABASE || bicos;
+
+  listaBicos.forEach(b => {
+    const modelo = b.modelo || "";
+    const tipo = b.tipo || "";
+    const angulo = Number(b.angulo_graus || b.angulo || 0);
+    const k = Number(b.fator_k || b.k || 0);
+    const diametro = b.diametro_descarga_mm || b.diametro || "";
+    const pressaoMinima = Number(b.pressao_min_mca || 0);
+
+    if(!angulo || !k) return;
+
+    const aberturaCalculada =
+  altura * Math.tan((angulo / 2) * Math.PI / 180) * 2;
+
+const coberturaUtil =
+  aberturaCalculada * 0.90; // 10% de transpasse
+
+const espacamentoPlanejado =
+  Math.min(3.00, Math.max(1.2, coberturaUtil));
+
+    const qtdPlanejada = Math.max(1, Math.ceil(comprimento / espacamentoPlanejado));
+    const vazaoPorBico = vazaoTotal / qtdPlanejada;
+    const pressao = Math.pow(vazaoPorBico / k, 2) * 10.197;
+
+    const distanciaIdeal10 = Math.abs(10 - pressao);
+    const penalidadePoucoBico = qtdPlanejada < 2 ? 20 : 0;
+    const penalidadePressaoAlta = pressao > 15 ? 50 : pressao > 12 ? 15 : 0;
+    const penalidadePressaoBaixa = pressao < pressaoMinima ? 30 : 0;
+
+    const score =
+      distanciaIdeal10 +
+      penalidadePoucoBico +
+      penalidadePressaoAlta +
+      penalidadePressaoBaixa;
+
+    const item = {
+      modelo,
+      tipo,
+      angulo,
+      k,
+      diametro,
+      entrada: "",
+      pressaoMinima,
+      espacamentoPlanejado,
+      qtdPlanejada,
+      vazaoPorBico,
+      pressao,
+      score
+    };
+
+    if(!melhor || item.score < melhor.score){
+      melhor = item;
+    }
+  });
+
+  return melhor;
+}
+
+
+function classificarPressao(p){
+  if(p <= 10) return "Recomendado";
+  if(p <= 12) return "Aceitável";
+  if(p <= 15) return "Revisar";
+  return "Não recomendado";
+}
+
+
+function preencherDropsBico(escolhido){
+  const listaBicos = window.BICOS_SUPABASE || bicos;
+
+  const selectModelo = document.getElementById("modeloBico");
+  const selectAngulo = document.getElementById("angulo");
+
+  const modeloAntes = selectModelo.value;
+  const anguloAntes = selectAngulo.value;
+
+  selectModelo.innerHTML = "";
+
+  const modelos = [...new Set(listaBicos.map(b => b.modelo))];
+
+  modelos.forEach(modelo => {
+    selectModelo.innerHTML += `<option value="${modelo}">${modelo}</option>`;
+  });
+
+  selectModelo.value = selecaoManual && modeloAntes ? modeloAntes : escolhido.modelo;
+
+  selectAngulo.innerHTML = "";
+
+  listaBicos
+    .filter(b => b.modelo === selectModelo.value)
+    .forEach(b => {
+      selectAngulo.innerHTML += `
+        <option value="${b.angulo_graus}">${b.angulo_graus}</option>
+      `;
+    });
+
+  selectAngulo.value = selecaoManual && anguloAntes ? anguloAntes : escolhido.angulo;
+
+  document.getElementById("tipoBico").value = escolhido.tipo || "Média Velocidade";
+}
+
+
+function calcular(){
+
+  const comprimento = n("comprimento");
+  const largura = n("largura");
+  const altura = n("altura");
+  const densidade = n("densidade");
+  const tempo = n("tempo");
+
+  const area = comprimento * largura;
+  const vazaoTotal = area * densidade;
+
+  if(vazaoTotal <= 0 || comprimento <= 0 || largura <= 0 || altura <= 0){
+    document.getElementById("area").value = "";
+    document.getElementById("vazaoTotal").value = "";
+    return;
+  }
+
+  let escolhido = escolherBico(vazaoTotal, comprimento, largura, altura);
+
+  if(!escolhido){
+    return;
+  }
+
+  preencherDropsBico(escolhido);
+
+  if(selecaoManual){
+    const listaBicos = window.BICOS_SUPABASE || bicos;
+
+    const modeloManual = document.getElementById("modeloBico").value;
+    const anguloManual = Number(document.getElementById("angulo").value);
+
+    const bicoManual = listaBicos.find(b =>
+      b.modelo === modeloManual &&
+      Number(b.angulo_graus || b.angulo) === anguloManual
+    );
+
+    if(bicoManual){
+      const angulo = Number(bicoManual.angulo_graus || bicoManual.angulo);
+      const k = Number(bicoManual.fator_k || bicoManual.k);
+      const diametro = bicoManual.diametro_descarga_mm || bicoManual.diametro || "";
+      const tipo = bicoManual.tipo || "Média Velocidade";
+
+      const aberturaCalculada =
+  altura * Math.tan((angulo / 2) * Math.PI / 180) * 2;
+
+const coberturaUtil =
+  aberturaCalculada * 0.90; // 10% de transpasse
+
+const espacamentoPlanejado =
+  Math.min(3.00, Math.max(1.2, coberturaUtil));
+
+
+      const qtdPlanejada =
+        Math.max(1, Math.ceil(comprimento / espacamentoPlanejado));
+
+      const vazaoPorBico =
+        vazaoTotal / qtdPlanejada;
+
+      const pressao =
+        Math.pow(vazaoPorBico / k, 2)* 10.197;
+
+      escolhido = {
+        modelo: bicoManual.modelo,
+        tipo,
+        angulo,
+        k,
+        diametro,
+        entrada: "",
+        espacamentoPlanejado,
+        qtdPlanejada,
+        vazaoPorBico,
+        pressao
+      };
+    }
+  }
+
+  let bicosProjetado = parseInt(document.getElementById("bicosProjetado").value);
+
+  if(!bicosProjetado || bicosProjetado < escolhido.qtdPlanejada){
+    bicosProjetado = escolhido.qtdPlanejada;
+    document.getElementById("bicosProjetado").value = bicosProjetado;
+  }
+
+  const distReal =
+    bicosProjetado > 0 ? comprimento / bicosProjetado : 0;
+
+  const vazaoRealBico =
+    bicosProjetado > 0 ? vazaoTotal / bicosProjetado : 0;
+
+  const pressaoCalculada =
+  Math.pow(vazaoRealBico / escolhido.k, 2)*10.197;
+
+const pressaoAjustada =
+  Math.max(10, pressaoCalculada);
+
+const pressaoParaVazao =
+  pressaoCalculada < 10 ? 10 : pressaoCalculada;
+
+const vazaoRealAjustada =
+  escolhido.k * Math.sqrt(pressaoParaVazao / 10.197);
+
+
+
+const volumeM3 =
+  (vazaoRealAjustada * bicosProjetado * tempo) / 1000;
+
+
+  const status =
+    classificarPressao(pressaoAjustada);
+
+  window.STATUS_CALCULO = status;
+
+  document.getElementById("area").value = fmt(area);
+  document.getElementById("vazaoTotal").value = fmt(vazaoTotal);
+  document.getElementById("tipoBico").value = escolhido.tipo || "Média Velocidade";
+  document.getElementById("fatorK").value = escolhido.k;
+  document.getElementById("diametroDescarga").value = escolhido.diametro;
+  document.getElementById("distPlanejada").value = fmt(escolhido.espacamentoPlanejado);
+  document.getElementById("bicosPlanejado").value = escolhido.qtdPlanejada;
+  document.getElementById("distReal").value = fmt(distReal);
+  document.getElementById("vazaoPlanejadaBico").value = fmt(escolhido.vazaoPorBico);
+  document.getElementById("pressaoPlanejada").value = fmt(pressaoCalculada);
+  document.getElementById("pressaoAjustada").value = fmt(pressaoAjustada);
+
+
+document.getElementById("vazaoRealBico").value = fmt(vazaoRealAjustada);
+
+document.getElementById("vazaoProjetadaTotal").value =
+  fmt(vazaoRealAjustada * bicosProjetado);
+
+
+  document.getElementById("volumeReservatorio").value = fmt(volumeM3);
+
+document.getElementById("observacao").value =
+  pressaoCalculada < 10
+    ? "Pressão calculada abaixo de 10 mca. Adotada pressão mínima de 10 mca para operação."
+    : pressaoCalculada > 15
+      ? "Pressão inicial no bico elevada, reavaliar o modelo."
+      : status === "Recomendado" ? "Pressão próxima do ideal." :
+        status === "Aceitável" ? "Pressão aceitável, verificar margem." :
+        status === "Revisar" ? "Pressão elevada, avaliar mais bicos." :
+        "Rever seleção e quantidade de bicos.";
+
+
+
+  atualizarMemoria();
+}
+
+
+function dadosAtuais(){
+  calcular();
+
+  return {
+    referencia: document.getElementById("referencia").value,
+    local: document.getElementById("localProtegido").value,
+    chave: document.getElementById("chave").value,
+pontoReferencia: document.getElementById("pontoReferencia").value.trim(),
+materialTubulacao:
+  document.getElementById("materialTubulacao").value,
+
+    comprimento: n("comprimento"),
+    largura: n("largura"),
+    altura: n("altura"),
+    densidade: n("densidade"),
+    area: document.getElementById("area").value,
+    vazao: document.getElementById("vazaoProjetadaTotal").value,
+    modelo: document.getElementById("modeloBico").value,
+    angulo: document.getElementById("angulo").value,
+    k: document.getElementById("fatorK").value,
+    bicos: document.getElementById("bicosProjetado").value,
+    espacamento: document.getElementById("distReal").value,
+    pressao: document.getElementById("pressaoAjustada").value,
+    reservatorio: document.getElementById("volumeReservatorio").value,
+    status: window.STATUS_CALCULO || "" 
+  };
+}
+
+
+function inserirLinha(){
+  const d = dadosAtuais();
+
+  const pontoReferencia =
+  document.getElementById("pontoReferencia").value.trim();
+
+const materialTubulacao =
+  document.getElementById("materialTubulacao").value;
+
+
+if(
+  !d.referencia ||
+  !d.chave ||
+  !pontoReferencia ||
+  !materialTubulacao ||
+  d.comprimento <= 0 ||
+  d.largura <= 0
+)
+{
+  alert(
+    "Informe Referência, Trecho/Chave, Ponto de Referência, Material da Tubulação, Comprimento e Largura."
+  );
+  return;
+}
+
+
+  linhas.push(d);
+  desenharTabela();
+  atualizarMemoria();
+
+  const referenciaAtual = document.getElementById("referencia").value;
+  const localAtual = document.getElementById("localProtegido").value;
+
+  limpar();
+
+  document.getElementById("referencia").value = referenciaAtual;
+  document.getElementById("localProtegido").value = localAtual;
+}
+
+
+function desenharTabela(){
+  const tbody = document.getElementById("tabela");
+  tbody.innerHTML = "";
+
+  linhas.forEach((l,i) => {
+    const classe = l.status === "Recomendado" ? "ok" : l.status === "Aceitável" ? "att" : "rev";
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${l.referencia}</td>
+        <td>${l.local}</td>
+        <td>${l.chave}</td>
+<td>${l.pontoReferencia}</td>
+        <td>${fmt(l.comprimento)}</td>
+        <td>${fmt(l.largura)}</td>
+        <td>${fmt(l.altura)}</td>
+        <td>${fmt(l.densidade)}</td>
+        <td>${l.area}</td>
+        <td>${l.vazao}</td>
+        <td>${l.modelo}</td>
+        <td>${l.angulo}°</td>
+        <td>${l.k}</td>
+        <td>${l.bicos}</td>
+        <td>${l.espacamento}</td>
+        <td>${l.pressao}</td>
+        <td>${l.reservatorio}</td>
+        
+        <td>
+  <button class="btn-clean btn-table" title="Editar chave" onclick="editarLinha(${i})">✏️</button>
+  <button class="btn-clean btn-table" title="Remover chave" onclick="removerLinha(${i})">🗑️</button>
+  <button class="btn-clean btn-table" title="Cálculo hidráulico" onclick="calculoHidraulicoChave(${i})">📈</button>
+</td>
+
+      </tr>
+    `;
+  });
+}
+
+function exportarTabelaResumoCSV(){
+  if(linhas.length === 0){
+    alert("Não há dados na Tabela Resumo para exportar.");
+    return;
+  }
+
+  const cabecalho = [
+    "Referência",
+    "Local",
+    "Trecho/Chave",
+    "Comprimento (m)",
+    "Largura (m)",
+    "Altura (m)",
+    "Densidade (L/min/m²)",
+    "Área (m²)",
+    "Vazão projetada (L/min)",
+    "Bico",
+    "Ângulo (°)",
+    "Fator K",
+    "Bicos",
+    "Distância (m)",
+    "Pressão (mca)",
+    "Reservatório (m³)"
+  ];
+
+  const linhasCSV = linhas.map(l => [
+    l.referencia,
+    l.local,
+    l.chave,
+    fmt(l.comprimento),
+    fmt(l.largura),
+    fmt(l.altura),
+    fmt(l.densidade),
+    l.area,
+    l.vazao,
+    l.modelo,
+    l.angulo,
+    l.k,
+    l.bicos,
+    l.espacamento,
+    l.pressao,
+    l.reservatorio
+  ]);
+
+  const csv = [
+    cabecalho.join(";"),
+    ...linhasCSV.map(linha =>
+      linha.map(campo => `"${String(campo).replace(/"/g, '""')}"`).join(";")
+    )
+  ].join("\n");
+
+  const blob = new Blob(["\uFEFF" + csv], {
+    type: "text/csv;charset=utf-8;"
+  });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = "tabela_resumo_diluvio.csv";
+  document.body.appendChild(a);
+  a.click();
+
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+
+function exportarTabelaResumoDXF(){
+
+  if(linhas.length === 0){
+    alert("Não há dados para exportar.");
+    return;
+  }
+
+  let dxf = '';
+
+  dxf += '0\nSECTION\n2\nHEADER\n0\nENDSEC\n';
+  dxf += '0\nSECTION\n2\nTABLES\n0\nENDSEC\n';
+  dxf += '0\nSECTION\n2\nENTITIES\n';
+
+  let x = 0;
+  let y = 0;
+
+  function texto(txt, px, py, h=2.5){
+    dxf += '0\nTEXT\n';
+    dxf += '8\n0\n';
+    dxf += `10\n${px}\n`;
+    dxf += `20\n${py}\n`;
+    dxf += '30\n0\n';
+    dxf += `40\n${h}\n`;
+    dxf += `1\n${txt}\n`;
+  }
+
+  texto('SAR ENGENHARIA',0,0,4);
+  texto('TABELA RESUMO - REDE DE DILUVIO',0,-6,3);
+
+  y = -15;
+
+  const colunas = [
+    'Ref',
+    'Local',
+    'Chave',
+    'Comp',
+    'Larg',
+    'Alt',
+    'Area',
+    'Vazao',
+    'Bico',
+    'Ang',
+    'K',
+    'Bicos',
+    'Dist',
+    'Press',
+    'RTI'
+  ];
+
+  const larguras = [35, 70, 35, 22, 22, 22, 25, 28, 30, 22, 22, 25, 25, 28, 28];
+
+let px = 0;
+
+colunas.forEach((c, idx)=>{
+  texto(c, px, y);
+  px += larguras[idx];
+});
+
+  y -= 6;
+
+  linhas.forEach(l=>{
+
+    let px = 0;
+
+    const dados = [
+      l.referencia,
+      l.local,
+      l.chave,
+      l.comprimento,
+      l.largura,
+      l.altura,
+      l.area,
+      l.vazao,
+      l.modelo,
+      l.angulo,
+      l.k,
+      l.bicos,
+      l.espacamento,
+      l.pressao,
+      l.reservatorio
+    ];
+
+    dados.forEach((v, idx)=>{
+  let valor = String(v);
+
+  if(idx === 1 && valor.length > 28){
+    valor = valor.substring(0,28);
+  }
+
+  texto(valor, px, y);
+  px += larguras[idx];
+});
+
+
+    y -= 6;
+  });
+
+  dxf += '0\nENDSEC\n';
+  dxf += '0\nEOF\n';
+
+  const blob = new Blob(
+    [dxf],
+    {type:'application/dxf'}
+  );
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+
+  a.href = url;
+  a.download = 'tabela_resumo_diluvio.dxf';
+
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  URL.revokeObjectURL(url);
+}
+
+
+
+function removerLinha(i){
+  linhas.splice(i,1);
+  desenharTabela();
+  atualizarMemoria();
+}
+
+function editarLinha(i){
+  const l = linhas[i];
+
+  selecaoManual = true;
+
+  document.getElementById("referencia").value = l.referencia;
+  document.getElementById("localProtegido").value = l.local;
+  document.getElementById("chave").value = l.chave;
+document.getElementById("pontoReferencia").value =
+  l.pontoReferencia || "";
+
+document.getElementById("materialTubulacao").value =
+  l.materialTubulacao || "";
+
+  document.getElementById("comprimento").value = l.comprimento;
+  document.getElementById("largura").value = l.largura;
+  document.getElementById("altura").value = l.altura;
+  document.getElementById("densidade").value = l.densidade;
+
+  document.getElementById("bicosProjetado").value = l.bicos;
+
+  calcular();
+
+  setTimeout(() => {
+    document.getElementById("modeloBico").value = l.modelo;
+    document.getElementById("angulo").value = String(l.angulo).replace("°", "");
+    calcular();
+  }, 50);
+
+  linhas.splice(i, 1);
+  desenharTabela();
+  atualizarMemoria();
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
 
 function buscarTubo(material, dn){
 
   if(!window.TUBOS_SUPABASE) return null;
 
-  return window.TUBOS_SUPABASE.find(t => {
+  const resultado = window.TUBOS_SUPABASE.find(t => {
 
     return (
       String(t.modo_exibicao || "").trim() === String(material).trim()
@@ -285,562 +1226,510 @@ function buscarTubo(material, dn){
     );
 
   }) || null;
+
+  return resultado;
 }
 
 
 
-VEJA COM UMA SETA O NOME EXIBIÇÃO NO SUPABASE
+function calcularVelocidade(vazaoLpm, diMm){
+const qM3s = vazaoLpm / 1000 / 60;
+const diametroM = diMm / 1000; 
+  const areaM2 = Math.PI * Math.pow(diametroM, 2) / 4;
 
+  if(areaM2 <= 0) return 0;
 
+  return qM3s / areaM2;
+}
 
-Texto colado.txt
-Documento
-VEJA MEU CÓDIGO EU NÃO ESSA FUNÇÃO function materialParaModo(material){
+function calcularPerdaMetro(vazaoLpm, diMm, c=120){
+const qM3s = vazaoLpm / 1000 / 60;
+const dM = diMm / 1000; 
 
-ESPERO PQ DESANIMOU
+  if(qM3s <= 0 || dM <= 0 || c <= 0) return 0;
 
+  return 10.67 * Math.pow(qM3s, 1.852) /
+    (Math.pow(c, 1.852) * Math.pow(dM, 4.87));
+}
 
-Texto colado.txt
-Documento
-ME MOSTRE ONDE ESTA ESSE CONSOLE.LOG(TUBO) 
 
-VEJA TUBO ENCONTRADO NULLL
+function recalcularComprimentoTotal(input){
+  const linha = input.closest("tr");
 
-4ac4eb2f-2e9b-4f6f-9da6-4355af18a6f5.png
-ea751726-d517-4428-8ad3-9828a6fbf116.png
-PRIMEIRO 
-SEGUNDO 
+  const compRealInput = linha.querySelector(".comp-real");
+  const compEqInput = linha.querySelector(".comp-eq");
+  const compTotalCell = linha.querySelector(".comp-total");
 
+  const compReal = parseFloat(String(compRealInput.value || compRealInput.textContent).replace(",", ".")) || 0;
+  const compEq = parseFloat(String(compEqInput.value || compEqInput.textContent).replace(",", ".")) || 0;
 
-O QUE É TUBOS_SUPABASE? ESE NOME VC QUE DEU SOMETNE NO CÓDIGO?
+  compTotalCell.textContent = fmt(compReal + compEq);
+}
 
-6a0d18f7-f65d-4a39-ab63-9fb919ff0260.png
-597c1766-62d5-4c29-8a33-60177661e7dd.png
-FIZ UM TESTE AQUI E ACHEI O PROBLEMA
+function valorNum(v){
+  return parseFloat(String(v || "0").replace(",", ".")) || 0;
+}
 
-NO SUPABSE NO SCH 10 DN 40 FIZ ESSA ALTERAÇÃO NO MODO_EXIBICAO
-E VOLTOU ISSO 
+function alterarDN(input){
+  const tabela = input.closest("table");
+  const linhasTabela = [...tabela.querySelectorAll("tbody tr")];
+const material =
+  tabela.dataset.material;
+  const linhaAtual = input.closest("tr");
+  const idx = linhasTabela.indexOf(linhaAtual);
+  const novoDN = input.value;
 
+  for(let i = idx; i < linhasTabela.length; i++){
+    const dnInput = linhasTabela[i].querySelector(".dn-edit");
+    if(dnInput) dnInput.value = novoDN;
+  }
 
-Texto colado.txt
-Documento
-ok pode montar essa função e e vou devolver o nome original no supabase
-esse é o código final, já me apssa tudo de linha teste que tenho que apagar também de forma rápida
+  recalcularTabelaHidraulica(tabela);
+}
 
-meu código 
-mas o correto não é corigor o bocno? podemos fazer essa correção rápida no google sheets e depois apagar esse banco e gerar outro, rapidinho e não fica gambiarra no código
+function recalcularTabelaHidraulica(tabela){
+  const k = valorNum(tabela.dataset.k);
+  let pressaoAtual = valorNum(tabela.dataset.pressaoInicial);
+  let vazaoAcumulada = 0;
 
+  const linhasTabela = [...tabela.querySelectorAll("tbody tr")];
 
-Texto colado.txt
-Documento
-alguma deu pau no código, veja ai
+const material = tabela.dataset.material; 
 
-ja alertei e exportei o supa
+  linhasTabela.forEach((tr, idx) => {
+    const temBico = tr.dataset.temBico === "sim";
 
-É SIMPLES A GENTE TIRAR ESSE DESTAQUE DO DIAMETRO INTERNO?
+    const dn = valorNum(tr.querySelector(".dn-edit")?.value);
+    const compReal = valorNum(tr.querySelector(".comp-real-edit")?.value || tr.querySelector(".comp-real")?.textContent);
+    const compEq = valorNum(tr.querySelector(".comp-eq")?.value);
+    const elevacao = valorNum(tr.querySelector(".elevacao-edit")?.value);
 
+    const compTotal = compReal + compEq;
 
-Texto colado.txt
-Documento
-CALMA VOU TE ENVIAR O CÓDIGO
+    let vazaoBico = 0;
 
-OK 
-AGORA VAMOS VER O QUE ME AJUDA, EM ALGUNS CASOS, PODE OCORRER A NECESSIDADE DE MAIS UM TRCHO NO FINAL, MAIS UMA LINHA , COMO PODEMOS PENSAR?
-A REGRA DAS CONTAS SERÁ A MESMA DA DE CIMA (MANOMETRO - A)
-TEM UM JEITO PRÁTICO E RÁPIDO?
+    if(temBico){
+      vazaoBico = k * Math.sqrt(pressaoAtual / 10.197);
+      vazaoAcumulada += vazaoBico;
+    }
 
+const tubo =
+  buscarTubo(material, dn);
 
-Texto colado.txt
-Documento
-TOMA O CODIGO, VOCE MANDOU ISSO <h3>Cálculo Hidráulico da Chave</h3> NAO TEM 
 
+const di =
+  tubo
+    ? Number(tubo.diametro_interno_mm)
+    : 0;
 
-SO ACHO QUE ELE TEM QUE FICAR AQUI NA LINHA AZUL  E DIMINUIR UM POUCO ESAT MUGANDE, E INVERTE O TEXTO, COLOCA ADICIONAR TRECHOS APÓS O MANÔETRO
+const fatorC =
+  tubo
+    ? Number(tubo.fator_c)
+    : 120;
 
+tr.querySelector(".di-mm").textContent =
+  fmt(di);
 
-Texto colado.txt
-Documento
-TUDO LEIA TA MUITO PREGUISOÇO
+const velocidade =
+  calcularVelocidade(vazaoAcumulada, di);
 
+const perdaMetro =
+  calcularPerdaMetro(
+    vazaoAcumulada,
+    di,
+    fatorC
+  );
 
-Texto colado.txt
-Documento
-veja o codigo pq parou de funcionar
 
-agora bem aqui onde eu coloquei essa linha vermelha, deve ter uma frase assim 
 
-Pressão de trabalho no manômetro: 34,57 m.c.a. = 3,45 kgf/cm²
+    const perdaTotal = perdaMetro * compTotal;
+    const pressaoReq = pressaoAtual + perdaTotal + elevacao;
 
-essa pressão é a final da linha do manometro no final marquei em azul no print
+    tr.querySelector(".pressao").textContent = fmt(pressaoAtual);
+    tr.querySelector(".vazao-bico").textContent = temBico ? fmt(vazaoBico) : "-";
+    tr.querySelector(".vazao-acum").textContent = fmt(vazaoAcumulada);
+    tr.querySelector(".comp-total").textContent = fmt(compTotal);
+    tr.querySelector(".perda-metro").textContent = fmt(perdaMetro,4);
+    tr.querySelector(".perda-total").textContent = fmt(perdaTotal,4);
+    tr.querySelector(".pressao-req").textContent = fmt(pressaoReq);
+    tr.querySelector(".velocidade").textContent = fmt(velocidade);
 
+    pressaoAtual = pressaoReq;
+  
+  });
 
-Texto colado.txt
-Documento
- analisa o codigo parou de geerar a tabela
+  const infoPressao =
+    tabela.parentElement.querySelector(".info-pressao-manometro");
 
-e6f3646b-7cb1-4dbc-86d1-0380de8c9932.png
-5df73388-948c-484a-9fd5-822e1ca595ab.png
-muito BOM, PARA FECHAR HOJE E EU USAR O SISTEMA AMANHÃ
-EU PRECISO DE UM BOTÃO DE GERAR PDF AQUI 
+  if(infoPressao){
 
-E RETPETIR TODOS ESSES BOTÕES PARA AS TABELAS QUE FOREM INSERIDASOS BOTÕES AUQI TAMBÉ NA ESQUERDA E LOGO ACIMA DE ChaVE 01
-COLOCAR
-Dimensionamento Hidráulico do Chuveiro Automático Tipo Dilúvio
+    infoPressao.textContent =
+      `Pressão de trabalho no manômetro: ${fmt(pressaoAtual)} m.c.a. = ${fmt(pressaoAtual/10)} kgf/cm²`;
 
-assim o 3 
+  }
 
+}
 
-Texto colado.txt
-Documento
-segue o código completo, leia tudo e ja veja se esta tudo no eixo 
 
-0d91e106-c919-4aa1-8ad0-ba1076c55f63.png
-1a8f3f38-3151-424d-87ef-f7352371220c.png
-o pdf tem que vir junto pra cá 
-deixa a fonte do dimensionmento hidra.... igua  ao calculo hidra 
+function dnMinimoPorBicosAcumulados(qtd){
+  if(qtd <= 5) return 40;
+  if(qtd <= 10) return 50;
+  if(qtd <= 20) return 65;
+  if(qtd <= 40) return 80;
+  if(qtd <= 65) return 90;
+  if(qtd <= 100) return 100;
+  if(qtd <= 160) return 125;
+  if(qtd <= 275) return 150;
+  return 200;
+}
 
-ainda não to fostando muito desse formato de novas linhas  
-seria muito dificil colcoar um botão de mais la embaixo onde eu fiz?
-para clicar e adicionar a linha ? individualmente uma a auma?
+function criarLinhaFinal(referencia,dn){
 
-o botão pedf do dimesniomaneot esat gerandoassim 
+  return `
+    <tr data-tem-bico="nao">
 
+      <td>${referencia}</td>
 
+      <td class="pressao">0,00</td>
 
-Texto colado.txt
-Documento
-analise o código para que voce seja mais precso 
+      <td>-</td>
 
+      <td class="vazao-bico">-</td>
 
-Texto colado.txt
-Documento
-analise ele completo novamente 
+      <td class="vazao-acum">0,00</td>
 
-deu pau pra caraba.... 
+      <td>
+        <input
+          class="hidraulica-edit dn-edit"
+          type="number"
+          value="${dn}"
+          oninput="alterarDN(this)">
+      </td>
 
-Depois abrir uma nova janela: e deixar o navegador gerar o PDF.
-muito mais confiável....
+      <td class="di-mm">0,00</td>
 
-vamos fazer assim, abre uma nova janela ou label
-com campos:
-cliente
-endereço
-referencia rpojeto
-titulo
-data
+      <td>
+        <input
+          class="hidraulica-edit comp-real-edit"
+          type="text"
+          value="0,00"
+          oninput="recalcularTabelaHidraulica(this.closest('table'))">
+      </td>
 
-ai fica top
+      <td>
+        <input
+          class="hidraulica-edit comp-eq"
+          type="text"
+          value="0,00"
+          oninput="recalcularTabelaHidraulica(this.closest('table'))">
+      </td>
 
-RELATÓRIO VAI SER SER
+      <td class="comp-total">0,00</td>
 
-DIMENSIONAMENTO HIDRÁULICO DO CHUVEIRO AUTOMÁTICO TIPO DILÚVIO
-A TABELA AQUI DESSE JEITO
+      <td class="perda-metro">0,0000</td>
 
-Emitido pelo SAR Engenharia
-Data/Hora
+      <td class="perda-total">0,0000</td>
 
+      <td>
+        <input
+          class="hidraulica-edit elevacao-edit"
+          type="text"
+          value="0,00"
+          oninput="recalcularTabelaHidraulica(this.closest('table'))">
+      </td>
 
-Texto colado.txt
-Documento
-ok, vamos codificar na verdade apagar o que não presta que criamos paragera o pdf e já montar o novo fromato
-analise todo codigo 
+      <td class="pressao-req">0,00</td>
 
-ea2766f9-4e2a-40be-b316-dccd8946301a.png
-33de2f9d-7ea7-4071-9715-74be3199d6f3.png
-veja 
+      <td class="velocidade">0,00</td>
 
-precisa comprimir as colunas par ficar na folha em pe, deve ser assim 
+    </tr>
+  `;
+}
 
-veja faltou 
-Bico: MV - 33 · K: 56.6 · Ângulo: 80° · Quantidade: 9
-Tubulação: Aço Carbono Sch 10 · Hazen-Williams C = 120
 
-e tem que tirar a caixa da impressão dos campos editaveis
 
+function calculoHidraulicoChave(i){
+  const l = linhas[i];
 
-Texto colado.txt
-Documento
-não achei a etapa 3
+  const qtd = Number(l.bicos || 0);
+  const k = valorNum(l.k);
+  const pressaoInicial = valorNum(l.pressao);
+  const espacamento = valorNum(l.espacamento);
 
-analisa no código 
+const pontoRef = l.pontoReferencia;
+  
+const trechosAdicionais =
+  Number(
+    document.getElementById("trechosAdicionais")?.value || 0
+  );
 
-Li o código inteiro. 
 
+  const calcId = `calc-chave-${i}`;
 
-E achei o problema. Na verdade, o PDF ainda nem está inserindo a tabela.
+  let linhasTabela = "";
 
-Você parou exatamente antes da última linha da função.
+  for(let n = 1; n <= qtd; n++){
+    const referenciaTrecho = n < qtd ? `B${n}-B${n+1}` : `B${n}-Manômetro`;
 
-Sua função termina assim:
+    linhasTabela += `
+      <tr data-tem-bico="sim">
+        <td>${referenciaTrecho}</td>
+        <td class="pressao">0,00</td>
+        <td>${fmt(k)}</td>
+        <td class="vazao-bico">0,00</td>
+        <td class="vazao-acum">0,00</td>
+        
+<td>
+<input class="hidraulica-edit dn-edit"
+type="number"
+value="${dnMinimoPorBicosAcumulados(n)}"
+oninput="alterarDN(this)">
+</td>
 
-const tabelaOriginal =
-document.querySelector("#calc-chave-"+indice+" table");
+<td class="di-mm">0,00</td>
 
-const tabelaClone =
-tabelaOriginal.cloneNode(true);
+<td>
+<input class="hidraulica-edit comp-real-edit"
 
-tabelaClone.querySelectorAll("input").forEach(input=>{
 
-    const span =
-        janela.document.createElement("span");
+type="text" value="${fmt(espacamento)}" oninput="recalcularTabelaHidraulica(this.closest('table'))">
+</td>
 
-    span.textContent =
-        input.value;
+        <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
+        <td class="comp-total">0,00</td>
+        <td class="perda-metro">0,0000</td>
+        <td class="perda-total">0,0000</td>
+        <td><input class="hidraulica-edit elevacao-edit" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
+        <td class="pressao-req">0,00</td>
+        <td class="velocidade">0,00</td>
+      </tr>
+    `;
+  }
 
-    span.style.display="inline-block";
-    span.style.minWidth="24px";
-    span.style.textAlign="center";
+if(trechosAdicionais === 0){
 
-    input.replaceWith(span);
+  linhasTabela += criarLinhaFinal(
+    `Manômetro-${pontoRef}`,
+    dnMinimoPorBicosAcumulados(qtd)
+  );
 
-});
-E acabou.
+}else{
 
-Está faltando colocar a tabela dentro da nova janela.
+  for(let p=1; p<=trechosAdicionais; p++){
 
-Acrescente logo depois:
+    const origem =
+      p === 1
+        ? "Manômetro"
+        : `P${p-1}`;
 
-janela.document
-    .getElementById("tabela")
-    .appendChild(tabelaClone);
-Aproveitando, já achei mais três coisas que vamos corrigir:
-1. Está faltando imprimir:
-Bico: MV-15 · K: 56,6 · Ângulo: 80° · Quantidade: 9
+    const destino =
+      p === trechosAdicionais
+        ? pontoRef
+        : `P${p}`;
+
+    linhasTabela += criarLinhaFinal(
+      `${origem}-${destino}`,
+      dnMinimoPorBicosAcumulados(qtd)
+    );
+
+  }
+
+}
+
 
-Tubulação: Aço Carbono Sch 10 · Hazen-Williams C = 120
-Isso nós colocamos logo abaixo do Material.
+const tuboCabecalho =
+  buscarTubo(
+    l.materialTubulacao,
+    dnMinimoPorBicosAcumulados(1)
+  );
 
-2. Os inputs ainda estão enormes.
-Em vez de trocar por:
+const fatorCCabecalho =
+  tuboCabecalho
+    ? tuboCabecalho.fator_c
+    : "-";
 
-span.style.display="inline-block";
-span.style.minWidth="24px";
-vamos colocar:
 
-span.style.fontWeight="600";
-span.style.display="block";
-span.style.textAlign="center";
-Fica muito mais limpo.
+  const html = `
+    <div style="
+font-size:16px;
+font-weight:800;
+color:#2f5f5b;
+margin-bottom:10px;
+"> 
+  Dimensionamento Hidráulico do Chuveiro Automático Tipo Dilúvio
+</div>
 
-3. A tabela ainda está muito larga.
-Vou reduzir:
+<div style="
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-bottom:10px;
+">
 
-padding
+  <button
+    class="btn-export"
+    onclick="exportarPDFChave('${calcId}')">
+    📄 PDF
+  </button>
+
+  <button
+    class="btn-export"
+    onclick="exportarExcelChave('${calcId}')">
+    📊 Excel
+  </button>
+
+  <button
+    class="btn-export"
+    onclick="exportarDXFChave('${calcId}')">
+    📐 DXF
+  </button>
 
-fonte
+</div>
+
+
 
-largura das colunas
 
-Só na impressão.
+
+<div class="hidraulica-title">${l.chave}</div>
 
-Minha sugestão
-Agora que já li o arquivo inteiro, acho que vale a pena fazermos diferente.
+    <div class="hidraulica-subtitle">
+  Bico: ${l.modelo} · K: ${l.k} · Ângulo: ${l.angulo}° · Quantidade: ${l.bicos}
+  <br>
+  Tubulação: ${l.materialTubulacao} · Hazen-Williams C = ${fatorCCabecalho}
+</div>
 
-Em vez de ir corrigindo pedacinho por pedacinho, eu monto uma versão profissional da função abrirPDFTecnico() inteira, já com:
 
-✅ tabela compacta em A4 retrato;
+    <div class="table-wrap">
+      <table
+data-k="${k}"
+data-pressao-inicial="${pressaoInicial}"
+data-material="${l.materialTubulacao}"> 
+        <thead>
+          <tr>
+            <th>Referência</th>
+            <th>Pressão<br>(mca)</th>
+            <th>K</th>
+            <th>Vazão<br>Bico</th>
+            <th>Vazão<br>Acum.</th>
+            <th>DN<br>(mm)</th>
+<th>DI<br>(mm)</th> 
+            <th>Comp.<br>Real</th>
+            <th>Comp.<br>Eq.</th>
+            <th>Comp.<br>Total</th>
+            <th>Perda<br>(m/m)</th>
+            <th>Perda<br>Total</th>
+            <th>Elevação<br>(m)</th>
+            <th>Pressão<br>Req.</th>
+            <th>Veloc.</th>
+          </tr>
+        </thead>
+        <tbody>${linhasTabela}</tbody>
+      </table>
+<div class="info-pressao-manometro"
+     style="
+       margin-top:10px;
+       font-size:14px;
+       font-weight:600;
+       color:#173f3b;
+     ">
+</div>
 
-✅ sem inputs;
 
-✅ cabeçalho completo;
 
-✅ Bico/K/Ângulo/Quantidade;
 
-✅ Hazen-Williams;
+    </div>
+  `;
 
-✅ pressão do manômetro;
+  let bloco = document.getElementById(calcId);
 
-✅ rodapé do SAR.
+  if(!bloco){
+    bloco = document.createElement("div");
+    bloco.id = calcId;
+    bloco.className = "card";
+    document.getElementById("calculoHidraulicoConteudo").appendChild(bloco);
+  }
 
-Fica uma única função pronta para substituir a atual, sem precisar fazer várias correções depois. Acho que você ganha tempo e já fica com um padrão definitivo para os próximos módulos.
+  bloco.innerHTML = html;
 
+  const tabela = bloco.querySelector("table");
+  recalcularTabelaHidraulica(tabela);
+}
 
+  
 
-Texto colado.txt
-Documento
-sim claro, muito mais pratico, fico louco aqui
+function atualizarMemoria(){
+  let txt = "MEMÓRIA DE CÁLCULO - SISTEMA DE DILÚVIO EM TRANSPORTADORES\\n\\n";
 
-somente analise o cósigo como sta hoje para dar tudo certo 
+  linhas.forEach((l, i) => {
+    txt += `${i+1}. ${l.chave}\\n`;
+    txt += `Local protegido: ${l.local}\\n`;
+    txt += `Área protegida: ${l.area} m²\\n`;
+    txt += `Vazão mínima: ${l.vazao} L/min\\n`;
+    txt += `Bico selecionado: ${l.modelo} / Ângulo ${l.angulo}° / K ${l.k}\\n`;
+    txt += `Quantidade de bicos: ${l.bicos}\\n`;
+    txt += `Espaçamento real: ${l.espacamento} m\\n`;
+    txt += `Pressão ajustada: ${l.pressao} mca\\n`;
+    txt += `Volume mínimo de reservatório: ${l.reservatorio} m³\\n`;
+    txt += `Status: ${l.status}\\n\\n`;
+  });
 
+  document.getElementById("memoria").value = txt;
+}
 
-Analisei novamente o código completo atualizado. 
+function limpar(){
+  selecaoManual = false;
 
+  document.querySelectorAll("input").forEach(i => {
+    i.value = "";
+  });
 
-E agora consigo dizer com bastante segurança: não vamos mais ficar remendando essa função.
+  document.querySelectorAll("select").forEach(s => {
+    s.selectedIndex = 0;
+  });
 
-A estrutura do seu módulo já está muito boa. O problema é que essa função abrirPDFTecnico() nasceu como um teste e acabou virando definitiva. Vale a pena reescrevê-la do zero.
+  document.getElementById("densidade").value = 12;
+  document.getElementById("tempo").value = 60;
 
-O que observei
-O cálculo está separado da impressão
-Isso é excelente.
+  document.getElementById("modeloBico").innerHTML = "";
+  document.getElementById("angulo").innerHTML = "";
 
-Você já possui:
+  window.STATUS_CALCULO = "";
 
-linhas[]
+  atualizarMemoria();
+}
 
-buscarTubo()
 
-recalcularTabelaHidraulica()
 
-calculoHidraulicoChave()
 
-Ou seja, a impressão não precisa calcular absolutamente nada.
+const SUPABASE_URL = "https://bjtxbpmrmhfvpmdsthxr.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdHhicG1ybWhmdnBtZHN0aHhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzIyNTgsImV4cCI6MjA5NzU0ODI1OH0.zHZvSLzt6sWCrrKMW_zQXdqj8KCPF8OjTcsyza07dPI";
 
-Ela só precisa ler o que já está pronto.
-
-A tabela já está pronta
-Você já possui a tabela completa na tela.
-
-Então o PDF deve apenas:
-
-const tabela =
-document.querySelector("#calc-chave-"+indice+" table");
-clonar,
-
-limpar os inputs,
-
-imprimir.
-
-Sem recalcular nada.
-
-Não devemos mais criar HTML na mão
-Hoje você escreve:
-
-janela.document.write(`
-<html>
-...
-`);
-e depois vai montando o restante.
-
-Eu faria diferente.
-
-A janela já nasce praticamente pronta.
-
-Depois apenas:
-
-cabeçalho
-
-↓
-
-informações
-
-↓
-
-informações do bico
-
-↓
-
-tabela clonada
-
-↓
-
-pressão do manômetro
-
-↓
-
-rodapé
-Muito mais simples.
-
-Eu mudaria inclusive o layout
-Eu faria um padrão SAR.
-
-Assim:
-
-SAR Engenharia
-──────────────────────────────────────────
-
-DIMENSIONAMENTO HIDRÁULICO
-CHUVEIRO AUTOMÁTICO TIPO DILÚVIO
-
-──────────────────────────────────────────
-
-Referência:
-
-Local:
-
-Trecho:
-
-Ponto de referência:
-
-Material:
-
-Bico:
-MV-15
-
-K:
-56,6
-
-Ângulo:
-80°
-
-Quantidade:
-11
-
-Tubulação:
-Aço Carbono Sch 10
-
-Hazen-Williams:
-C=120
-
-──────────────────────────────────────────
-
-                 TABELA
-
-──────────────────────────────────────────
-
-Pressão de trabalho no manômetro:
-
-11,56 mca
-1,16 kgf/cm²
-
-──────────────────────────────────────────
-
-Emitido pelo SAR Engenharia
-
-24/06/2026 22:08
-Repare que fica exatamente com cara de memorial técnico.
-
-A tabela
-Ela não ficará igual à da tela.
-
-Na impressão:
-
-fonte 10 px
-
-padding 3 px
-
-altura pequena
-
-cabeçalhos em duas linhas
-
-colunas comprimidas
-
-A4 retrato
-
-Vai caber perfeitamente.
-
-Os campos editáveis
-Nem vamos substituir por <span>.
-
-Vou remover completamente os <input>.
-
-Eles virarão apenas texto.
-
-Fica igual AutoCAD.
-
-Outra melhoria
-Hoje você faz:
-
-cloneNode(true)
-Depois percorre todos os inputs.
-
-Eu vou percorrer também:
-
-select
-textarea
-button
-e remover tudo que não faz sentido imprimir.
-
-Assim o PDF fica "limpo".
-
-Minha sugestão
-Aproveitando que já li esse módulo inteiro, eu faria a função definitiva.
-
-Ela terá aproximadamente 250~300 linhas, mas será o padrão do SAR.
-
-E depois você simplesmente copia essa mesma estrutura para:
-
-Hidrantes
-
-Sprinklers
-
-Bombas
-
-Reservatórios
-
-Espuma
-
-Monitores
-
-Calhas
-
-Escadas
-
-Todos terão exatamente a mesma identidade visual.
-
-Na minha opinião, vale a pena investir esse tempo agora, porque esse será o primeiro relatório técnico oficial do SAR. Depois dele, os próximos módulos praticamente herdam o mesmo modelo e você só troca os dados específicos.
-
-
-7721f44f-1001-4806-96fb-5a982c4a1a18.png
-
-a92fe7b4-bb53-4ef8-9d90-f11a3ba31e91.png
-ok e o que vai aqui dentro?
-
-65c25f20-063e-42fd-9652-a4bdf1579c85.png
-apareceu undefined
-
-mas o que é esse primeiro erro que ocorre?
-
-03a1ce52-30bb-4897-828e-161ce660b3fe.png
-
-Texto colado.txt
-Documento
-posso te enviar o código completo?
-acho que o erro é que vc mandou eu abrir um novo script
-
-03473bba-9c14-4122-82e4-09d6a94d907f.png
-ainda não fiz o que vc pediu, mas ja deu isso, ta certo? 
-
-
-Texto colado.txt
-Documento
-mas não altera o que funciona e eu já validei
-
-17a78a76-f3de-4e39-8651-60696104614c.png
-corrigido 
-
-a004e3ec-53cc-4a50-ba6a-a6abff0a3b84.png
-
-49bf5162-e0f0-47aa-b8dd-4346a70eea40.png
-aqui
-
-27d10512-6bb8-445c-be1b-97545d66a2b7.png
-
-91a2bc37-7ffe-4320-a7e1-893da76c6357.png
-vc me enviou somente isso
-
-
-Texto colado.txt
-Documento
-
-3670ee84-26ff-4f32-b358-6023baa9b47b.png
-voltando aqui, pq o código arpaou de funcioanr 
-voce arruma uma coisa e quebra outra
-
-
-Texto colado.txt
-Documento
-analisa o código, é pra calcular automatico inserindo soetne comprimento, largura e altura
-
-
-Texto colado.txt
-Documento
-essa função na existe no meu código, veja
-
-✅ Está 99% certo.
-
-Faça apenas UMA alteração.
-
-DENTRO DE:
-async function carregarBicosSupabase(){
-APAGUE esta linha:
-calcular();
-Ou seja, deixe assim:
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 async function carregarBicosSupabase(){
+
+const { data, error } = await supabaseClient
+.from("sar_diluvio_bicos")
+.select("*")
+.eq("ativo", true)
+.eq("ativo_calculo", true);
+
+if(error){
+console.error("Erro Supabase:", error);
+alert("Erro ao carregar bicos do Supabase.");
+return;
+}
+
+window.BICOS_SUPABASE = data;
+} 
+
+async function carregarTubosSupabase(){
 
   const { data, error } = await supabaseClient
-    .from("vw_bicos_ativos")
+    .from("vw_tubos_ativos")
     .select("*");
 
   if(error){
@@ -848,399 +1737,44 @@ async function carregarBicosSupabase(){
     return;
   }
 
-  window.BICOS_SUPABASE = data;
+  window.TUBOS_SUPABASE = data;
+
+
 
 }
-O restante fica exatamente como você mostrou.
-
-Depois teste.
-
-Me diga apenas:
-
-✅ Funcionou
-
-❌ Erro no console (manda o print)
-
-
-2bd8b591-b7d6-4bcc-bb4e-5c7d78d7545b.png
-
-Perfeito.
-
-O erro não é de JavaScript.
-
-É do Supabase.
-
-O erro é:
-404
-Isso significa que a view não existe.
-
-FAÇA ISSO
-Entre no Supabase e execute:
-
-select * from vw_bicos_ativos;
-Me diga:
-
-✅ abre normalmente
-
-❌ erro
-
-Se der erro
-Abra o SQL Editor e execute:
-
-select table_name
-from information_schema.views
-order by table_name;
-Me mande a lista.
-
-Não altere mais o código.
-
-O JavaScript agora está certo.
-
-O problema é apenas o nome da view no banco.
-
-
-deixa quieto, vou resgatar um código que funciona que merda, apareceu 100row, quer que te mande tudo, vou procurar te chamo
-
-Pode fazer isso.
-
-Na situação em que estamos, eu faria exatamente o mesmo.
-
-Resgata a última versão que você sabe que estava funcionando e não tenta consertar em cima da quebrada. Isso é muito mais rápido.
-
-Quando você tiver o código funcionando:
-
-Me manda o HTML inteiro.
-
-Eu não vou mais inventar alteração.
-
-Vou comparar linha por linha com o que está funcionando.
-
-Cada alteração será cirúrgica:
-
-Procure isso...
-
-Troque por isso...
-
-Teste.
-
-Só depois passamos para a próxima.
-
-Sem reescrever função inteira, sem mudar arquitetura no meio do módulo.
-
-Acho que hoje o erro foi meu: tentei adiantar uma reorganização do código antes de estabilizar o módulo. Vamos voltar ao método que estava funcionando melhor para nós: uma alteração por vez, sempre preservando a versão validada.
-
-Quando você recuperar o código, me chama que a gente resolve isso de forma objetiva.
-
-
-<!DOCTYPE html>
-
-<html lang="pt-BR"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Dilúvio em Transportadores</title>
-
-<style> :root{ --sar-green:#2f5f5b; --sar-green-2:#3d7b72; --sar-light:#f4f7f6; --sar-border:#d7e2df; --sar-text:#1f2933; --sar-muted:#667085; --sar-yellow:#fff9c4; --sar-result:#dff3d5; } *{box-sizing:border-box} body{ margin:0; font-family:Arial, Helvetica, sans-serif; background:#f3f6f5; color:var(--sar-text); } .wrap{ max-width:1280px; margin:0 auto; padding:18px; } .header{ background:linear-gradient(135deg,var(--sar-green),var(--sar-green-2)); color:#fff; border-radius:12px; padding:18px 22px; margin-bottom:16px; box-shadow:0 6px 18px rgba(0,0,0,.12); } .header h1{ margin:0; font-size:22px; } .header p{ margin:6px 0 0; opacity:.9; } .field-wide{ grid-column: span 2; } .card{ background:#fff; border:1px solid var(--sar-border); border-radius:12px; padding:18px; margin-bottom:16px; box-shadow:0 3px 12px rgba(0,0,0,.05); } .section-title{ font-size:16px; font-weight:800; margin:0 0 14px; color:var(--sar-green); border-left:5px solid var(--sar-green); padding-left:10px; } .grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; } .grid-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; } .obs-alerta{ border:2px solid #ff0000 !important; color:#b42318; font-weight:700; } .field label{ display:block; font-size:14px; font-weight:700; margin-bottom:6px; } input, select{ width:100%; height:40px; border:1px solid #222; border-radius:4px; padding:8px 10px; font-size:17px; background:#fff; text-align:center; } .dados-iniciais input, .dados-iniciais select{ text-align:left; } input[readonly]{ background:#f8faf9; } .result{ background:var(--sar-result)!important; font-weight:800; } .warn{ background:var(--sar-yellow)!important; } .actions{ grid-column:1 / -1; display:flex; justify-content:center; gap:12px; margin-top:8px; margin-bottom:10px; padding-top:0; } .actions button{ min-width:110px; height:44px; padding:8px 18px; } button{ border:0; border-radius:8px; padding:11px 24px; font-weight:800; cursor:pointer; font-size:14px; } .btn-clean{ background:#e9eeee; color:#344054; } .btn-insert{ background:var(--sar-green); color:#fff; } .btn-calc{ background:#173f3b; color:#fff; } .table-wrap{ overflow:auto; } table{ width:100%; border-collapse:collapse; margin-top:12px; font-size:13px; background:#fff; } th{ background:#2f5f5b; color:#fff; padding:9px; border:1px solid #244b47; white-space:nowrap; } td{ border:1px solid var(--sar-border); padding:8px; text-align:center; white-space:nowrap; } tr:nth-child(even){ background:#f7fbfa; } .badge{ padding:4px 8px; border-radius:999px; font-weight:800; font-size:12px; } .ok{background:#d1fadf;color:#05603a} .att{background:#fef0c7;color:#93370d} .rev{background:#fee4e2;color:#b42318} .memoria{ width:100%; min-height:180px; border:1px solid var(--sar-border); border-radius:8px; padding:12px; font-family:Consolas, monospace; resize:vertical; } @media(max-width:900px){ .grid-3,.grid-4{grid-template-columns:1fr} } .btn-table{ width:32px; height:28px; padding:0; font-size:14px; border-radius:6px; margin:2px; } .hidraulica-title{ font-weight:800; color:#2f5f5b; margin:10px 0; } .hidraulica-subtitle{ font-size:13px; color:#667085; margin-bottom:10px; } .hidraulica-edit{ width:70px; height:28px; padding:3px; font-size:13px; background:#fff9c4; } .field-full{ grid-column:1 / -1; margin-bottom:0; } .obrigatorio{ background:#eaf3ff !important; } .check{ background:#dff3d5 !important; font-weight:800; color:#14532d; } .legenda-campos{ font-size:12px; color:#667085; align-self:end; } .legenda-linha{ height:40px; display:flex; align-items:center; gap:6px; border:1px solid transparent; } .legenda-tag{ padding:3px 8px; border-radius:5px; font-size:12px; white-space:nowrap; } .legenda-campos span{ display:inline-block; min-width:58px; padding:2px 6px; border-radius:4px; margin-right:5px; } .card-header-line{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; } .card-header-line .section-title{ margin:0; } .btn-export{ background:#e9eeee; color:#344054; padding:8px 12px; font-size:13px; border-radius:8px; } </style>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-</head>
-
-<body> <div class="wrap">
-
-<div class="header"> <h1>Dimensionamento de Sistema de Dilúvio para Transportadores Enclausurados</h1> <p>SAR Engenharia · Projeto Técnico · Sistemas Hidráulicos · Proteção por Dilúvio</p> </div>
-
-<div class="card"> <h2 class="section-title">Dados</h2>
-
-<div class="grid-3 dados-iniciais"> 
-  <div class="field">
-    <label>Referência</label>
-    <input id="referencia" class="obrigatorio"  type="text">
-  </div>
-
-  <div class="field">
-    <label>Local protegido</label>
-<input id="localProtegido" class="obrigatorio" type="text" placeholder="Ex.: Túnel / Aéreo / Transportador"> </div>
-
-  <div class="field">
-    <label>Identificação Trecho/Chave</label>
-    <input id="chave" class="obrigatorio"  type="text" placeholder="Ex.: TC-01 / CH-01">
-  </div>
-</div>
-  <h2 class="section-title" style="margin-top:18px;">Rede de Dilúvio</h2>
-
-<div class="grid-4">
-
-
-  <div class="field">
-    <label>Comprimento da área protegida (m)</label>
-    <input id="comprimento" class="obrigatorio"  type="number" step="0.01" oninput="calcular()">
-  </div>
-
-  <div class="field">
-    <label>Largura da área protegida (m)</label>
-    <input id="largura" class="obrigatorio"  type="number" step="0.01" oninput="calcular()">
-  </div>
-
-  <div class="field">
-    <label>Altura entre a área e o defletor (m)</label>
-    <input id="altura" class="obrigatorio"  type="number" step="0.01" oninput="calcular()">
-  </div>
-
-  <div class="field">
-    <label>Densidade (L/min/m²)</label>
-    <input id="densidade" class="warn" type="number" step="0.01" value="12" oninput="calcular()">
-
-  </div>
-
-  <div class="field">
-    <label>Área protegida (m²)</label>
-    <input id="area" class="result" readonly>
-  </div>
-
-  <div class="field">
-    <label>Vazão total mínima (L/min)</label>
-    <input id="vazaoTotal" class="result" readonly>
-  </div>
-
-  <div class="field">
-    <label>Modelo do Bico</label>
-    <select id="modeloBico" class="warn" onchange="selecaoManual=true; calcular()">
-</select>
-
-  </div>
-
-  <div class="field">
-    <label>Tipo</label>
-    <input id="tipoBico" readonly value="Média Velocidade">
-  </div>
-
-  <div class="field">
-    <label>Ângulo abertura defletor (°)</label>
-    <select id="angulo" class="warn" onchange="selecaoManual=true; calcular()">
-</select> </div>
-
-  <div class="field">
-    <label>Fator K de descarga</label>
-    <input id="fatorK" readonly>
-  </div>
-
-  <div class="field">
-    <label>Diâmetro da descarga (mm)</label>
-    <input id="diametroDescarga" readonly>
-  </div>
-
-        <div class="field">
-    <label>Distância planejada entre bicos (m)</label>
-    <input id="distPlanejada" readonly>
-  </div>
-
-  <div class="field">
-    <label>Nº de bicos planejado</label>
-    <input id="bicosPlanejado" readonly>
-  </div>
-
-  <div class="field">
-    <label>Nº de bicos projetado</label>
-    <input id="bicosProjetado" class="warn" type="number" step="1" oninput="calcular()">
-  </div>
-
-  <div class="field">
-    <label>Distância entre bicos real (m)</label>
-    <input id="distReal" readonly>
-  </div>
-
-  <div class="field">
-    <label>Vazão min planejada por bico (L/min)</label>
-    <input id="vazaoPlanejadaBico" readonly>
-  </div>
-
-  <div class="field">
-    <label>Pressão calculada no bico (mca)</label>
-    <input id="pressaoPlanejada" readonly>
-  </div>
-
-  <div class="field">
-    <label>Pressão ajustada no bico (mca)</label>
-    <input id="pressaoAjustada" class="check" readonly>
-  </div>
-
-  <div class="field">
-    <label>Vazão min real por bico (L/min)</label>
-    <input id="vazaoRealBico" readonly>
-  </div>
-
-  <div class="field">
-<label>Vazão projetada total (L/min)</label>
-<input id="vazaoProjetadaTotal" class="result" readonly>
-
-</div>
-
-<div class="field"> <label>Tempo de operação (min)</label> <input id="tempo" class="warn" type="number" value="60" oninput="calcular()"> </div>
-
-  <div class="field">
-    <label>Volume mínimo reservatório (m³)</label>
-    <input id="volumeReservatorio" class="result" readonly>
-  </div>
-<div class="field"> <label>Ponto de Referência na Rede Principal</label> <input id="pontoReferencia" class="obrigatorio" type="text" placeholder="Ponto de ligação na rede"> </div>
-
-<div class="field"> <label>Material da Tubulação</label>
-
-<select id="materialTubulacao" class="obrigatorio"> <option value="">Selecione...</option>
-
-<option>Aço Carbono Sch 10</option>
-<option>Aço Carbono Sch 30</option>
-<option>Aço Carbono Sch 40</option>
-<option>Aço Carbono Sch 80</option>
-
-<option>Galvanizado Leve</option>
-<option>Galvanizado Médio</option>
-<option>Galvanizado Pesado</option>
-</select> </div>
-
-<div class="field legenda-campos"> <label>Legenda</label> <div class="legenda-linha"> <span class="legenda-tag" style="background:#eaf3ff;">Obrigatório</span> <span class="legenda-tag" style="background:#dff3d5;">Checagem</span> <span class="legenda-tag" style="background:#fff9c4;">Editável</span> </div> </div>
-
-  <div class="field field-full">
-<label>Nota Técnica</label>
-<input id="observacao" class="obs-alerta" readonly>
-
-</div>
-
-<div class="actions">
-  <button class="btn-clean" onclick="limpar()">Limpar</button>
-<button class="btn-insert" onclick="inserirLinha()">Inserir</button>
-</div>
-
-</div>
-
-<div class="card"> <div class="card-header-line"> <h2 class="section-title">Tabela Resumo</h2>
-
-<div> <button class="btn-export" onclick="exportarTabelaResumoCSV()">📊 Excel</button> <button class="btn-export" onclick="exportarTabelaResumoDXF()">📐 DXF</button> </div> </div>
-
-<div class="table-wrap">
-  <table>
-    <thead>
-<tr> <th>Referência</th> <th>Local</th> <th>Trecho/<br>Chave</th> <th>Ponto<br>Ref.</th> <th>Compr.<br>(m)</th> <th>Larg.<br>(m)</th> <th>Altura<br>(m)</th> <th>Dens.<br>(L/min/m²)</th> <th>Área<br>(m²)</th> <th>Vazão<br>(L/min)</th> <th>Bico</th> <th>Ângulo<br>(°)</th> <th>K</th> <th>Bicos</th> <th>Distância<br>(m)</th> <th>Pressão<br>(mca)</th> <th>Reserv.<br>(m³)</th> <th>Ação</th> </tr> </thead>
-
-    <tbody id="tabela"></tbody>
-  </table>
-</div>
-</div>
-
-<div class="card" id="cardCalculoHidraulico"> <h2 class="section-title">Cálculo Hidráulico das Chaves</h2>
-
-<div id="calculoHidraulicoConteudo">
-
-<div style="margin:12px 0;"> <label><b>Adicionar trechos após o manômetro:</b></label>
-
-<input
-id="trechosAdicionais"
-type="number"
-min="0"
-max="5"
-value="0"
-style="width:70px;text-align;margin-left:8px;"
-
-
-
-</div>
-
-
-
-<p style="color:#667085;font-size:14px;">
-  Clique no botão 📈 da Tabela Resumo para gerar o cálculo hidráulico da chave.
-</p>
-</div> </div>
-
-
-
-
-
-<div class="card"> <h2 class="section-title">Memória Base</h2> <textarea id="memoria" class="memoria" readonly></textarea> </div>
-
-</div>
-
-<script> const bicos = []; let linhas = []; let selecaoManual = false; function n(id){ const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; } function fmt(v, c=2){ return Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits:c, maximumFractionDigits:c }); } function escolherBico(vazaoTotal, comprimento, largura, altura){ let melhor = null; const listaBicos = window.BICOS_SUPABASE || bicos; listaBicos.forEach(b => { const modelo = b.modelo || ""; const tipo = b.tipo || ""; const angulo = Number(b.angulo_graus || b.angulo || 0); const k = Number(b.fator_k || b.k || 0); const diametro = b.diametro_descarga_mm || b.diametro || ""; const pressaoMinima = Number(b.pressao_min_mca || 0); if(!angulo || !k) return; const aberturaCalculada = altura * Math.tan((angulo / 2) * Math.PI / 180) * 2; const coberturaUtil = aberturaCalculada * 0.90; // 10% de transpasse const espacamentoPlanejado = Math.min(3.00, Math.max(1.2, coberturaUtil)); const qtdPlanejada = Math.max(1, Math.ceil(comprimento / espacamentoPlanejado)); const vazaoPorBico = vazaoTotal / qtdPlanejada; const pressao = Math.pow(vazaoPorBico / k, 2) * 10.197; const distanciaIdeal10 = Math.abs(10 - pressao); const penalidadePoucoBico = qtdPlanejada < 2 ? 20 : 0; const penalidadePressaoAlta = pressao > 15 ? 50 : pressao > 12 ? 15 : 0; const penalidadePressaoBaixa = pressao < pressaoMinima ? 30 : 0; const score = distanciaIdeal10 + penalidadePoucoBico + penalidadePressaoAlta + penalidadePressaoBaixa; const item = { modelo, tipo, angulo, k, diametro, entrada: "", pressaoMinima, espacamentoPlanejado, qtdPlanejada, vazaoPorBico, pressao, score }; if(!melhor || item.score < melhor.score){ melhor = item; } }); return melhor; } function classificarPressao(p){ if(p <= 10) return "Recomendado"; if(p <= 12) return "Aceitável"; if(p <= 15) return "Revisar"; return "Não recomendado"; } function preencherDropsBico(escolhido){ const listaBicos = window.BICOS_SUPABASE || bicos; const selectModelo = document.getElementById("modeloBico"); const selectAngulo = document.getElementById("angulo"); const modeloAntes = selectModelo.value; const anguloAntes = selectAngulo.value; selectModelo.innerHTML = ""; const modelos = [...new Set(listaBicos.map(b => b.modelo))]; modelos.forEach(modelo => { selectModelo.innerHTML += `<option value="${modelo}">${modelo}</option>`; }); selectModelo.value = selecaoManual && modeloAntes ? modeloAntes : escolhido.modelo; selectAngulo.innerHTML = ""; listaBicos .filter(b => b.modelo === selectModelo.value) .forEach(b => { selectAngulo.innerHTML += ` <option value="${b.angulo_graus}">${b.angulo_graus}</option> `; }); selectAngulo.value = selecaoManual && anguloAntes ? anguloAntes : escolhido.angulo; document.getElementById("tipoBico").value = escolhido.tipo || "Média Velocidade"; } function calcular(){ const comprimento = n("comprimento"); const largura = n("largura"); const altura = n("altura"); const densidade = n("densidade"); const tempo = n("tempo"); const area = comprimento * largura; const vazaoTotal = area * densidade; if(vazaoTotal <= 0 || comprimento <= 0 || largura <= 0 || altura <= 0){ document.getElementById("area").value = ""; document.getElementById("vazaoTotal").value = ""; return; } let escolhido = escolherBico(vazaoTotal, comprimento, largura, altura); if(!escolhido){ return; } preencherDropsBico(escolhido); if(selecaoManual){ const listaBicos = window.BICOS_SUPABASE || bicos; const modeloManual = document.getElementById("modeloBico").value; const anguloManual = Number(document.getElementById("angulo").value); const bicoManual = listaBicos.find(b => b.modelo === modeloManual && Number(b.angulo_graus || b.angulo) === anguloManual ); if(bicoManual){ const angulo = Number(bicoManual.angulo_graus || bicoManual.angulo); const k = Number(bicoManual.fator_k || bicoManual.k); const diametro = bicoManual.diametro_descarga_mm || bicoManual.diametro || ""; const tipo = bicoManual.tipo || "Média Velocidade"; const aberturaCalculada = altura * Math.tan((angulo / 2) * Math.PI / 180) * 2; const coberturaUtil = aberturaCalculada * 0.90; // 10% de transpasse const espacamentoPlanejado = Math.min(3.00, Math.max(1.2, coberturaUtil)); const qtdPlanejada = Math.max(1, Math.ceil(comprimento / espacamentoPlanejado)); const vazaoPorBico = vazaoTotal / qtdPlanejada; const pressao = Math.pow(vazaoPorBico / k, 2)* 10.197; escolhido = { modelo: bicoManual.modelo, tipo, angulo, k, diametro, entrada: "", espacamentoPlanejado, qtdPlanejada, vazaoPorBico, pressao }; } } let bicosProjetado = parseInt(document.getElementById("bicosProjetado").value); if(!bicosProjetado || bicosProjetado < escolhido.qtdPlanejada){ bicosProjetado = escolhido.qtdPlanejada; document.getElementById("bicosProjetado").value = bicosProjetado; } const distReal = bicosProjetado > 0 ? comprimento / bicosProjetado : 0; const vazaoRealBico = bicosProjetado > 0 ? vazaoTotal / bicosProjetado : 0; const pressaoCalculada = Math.pow(vazaoRealBico / escolhido.k, 2)*10.197; const pressaoAjustada = Math.max(10, pressaoCalculada); const pressaoParaVazao = pressaoCalculada < 10 ? 10 : pressaoCalculada; const vazaoRealAjustada = escolhido.k * Math.sqrt(pressaoParaVazao / 10.197); const volumeM3 = (vazaoRealAjustada * bicosProjetado * tempo) / 1000; const status = classificarPressao(pressaoAjustada); window.STATUS_CALCULO = status; document.getElementById("area").value = fmt(area); document.getElementById("vazaoTotal").value = fmt(vazaoTotal); document.getElementById("tipoBico").value = escolhido.tipo || "Média Velocidade"; document.getElementById("fatorK").value = escolhido.k; document.getElementById("diametroDescarga").value = escolhido.diametro; document.getElementById("distPlanejada").value = fmt(escolhido.espacamentoPlanejado); document.getElementById("bicosPlanejado").value = escolhido.qtdPlanejada; document.getElementById("distReal").value = fmt(distReal); document.getElementById("vazaoPlanejadaBico").value = fmt(escolhido.vazaoPorBico); document.getElementById("pressaoPlanejada").value = fmt(pressaoCalculada); document.getElementById("pressaoAjustada").value = fmt(pressaoAjustada); document.getElementById("vazaoRealBico").value = fmt(vazaoRealAjustada); document.getElementById("vazaoProjetadaTotal").value = fmt(vazaoRealAjustada * bicosProjetado); document.getElementById("volumeReservatorio").value = fmt(volumeM3); document.getElementById("observacao").value = pressaoCalculada < 10 ? "Pressão calculada abaixo de 10 mca. Adotada pressão mínima de 10 mca para operação." : pressaoCalculada > 15 ? "Pressão inicial no bico elevada, reavaliar o modelo." : status === "Recomendado" ? "Pressão próxima do ideal." : status === "Aceitável" ? "Pressão aceitável, verificar margem." : status === "Revisar" ? "Pressão elevada, avaliar mais bicos." : "Rever seleção e quantidade de bicos."; atualizarMemoria(); } function dadosAtuais(){ calcular(); return { referencia: document.getElementById("referencia").value, local: document.getElementById("localProtegido").value, chave: document.getElementById("chave").value, pontoReferencia: document.getElementById("pontoReferencia").value.trim(), materialTubulacao: document.getElementById("materialTubulacao").value, comprimento: n("comprimento"), largura: n("largura"), altura: n("altura"), densidade: n("densidade"), area: document.getElementById("area").value, vazao: document.getElementById("vazaoProjetadaTotal").value, modelo: document.getElementById("modeloBico").value, angulo: document.getElementById("angulo").value, k: document.getElementById("fatorK").value, bicos: document.getElementById("bicosProjetado").value, espacamento: document.getElementById("distReal").value, pressao: document.getElementById("pressaoAjustada").value, reservatorio: document.getElementById("volumeReservatorio").value, status: window.STATUS_CALCULO || "" }; } function inserirLinha(){ const d = dadosAtuais(); const pontoReferencia = document.getElementById("pontoReferencia").value.trim(); const materialTubulacao = document.getElementById("materialTubulacao").value; if( !d.referencia || !d.chave || !pontoReferencia || !materialTubulacao || d.comprimento <= 0 || d.largura <= 0 ) { alert( "Informe Referência, Trecho/Chave, Ponto de Referência, Material da Tubulação, Comprimento e Largura." ); return; } linhas.push(d); desenharTabela(); atualizarMemoria(); const referenciaAtual = document.getElementById("referencia").value; const localAtual = document.getElementById("localProtegido").value; limpar(); document.getElementById("referencia").value = referenciaAtual; document.getElementById("localProtegido").value = localAtual; } function desenharTabela(){ const tbody = document.getElementById("tabela"); tbody.innerHTML = ""; linhas.forEach((l,i) => { const classe = l.status === "Recomendado" ? "ok" : l.status === "Aceitável" ? "att" : "rev"; tbody.innerHTML += ` <tr> <td>${l.referencia}</td> <td>${l.local}</td> <td>${l.chave}</td> <td>${l.pontoReferencia}</td> <td>${fmt(l.comprimento)}</td> <td>${fmt(l.largura)}</td> <td>${fmt(l.altura)}</td> <td>${fmt(l.densidade)}</td> <td>${l.area}</td> <td>${l.vazao}</td> <td>${l.modelo}</td> <td>${l.angulo}°</td> <td>${l.k}</td> <td>${l.bicos}</td> <td>${l.espacamento}</td> <td>${l.pressao}</td> <td>${l.reservatorio}</td> <td> <button class="btn-clean btn-table" title="Editar chave" onclick="editarLinha(${i})">✏️</button> <button class="btn-clean btn-table" title="Remover chave" onclick="removerLinha(${i})">🗑️</button> <button class="btn-clean btn-table" title="Cálculo hidráulico" onclick="calculoHidraulicoChave(${i})">📈</button> </td> </tr> `; }); } function exportarTabelaResumoCSV(){ if(linhas.length === 0){ alert("Não há dados na Tabela Resumo para exportar."); return; } const cabecalho = [ "Referência", "Local", "Trecho/Chave", "Comprimento (m)", "Largura (m)", "Altura (m)", "Densidade (L/min/m²)", "Área (m²)", "Vazão projetada (L/min)", "Bico", "Ângulo (°)", "Fator K", "Bicos", "Distância (m)", "Pressão (mca)", "Reservatório (m³)" ]; const linhasCSV = linhas.map(l => [ l.referencia, l.local, l.chave, fmt(l.comprimento), fmt(l.largura), fmt(l.altura), fmt(l.densidade), l.area, l.vazao, l.modelo, l.angulo, l.k, l.bicos, l.espacamento, l.pressao, l.reservatorio ]); const csv = [ cabecalho.join(";"), ...linhasCSV.map(linha => linha.map(campo => `"${String(campo).replace(/"/g, '""')}"`).join(";") ) ].join("\n"); const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "tabela_resumo_diluvio.csv"; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); } function exportarTabelaResumoDXF(){ if(linhas.length === 0){ alert("Não há dados para exportar."); return; } let dxf = ''; dxf += '0\nSECTION\n2\nHEADER\n0\nENDSEC\n'; dxf += '0\nSECTION\n2\nTABLES\n0\nENDSEC\n'; dxf += '0\nSECTION\n2\nENTITIES\n'; let x = 0; let y = 0; function texto(txt, px, py, h=2.5){ dxf += '0\nTEXT\n'; dxf += '8\n0\n'; dxf += `10\n${px}\n`; dxf += `20\n${py}\n`; dxf += '30\n0\n'; dxf += `40\n${h}\n`; dxf += `1\n${txt}\n`; } texto('SAR ENGENHARIA',0,0,4); texto('TABELA RESUMO - REDE DE DILUVIO',0,-6,3); y = -15; const colunas = [ 'Ref', 'Local', 'Chave', 'Comp', 'Larg', 'Alt', 'Area', 'Vazao', 'Bico', 'Ang', 'K', 'Bicos', 'Dist', 'Press', 'RTI' ]; const larguras = [35, 70, 35, 22, 22, 22, 25, 28, 30, 22, 22, 25, 25, 28, 28]; let px = 0; colunas.forEach((c, idx)=>{ texto(c, px, y); px += larguras[idx]; }); y -= 6; linhas.forEach(l=>{ let px = 0; const dados = [ l.referencia, l.local, l.chave, l.comprimento, l.largura, l.altura, l.area, l.vazao, l.modelo, l.angulo, l.k, l.bicos, l.espacamento, l.pressao, l.reservatorio ]; dados.forEach((v, idx)=>{ let valor = String(v); if(idx === 1 && valor.length > 28){ valor = valor.substring(0,28); } texto(valor, px, y); px += larguras[idx]; }); y -= 6; }); dxf += '0\nENDSEC\n'; dxf += '0\nEOF\n'; const blob = new Blob( [dxf], {type:'application/dxf'} ); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'tabela_resumo_diluvio.dxf'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); } function removerLinha(i){ linhas.splice(i,1); desenharTabela(); atualizarMemoria(); } function editarLinha(i){ const l = linhas[i]; selecaoManual = true; document.getElementById("referencia").value = l.referencia; document.getElementById("localProtegido").value = l.local; document.getElementById("chave").value = l.chave; document.getElementById("pontoReferencia").value = l.pontoReferencia || ""; document.getElementById("materialTubulacao").value = l.materialTubulacao || ""; document.getElementById("comprimento").value = l.comprimento; document.getElementById("largura").value = l.largura; document.getElementById("altura").value = l.altura; document.getElementById("densidade").value = l.densidade; document.getElementById("bicosProjetado").value = l.bicos; calcular(); setTimeout(() => { document.getElementById("modeloBico").value = l.modelo; document.getElementById("angulo").value = String(l.angulo).replace("°", ""); calcular(); }, 50); linhas.splice(i, 1); desenharTabela(); atualizarMemoria(); window.scrollTo({ top: 0, behavior: "smooth" }); } function buscarTubo(material, dn){ if(!window.TUBOS_SUPABASE) return null; const resultado = window.TUBOS_SUPABASE.find(t => { return ( String(t.modo_exibicao || "").trim() === String(material).trim() && Number(t.dn_mm) === Number(dn) ); }) || null; return resultado; } function calcularVelocidade(vazaoLpm, diMm){ const qM3s = vazaoLpm / 1000 / 60; const diametroM = diMm / 1000; const areaM2 = Math.PI * Math.pow(diametroM, 2) / 4; if(areaM2 <= 0) return 0; return qM3s / areaM2; } function calcularPerdaMetro(vazaoLpm, diMm, c=120){ const qM3s = vazaoLpm / 1000 / 60; const dM = diMm / 1000; if(qM3s <= 0 || dM <= 0 || c <= 0) return 0; return 10.67 * Math.pow(qM3s, 1.852) / (Math.pow(c, 1.852) * Math.pow(dM, 4.87)); } function recalcularComprimentoTotal(input){ const linha = input.closest("tr"); const compRealInput = linha.querySelector(".comp-real"); const compEqInput = linha.querySelector(".comp-eq"); const compTotalCell = linha.querySelector(".comp-total"); const compReal = parseFloat(String(compRealInput.value || compRealInput.textContent).replace(",", ".")) || 0; const compEq = parseFloat(String(compEqInput.value || compEqInput.textContent).replace(",", ".")) || 0; compTotalCell.textContent = fmt(compReal + compEq); } function valorNum(v){ return parseFloat(String(v || "0").replace(",", ".")) || 0; } function alterarDN(input){ const tabela = input.closest("table"); const linhasTabela = [...tabela.querySelectorAll("tbody tr")]; const material = tabela.dataset.material; const linhaAtual = input.closest("tr"); const idx = linhasTabela.indexOf(linhaAtual); const novoDN = input.value; for(let i = idx; i < linhasTabela.length; i++){ const dnInput = linhasTabela[i].querySelector(".dn-edit"); if(dnInput) dnInput.value = novoDN; } recalcularTabelaHidraulica(tabela); } function recalcularTabelaHidraulica(tabela){ const k = valorNum(tabela.dataset.k); let pressaoAtual = valorNum(tabela.dataset.pressaoInicial); let vazaoAcumulada = 0; const linhasTabela = [...tabela.querySelectorAll("tbody tr")]; const material = tabela.dataset.material; linhasTabela.forEach((tr, idx) => { const temBico = tr.dataset.temBico === "sim"; const dn = valorNum(tr.querySelector(".dn-edit")?.value); const compReal = valorNum(tr.querySelector(".comp-real-edit")?.value || tr.querySelector(".comp-real")?.textContent); const compEq = valorNum(tr.querySelector(".comp-eq")?.value); const elevacao = valorNum(tr.querySelector(".elevacao-edit")?.value); const compTotal = compReal + compEq; let vazaoBico = 0; if(temBico){ vazaoBico = k * Math.sqrt(pressaoAtual / 10.197); vazaoAcumulada += vazaoBico; } const tubo = buscarTubo(material, dn); const di = tubo ? Number(tubo.diametro_interno_mm) : 0; const fatorC = tubo ? Number(tubo.fator_c) : 120; tr.querySelector(".di-mm").textContent = fmt(di); const velocidade = calcularVelocidade(vazaoAcumulada, di); const perdaMetro = calcularPerdaMetro( vazaoAcumulada, di, fatorC ); const perdaTotal = perdaMetro * compTotal; const pressaoReq = pressaoAtual + perdaTotal + elevacao; tr.querySelector(".pressao").textContent = fmt(pressaoAtual); tr.querySelector(".vazao-bico").textContent = temBico ? fmt(vazaoBico) : "-"; tr.querySelector(".vazao-acum").textContent = fmt(vazaoAcumulada); tr.querySelector(".comp-total").textContent = fmt(compTotal); tr.querySelector(".perda-metro").textContent = fmt(perdaMetro,4); tr.querySelector(".perda-total").textContent = fmt(perdaTotal,4); tr.querySelector(".pressao-req").textContent = fmt(pressaoReq); tr.querySelector(".velocidade").textContent = fmt(velocidade); pressaoAtual = pressaoReq; }); const infoPressao = tabela.parentElement.querySelector(".info-pressao-manometro"); if(infoPressao){ infoPressao.textContent = `Pressão de trabalho no manômetro: ${fmt(pressaoAtual)} m.c.a. = ${fmt(pressaoAtual/10)} kgf/cm²`; } } function dnMinimoPorBicosAcumulados(qtd){ if(qtd <= 5) return 40; if(qtd <= 10) return 50; if(qtd <= 20) return 65; if(qtd <= 40) return 80; if(qtd <= 65) return 90; if(qtd <= 100) return 100; if(qtd <= 160) return 125; if(qtd <= 275) return 150; return 200; } function criarLinhaFinal(referencia,dn){ return ` <tr data-tem-bico="nao"> <td>${referencia}</td> <td class="pressao">0,00</td> <td>-</td> <td class="vazao-bico">-</td> <td class="vazao-acum">0,00</td> <td> <input class="hidraulica-edit dn-edit" type="number" value="${dn}" oninput="alterarDN(this)"> </td> <td class="di-mm">0,00</td> <td> <input class="hidraulica-edit comp-real-edit" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"> </td> <td> <input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"> </td> <td class="comp-total">0,00</td> <td class="perda-metro">0,0000</td> <td class="perda-total">0,0000</td> <td> <input class="hidraulica-edit elevacao-edit" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"> </td> <td class="pressao-req">0,00</td> <td class="velocidade">0,00</td> </tr> `; } function calculoHidraulicoChave(i){ const l = linhas[i]; const qtd = Number(l.bicos || 0); const k = valorNum(l.k); const pressaoInicial = valorNum(l.pressao); const espacamento = valorNum(l.espacamento); const pontoRef = l.pontoReferencia; const trechosAdicionais = Number( document.getElementById("trechosAdicionais")?.value || 0 ); const calcId = `calc-chave-${i}`; let linhasTabela = ""; for(let n = 1; n <= qtd; n++){ const referenciaTrecho = n < qtd ? `B${n}-B${n+1}` : `B${n}-Manômetro`; linhasTabela += ` <tr data-tem-bico="sim"> <td>${referenciaTrecho}</td> <td class="pressao">0,00</td> <td>${fmt(k)}</td> <td class="vazao-bico">0,00</td> <td class="vazao-acum">0,00</td> <td> <input class="hidraulica-edit dn-edit" type="number" value="${dnMinimoPorBicosAcumulados(n)}" oninput="alterarDN(this)"> </td> <td class="di-mm">0,00</td> <td> <input class="hidraulica-edit comp-real-edit" type="text" value="${fmt(espacamento)}" oninput="recalcularTabelaHidraulica(this.closest('table'))"> </td> <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td> <td class="comp-total">0,00</td> <td class="perda-metro">0,0000</td> <td class="perda-total">0,0000</td> <td><input class="hidraulica-edit elevacao-edit" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td> <td class="pressao-req">0,00</td> <td class="velocidade">0,00</td> </tr> `; } if(trechosAdicionais === 0){ linhasTabela += criarLinhaFinal( `Manômetro-${pontoRef}`, dnMinimoPorBicosAcumulados(qtd) ); }else{ for(let p=1; p<=trechosAdicionais; p++){ const origem = p === 1 ? "Manômetro" : `P${p-1}`; const destino = p === trechosAdicionais ? pontoRef : `P${p}`; linhasTabela += criarLinhaFinal( `${origem}-${destino}`, dnMinimoPorBicosAcumulados(qtd) ); } } const tuboCabecalho = buscarTubo( l.materialTubulacao, dnMinimoPorBicosAcumulados(1) ); const fatorCCabecalho = tuboCabecalho ? tuboCabecalho.fator_c : "-"; const html = ` <div class="pdf-chave"> <div style=" font-size:16px; font-weight:800; color:#2f5f5b; margin-bottom:10px; "> Dimensionamento Hidráulico do Chuveiro Automático Tipo Dilúvio </div> <div style=" display:flex; justify-content:flex-end; gap:8px; margin-bottom:10px; "> <button class="btn-export" onclick="abrirPDFTecnico(${i})"> 📄 PDF Técnico </button> <button class="btn-export" onclick="exportarExcelChave('${calcId}')"> 📊 Excel </button> <button class="btn-export" onclick="exportarDXFChave('${calcId}')"> 📐 DXF </button> </div> <div class="hidraulica-title">${l.chave}</div> <div class="hidraulica-subtitle"> Bico: ${l.modelo} · K: ${l.k} · Ângulo: ${l.angulo}° · Quantidade: ${l.bicos} <br> Tubulação: ${l.materialTubulacao} · Hazen-Williams C = ${fatorCCabecalho} </div> <div class="table-wrap"> <table data-k="${k}" data-pressao-inicial="${pressaoInicial}" data-material="${l.materialTubulacao}"> <thead> <tr> <th>Referência</th> <th>Pressão<br>(mca)</th> <th>K</th> <th>Vazão<br>Bico</th> <th>Vazão<br>Acum.</th> <th>DN<br>(mm)</th> <th>DI<br>(mm)</th> <th>Comp.<br>Real</th> <th>Comp.<br>Eq.</th> <th>Comp.<br>Total</th> <th>Perda<br>(m/m)</th> <th>Perda<br>Total</th> <th>Elevação<br>(m)</th> <th>Pressão<br>Req.</th> <th>Veloc.</th> </tr> </thead> <tbody>${linhasTabela}</tbody> </table> <div class="info-pressao-manometro" style=" margin-top:10px; font-size:14px; font-weight:600; color:#173f3b; "> </div> </div> </div> `; let bloco = document.getElementById(calcId); if(!bloco){ bloco = document.createElement("div"); bloco.id = calcId; bloco.className = "card"; document.getElementById("calculoHidraulicoConteudo").appendChild(bloco); } bloco.innerHTML = html; const tabela = bloco.querySelector("table"); recalcularTabelaHidraulica(tabela); } function atualizarMemoria(){ let txt = "MEMÓRIA DE CÁLCULO - SISTEMA DE DILÚVIO EM TRANSPORTADORES\\n\\n"; linhas.forEach((l, i) => { txt += `${i+1}. ${l.chave}\\n`; txt += `Local protegido: ${l.local}\\n`; txt += `Área protegida: ${l.area} m²\\n`; txt += `Vazão mínima: ${l.vazao} L/min\\n`; txt += `Bico selecionado: ${l.modelo} / Ângulo ${l.angulo}° / K ${l.k}\\n`; txt += `Quantidade de bicos: ${l.bicos}\\n`; txt += `Espaçamento real: ${l.espacamento} m\\n`; txt += `Pressão ajustada: ${l.pressao} mca\\n`; txt += `Volume mínimo de reservatório: ${l.reservatorio} m³\\n`; txt += `Status: ${l.status}\\n\\n`; }); document.getElementById("memoria").value = txt; } function limpar(){ selecaoManual = false; document.querySelectorAll("input").forEach(i => { i.value = ""; }); document.querySelectorAll("select").forEach(s => { s.selectedIndex = 0; }); document.getElementById("densidade").value = 12; document.getElementById("tempo").value = 60; document.getElementById("modeloBico").innerHTML = ""; document.getElementById("angulo").innerHTML = ""; window.STATUS_CALCULO = ""; atualizarMemoria(); } const SUPABASE_URL = "https://bjtxbpmrmhfvpmdsthxr.supabase.co"; const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdHhicG1ybWhmdnBtZHN0aHhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzIyNTgsImV4cCI6MjA5NzU0ODI1OH0.zHZvSLzt6sWCrrKMW_zQXdqj8KCPF8OjTcsyza07dPI"; const supabaseClient = window.supabase.createClient( SUPABASE_URL, SUPABASE_KEY ); async function carregarBicosSupabase(){ const { data, error } = await supabaseClient .from("sar_diluvio_bicos") .select("*") .eq("ativo", true) .eq("ativo_calculo", true); if(error){ console.error("Erro Supabase:", error); alert("Erro ao carregar bicos do Supabase."); return; } window.BICOS_SUPABASE = data; } async function carregarTubosSupabase(){ const { data, error } = await supabaseClient .from("vw_tubos_ativos") .select("*"); if(error){ console.error(error); return; } window.TUBOS_SUPABASE = data; } function abrirPDFTecnico(indice){ const l = linhas[indice]; const janela = window.open("", "_blank"); janela.document.write(` <!DOCTYPE html> <html lang="pt-BR"> <head> <meta charset="UTF-8"> <title>Dimensionamento Hidráulico</title> <style> body{ font-family:Arial; margin:35px; color:#222; } h1{ font-size:24px; text-align:center; margin-bottom:5px; } h2{ font-size:16px; text-align:center; margin-top:0; color:#555; } .info{ margin-top:30px; margin-bottom:25px; line-height:1.8; } table{ width:100%; border-collapse:collapse; font-size:12px; } th{ background:#2f5f5b; color:white; border:1px solid #666; padding:6px; } td{ border:1px solid #999; padding:5px; text-align:center; } .rodape{ margin-top:40px; display:flex; justify-content:space-between; font-size:12px; } </style>
-
-</head>
-
-<body>
-
-<h1>SAR Engenharia</h1>
-
-<h2>Dimensionamento Hidráulico do Chuveiro Automático Tipo Dilúvio</h2>
-
-<div class="info">
-
-<b>Referência:</b> ${l.referencia}<br>
-
-<b>Local:</b> ${l.local}<br>
-
-<b>Trecho:</b> ${l.chave}<br>
-
-<b>Ponto de referência:</b> ${l.pontoReferencia}<br>
-
-<b>Material:</b> ${l.materialTubulacao}
-
-</div>
-
-<br><br>
-
-<div id="tabela"></div>
-
-<div class="rodape">
-
-<div>
-
-Emitido pelo SAR Engenharia
-
-</div>
-
-<div>
-
-${new Date().toLocaleString("pt-BR")}
-
-</div>
-
-</div>
-
-</body>
-
-</html>
-
-`);
-
-janela.document.close();
-
-const tabelaOriginal =
-document.querySelector("#calc-chave-"+indice+" table");
-
-const tabelaClone =
-tabelaOriginal.cloneNode(true);
-
-tabelaClone.querySelectorAll("input").forEach(input=>{
-
-const span =
-    janela.document.createElement("span");
-
-span.textContent =
-    input.value;
-
-span.style.fontWeight="600";
-span.style.display="block";
-span.style.textAlign="center";
-
-input.replaceWith(span);
-});
-
-janela.document
-.getElementById("tabela")
-.appendChild(tabelaClone);
+  
+function exportarPDFChave(id){
+
+  const elemento =
+    document.getElementById(id);
+
+  html2pdf()
+    .set({
+      margin:10,
+      filename:id + ".pdf",
+      image:{type:"jpeg",quality:1},
+      html2canvas:{scale:2},
+      jsPDF:{
+        unit:"mm",
+        format:"a4",
+        orientation:"landscape"
+      }
+    })
+    .from(elemento)
+    .save();
 
 }
 
+  
 carregarBicosSupabase();
 carregarTubosSupabase();
 
+  
 </script>
 
 
+  
+</body>
+</html>
 
-</body> </html>
 
