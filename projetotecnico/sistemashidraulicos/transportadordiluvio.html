@@ -1336,17 +1336,31 @@ const perdaMetro =
   
   });
 
-  const infoPressao =
+   const infoPressao =
     tabela.parentElement.querySelector(".info-pressao-manometro");
 
   if(infoPressao){
 
+    const linhaManometro = [...linhasTabela].find(tr => {
+      const ref = tr.children[0]?.textContent || "";
+      return ref.includes("Manômetro");
+    });
+
+    let pressaoManometro = pressaoAtual;
+
+    if(linhaManometro){
+      pressaoManometro = valorNum(
+        linhaManometro.querySelector(".pressao-req")?.textContent
+      );
+    }
+
     infoPressao.textContent =
-      `Pressão de trabalho no manômetro: ${fmt(pressaoAtual)} m.c.a. = ${fmt(pressaoAtual/10)} kgf/cm²`;
+      `Pressão de trabalho no manômetro: ${fmt(pressaoManometro)} m.c.a. = ${fmt(pressaoManometro/10)} kgf/cm²`;
 
   }
 
 }
+ 
 
 
 function dnMinimoPorBicosAcumulados(qtd){
