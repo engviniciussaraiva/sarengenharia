@@ -1713,23 +1713,6 @@ const supabaseClient = window.supabase.createClient(
 
 async function carregarBicosSupabase(){
 
-const { data, error } = await supabaseClient
-.from("sar_diluvio_bicos")
-.select("*")
-.eq("ativo", true)
-.eq("ativo_calculo", true);
-
-if(error){
-console.error("Erro Supabase:", error);
-alert("Erro ao carregar bicos do Supabase.");
-return;
-}
-
-window.BICOS_SUPABASE = data;
-} 
-
-async function carregarTubosSupabase(){
-
   const { data, error } = await supabaseClient
     .from("vw_tubos_ativos")
     .select("*");
@@ -1741,103 +1724,15 @@ async function carregarTubosSupabase(){
 
   window.TUBOS_SUPABASE = data;
 
-
-
-}
-  
-  
-</style>
-
-</head>
-
-<body>
-
-<h1>SAR Engenharia</h1>
-
-<h2>Dimensionamento Hidráulico do Chuveiro Automático Tipo Dilúvio</h2>
-
-<div class="info">
-
-<b>Referência:</b> ${l.referencia}<br>
-
-<b>Local:</b> ${l.local}<br>
-
-<b>Trecho:</b> ${l.chave}<br>
-
-<b>Ponto de referência:</b> ${l.pontoReferencia}<br>
-
-<b>Material:</b> ${l.materialTubulacao}
-
-</div>
-
-<br><br>
-
-<div id="tabela"></div>
-
-<div class="rodape">
-
-<div>
-
-Emitido pelo SAR Engenharia
-
-</div>
-
-<div>
-
-${new Date().toLocaleString("pt-BR")}
-
-</div>
-
-</div>
-
-</body>
-
-</html>
-
-`);
-
-  janela.document.close();
-
-const tabelaOriginal =
-document.querySelector("#calc-chave-"+indice+" table");
-
-const tabelaClone =
-tabelaOriginal.cloneNode(true);
-
-tabelaClone.querySelectorAll("input").forEach(input=>{
-
-    const span =
-        janela.document.createElement("span");
-
-    span.textContent =
-        input.value;
-
-    span.style.fontWeight="600";
-span.style.display="block";
-span.style.textAlign="center";
-
-
-    input.replaceWith(span);
-
-});
-
-janela.document
-.getElementById("tabela")
-.appendChild(tabelaClone); 
-
 }
 
 carregarBicosSupabase();
 carregarTubosSupabase();
 
-  
 </script>
 
 <script src="js/impressaoTecnica.js"></script>
 
-
-  
 </body>
 </html>
-
 
