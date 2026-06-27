@@ -526,7 +526,8 @@ tr:nth-child(even){
   <h2 class="section-title">Tabela Resumo</h2>
 
   <div>
-    <button class="btn-export" onclick="exportarTabelaResumoCSV()">📊 Excel</button>
+<button class="btn-export" onclick="exportarTabelaResumoPDF()">📄 PDF</button>     
+<button class="btn-export" onclick="exportarTabelaResumoCSV()">📊 Excel</button>
     <button class="btn-export" onclick="exportarTabelaResumoDXF()">📐 DXF</button>
   </div>
 </div>
@@ -567,18 +568,6 @@ tr:nth-child(even){
 
   <div id="calculoHidraulicoConteudo">
 
-<div style="margin:12px 0;">
-  <label><b>Adicionar trechos após o manômetro:</b></label>
-
-  <input
-    id="trechosAdicionais"
-    type="number"
-    min="0"
-    max="5"
-    value="0"
-    style="width:70px;text-align:center;margin-left:8px;"
-  >
-</div>
 
 
 
@@ -1386,7 +1375,7 @@ function dnMinimoPorBicosAcumulados(qtd){
 function criarLinhaFinal(referencia,dn){
 
   return `
-    <tr data-tem-bico="nao">
+    <tr data-tem-bico="nao" class="linha-final-manometro"> 
 
       <td>${referencia}</td>
 
@@ -1440,7 +1429,7 @@ function criarLinhaFinal(referencia,dn){
 
       <td class="pressao-req">0,00</td>
 
-      <td class="velocidade">0,00</td>
+      <td class="velocidade">0,00</td> 
 
     </tr>
   `;
@@ -1625,7 +1614,17 @@ data-material="${l.materialTubulacao}">
         </thead>
         <tbody>${linhasTabela}</tbody>
       </table>
+
+<div style="margin-top:8px;">
+  <button
+    class="btn-export"
+    onclick="adicionarTrechoAposManometro('${calcId}')">
+    ➕ Adicionar trecho após o manômetro
+  </button>
+</div>
+
 <div class="info-pressao-manometro"
+
      style="
        margin-top:10px;
        font-size:14px;
@@ -1656,6 +1655,84 @@ data-material="${l.materialTubulacao}">
 }
 
   
+function adicionarTrechoAposManometro(calcId){
+  const bloco = document.getElementById(calcId);
+  if(!bloco) return;
+
+  const tabela = bloco.querySelector("table");
+  const tbody = tabela.querySelector("tbody");
+
+  const material = tabela.dataset.material;
+
+  const linhas = [...tbody.querySelectorAll("tr")];
+  const qtdBicos = linhas.filter(tr => tr.dataset.temBico === "sim").length;
+
+  const dn = dnMinimoPorBicosAcumulados(qtdBicos);
+
+  const novaLinha = document.createElement("tr");
+  novaLinha.dataset.temBico = "nao";
+
+  novaLinha.innerHTML = `
+    <td>Novo trecho</td>
+
+    <td class="pressao">0,00</td>
+
+    <td>-</td>
+
+    <td class="vazao-bico">-</td>
+
+    <td class="vazao-acum">0,00</td>
+
+    <td>
+      <input
+        class="hidraulica-edit dn-edit"
+        type="number"
+        value="${dn}"
+        oninput="alterarDN(this)">
+    </td>
+
+    <td class="di-mm">0,00</td>
+
+    <td>
+      <input
+        class="hidraulica-edit comp-real-edit"
+        type="text"
+        value="0,00"
+        oninput="recalcularTabelaHidraulica(this.closest('table'))">
+    </td>
+
+    <td>
+      <input
+        class="hidraulica-edit comp-eq"
+        type="text"
+        value="0,00"
+        oninput="recalcularTabelaHidraulica(this.closest('table'))">
+    </td>
+
+    <td class="comp-total">0,00</td>
+
+    <td class="perda-metro">0,0000</td>
+
+    <td class="perda-total">0,0000</td>
+
+    <td>
+      <input
+        class="hidraulica-edit elevacao-edit"
+        type="text"
+        value="0,00"
+        oninput="recalcularTabelaHidraulica(this.closest('table'))">
+    </td>
+
+    <td class="pressao-req">0,00</td>
+
+    <td class="velocidade">0,00</td>
+  `;
+
+  tbody.appendChild(novaLinha);
+
+  recalcularTabelaHidraulica(tabela);
+}
+
 
 function atualizarMemoria(){
   let txt = "MEMÓRIA DE CÁLCULO - SISTEMA DE DILÚVIO EM TRANSPORTADORES\\n\\n";
