@@ -1589,6 +1589,12 @@ data-material="${l.materialTubulacao}">
   </button>
 </div>
 
+<button
+class="btn-export"
+onclick="excluirUltimoTrechoAdicionado('${calcId}')">
+🗑️ Excluir última linha
+</button> 
+
 <div class="info-pressao-manometro"
 
      style="
@@ -1714,6 +1720,27 @@ style="width:110px;"
 
   recalcularTabelaHidraulica(tabela);
 }
+
+function excluirUltimoTrechoAdicionado(calcId){
+  const bloco = document.getElementById(calcId);
+  if(!bloco) return;
+
+  const tabela = bloco.querySelector("table");
+  const tbody = tabela.querySelector("tbody");
+
+  const linhasExtras = [...tbody.querySelectorAll("tr")]
+    .filter(tr => tr.dataset.temBico === "nao");
+
+  if(linhasExtras.length === 0){
+    alert("Não há linha adicional para excluir.");
+    return;
+  }
+
+  linhasExtras[linhasExtras.length - 1].remove();
+
+  recalcularTabelaHidraulica(tabela);
+}
+
 
 
 function atualizarMemoria(){
