@@ -521,8 +521,7 @@ tr:nth-child(even){
     <div class="card-header-line">
   <h2 class="section-title">Tabela Resumo</h2>
 
-  <div>
-<button class="btn-export" onclick="exportarTabelaResumoPDF()">📄 PDF</button>     
+  <div>   
 <button class="btn-export" onclick="exportarTabelaResumoCSV()">📊 Excel</button>
     <button class="btn-export" onclick="exportarTabelaResumoDXF()">📐 DXF</button>
   </div>
@@ -1519,13 +1518,7 @@ margin-bottom:10px;
   margin-bottom:10px;
 ">
 
-  <button
-    class="btn-export"
-    onclick="exportarPDFChave('${calcId}')">
-    📄 PDF
-  </button>
-
-  <button
+   <button
     class="btn-export"
     onclick="exportarExcelChave('${calcId}')">
     📊 Excel
@@ -1602,6 +1595,15 @@ onclick="excluirUltimoTrechoAdicionado('${calcId}')">
        color:#173f3b;
      ">
 </div>
+
+<div style="margin-top:14px; text-align:center;">
+  <button
+    class="btn-export"
+    onclick="exportarPDFCompleto()">
+    📄 PDF Completo
+  </button>
+</div>
+
 
 
 
