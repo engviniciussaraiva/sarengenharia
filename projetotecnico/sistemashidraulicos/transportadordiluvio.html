@@ -1445,13 +1445,6 @@ function calculoHidraulicoChave(i){
   const pressaoInicial = valorNum(l.pressao);
   const espacamento = valorNum(l.espacamento);
 
-const pontoRef = l.pontoReferencia;
-  
-const trechosAdicionais =
-  Number(
-    document.getElementById("trechosAdicionais")?.value || 0
-  );
-
 
   const calcId = `calc-chave-${i}`;
 
@@ -1494,36 +1487,6 @@ type="text" value="${fmt(espacamento)}" oninput="recalcularTabelaHidraulica(this
       </tr>
     `;
   }
-
-if(trechosAdicionais === 0){
-
-  linhasTabela += criarLinhaFinal(
-    `Manômetro-${pontoRef}`,
-    dnMinimoPorBicosAcumulados(qtd)
-  );
-
-}else{
-
-  for(let p=1; p<=trechosAdicionais; p++){
-
-    const origem =
-      p === 1
-        ? "Manômetro"
-        : `P${p-1}`;
-
-    const destino =
-      p === trechosAdicionais
-        ? pontoRef
-        : `P${p}`;
-
-    linhasTabela += criarLinhaFinal(
-      `${origem}-${destino}`,
-      dnMinimoPorBicosAcumulados(qtd)
-    );
-
-  }
-
-}
 
 
 const tuboCabecalho =
