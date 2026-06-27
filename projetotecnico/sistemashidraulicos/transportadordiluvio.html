@@ -1579,19 +1579,19 @@ data-material="${l.materialTubulacao}">
         <tbody>${linhasTabela}</tbody>
       </table>
 
-<div style="margin-top:8px;">
-  <button
-    class="btn-export"
-    onclick="adicionarTrechoAposManometro('${calcId}')">
-    ➕ Adicionar trecho após o manômetro
-  </button>
-</div>
+<div style="margin-top:8px; display:flex; gap:14px; align-items:center;">
+<button
+class="btn-export"
+onclick="adicionarTrechoAposManometro('${calcId}')">
+➕ Adicionar trecho
+</button>
 
 <button
 class="btn-export"
 onclick="excluirUltimoTrechoAdicionado('${calcId}')">
 🗑️ Excluir última linha
-</button> 
+</button>
+</div> 
 
 <div class="info-pressao-manometro"
 
