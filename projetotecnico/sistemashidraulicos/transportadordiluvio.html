@@ -1714,6 +1714,23 @@ const supabaseClient = window.supabase.createClient(
 async function carregarBicosSupabase(){
 
   const { data, error } = await supabaseClient
+    .from("vw_bicos_ativos") 
+    .select("*");
+
+  if(error){
+    console.error(error);
+    return;
+  }
+
+  window.BICOS_SUPABASE = data; 
+
+calcular(); 
+
+}
+
+async function carregarTubosSupabase(){
+
+  const { data, error } = await supabaseClient
     .from("vw_tubos_ativos")
     .select("*");
 
@@ -1726,7 +1743,17 @@ async function carregarBicosSupabase(){
 
 }
 
-carregarBicosSupabase(); 
+async function inicializarSistema(){
+
+  await carregarBicosSupabase();
+
+  await carregarTubosSupabase();
+
+
+}
+
+inicializarSistema();
+
 
 </script>
 
