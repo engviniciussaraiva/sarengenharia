@@ -536,7 +536,6 @@ tr:nth-child(even){
     <th>Referência</th>
     <th>Local</th>
     <th>Trecho/<br>Chave</th>
-<th>Ponto<br>Ref.</th>
     <th>Compr.<br>(m)</th>
     <th>Larg.<br>(m)</th>
     <th>Altura<br>(m)</th>
@@ -864,7 +863,6 @@ function dadosAtuais(){
     referencia: document.getElementById("referencia").value,
     local: document.getElementById("localProtegido").value,
     chave: document.getElementById("chave").value,
-pontoReferencia: document.getElementById("pontoReferencia").value.trim(),
 materialTubulacao:
   document.getElementById("materialTubulacao").value,
 
@@ -889,24 +887,20 @@ materialTubulacao:
 function inserirLinha(){
   const d = dadosAtuais();
 
-  const pontoReferencia =
-  document.getElementById("pontoReferencia").value.trim();
-
-const materialTubulacao =
+  const materialTubulacao =
   document.getElementById("materialTubulacao").value;
 
 
 if(
   !d.referencia ||
   !d.chave ||
-  !pontoReferencia ||
   !materialTubulacao ||
   d.comprimento <= 0 ||
   d.largura <= 0
 )
 {
   alert(
-    "Informe Referência, Trecho/Chave, Ponto de Referência, Material da Tubulação, Comprimento e Largura."
+    "Informe Referência, Trecho/Chave, Material da Tubulação, Comprimento e Largura."
   );
   return;
 }
@@ -938,7 +932,6 @@ function desenharTabela(){
         <td>${l.referencia}</td>
         <td>${l.local}</td>
         <td>${l.chave}</td>
-<td>${l.pontoReferencia}</td>
         <td>${fmt(l.comprimento)}</td>
         <td>${fmt(l.largura)}</td>
         <td>${fmt(l.altura)}</td>
