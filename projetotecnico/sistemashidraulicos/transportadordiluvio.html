@@ -1829,11 +1829,12 @@ async function carregarTubosSupabase(){
 
 function exportarPDFCompleto(){
 
-  const tabelaResumo =
-    document.querySelector(".card:nth-of-type(2)");
+  const tabelaResumo = [...document.querySelectorAll(".card")]
+    .find(card => card.querySelector(".section-title")?.textContent.trim() === "Tabela Resumo");
 
-  const calculos =
-    document.querySelectorAll("#calculoHidraulicoConteudo .card");
+  const calculos = document.querySelectorAll(
+    "#calculoHidraulicoConteudo > .card[id^='calc-chave-']"
+  );
 
   if(!tabelaResumo){
     alert("Tabela Resumo não encontrada.");
@@ -1847,51 +1848,59 @@ function exportarPDFCompleto(){
 
   const container = document.createElement("div");
 
-  container.style.padding = "10px";
   container.style.fontFamily = "Arial, Helvetica, sans-serif";
   container.style.color = "#1f2933";
+  container.style.padding = "8px";
+  container.style.background = "#fff";
 
-  const titulo = document.createElement("div");
-  titulo.innerHTML = `
-    <h2 style="color:#2f5f5b;margin-bottom:4px;">
+  container.innerHTML = `
+    <h2 style="color:#2f5f5b;margin:0 0 4px;">
       Dimensionamento de Sistema de Dilúvio
     </h2>
-    <p style="margin-top:0;font-size:12px;color:#667085;">
+    <p style="margin:0 0 12px;font-size:12px;color:#667085;">
       Tabela Resumo e Cálculos Hidráulicos das Chaves
     </p>
   `;
 
-  container.appendChild(titulo);
-
   const resumoClone = tabelaResumo.cloneNode(true);
   container.appendChild(resumoClone);
 
-  calculos.forEach((calc, index) => {
+  calculos.forEach(calc => {
     const clone = calc.cloneNode(true);
-
-    clone.style.pageBreakBefore = index === 0 ? "auto" : "always";
-
+    clone.style.pageBreakBefore = "always";
     container.appendChild(clone);
   });
 
   container.querySelectorAll("button").forEach(btn => btn.remove());
 
+  container.querySelectorAll(".table-wrap").forEach(div => {
+    div.style.overflow = "visible";
+  });
+
+  container.querySelectorAll("table").forEach(table => {
+    table.style.fontSize = "10px";
+    table.style.width = "100%";
+  });
+
   html2pdf()
     .set({
-      margin:8,
-      filename:"pdf_completo_diluvio.pdf",
-      image:{ type:"jpeg", quality:1 },
-      html2canvas:{ scale:2 },
-      jsPDF:{
-        unit:"mm",
-        format:"a4",
-        orientation:"landscape"
+      margin: 6,
+      filename: "pdf_completo_diluvio.pdf",
+      image: { type: "jpeg", quality: 1 },
+      html2canvas: { scale: 2, scrollY: 0 },
+      jsPDF: {
+        unit: "mm",
+        format: "a4",
+        orientation: "landscape"
+      },
+      pagebreak: {
+        mode: ["css", "legacy"]
       }
     })
     .from(container)
     .save();
 }
-  
+
 
 
 function exportarPDFChave(id){
