@@ -536,16 +536,16 @@ tr:nth-child(even){
     <th>Referência</th>
     <th>Local</th>
     <th>Trecho/<br>Chave</th>
-    <th>Compr.<br>(m)</th>
+    <th>Comp.<br>(m)</th>
     <th>Larg.<br>(m)</th>
     <th>Altura<br>(m)</th>
-    <th>Dens.<br>(L/min/m²)</th>
+    <th>Densidade<br>(L/min/m²)</th>
     <th>Área<br>(m²)</th>
     <th>Vazão<br>(L/min)</th>
     <th>Bico</th>
     <th>Ângulo<br>(°)</th>
-    <th>K</th>
-    <th>Bicos</th>
+    <th>Fator K</th>
+    <th>nº de Bicos</th>
     <th>Distância<br>(m)</th>
     <th>Pressão<br>(mca)</th>
     <th>Reserv.<br>(m³)</th>
@@ -1057,20 +1057,20 @@ function exportarTabelaResumoDXF(){
   y = -15;
 
   const colunas = [
-    'Ref',
+    'Referencia',
     'Local',
     'Chave',
-    'Comp',
-    'Larg',
-    'Alt',
+    'Comprimento',
+    'Largura',
+    'Altura',
     'Area',
     'Vazao',
     'Bico',
-    'Ang',
-    'K',
-    'Bicos',
-    'Dist',
-    'Press',
+    'Angulo',
+    'Fator K',
+    'Quantidade Bicos',
+    'Distancia',
+    'Pressao',
     'RTI'
   ];
 
@@ -1638,8 +1638,24 @@ function adicionarTrechoAposManometro(calcId){
   const novaLinha = document.createElement("tr");
   novaLinha.dataset.temBico = "nao";
 
-  novaLinha.innerHTML = `
-    <td>Novo trecho</td>
+const trechosExtras = [...tbody.querySelectorAll("tr")]
+  .filter(tr => tr.dataset.temBico === "nao").length;
+
+const referenciaNova =
+  trechosExtras === 0
+    ? "Manômetro-P1"
+    : `P${trechosExtras}-P${trechosExtras + 1}`;
+
+novaLinha.innerHTML = `
+<td>
+<input
+class="hidraulica-edit"
+type="text"
+value="${referenciaNova}"
+style="width:110px;"
+>
+</td> 
+
 
     <td class="pressao">0,00</td>
 
