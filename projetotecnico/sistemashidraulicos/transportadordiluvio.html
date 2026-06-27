@@ -1449,7 +1449,7 @@ function calculoHidraulicoChave(i){
   const espacamento = valorNum(l.espacamento);
 
 
-  const calcId = `calc-chave-${i}`;
+  const calcId = `calc-chave-${i}-${Date.now()}`;
 
   let linhasTabela = "";
 
@@ -1545,7 +1545,7 @@ margin-bottom:10px;
 
 
 
-<div class="hidraulica-title">${l.chave}</div>
+<div class="hidraulica-title">${l.referencia} - ${l.chave}</div> 
 
     <div class="hidraulica-subtitle">
   Bico: ${l.modelo} · K: ${l.k} · Ângulo: ${l.angulo}° · Quantidade: ${l.bicos}
