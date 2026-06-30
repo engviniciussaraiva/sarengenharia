@@ -1586,7 +1586,15 @@ oninput="alterarDN(this)">
 type="text" value="${fmt(espacamento)}" oninput="recalcularTabelaHidraulica(this.closest('table'))">
 </td>
 
-        <td><input class="hidraulica-edit comp-eq" type="text" value="0,00" oninput="recalcularTabelaHidraulica(this.closest('table'))"></td>
+        <td>
+  <input
+    class="hidraulica-edit comp-eq"
+    type="text"
+    value="0,00"
+    readonly
+    onclick="abrirModalCompEq(this)">
+</td>
+
         <td class="comp-total">0,00</td>
         <td class="perda-metro">0,0000</td>
         <td class="perda-total">0,0000</td>
