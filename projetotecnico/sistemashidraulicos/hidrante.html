@@ -1,0 +1,3600 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dimensionamento de Rede de Hidrantes</title>
+  <style>
+
+/* Corrige alinhamento e quebra de linha na última coluna "Velocidade" */
+#memoriaTabela th:last-child,
+#memoriaTabela td:last-child {
+  text-align: center;
+  width: 110px;
+  white-space: normal; /* permite quebrar linha */
+  line-height: 1.2;
+  word-wrap: break-word;
+  vertical-align: middle;
+}
+
+
+
+.checagens{ margin-top:12px; }
+.checagens .item{
+  padding:8px 10px; border-radius:8px; margin:6px 0;
+  display:flex; gap:8px; align-items:center; font-weight:600;
+}
+.checagens .ok{ background:#e3f2fd; color:#0d47a1; }      /* azul claro */
+.checagens .bad{ background:#ffebee; color:#b71c1c; }     /* vermelho claro */
+
+
+
+@media print {
+  @page { size: A4 portrait; margin: 20mm 15mm 25mm 15mm; }
+  body { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; }
+  .page-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 20mm; text-align: center; font-size: 12px; color: #555; }
+  .page-footer::after { counter-increment: page; content: "Página " counter(page) " de " counter(pages); }
+}
+
+
+
+/* ===== estilos do bloco NBR 16704 ===== */
+.nbr-card{
+  border:1px solid #e0e0e0; border-radius:10px; padding:14px; background:#fff; margin-top:14px;
+}
+.nbr-title{ font-weight:700; color:#1b5e20; margin-bottom:10px; }
+.nbr-grid{ display:grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr)); gap:12px; }
+.nbr-item b{ display:block; color:#333; margin-bottom:4px; }
+.nbr-item span{ display:block; color:#000; }
+.nbr-status{ margin-top:10px; font-size:14px; }
+.nbr-ok{ color:#1b5e20; }
+.nbr-warn{ color:#b26a00; }
+.nbr-err{ color:#b00020; }
+
+
+
+/* Bloco de resumo das bombas (aba Memória) */
+.bombas-resumo{ margin-top:16px; }
+.bombas-resumo h3{ color:#006400; margin:10px 0 8px; }
+.bombas-grid{ display:flex; gap:16px; flex-wrap:wrap; }
+.b-card{
+  flex:1; min-width:260px; background:#fff; border:1px solid #e0e0e0;
+  border-radius:10px; padding:12px;
+}
+.b-title{ font-weight:700; color:#1b5e20; margin-bottom:8px; }
+.b-row{ margin:4px 0; font-size:15px; }
+.b-row span{ color:#555; margin-right:6px; }
+
+
+
+/* Memória: destaque da linha selecionada */
+#memoriaTabela tbody tr.selected-row{
+  outline:2px solid #00cc66;
+  background:#f1fff5;
+}
+
+/* Memória: alinhamento geral + coluna Ações */
+#memoriaTabela th, #memoriaTabela td{ vertical-align: middle; }
+#memoriaTabela th:last-child, #memoriaTabela td:last-child{
+  width:60px; text-align:center;
+}
+#memoriaTabela td.row-actions{
+  vertical-align: middle;
+}
+#memoriaTabela td.row-actions .move-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:36px; height:30px; padding:0; margin:0;
+}
+
+
+    body { margin:0; font-family: Arial, sans-serif; background:#f8f8f8; }
+    h1 { text-align:center; color:#006400; font-size:30px; margin:25px 0 10px; }
+
+    .topnav { display:flex; background:#006400; overflow-x:auto; }
+    .topnav button{ flex:1; background:#006400; color:#fff; padding:15px; font-size:16px; border:none; cursor:pointer; border-bottom:4px solid transparent; }
+    .topnav button.active{ background:#004d00; border-bottom:4px solid #00cc66; font-weight:700; }
+
+    .aba{ display:none; padding:25px; }
+    .aba.ativa{ display:block; }
+
+    label{ font-weight:700; display:block; margin-bottom:6px; }
+    input, select{
+      width:100%; padding:8px; font-size:16px; border-radius:6px; border:1px solid #ccc; box-sizing:border-box; background:#fff;
+      margin-bottom:12px;
+    }
+
+    .linha{ display:flex; gap:20px; flex-wrap:wrap; }
+    .coluna{ flex:1; min-width:220px; }
+    h2{ font-size:24px; color:#006400; margin:0 0 14px; }
+    .icone::before{ margin-right:8px; }
+    .referencia .icone::before { content:"📄"; }
+    .edificacao .icone::before { content:"🏢"; }
+    .config .icone::before { content:"⚙️"; }
+    .hidrantes .icone::before { content:"🚰"; }
+    .trechos .icone::before { content:"✏️"; }
+
+    .linha-titulo{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:16px; flex-wrap:wrap; }
+    .botoes-cadastro button{
+      background:darkgreen; color:#fff; font-size:16px; border:none; padding:10px 16px; margin-left:8px; border-radius:8px; cursor:pointer;
+    }
+    .botoes-cadastro button.remover-tudo{ background:#b71c1c; }
+
+    .eq-mini{
+      border:1px solid #cfd8dc; background:#fff; border-radius:10px; padding:12px;
+      display:flex; gap:10px; align-items:end; flex-wrap:wrap;
+      min-width:320px;
+    }
+    .eq-mini label{ margin-bottom:4px; }
+    .eq-mini .btn{ background:#0a7; color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-size:14px; }
+    .eq-feedback{ margin-top:8px; font-size:14px; }
+    .eq-ok{ color:#1b5e20; }
+    .eq-warn{ color:#b26a00; }
+    .eq-err{ color:#b00020; }
+
+    .bloco-hidrante, .bloco-trecho{
+      border:1px solid #ccc; border-radius:12px; padding:18px; background:#fff; margin-bottom:25px;
+    }
+    .bloco-hidrante summary, .bloco-trecho summary{
+      font-weight:700; font-size:16px; cursor:pointer; margin-bottom:10px;
+    }
+
+    .observacao-vermelha{ color:#c62828; font-size:14px; }
+
+    table{ width:100%; border-collapse:collapse; }
+    th, td{ border:1px solid #aaa; padding:8px; text-align:center; font-size:14px; }
+    th{ background:#f0f0f0; font-weight:700; }
+
+    .tabela-resultado{ margin-top:16px; }
+    .botao-remover{ background:#e57373; color:#fff; padding:8px 14px; border:none; border-radius:6px; cursor:pointer; font-size:15px; }
+
+    .trecho-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:20px; }
+    .trecho-col-esq, .trecho-col-dir{ background:#fff; }
+    .tbl-conexoes th:nth-child(1), .tbl-conexoes td:nth-child(1){ text-align:left; }
+    .rodape-conexoes{ text-align:right; font-size:13px; color:#333; padding-top:6px; }
+
+    .resultados-trecho{ margin-top:14px; }
+    .resultados-trecho th, .resultados-trecho td{ font-size:13px; }
+
+    /* Memória */
+    .mem-toolbar{ display:flex; gap:10px; justify-content:flex-start; margin:10px 0 14px; }
+    .mem-toolbar button{ background:#00695c; color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-size:14px; }
+    .mem-toolbar .danger{ background:#b00020; }
+    .move-btn{ background:#eee; border:1px solid #ccc; border-radius:4px; padding:2px 6px; cursor:pointer; }
+    .row-actions{ display:flex; gap:4px; justify-content:center; }
+
+    @media (max-width: 980px){ .trecho-grid{ grid-template-columns: 1fr; } }
+
+/* === estilos para os cards da Bomba === */
+    .cmb-card-title{
+      font-weight:700; color:#1b5e20; margin-bottom:10px;
+    }
+    .cmb-group{
+      margin-bottom:14px;   /* espaço entre Pressão, Vazão, Potência */
+    }
+    .cmb-label{
+      font-weight:700; margin-bottom:6px;
+    }
+    .cmb-val{
+      display:block;
+      line-height:1.35;     /* altura de linha maior */
+      margin-bottom:2px;    /* espaço entre as duas linhas */
+    }
+    .cmb-note{
+      font-size:14px; color:#666; margin-top:6px;
+    }
+
+
+/* Coluna "Ações" — mais estreita e centralizada */
+    #memoriaTabela th:last-child,
+    #memoriaTabela td:last-child{
+      width: 54px;
+      min-width: 54px;
+      max-width: 54px;
+      text-align: center;
+      padding-left: 4px;
+      padding-right: 4px;
+    }
+
+    #memoriaTabela td.row-actions{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 4px;
+    }
+
+    #memoriaTabela td.row-actions .move-btn{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      margin: 0;
+      border-radius: 6px;
+    }
+
+/* Notas técnicas na aba 2 */
+.nota-tecnica{ color:#b00020; font-size:16px; margin-top:6px; }
+.nota-tecnica.oculta{ display:none; }
+/* Coloca a caixa da Jockey abaixo da Principal sem alterar tamanhos */
+.bombas-grid {
+  display: flex;
+  flex-direction: column; /* muda de lado a lado → para embaixo */
+  gap: 12px; /* espaçamento vertical entre as caixas */
+}
+
+/* Mantém o mesmo tamanho original das duas caixas */
+.b-card {
+  width: 100%;
+  max-width: 500px; /* ou o valor atual que você usa */
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+
+
+
+
+</style>
+</head>
+<body>
+
+
+  <h1>DIMENSIONAMENTO HIDRÁULICO</h1>
+
+  <div class="topnav">
+    <button class="active" onclick="abrirAba(event,'aba1')">📄 Referência do Projeto</button>
+    <button onclick="abrirAba(event,'aba2')">🏢 Dados da Edificação</button>
+    <button onclick="abrirAba(event,'aba3')">⚙️ Configurações do Sistema de Hidrantes</button>
+    <button onclick="abrirAba(event,'aba4')">🚰 Rede Isométrica</button>
+    <button onclick="abrirAba(event,'aba6')">⚡ Conjunto Moto Bomba</button>
+    <button onclick="abrirAba(event,'aba5')">✏️ Memória de Cálculo</button>
+ 	<button onclick="abrirAba(event,'aba7')">🧾 Memorial Descritivo</button>
+  </div>
+
+  <!-- Aba 1 -->
+  <div class="aba ativa referencia" id="aba1">
+    <h2 class="icone">Referência do Projeto</h2>
+    <label>Sistema Dimensionado:</label>
+    <input id="sistema" placeholder="Ex: Rede de Hidrantes ou Rede de Hidrantes e Chuveiros automáticos" />
+    <label>Referência:</label><input id="referencia" />
+    <label>Cliente:</label><input id="cliente" />
+    <label>Endereço:</label><input id="endereco" />
+    <div class="linha">
+      <div class="coluna"><label>ART:</label><input id="art" placeholder="Ex: 123456789012345/SP" /></div>
+      <div class="coluna"><label>Data:</label><input id="data" value="" /></div>
+    </div>
+  </div>
+
+  <!-- Aba 2 -->
+  <div class="aba edificacao" id="aba2">
+    <h2 class="icone">Dados da Edificação</h2>
+    <label>Uso:</label>
+    <select id="grupo" onchange="atualizarOcupacao()"><option value="">Selecione</option></select>
+    <label>Ocupação:</label>
+    <select id="ocupacao"><option value="">Selecione</option></select>
+    <label>Área construída protegida (m²):</label>
+    <input id="area" placeholder="Ex: 5.000,00" />
+<!-- Notas técnicas dinâmicas -->
+<div id="edif-notas">
+  <div id="nota-area" class="nota-tecnica oculta">
+    Nota técnica: Verificar real necessidade da rede de hidrantes considerando a área construída indicada.
+  </div>
+  <div id="nota-mj" class="nota-tecnica oculta">
+    Nota técnica: Verificar real necessidade da rede de hidrantes considerando a classificação Industrial com baixa carga de incêndio (200 MJ/m²).
+    <br>
+    <small>IT 22 - Item: E.1.1 Áreas exclusivamente destinadas a processos industriais com carga de incêndio igual ou inferior a 200 MJ/m².</small>
+  </div>
+</div>
+
+
+  </div>
+
+  <!-- Aba 3 -->
+  <div class="aba config" id="aba3">
+    <h2 class="icone">Configurações do Sistema de Hidrantes</h2>
+    <div class="linha">
+      <div class="coluna">
+        <label>Tipo de Sistema:</label>
+        <select id="tipoSistema"><option>-- Selecionar --</option></select>
+        <label>Selecionar Modelo do Esguicho:</label>
+        <select id="modeloEsguicho"><option>-- Selecionar --</option></select>
+        <label>Fator K do Esguicho:</label><input id="fatorK" />
+        <label>Volume mínimo da reserva de incêndio (L):</label><input id="volumeMinimo" readonly />
+<label>Tipo de Expedição do hidrante:</label><input id="expedicoes" readonly />
+
+
+      </div>
+      <div class="coluna">
+        <label>Vazão mínima na válvula do hidrante (lpm):</label><input id="vazaoMinima" />
+        <label>Pressão mínima na válvula do hidrante (m.c.a.):</label><input id="pressaoMinima" />
+        <label>Diâmetro do Esguicho (mm):</label><input id="diametroEsguicho" />
+        <label>Diâmetro da Mangueira (mm):</label><input id="diametroMangueira" />
+<label>Quantidade de hidrantes na rede:</label>
+<input id="qtdHidrantes" type="number" min="1" step="1" placeholder="Informe a quantidade" />
+<p id="msgJockey" class="muted" style="color:#1b5e20; margin-top:6px; display:none;">
+  💡 Sistema com mais de 6 hidrantes obrigatório rede pressurizada.
+</p>
+
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Aba 4 -->
+  <div class="aba hidrantes" id="aba4">
+    <h2 class="icone">Rede Isométrica</h2>
+
+    <div class="linha-titulo">
+      <div class="botoes-cadastro">
+        <button onclick="adicionarHidrante()">➕ Adicionar Hidrante</button>
+        <button onclick="adicionarTrecho(true)">➕ Adicionar Trecho</button>
+        <button onclick="inserirEquipamento()">➕ Adicionar Equipamento</button>
+        <button class="remover-tudo" onclick="removerTudo()">🗑️ Remover Tudo</button>
+      </div>
+
+      <!-- Equalização por nó -->
+      <div class="eq-mini">
+        <div class="coluna" style="min-width:220px;">
+          <label for="eq-no-list">Selecione o nó para equalizar</label>
+          <select id="eq-no-list">
+            <option value="">Nenhum nó elegível</option>
+          </select>
+        </div>
+        <div>
+          <button class="btn" onclick="aplicarEqualizacaoNo()">Aplicar Equalização</button>
+        </div>
+        <div class="eq-feedback" id="eq-feedback"></div>
+        <div class="eq-diff" id="eq-diff" style="margin-top:6px; font-size:14px;"></div>
+      </div>
+    </div>
+
+    <datalist id="listaNos"></datalist>
+    <datalist id="listaNosRef"></datalist>
+
+    <div id="containerTrechos"></div>
+  </div>
+
+  <!-- Aba 6 -->
+  <div class="aba" id="aba6">
+    <h2 class="icone">Conjunto Moto Bomba</h2>
+    <div style="border:1px solid #cfd8dc; background:#fff; border-radius:10px; padding:16px;">
+
+      <div class="linha" style="align-items:flex-end">
+        <div class="coluna">
+          <label>Selecione o ponto referência para o cálculo:</label>
+          <select id="cmb-trecho-select">
+            <option value="">— selecione um trecho —</option>
+          </select>
+        </div>
+        <div style="min-width:220px">
+          <label>Rendimento hidráulico/mecânico (%)</label>
+          <input id="cmb-ef" value="50" />
+        </div>
+      </div>
+
+      <div class="linha" style="margin-top:10px">
+        <!-- BLOCO ESQ: CARACTERISTICAS -->
+   <div class="coluna" style="min-width:320px">
+  <div style="border:1px solid #e0e0e0; border-radius:10px; padding:14px;">
+  <div class="cmb-card-title">Características do conjunto Moto Bomba Principal</div>
+
+  <div class="cmb-group">
+    <div class="cmb-label">Pressão:</div>
+    <div id="cmb-p-mca" class="cmb-val">—</div>
+    <div id="cmb-p-bar" class="cmb-val">—</div>
+  </div>
+
+  <div class="cmb-group">
+    <div class="cmb-label">Vazão de Projeto:</div>
+    <div id="cmb-q-lpm" class="cmb-val">—</div>
+    <div id="cmb-q-m3h" class="cmb-val">—</div>
+  </div>
+
+  <div class="cmb-group">
+    <div class="cmb-label">Potência Teórica do conjunto</div>
+    <div id="cmb-pot-cv" class="cmb-val">—</div>
+    <div id="cmb-pot-hp" class="cmb-val">—</div>
+  </div>
+
+  <div class="cmb-note">Nota Técnica: Dimensionamento teórico - ajuste conforme catálogo do fabricante.</div>
+</div>
+  </div>
+</div>
+
+
+
+<!-- BLOCO JOCKEY -->
+<div class="coluna" style="min-width:320px">
+  <div style="border:1px solid #e0e0e0; border-radius:10px; padding:14px;">
+  <div class="cmb-card-title">Características do conjunto Moto Bomba Jockey (pressurização) - Aplicar somente para linha com mais de 06 pontos de hidrantes</div>
+
+  <div class="cmb-group">
+    <div class="cmb-label">Pressão:</div>
+    <div id="jockey-p-mca" class="cmb-val">—</div>
+    <div id="jockey-p-bar" class="cmb-val">—</div>
+  </div>
+
+  <div class="cmb-group">
+    <div class="cmb-label">Vazão Mínima:</div>
+    <div id="jockey-q-lpm" class="cmb-val">—</div>
+    <div id="jockey-q-m3h" class="cmb-val">—</div>
+  </div>
+
+  <div class="cmb-group">
+    <div class="cmb-label">Potência Teórica do conjunto (apenas referência)</div>
+    <div id="jockey-pot-cv" class="cmb-val">—</div>
+    <div id="jockey-pot-hp" class="cmb-val">—</div>
+  </div>
+
+  <div class="cmb-note">Nota Técnica: Dimensionamento teórico – ajuste conforme catálogo do fabricante.</div>
+</div>
+</div>
+</div>
+
+
+
+
+        <!-- BLOCO DIR: NPSH -->
+        <div class="coluna" style="min-width:320px">
+          <div style="border:1px solid #e0e0e0; border-radius:10px; padding:14px;">
+            <div style="font-weight:700; color:#1b5e20; margin-bottom:10px;">NPSH</div>
+            <div class="linha">
+              <div class="coluna">
+                <label>Altitude (m s.n.m.)</label>
+                <input id="cmb-alt" value="10,33" />
+              </div>
+              <div class="coluna">
+                <label>Temperatura da água (°C)</label>
+                <input id="cmb-temp" value="20" />
+              </div>
+            </div>
+            <div class="linha">
+              <div class="coluna">
+                <label>Carga estática de sucção (m)</label>
+                <input id="cmb-hs" value="0" />
+              </div>
+              <div class="coluna">
+                <label>Perdas na sucção (m)</label>
+                <input id="cmb-hf" value=" " />
+              </div>
+            </div>
+            <div class="linha">
+              <div class="coluna">
+                <label>NPSHr do fabricante (m)</label>
+                <input id="cmb-npshr" value=" " />
+              </div>
+              <div class="coluna">
+                <label>Margem recomendada (m)</label>
+                <input id="cmb-margem" value="0,50" />
+              </div>
+            </div>
+            <div style="margin-top:10px; font-size:14px;">
+              <div><strong>NPSH disponível (m):</strong> <span id="cmb-npsha">—</span></div>
+              <div><strong>Requisito (NPSHr + margem) (m):</strong> <span id="cmb-npshreq">—</span></div>
+              <div><strong>Situação:</strong> <span id="cmb-npshstatus">—</span></div>
+            </div>
+</div>
+
+<!-- NBR 16704 – Parâmetros de Seleção (fica abaixo do NPSH) -->
+<div class="nbr-card" id="nbr16704-card">
+  <div class="nbr-title">NBR 16704 — Parâmetros para seleção da bomba</div>
+  <div class="nbr-grid">
+    <div class="nbr-row">
+     <strong>Ponto nominal (projeto)</strong><br>
+Vazão nominal: <span id="nbr-qn">—</span><br>
+Pressão nominal: <span id="nbr-hn">—</span>
+
+    </div>
+    <div class="nbr-row">
+      <strong>Faixa operacional ideal (70–120% de Qn)</strong><br>
+      Q: <span id="nbr-q-ideal">—</span>
+      <span class="badge mute" id="nbr-bdg-ideal">—</span>
+    </div>
+    <div class="nbr-row">
+      <strong>150% da vazão</strong><br>
+      Q<sub>150%</sub>: <span id="nbr-q150">—</span><br>
+      H admissível: <span id="nbr-h150">—</span>
+      <span class="badge mute" id="nbr-bdg-150">—</span>
+    </div>
+    <div class="nbr-row">
+      <strong>Shutoff (Q=0)</strong><br>
+      H<sub>máx</sub> ≤ <span id="nbr-h0max">—</span>
+      <span class="badge mute" id="nbr-bdg-0">—</span>
+    </div>
+  </div>
+  <div style="font-size:12px;color:#666; margin-top:6px;">
+    Observação: estes valores são <em>alvos normativos</em> para checagem. A confirmação final depende da curva real do fabricante.
+  </div>
+</div>
+
+</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<!-- Aba 7 -->
+<div class="aba" id="aba7">
+  <h2 class="icone">Memorial Descritivo do Dimensionamento Hidráulico</h2>
+
+  <div class="memorial-toolbar" style="display:flex; gap:8px; margin:10px 0 14px;">
+    <button id="btn-mem-atualizar" style="background:#00695c;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;">
+      🔄 Atualizar Memorial
+    </button>
+    <button onclick="window.print()" style="background:#2e7d32;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;">
+      🖨️ Imprimir / PDF
+    </button>
+  </div>
+
+  <div id="memorial" class="memorial-doc" style="
+    background:#fff; border:1px solid #e0e0e0; border-radius:10px;
+    padding:18px; line-height:1.45; color:#222;">
+    <em>Clique em “Atualizar Memorial” para gerar o conteúdo.</em>
+  </div>
+</div>
+
+
+
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ===== Aba 6 – cálculo só CV/HP com rendimento ===== */
+    const MCA_PER_BAR = 10.197;
+
+function cmb_resetUI(){
+  const set = id => { const el = document.getElementById(id); if (el) el.textContent = '—'; };
+  [
+    // principal
+    'cmb-p-mca','cmb-p-bar','cmb-q-lpm','cmb-q-m3h','cmb-pot-cv','cmb-pot-hp',
+    // jockey
+    'jockey-p-mca','jockey-p-bar','jockey-q-lpm','jockey-q-m3h','jockey-pot-cv','jockey-pot-hp'
+  ].forEach(set);
+ // —— limpa cartão da NBR 16704 também
+  if (typeof cmb_resetNorma==='function') cmb_resetNorma();
+}
+
+function cmb_updateOp(){
+  const sel  = document.getElementById('cmb-trecho-select');
+
+  // refs PRINCIPAL
+  const Pmca = document.getElementById('cmb-p-mca');
+  const Pbar = document.getElementById('cmb-p-bar');
+  const Qlpm = document.getElementById('cmb-q-lpm');
+  const Qm3h = document.getElementById('cmb-q-m3h');
+  const elCV = document.getElementById('cmb-pot-cv');
+  const elHP = document.getElementById('cmb-pot-hp');
+
+  // refs JOCKEY
+  const J_Pmca = document.getElementById('jockey-p-mca');
+  const J_Pbar = document.getElementById('jockey-p-bar');
+  const J_Qlpm = document.getElementById('jockey-q-lpm');
+  const J_Qm3h = document.getElementById('jockey-q-m3h');
+  const J_CV   = document.getElementById('jockey-pot-cv');
+  const J_HP   = document.getElementById('jockey-pot-hp');
+
+  // === CHECAGEM AUTOMÁTICA DA BOMBA JOCKEY ===
+  const deveCalcularJockey = sessionStorage.getItem('mostrarJockey') === 'true';
+  const blocoJockey = document.getElementById('bloco-jockey');
+
+  if (blocoJockey) {
+    blocoJockey.style.display = deveCalcularJockey ? 'block' : 'none';
+  }
+
+  // Se não deve calcular, limpa os campos da jockey
+ if (!deveCalcularJockey) {
+  // Mantém o bloco visível mas apaga os textos e números
+  const tituloJockey = document.querySelector('#bloco-jockey h3');
+  if (tituloJockey) tituloJockey.textContent = '';
+
+  [J_Pmca, J_Pbar, J_Qlpm, J_Qm3h, J_CV, J_HP].forEach(el => {
+    if (el) el.textContent = ''; // deixa em branco
+  });
+} else {
+  // Reaplica o título quando for necessário mostrar novamente
+  const tituloJockey = document.querySelector('#bloco-jockey h3');
+  if (tituloJockey) {
+    tituloJockey.textContent =
+      'Características do conjunto Moto Bomba Jockey (pressurização) - Aplicar somente para linha com mais de 06 pontos de hidrantes';
+  }
+}
+
+
+  // reset rápido
+  const reset = () => {
+    [Pmca,Pbar,Qlpm,Qm3h,elCV,elHP,J_Pmca,J_Pbar,J_Qlpm,J_Qm3h,J_CV,J_HP]
+      .forEach(el => { if(el) el.textContent = '—'; });
+  };
+
+  // ⬇️⬇️ INSERÇÃO 1: sem seleção → limpa UI + limpa card da NBR
+  if(!sel || !sel.value){
+    reset();
+    if (typeof cmb_resetNorma === 'function') cmb_resetNorma();   // <<< limpar card NBR 16704
+    updateResumoBombas();
+    return;
+  }
+
+  // lê trecho selecionado
+  const d = cmb_lerTrecho(sel.value);
+  if(!d || !(d.Qin_lpm>0) || !(d.Pf_mca!=null)){
+    reset();
+    if (typeof cmb_resetNorma === 'function') cmb_resetNorma();   // <<< limpar card NBR 16704
+    updateResumoBombas();
+    return;
+  }
+
+  // ===== PRINCIPAL =====
+  const p_mca = d.Pf_mca;                 // Hn
+  const p_bar = p_mca / MCA_PER_BAR;
+  const q_lpm = d.Qin_lpm;                // Qn
+  const q_m3h = (q_lpm/1000)*60;
+
+  if (Pmca) Pmca.textContent = `${formatBR(p_mca,2)} m.c.a.`;
+  if (Pbar) Pbar.textContent = `${formatBR(p_bar,3)} bar`;
+  if (Qlpm) Qlpm.textContent = `${formatBR(q_lpm,2)} L/min`;
+  if (Qm3h) Qm3h.textContent = `${formatBR(q_m3h,2)} m³/h`;
+
+  // ⬇️⬇️ INSERÇÃO 2: após preencher pressão/vazão principais → atualiza card NBR
+  if (typeof cmb_updateNorma === 'function') cmb_updateNorma(q_lpm, p_mca);
+
+  const Q_m3s = q_m3h/3600;
+  const PkW   = (1000*9.81*Q_m3s*p_mca)/1000;
+  const ef    = toNumberLocaleSmart(document.getElementById('cmb-ef').value) || 100;
+  const PkWef = (ef>0) ? PkW/(ef/100) : PkW;
+  const Pcv   = PkWef / 0.7355;
+  const Php   = PkWef / 0.7457;
+
+  if (elCV) elCV.textContent = `${formatBR(Pcv,2)} cv`;
+  if (elHP) elHP.textContent = `${formatBR(Php,2)} hp`;
+
+  // ===== JOCKEY =====
+  if (J_Pmca){
+    const Pj_mca = p_mca * 1.10;
+    const Pj_bar = Pj_mca / MCA_PER_BAR;
+    const Qj_lpm = 20;
+    const Qj_m3h = (Qj_lpm/1000)*60;
+
+    J_Pmca.textContent = `${formatBR(Pj_mca,2)} m.c.a.`;
+    J_Pbar.textContent = `${formatBR(Pj_bar,3)} bar`;
+    J_Qlpm.textContent = `${formatBR(Qj_lpm,2)} L/min`;
+    J_Qm3h.textContent = `${formatBR(Qj_m3h,2)} m³/h`;
+
+    const Qj_m3s = Qj_m3h/3600;
+    const PkW_j  = (1000*9.81*Qj_m3s*Pj_mca)/1000;
+    const PkWef_j = (ef>0) ? PkW_j/(ef/100) : PkW_j;
+    J_CV.textContent = `${formatBR(PkWef_j/0.7355,2)} cv`;
+    J_HP.textContent = `${formatBR(PkWef_j/0.7457,2)} hp`;
+  }
+
+  updateResumoBombas();
+}
+
+
+
+
+
+    
+
+
+
+
+// === Resumo das Bombas na aba Memória (somente exibição) ===
+function updateResumoBombas(){
+  // principal
+  const get = id => (document.getElementById(id)?.textContent || '—');
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent = val; };
+
+  set('mem-cmb-p-mca', get('cmb-p-mca'));
+  set('mem-cmb-p-bar', get('cmb-p-bar'));
+  set('mem-cmb-q-lpm', get('cmb-q-lpm'));
+  set('mem-cmb-q-m3h', get('cmb-q-m3h'));
+  set('mem-cmb-pot-cv', get('cmb-pot-cv'));
+  set('mem-cmb-pot-hp', get('cmb-pot-hp'));
+
+  // jockey
+  set('mem-jk-p-mca',   get('jockey-p-mca'));
+  set('mem-jk-p-bar',   get('jockey-p-bar'));
+  set('mem-jk-q-lpm',   get('jockey-q-lpm'));
+  set('mem-jk-q-m3h',   get('jockey-q-m3h'));
+  set('mem-jk-pot-cv',  get('jockey-pot-cv'));
+  set('mem-jk-pot-hp',  get('jockey-pot-hp'));
+}
+
+
+
+</script>
+
+
+
+  <!-- Aba 5 -->
+  <div class="aba trechos" id="aba5">
+    <!-- Bloco superior da aba Memória -->
+<div class="memoria-header">
+  <div class="mem-toolbar">
+    <button id="btn-carregar-memoria" onclick="preencherMemoriaCalculo()">🧮 Carregar Memória</button>
+    <button onclick="exportarMemoria()">⬇️ Exportar CSV</button>
+    <button class="danger" onclick="limparMemoria()">🗑️ Limpar Tabela</button>
+  </div>
+  <h2 class="icone"> Memória de Cálculo</h2>
+</div>
+
+
+
+
+   <table id="memoriaTabela">
+  <thead>
+    <tr>
+      <th>Trecho (PI→PF)</th>
+      <th>Pressão inicial (mca)</th>
+      <th>Fator K</th>
+      <th>Vazão inicial (L/min)</th>
+      <th>Diâmetro da linha (mm)</th>
+      <th>Comp. real (m)</th>
+      <th>Comp. equivalente (m)</th>
+      <th>Comp. total (m)</th>
+      <th>Perda de carga (mca/m)</th>
+      <th>Perda de carga total (mca)</th>
+      <th>Desnível (m)</th>
+      <th>Pressão final (mca)</th>
+      <th>Velocidade (m/s)</th>
+      <th style="width:160px">Ações</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+
+<!-- Checagens automáticas (aba Memória) -->
+<div id="checagens" class="checagens"></div>
+
+
+
+
+<!-- Resumo das bombas (somente visual) -->
+<div id="resumoBombas" class="bombas-resumo">
+<!-- Checagens rápidas (Pressão e Vazão) -->
+  <div id="checks-pre-cmb" style="display:none;"></div>
+  <h3>Conjunto Moto-Bomba — Dimensionamento</h3>
+  <div class="bombas-grid">
+    <div class="b-card">
+      <div class="b-title">Principal</div>
+      <div class="b-row"><span>Pressão:</span> <strong id="mem-cmb-p-mca">—</strong> · <strong id="mem-cmb-p-bar">—</strong></div>
+      <div class="b-row"><span>Vazão de projeto:</span>   <strong id="mem-cmb-q-lpm">—</strong> · <strong id="mem-cmb-q-m3h">—</strong></div>
+      <div class="b-row"><span>Potência:</span> <strong id="mem-cmb-pot-cv">—</strong> · <strong id="mem-cmb-pot-hp">—</strong></div>
+    </div>
+
+    <div class="b-card">
+      <div class="b-title">Jockey (pressurização)</div>
+      <div class="b-row"><span>Pressão:</span> <strong id="mem-jk-p-mca">—</strong> · <strong id="mem-jk-p-bar">—</strong></div>
+      <div class="b-row"><span>Vazão mínima:</span>   <strong id="mem-jk-q-lpm">—</strong> · <strong id="mem-jk-q-m3h">—</strong></div>
+      <div class="b-row"><span>Potência (somente referência):</span> <strong id="mem-jk-pot-cv">—</strong> · <strong id="mem-jk-pot-hp">—</strong></div>
+    </div>
+  </div>
+</div>
+
+
+
+  </div>
+
+  <script>
+    /* ===== Abas ===== */
+    function abrirAba(evt, nomeAba){
+      document.querySelectorAll(".aba").forEach(a=>a.classList.remove("ativa"));
+      document.querySelectorAll(".topnav button").forEach(b=>b.classList.remove("active"));
+      document.getElementById(nomeAba).classList.add("ativa");
+      if (evt && evt.currentTarget) evt.currentTarget.classList.add("active");
+      // Se abriu a aba Memória (aba5), atualiza cores e checagens
+  if (nomeAba === 'aba5') {
+    pintarMemoriaPfVel();
+    renderChecagensAbaMemoria();
+renderChecksPreCMB(); 
+  }
+}
+
+
+    /* Data atual */
+    const hoje = new Date();
+    (function(){ const d=document.getElementById('data'); if(d) d.value = hoje.toLocaleDateString('pt-BR'); })();
+
+    /* Bancos (URLs) */
+    const urlOcupacao = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQCHZweMF9aSf8tlWJc-X7nzhOhnEJJTIKFP0GtTCagp7DRRuTqBaGVlxo0yILyBDYDkenNVITCMvpd/pub?output=csv";
+    const urlSistema  = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzG9VjQDsnjQqbgG63nnfb5HjeIFqILfFg_l1nGSd3xddckdSWpttpBMaXNkylkXVYEbVRj0C3kqfy/pub?output=csv";
+    const urlEsguicho = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQembmQ7IdYomcTlTop-j06yG19PqQzVFUmmYqKLY1l58OUHbhw67mPP4q1ZmJSRzBrGnlE5JgnsZsW/pub?output=csv";
+    const urlFatorC   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQPtrmiVKapZFL0euL9_FA8B_PQ5anR-ZrJ6dY99w7iYzlu3vhuqp6IilmcrtWQwOFoflQO4Szxe8Bn/pub?output=csv";
+    const urlDiametros= "https://docs.google.com/spreadsheets/d/e/2PACX-1vSV7TDdozeyNzb6MdzK1CpHfZ-1CQB5qfseaIiBYB4qBSIh0v7oFcw7AifSCOuuSvhiluFWQACVIbIy/pub?output=csv";
+    const urlConexoes = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSlu6-8XaSiWsOyyqcQMJzuFp6FNAqQKQMgUb-KfGRHMWli7eQGSHoqNHoCkZWpZUEqyh1espeeNVcU/pub?output=csv";
+
+    /* Bancos (dados) */
+    let bancoOcupacao=[], bancoSistema=[], bancoEsguicho=[];
+    let bancoFatorC=[], bancoDiametros=[], bancoConexoes=[];
+    let fatorCCarregado=false, diametrosCarregado=false, conexoesCarregado=false;
+
+    /* ===== CSV helpers ===== */
+    function splitCSVLine(line){ const out=[]; let cur=""; let inQ=false;
+      for(let i=0;i<line.length;i++){ const ch=line[i];
+        if(ch==='"'){ if(inQ && line[i+1]==='"'){cur+='"'; i++;} else inQ=!inQ; }
+        else if(ch===',' && !inQ){ out.push(cur); cur=""; }
+        else cur+=ch;
+      }
+      out.push(cur); return out.map(s=>s.trim());
+    }
+    function parseCSV(text){
+      const txt=text.replace(/^\uFEFF/,"").trim();
+      const linhas=txt.split(/\r?\n/); if(!linhas.length) return [];
+      const headers=splitCSVLine(linhas[0]).map(h=>h.trim());
+      return linhas.slice(1).map(l=>{
+        const cols=splitCSVLine(l); const obj={};
+        headers.forEach((h,i)=>obj[h]=(cols[i]??"").trim());
+        return obj;
+      });
+    }
+    async function lerCSV(url){
+      try{
+        const r=await fetch(url,{mode:'cors',cache:'no-store'});
+        if(!r.ok) throw new Error('HTTP '+r.status);
+        const txt=await r.text(); return parseCSV(txt);
+      }catch(e){
+        console.warn('[CSV] Falha ao buscar',url,e);
+        if(location.protocol==='file:'){
+          console.warn('Abra via http(s) (ex. VSCode Live Server) para evitar CORS.');
+        }
+        return [];
+      }
+    }
+
+    /* Carrega tabelas base */
+    Promise.all([lerCSV(urlOcupacao), lerCSV(urlSistema), lerCSV(urlEsguicho)]).then(([oc,si,es])=>{
+      bancoOcupacao=oc; bancoSistema=si; bancoEsguicho=es; preencherGrupo();
+    });
+    async function carregarBancoFatorC(){ if(!fatorCCarregado){ bancoFatorC=await lerCSV(urlFatorC); fatorCCarregado=true; } }
+    async function carregarBancoDiametros(){ if(!diametrosCarregado){ bancoDiametros=await lerCSV(urlDiametros); diametrosCarregado=true; } }
+    async function carregarBancosConexoes(){ if(!conexoesCarregado){ bancoConexoes=await lerCSV(urlConexoes); conexoesCarregado=true; } }
+
+    /* ===== Helpers gerais ===== */
+    const removeAcentos = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    function mapeiaMaterialParaColuna(mat){ const m=removeAcentos(String(mat).toLowerCase());
+      if(m.includes('pvc')) return 'PVC'; if(m.includes('pead')||m.includes('polietileno')) return 'PEAD'; return 'ACO'; }
+    function limparCSV(v){ if(v==null) return ""; return String(v).trim().replace(/^["']+|["']+$/g,""); }
+    function dnKey(v){ return String(v||'').replace(/"/g,'').replace(/[.\s]/g,'').trim(); }
+
+    function toNumberLocaleSmart(s){
+      if(s==null) return null;
+      s=String(s).trim();
+      if(!s) return null;
+      if(s.includes(',')){
+        const norm=s.replace(/\./g,'').replace(/,/g,'.');
+        const n=Number(norm);
+        return Number.isFinite(n)? n : null;
+      }else{
+        const n=Number(s);
+        return Number.isFinite(n)? n : null;
+      }
+    }
+    function formatBR(n, casas=2){
+      return (n==null || !isFinite(n)) ? "–" :
+        Number(n).toLocaleString('pt-BR',{minimumFractionDigits:casas,maximumFractionDigits:casas});
+    }
+
+// Lê "2|8", "2 / 8", "T2 - RTI 8" ou "8"  →  {tipo, rti}
+function parseTipoRtiCell(cell){
+  const s = (cell ?? '').toString().trim();
+  if (!s) return { tipo: null, rti: null };
+  const nums = s.match(/\d+/g);
+  if (!nums) return { tipo: null, rti: null };
+  if (nums.length >= 2) return { tipo: Number(nums[0]), rti: Number(nums[1]) };
+  return { tipo: null, rti: Number(nums[0]) }; // retrocompatível se vier só RTI
+}
+
+// Pega o conteúdo da coluna da faixa de área
+function valorAreaCell(linhaOcup, area){
+  if (area <= 2500)   return linhaOcup["Area_ate_2500"];
+  if (area <= 5000)   return linhaOcup["Area_2500_ate_5000"];
+  if (area <= 10000)  return linhaOcup["Area_5000_ate_10000"];
+  if (area <= 20000)  return linhaOcup["Area_10000_ate_20000"];
+  if (area <= 50000)  return linhaOcup["Area_20000_ate_50000"];
+  return linhaOcup["Area_acima_50000"];
+}
+
+// Monta o dropdown de tipo a partir do número (1..5) e chama preencherDadosSistema()
+
+function aplicarTipoSistema(tipoNum){
+  const drop = document.getElementById('tipoSistema');
+  const prev = drop.value;        // tenta preservar seleção atual
+  drop.innerHTML = "";
+
+  if (String(tipoNum) === "4"){
+    const opts = ["Tipo 4 - DN 40","Tipo 4 - DN 65"];
+    opts.forEach(t => drop.add(new Option(t,t)));
+    drop.disabled = false;        // Tipo 4 precisa ficar habilitado
+    drop.value = opts.includes(prev) ? prev : "Tipo 4 - DN 40";
+  } else {
+    const linha = bancoSistema.find(s => s["Tipo"].includes(`Tipo ${tipoNum}`));
+    if (linha && linha["Tipo"]){
+      drop.add(new Option(linha["Tipo"], linha["Tipo"]));
+      drop.disabled = true;       // tipos ≠ 4 continuam travados
+      drop.value = linha["Tipo"];
+    } else {
+      drop.add(new Option("-- Tipo não encontrado --",""));
+      drop.disabled = true;
+    }
+  }
+}
+
+
+
+
+
+    function attachBRFormatter(input, casas=2){
+      input.addEventListener('blur', ()=>{
+        const v = toNumberLocaleSmart(input.value);
+        input.value = (v==null) ? "" : v.toLocaleString('pt-BR',{minimumFractionDigits:casas,maximumFractionDigits:casas});
+        recalcularTodosTrechos();
+      });
+    }
+
+    /* ===== Ocupação / Sistema ===== */
+
+// === Filtro interno no MESMO <select id="ocupacao"> ===
+// Modo compatível + mostra a lista ao vivo (usando size)
+let _ocSnapshot = [];
+let _ocQuery = "";
+let _ocTimer = null;
+
+function _ocSel(){ return document.getElementById("ocupacao"); }
+
+function _ocNorm(s){
+  return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+}
+function _ocSnapshotSave(){
+  const sel = _ocSel(); if (!sel) return;
+  _ocSnapshot = Array.from(sel.options).map(o => ({ text:o.text, value:o.value }));
+}
+function _ocApplyFilter(q){
+  if (_ocSnapshot.length === 0) _ocSnapshotSave();
+  const sel = _ocSel(); if (!sel) return;
+
+  const termo = _ocNorm(q);
+  const prev = sel.value;
+  sel.innerHTML = "";
+
+  let count = 0;
+  _ocSnapshot.forEach(({text, value})=>{
+    if (!termo || _ocNorm(text).includes(termo)){
+      sel.add(new Option(text, value || text));
+      count++;
+    }
+  });
+
+  // mantém seleção se existir
+  const existe = Array.from(sel.options).some(o => o.value === prev);
+  if (existe) sel.value = prev; else if (sel.options.length) sel.selectedIndex = 0;
+
+  // abre/fecha “lista” conforme há filtro
+  _ocOpenList(count);
+}
+function _ocOpenList(count){
+  const sel = _ocSel(); if (!sel) return;
+  const n = Math.min(Math.max(count || sel.options.length, 0), 10); // até 10 linhas visíveis
+  if ((_ocQuery && n>1) || sel.dataset.forceOpen === "1"){
+    sel.size = n || 2;       // mostra como lista
+    sel.dataset.open = "1";
+  }else{
+    sel.size = 0;            // volta ao nativo (dropdown fechado)
+    sel.removeAttribute("size");
+    sel.dataset.open = "0";
+  }
+}
+function _ocCloseList(){
+  const sel = _ocSel(); if (!sel) return;
+  _ocQuery = "";
+  sel.removeAttribute("size");
+  sel.dataset.open = "0";
+}
+
+(function _ocEnableTypeAhead(){
+  const sel = _ocSel(); if (!sel) return;
+
+  // ao focar, zera buffer
+  sel.addEventListener("focus", () => { _ocQuery = ""; });
+
+  // *** TECLADO ***
+  sel.addEventListener("keydown", (e)=>{
+    // Navegação nativa quando a lista está aberta
+    if (sel.dataset.open === "1"){
+      if (["ArrowUp","ArrowDown","PageUp","PageDown","Home","End"].includes(e.key)) return;
+    }
+
+    if (e.key === "Escape"){
+      _ocCloseList(); _ocApplyFilter(""); e.preventDefault(); return;
+    }
+    if (e.key === "Enter"){
+      _ocCloseList();
+      sel.dispatchEvent(new Event("change", {bubbles:true}));
+      e.preventDefault(); return;
+    }
+    if (e.key === "Backspace"){
+      _ocQuery = _ocQuery.slice(0, -1);
+      _ocApplyFilter(_ocQuery);
+      e.preventDefault(); return;
+    }
+    // teclas imprimíveis (sem Ctrl/Alt/Cmd)
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey){
+      _ocQuery += e.key;
+      clearTimeout(_ocTimer);
+      _ocTimer = setTimeout(()=>{ _ocQuery=""; _ocCloseList(); }, 900);
+      _ocApplyFilter(_ocQuery);
+      e.preventDefault(); return;
+    }
+  });
+
+  // *** MOUSE / TOQUE ***
+  // confirma a seleção com duplo clique quando a lista estiver aberta
+  sel.addEventListener("dblclick", () => {
+    if (sel.dataset.open === "1") {
+      _ocCloseList();
+      sel.dispatchEvent(new Event("change", {bubbles: true}));
+    }
+  });
+
+  // fecha ao perder foco
+  sel.addEventListener("blur", ()=>{ setTimeout(_ocCloseList, 100); });
+
+  // abre manualmente ao clicar (evita popup nativo)
+  sel.addEventListener("mousedown", (e)=>{
+    if (sel.dataset.open === "1") return;      // já aberta: deixa selecionar
+    e.preventDefault();
+    sel.dataset.forceOpen = "1";
+    _ocOpenList();
+    sel.focus();
+  });
+
+  // suporte a toque (mobile)
+  sel.addEventListener("touchstart", (e)=>{
+    if (sel.dataset.open === "1") return;
+    e.preventDefault();
+    sel.dataset.forceOpen = "1";
+    _ocOpenList();
+    sel.focus();
+  }, {passive:false});
+
+  // fecha se clicar fora
+  document.addEventListener("mousedown", (e)=>{
+    if (!sel.contains(e.target)) _ocCloseList();
+  });
+})();
+
+
+
+
+
+
+    function preencherGrupo(){
+      const grupos=[...new Set(bancoOcupacao.map(i=>i["Ocupacao_Uso"]).filter(Boolean))];
+      const drop=document.getElementById('grupo');
+      drop.innerHTML='<option value="">Selecione</option>';
+      grupos.forEach(g=>drop.appendChild(new Option(g,g)));
+    }
+    function atualizarOcupacao(){
+      const grupo=document.getElementById('grupo').value;
+      const drop=document.getElementById('ocupacao'); drop.innerHTML='<option value="">Selecione</option>';
+      bancoOcupacao.filter(i=>i["Ocupacao_Uso"]===grupo).forEach(item=>{
+        const texto=`${item["Descricao"]} | ${item["Divisao"]} | ${item["Carga_Incendio_MJ_m2"]} MJ/m²`;
+        drop.appendChild(new Option(texto,texto));
+      });
+
+  _ocSnapshotSave();        // ← NOVO: guarda as opções atuais
+  _ocApplyFilter("");       // ← NOVO: garante lista “completa” ao trocar o grupo
+  updateNotasEdificacao();
+
+
+
+    }
+    document.getElementById('ocupacao').addEventListener('change',()=>{
+      const ocupSelecionada=document.getElementById('ocupacao').value;
+      const dado=bancoOcupacao.find(o=>ocupSelecionada.includes(o["Descricao"]));
+      const tipo=dado?.["Tipo_Sistema"]||"";
+const drop=document.getElementById('tipoSistema'); 
+drop.innerHTML="";
+
+const tipoLower = (tipo||"").toString().toLowerCase();
+
+if (tipoLower === "auto_area"){
+  const area = toNumberLocaleSmart(document.getElementById('area').value);
+  if (area>0){
+    const cell = valorAreaCell(dado, area);
+    const { tipo: tipoArea } = parseTipoRtiCell(cell);
+    if (tipoArea){
+      aplicarTipoSistema(tipoArea);
+      preencherDadosSistema();     // <<< chama depois de aplicar o tipo
+    } else {
+      drop.innerHTML = '<option>— informe a área para definir o tipo —</option>';
+      drop.disabled = true;
+    }
+  }else{
+    drop.innerHTML = '<option>— informe a área para definir o tipo —</option>';
+    drop.disabled = true;
+  }
+}else if (tipo === "4"){
+  aplicarTipoSistema(4);           // <<< usa a mesma função (já popula DN40/DN65)
+  preencherDadosSistema();
+}else if (tipo === "Não aplica - isento"){
+  drop.add(new Option("Isento","Isento"));
+  drop.disabled = true;
+  preencherDadosSistema();
+}else{
+  aplicarTipoSistema(tipo);        // 1,2,3,5
+  preencherDadosSistema();
+}
+
+
+  updateNotasEdificacao();
+
+
+    });
+    document.getElementById('tipoSistema').addEventListener('change', () => {
+  if (!document.getElementById('tipoSistema').disabled) preencherDadosSistema();
+});
+
+function preencherDadosSistema() {
+  const tipoSelecionado = document.getElementById('tipoSistema').value;
+  const linha = bancoSistema.find(l => l["Tipo"] === tipoSelecionado);
+
+  document.getElementById('vazaoMinima').value       = linha?.["Vazao minima (L/min)"] || "";
+  document.getElementById('pressaoMinima').value     = linha?.["Pressao minima (mca)"] || "";
+  document.getElementById('diametroEsguicho').value  = linha?.["Esguicho DN (mm)"] || "";
+  const dnMang = linha?.["Mangueira DN (mm)"] || "";
+  document.getElementById('diametroMangueira').value = dnMang;
+  sessionStorage.setItem('diametroMangueira', dnMang);
+
+  // === NOVO BLOCO: EXPEDIÇÕES (coluna E do CSV do Tipo de Sistema) ===
+  const exp = linha?.["Expedicoes"] || linha?.["Expedições"] || "";
+  const expInput = document.getElementById('expedicoes');
+  if (expInput) {
+    expInput.value = exp;
+    sessionStorage.setItem('expedicoesSistema', exp);
+  }
+  // === FIM DO BLOCO EXPEDIÇÕES ===
+
+  const dnPermitido = linha?.["Esguicho DN (mm)"];
+  const dropEsg = document.getElementById('modeloEsguicho');
+  dropEsg.innerHTML = '<option>-- Selecionar --</option>';
+  bancoEsguicho
+    .filter(e => e["Diâmetro (mm)"] === dnPermitido)
+    .forEach(e => dropEsg.add(new Option(e["Modelo esguicho regulável"], e["Modelo esguicho regulável"])));
+
+  calcularVolumeRTI();
+  recalcularTodosHidrantes();
+  recalcularTodosTrechos();
+}
+
+// === ETAPA 2: LÓGICA INTELIGENTE – MOSTRAR/OCULTAR CÁLCULO JOCKEY ===
+const qtdInput = document.getElementById('qtdHidrantes');
+const msgJockey = document.getElementById('msgJockey');
+
+if (qtdInput) {
+  qtdInput.addEventListener('input', () => {
+    const qtd = Number(qtdInput.value);
+    if (Number.isFinite(qtd) && qtd > 6) {
+      msgJockey.style.display = 'block';
+      sessionStorage.setItem('mostrarJockey', 'true');
+    } else {
+      msgJockey.style.display = 'none';
+      sessionStorage.setItem('mostrarJockey', 'false');
+    }
+  });
+}
+
+
+  
+function calcularVolumeRTI(){
+  const areaStr = document.getElementById('area').value;
+  const area    = toNumberLocaleSmart(areaStr);
+  const ocupSelecionada = document.getElementById('ocupacao').value;
+
+  if (!ocupSelecionada || area==null || area<=0){
+    document.getElementById('volumeMinimo').value = "";
+    return;
+  }
+
+  const linhaOcup = bancoOcupacao.find(o => ocupSelecionada.includes(o["Descricao"]));
+  if (!linhaOcup){ document.getElementById('volumeMinimo').value=""; return; }
+
+  const cell = valorAreaCell(linhaOcup, area);      // pega a célula da faixa certa
+  const { tipo, rti } = parseTipoRtiCell(cell);     // lê Tipo e RTI
+
+  // RTI em litros
+  document.getElementById('volumeMinimo').value = (rti!=null)
+    ? (rti*1000).toLocaleString('pt-BR')
+    : "";
+
+  // Se a ocupação for "auto_area", define o Tipo pelo conteúdo da célula
+  const tipoDB = (linhaOcup["Tipo_Sistema"] || "").toString().trim().toLowerCase();
+  if (tipoDB === "auto_area" && tipo){
+    aplicarTipoSistema(tipo);
+    preencherDadosSistema(); // <<< garante atualização do resto
+  }
+}
+
+
+
+
+
+    document.getElementById('area').addEventListener('blur', e=>{
+      const v = toNumberLocaleSmart(e.target.value);
+      e.target.value = (v==null) ? "" : v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      calcularVolumeRTI();
+// Se a ocupação for "auto_area", atualiza o Tipo conforme a nova área
+const ocSel = document.getElementById('ocupacao').value;
+const linhaOcup = bancoOcupacao.find(o => ocSel.includes(o["Descricao"]));
+if (linhaOcup && String(linhaOcup["Tipo_Sistema"]||"").toLowerCase() === "auto_area"){
+  const areaVal = toNumberLocaleSmart(e.target.value);
+  if (areaVal>0){
+    const cell = valorAreaCell(linhaOcup, areaVal);
+    const { tipo: tipoArea } = parseTipoRtiCell(cell);
+    if (tipoArea){
+      aplicarTipoSistema(tipoArea);
+      preencherDadosSistema();     // <<< chama só aqui, depois que o tipo foi aplicado
+    }
+  }
+}
+
+
+
+
+  updateNotasEdificacao();
+
+
+    });
+
+    document.getElementById('modeloEsguicho').addEventListener('change', function(){
+      const linha=bancoEsguicho.find(e=>e["Modelo esguicho regulável"]===this.value);
+      const fatorK=linha?.["Fator K"]||"";
+      document.getElementById('fatorK').value=fatorK;
+      sessionStorage.setItem('fatorKEsguicho', fatorK);
+      const diametroMangueira=document.getElementById('diametroMangueira').value||"";
+      sessionStorage.setItem('diametroMangueira', diametroMangueira);
+      recalcularTodosHidrantes();
+      recalcularTodosTrechos();
+    });
+
+    /* ===== HIDRANTES / EQUIPAMENTOS ===== */
+    let UID_SEQ=1;
+    function novaUID(prefix){ return `${prefix}_${UID_SEQ++}`; }
+
+    function getHidranteCells(bloco){
+      const rows = bloco.querySelectorAll('.tabela-resultado tr');
+      if(rows.length >= 2){
+        return rows[1].querySelectorAll('td'); // linha de dados
+      }
+      return bloco.querySelectorAll('.tabela-resultado tbody tr td'); // fallback
+    }
+
+    // Atualiza título dos blocos com "PI – Nó"
+    function atualizarTituloResumo(bloco, tipo){
+      const sum = bloco.querySelector('summary');
+      if(!sum) return;
+      if(tipo==='Trecho'){
+        const pi=(bloco.querySelector('.t-pi')?.value||'').trim();
+        const pf=(bloco.querySelector('.t-pf')?.value||'').trim();
+        sum.textContent = (pi||pf) ? `Trecho: ${pi||'–'} – ${pf||'–'}` : 'Trecho';
+      }else if(tipo==='Hidrante'){
+        const pi=(bloco.querySelector('.hid-pi')?.value||'').trim();
+        const pf=(bloco.querySelector('.no-ref')?.value||'').trim();
+        sum.textContent = (pi||pf) ? `Hidrante: ${pi||'–'} – ${pf||'–'}` : 'Hidrante';
+      }else if(tipo==='Equip'){
+        const pi=(bloco.querySelector('.eq-pi')?.value||'Equipamento');
+        const pf=(bloco.querySelector('.no-ref')?.value||'').trim();
+        sum.textContent = (pi||pf) ? `Equipamento: ${pi||'–'} – ${pf||'–'}` : 'Equipamento';
+      }
+    }
+
+    function adicionarHidrante(){
+      const container=document.getElementById("containerTrechos");
+      const bloco=document.createElement("details");
+      bloco.className="bloco-hidrante"; bloco.open=true;
+      bloco.dataset.uid = novaUID('HID');
+      bloco.innerHTML=`
+        <summary><strong>Hidrante</strong></summary>
+        <div class="linha">
+          <div class="coluna"><label>Ponto Inicial:</label><input class="hid-pi" placeholder="Ex: Esguicho" /></div>
+          <div class="coluna"><label>Nó de Referência:</label><input class="no-ref" placeholder="Ex: Nó J-01" list="listaNosRef" /></div>
+        </div>
+        <div class="linha">
+          <div class="coluna">
+            <label>Comprimento da Mangueira:</label>
+            <select class="hid-l" onchange="verificaComprimento(this,this.closest('details'))">
+              <option value="">-- Selecionar --</option>
+              <option value="30">30 metros</option>
+              <option value="60">60 metros</option>
+            </select>
+            <div class="observacao-vermelha" style="display:none">Nota: Permitido para distância mínima de 1,5 vezes a altura da parede da edificação a ser protegida.</div>
+          </div>
+          <div class="coluna"><label>Fator C:</label><input class="hid-c" value="140" /></div>
+          <div class="coluna"><label>Fator K do esguicho:</label><input class="fator-k" readonly /></div>
+          <div class="coluna"><label>Diâmetro da mangueira:</label><input class="diametro-mangueira" readonly /></div>
+        </div>
+        <table class="tabela-resultado">
+          <tr>
+            <th>Pressão no esguicho (m.c.a.)</th><th>Vazão no esguicho (L/min)</th>
+            <th>Perda unitária (m/m)</th><th>Perda total (m.c.a.)</th>
+            <th>Pressão na válvula (m.c.a.)</th><th>Vazão na válvula (L/min)</th>
+          </tr>
+          <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+        </table>
+        <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="botao-remover" onclick="this.closest('details').remove(); atualizarNos(); atualizarListaNosEqualizacao(); recalcularTodosTrechos();">🗑️ Remover</button>
+        </div>
+      `;
+      container.appendChild(bloco);
+      bloco.scrollIntoView({behavior:'smooth', block:'end'});
+
+      bloco.querySelector(".fator-k").value = sessionStorage.getItem('fatorKEsguicho')||'';
+      bloco.querySelector(".diametro-mangueira").value = sessionStorage.getItem('diametroMangueira')||'';
+
+      bloco.querySelectorAll('.hid-pi,.no-ref').forEach(inp=>{
+        inp.addEventListener('input', ()=>{
+          atualizarTituloResumo(bloco,'Hidrante');
+          atualizarNos(); atualizarListaNosEqualizacao();
+          recalcularTodosTrechos();
+        });
+      });
+
+      ['.hid-l','.hid-c','.fator-k','.diametro-mangueira'].forEach(sel=>{
+        const el = bloco.querySelector(sel);
+        if (el) el.addEventListener('input', ()=>{recalcularHidrante(bloco);recalcularTodosTrechos();});
+      });
+
+      atualizarTituloResumo(bloco,'Hidrante');
+      recalcularHidrante(bloco);
+      recalcularTodosTrechos();
+      atualizarListaNosEqualizacao();
+    }
+    function verificaComprimento(selectEl, blocoEl){
+      blocoEl.querySelector(".observacao-vermelha").style.display = (selectEl.value==="60")? "block":"none";
+    }
+
+
+function inserirEquipamento(){
+  const container=document.getElementById("containerTrechos");
+  const bloco=document.createElement("details");
+  bloco.className="bloco-hidrante"; bloco.open=true;
+  bloco.dataset.uid = novaUID('EQP');
+
+  bloco.innerHTML=`
+    <summary><strong>Equipamento</strong></summary>
+    <div class="linha">
+      <div class="coluna"><label>Ponto Inicial:</label><input class="eq-pi" placeholder="Ex: Bomba/Equipamento" /></div>
+      <div class="coluna"><label>Nó de Referência:</label><input class="no-ref" placeholder="Ex: Nó comum" list="listaNosRef" /></div>
+    </div>
+
+    <div class="linha">
+      <div class="coluna"><label>Pressão (m.c.a.):</label><input class="eq-p" type="text" placeholder="Ex: 25,00" /></div>
+      <div class="coluna"><label>Vazão (L/min):</label><input class="eq-q" type="text" placeholder="Ex: 150,00" /></div>
+      <div class="coluna"><label>Fator K:</label><input class="eq-k" type="text" placeholder="Ex: 120,00" /></div>
+    </div>
+
+    <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="botao-remover" onclick="this.closest('details').remove(); atualizarNos(); atualizarListaNosEqualizacao(); recalcularTodosTrechos();">🗑️ Remover</button>
+    </div>
+  `;
+  container.appendChild(bloco);
+  bloco.scrollIntoView({behavior:'smooth', block:'end'});
+
+  // formatadores
+  attachBRFormatter(bloco.querySelector('.eq-p'),2);
+  attachBRFormatter(bloco.querySelector('.eq-q'),2);
+  attachBRFormatter(bloco.querySelector('.eq-k'),2);
+
+  // título / nós
+  bloco.querySelectorAll('.eq-pi,.no-ref').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      atualizarTituloResumo(bloco,'Equip');
+      atualizarNos(); atualizarListaNosEqualizacao();
+      recalcularTodosTrechos();
+    });
+  });
+
+  // === Auto-cálculo da vazão a partir de P (mca) + K ===
+  function autoCalcQ(){
+    const Pmca = toNumberLocaleSmart(bloco.querySelector('.eq-p')?.value);
+    const K    = toNumberLocaleSmart(bloco.querySelector('.eq-k')?.value);
+    const qEl  = bloco.querySelector('.eq-q');
+    if(Pmca>0 && K>0){
+      const Q = K * Math.sqrt(Pmca * (1/10.197)); // MCA_TO_BAR
+      if(qEl){ qEl.value = formatBR(Q,2); }
+    }
+    recalcularTodosTrechos();
+  }
+
+  // quando mudar P ou K, recalcula Q automaticamente
+  ['.eq-p','.eq-k'].forEach(sel=>{
+    const el = bloco.querySelector(sel);
+    if(el) el.addEventListener('input', autoCalcQ);
+  });
+
+  // se o usuário digitar Q manualmente, apenas propaga efeitos
+  const qEl = bloco.querySelector('.eq-q');
+  if(qEl) qEl.addEventListener('input', ()=>recalcularTodosTrechos());
+
+  atualizarTituloResumo(bloco,'Equip');
+  atualizarListaNosEqualizacao();
+}
+
+
+
+
+// ======================= removerTudo =======================
+function removerTudo(){
+  const cont = document.getElementById('containerTrechos');
+  if (cont) cont.innerHTML = '';
+  // zera nós/listas
+  nos.clear();
+  (typeof rebuildDatalists === 'function') && rebuildDatalists();
+  (typeof atualizarListaNosEqualizacao === 'function') && atualizarListaNosEqualizacao();
+  // zera/repovoa seção da bomba
+  cmb_resetUI();
+  cmb_popularTrechos();
+  cmb_updateOp();
+  cmb_updateNPSH();
+}
+
+
+    /* ========================== HIDRANTE ========================== */
+    function hwPerdaUnit(Q_lpm, C, D_mm){
+      const Q=Number(Q_lpm)||0, Cn=Number(C)||0, Dm=Number(D_mm)||0;
+      if(!(Q>0&&Cn>0&&Dm>0)) return null;
+      const Qm3s=Q/1000/60, Dm_=Dm/1000;
+      return 10.67*Math.pow(Qm3s,1.852)/(Math.pow(Cn,1.852)*Math.pow(Dm_,4.871));
+    }
+    const MCA_TO_BAR = 1 / 10.197;
+
+    // ====== Ajuste de hidrante (garante Qmín) ======
+    function recalcularHidrante(bloco){
+      const override = toNumberLocaleSmart(bloco?.dataset?.overridePval);
+      const Ppadrao  = toNumberLocaleSmart(document.getElementById('pressaoMinima').value);
+      const PvalBase = (override!=null && override>0) ? override : Ppadrao;
+
+      const Lm   = toNumberLocaleSmart(bloco.querySelector('.hid-l')?.value);
+      const C    = toNumberLocaleSmart(bloco.querySelector('.hid-c')?.value);
+      const Dm   = toNumberLocaleSmart(bloco.querySelector('.diametro-mangueira')?.value);
+      const K    = toNumberLocaleSmart(bloco.querySelector('.fator-k')?.value);
+      const Qmin = toNumberLocaleSmart(document.getElementById('vazaoMinima').value);
+
+      const tds = getHidranteCells(bloco);
+      if (!(PvalBase>0 && Lm>0 && C>0 && Dm>0 && K>0)){
+        if (tds.length>=6){ for (let i=0;i<6;i++) tds[i].textContent = '–'; }
+        return;
+      }
+
+      function solveForPval(Pval){
+        let Q = (Qmin && Qmin>0) ? Qmin : (K * Math.sqrt(Pval * MCA_TO_BAR));
+        for (let i=0; i<80; i++){
+          const J    = hwPerdaUnit(Q, C, Dm) || 0;
+          const Pnoz = Math.max(Pval - J*Lm, 0);
+          const Qk   = (Pnoz>0) ? K * Math.sqrt(Pnoz * MCA_TO_BAR) : 0;
+          const Qnext = 0.5*Q + 0.5*Qk;
+          if (Math.abs(Qnext - Q) < 1e-6 * Math.max(1, Q)) { Q = Qnext; break; }
+          Q = Qnext;
+        }
+        const Jf         = hwPerdaUnit(Q, C, Dm) || 0;
+        const perdaTotal = (Jf||0) * Lm;
+        const Pnoz       = Math.max(Pval - perdaTotal, 0);
+        return { Pnoz, Q, Jf, perdaTotal };
+      }
+
+      let { Pnoz, Q, Jf, perdaTotal } = solveForPval(PvalBase);
+      let PvalUsado = PvalBase;
+
+      if (Qmin && Qmin>0 && (!Q || Q < Qmin - 1e-6)){
+        let lo = PvalBase, hi = PvalBase + 200;
+        for(let k=0;k<5;k++){
+          const test = solveForPval(hi);
+          if (test.Q >= Qmin - 1e-6) break;
+          hi += 200;
+        }
+        for (let it=0; it<28; it++){
+          const mid = 0.5*(lo+hi);
+          const res = solveForPval(mid);
+          if (res.Q >= Qmin - 1e-6){
+            hi = mid; Pnoz=res.Pnoz; Q=res.Q; Jf=res.Jf; perdaTotal=res.perdaTotal; PvalUsado=mid;
+          }else{ lo = mid; }
+        }
+      }
+
+      tds[0].textContent = formatBR(Pnoz, 2);
+      tds[1].textContent = formatBR(Q, 2);
+      tds[2].textContent = Jf ? Jf.toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4}) : '–';
+      tds[3].textContent = formatBR(perdaTotal, 2);
+      tds[4].textContent = formatBR(PvalUsado, 2);
+      tds[5].textContent = formatBR(Q, 2);
+    }
+
+    function recalcularTodosHidrantes(){
+      document.querySelectorAll('.bloco-hidrante').forEach(recalcularHidrante);
+    }
+    ['vazaoMinima','pressaoMinima','modeloEsguicho','diametroMangueira','fatorK']
+      .forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', ()=>{recalcularTodosHidrantes();recalcularTodosTrechos();}); });
+
+    /* ======================= NÓS E ESTADOS ======================= */
+    const nos = new Map();
+    const dlTodos = document.getElementById('listaNos');
+    const dlRef   = document.getElementById('listaNosRef');
+
+    function setNo(name){ const n=String(name||'').trim(); if(!n) return; if(!nos.has(n)) nos.set(n,{name:n}); }
+    function rebuildDatalists(){
+      dlTodos.innerHTML='';
+      [...nos.keys()].sort((a,b)=>a.localeCompare(b,'pt-BR')).forEach(n=>dlTodos.appendChild(Object.assign(document.createElement('option'),{value:n})));
+      const refSet = new Set();
+      document.querySelectorAll('.no-ref, .t-pf').forEach(inp=>{
+        const v=(inp.value||'').trim(); if(v) refSet.add(v);
+      });
+      dlRef.innerHTML='';
+      [...refSet].sort((a,b)=>a.localeCompare(b,'pt-BR')).forEach(n=>dlRef.appendChild(Object.assign(document.createElement('option'),{value:n})));
+    }
+    function atualizarNos(){
+      nos.clear();
+      document.querySelectorAll('.no-ref,.no-pi,.no-pf,.eq-pi,.hid-pi').forEach(inp=>setNo(inp.value));
+      rebuildDatalists();
+    }
+
+    function estadoNoBasico(nome){
+      const alvo=String(nome||'').trim(); if(!alvo) return {Q:0,P:null};
+      let Qsum=0, Pmax=null;
+
+      document.querySelectorAll('.bloco-hidrante').forEach(bl=>{
+        const nr=(bl.querySelector('.no-ref')?.value||'').trim();
+        if(nr!==alvo) return;
+
+        const eqP=bl.querySelector('.eq-p'), eqQ=bl.querySelector('.eq-q');
+        if(eqP && eqQ){
+          const P=toNumberLocaleSmart(eqP.value), Q=toNumberLocaleSmart(eqQ.value);
+          if(Q>0) Qsum+=Q; if(P!=null) Pmax=(Pmax==null)?P:Math.max(Pmax,P);
+        }
+
+        const tds=getHidranteCells(bl);
+        if(tds.length>=6){
+          const P=toNumberLocaleSmart(tds[4].textContent);
+          const Q=toNumberLocaleSmart(tds[5].textContent);
+          if(Q>0) Qsum+=Q; if(P!=null) Pmax=(Pmax==null)?P:Math.max(Pmax,P);
+        }
+      });
+
+      document.querySelectorAll('.bloco-trecho').forEach(tr=>{
+        const noF=(tr.querySelector('.t-pf')?.value||'').trim();
+        if(noF!==alvo) return;
+        const tds=tr.querySelectorAll('.resultados-trecho tbody tr td');
+        if(tds.length>=11){
+          const Pf = toNumberLocaleSmart(tds[9].textContent);
+          if(Pf!=null) Pmax=(Pmax==null)?Pf:Math.max(Pmax,Pf);
+        }
+      });
+
+      return {Q:Qsum, P:Pmax};
+    }
+
+    const nodeConsiderar = new Map(); // no -> Set<uids>
+
+    function listarFontesDoNo(no, {skipTrechoUID=null}={}){
+      const alvo = String(no||'').trim();
+      const fontes = [];
+
+      document.querySelectorAll('.bloco-hidrante').forEach(bl=>{
+        if(bl.querySelector('.eq-p')) return;
+        const nr=(bl.querySelector('.no-ref')?.value||'').trim();
+        if(nr!==alvo) return;
+        const tds = getHidranteCells(bl);
+        const Q   = (tds.length>=6) ? toNumberLocaleSmart(tds[5].textContent) : null;
+        const nome= (bl.querySelector('.hid-pi')?.value || 'Hidrante');
+        fontes.push({tipo:'hidrante', uid:bl.dataset.uid, label:`${nome} → ${alvo}`, Q:(Q>0?Q:0)});
+      });
+
+      document.querySelectorAll('.bloco-hidrante').forEach(bl=>{
+        if(!bl.querySelector('.eq-p')) return;
+        const nr=(bl.querySelector('.no-ref')?.value||'').trim();
+        if(nr!==alvo) return;
+        const pi=(bl.querySelector('.eq-pi')?.value||'Equipamento');
+        const Q = toNumberLocaleSmart(bl.querySelector('.eq-q')?.value);
+        fontes.push({tipo:'equip', uid:bl.dataset.uid, label:`${pi} → ${alvo}`, Q:(Q>0?Q:0)});
+      });
+
+      document.querySelectorAll('.bloco-trecho').forEach(tr=>{
+        if(skipTrechoUID && tr.dataset.uid===skipTrechoUID) return;
+        const nf=(tr.querySelector('.t-pf')?.value||'').trim();
+        if(nf!==alvo) return;
+        const pi=(tr.querySelector('.t-pi')?.value||'–').trim();
+        const tds=tr.querySelectorAll('.resultados-trecho tbody tr td');
+        const Qin = (tds.length>=2) ? toNumberLocaleSmart(tds[1].textContent) : null;
+        fontes.push({tipo:'trecho', uid:tr.dataset.uid, label:`${pi} → ${alvo}`, Q:(Qin>0?Qin:0)});
+      });
+
+      return fontes;
+    }
+
+    function renderResumoNoInicial(blocoTrecho){
+      const box = blocoTrecho.querySelector('.no-resumo .no-resumo-conteudo');
+      if(!box) return;
+
+      const noInicial=(blocoTrecho.querySelector('.t-pi')?.value||'').trim();
+      if(!noInicial){ box.innerHTML='(preencha o Ponto Inicial)'; return; }
+
+      const fontes = listarFontesDoNo(noInicial, {skipTrechoUID: blocoTrecho.dataset.uid});
+      const setSel = nodeConsiderar.get(noInicial) || new Set();
+
+      if(!fontes.length){ box.innerHTML='(nenhuma fonte encontrada no nó inicial)'; return; }
+
+      let html = '<div style="margin-top:6px;">Selecione as vazões a considerar:</div>';
+      fontes.forEach(f=>{
+        const checked = setSel.has(f.uid) ? 'checked' : '';
+        html += `
+          <label style="display:flex; gap:8px; align-items:center; margin:4px 0;">
+            <input type="checkbox" class="resumo-qsrc" data-no="${noInicial}" data-uid="${f.uid}" ${checked}/>
+            <span>${f.label} (Q≈ ${formatBR(f.Q,2)} L/min)</span>
+          </label>`;
+      });
+
+      let soma=0; fontes.forEach(f=>{ if(setSel.has(f.uid)) soma += (f.Q||0);});
+      html += `<div style="margin-top:6px; color:#333"><strong>Soma selecionada:</strong> ${formatBR(soma,2)} L/min</div>`;
+
+      box.innerHTML = html;
+
+      box.querySelectorAll('.resumo-qsrc').forEach(chk=>{
+        chk.addEventListener('change', e=>{
+          const no=e.target.dataset.no, uid=e.target.dataset.uid;
+          const cur = nodeConsiderar.get(no) || new Set();
+          e.target.checked ? cur.add(uid) : cur.delete(uid);
+          nodeConsiderar.set(no, cur);
+          renderResumoNoInicial(blocoTrecho);
+          recalcularTrecho(blocoTrecho);
+        });
+      });
+    }
+
+    function estadoNo(nome){
+      const base = estadoNoBasico(nome);
+      const no = String(nome||'').trim();
+      const sel = nodeConsiderar.get(no);
+      if(!sel || !sel.size) return base;
+
+      let Qsum = 0, Pmax = base.P;
+      listarFontesDoNo(no).forEach(f=>{
+        if(sel.has(f.uid)) Qsum += (f.Q||0);
+      });
+      return { Q: Qsum, P: Pmax };
+    }
+
+    function nosComRamificacao(){
+      const cont = {};
+      document.querySelectorAll('.bloco-trecho').forEach(tr=>{
+        const nf=(tr.querySelector('.t-pf')?.value||'').trim();
+        if(!nf) return; cont[nf]=(cont[nf]||0)+1;
+      });
+      return Object.keys(cont).filter(n=>cont[n]>=2).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+    }
+    function atualizarListaNosEqualizacao(){
+      const sel = document.getElementById('eq-no-list');
+      if(!sel) return;
+      const lista = nosComRamificacao();
+      const atual = sel.value;
+      sel.innerHTML = '';
+      if(!lista.length){
+        sel.appendChild(new Option('Nenhum nó elegível',''));
+        return;
+      }
+      sel.appendChild(new Option('Selecione...',''));
+      lista.forEach(n=> sel.appendChild(new Option(n,n)));
+      if(atual && lista.includes(atual)) sel.value = atual;
+    }
+
+    // Diferença de Pf no nó
+    function trechosQueFinalizamEm(no){
+      const alvo = String(no||'').trim(); const arr=[];
+      document.querySelectorAll('.bloco-trecho').forEach(tr=>{
+        const nf=(tr.querySelector('.t-pf')?.value||'').trim();
+        if(nf===alvo) arr.push(tr);
+      });
+      return arr;
+    }
+    function pressaoFinalTrecho(blocoTrecho){
+      const tds=blocoTrecho.querySelectorAll('.resultados-trecho tbody tr td');
+      return (tds.length>=11) ? toNumberLocaleSmart(tds[9].textContent) : null;
+    }
+    function pressaoInicialTrecho(blocoTrecho){
+      const tds=blocoTrecho.querySelectorAll('.resultados-trecho tbody tr td');
+      return (tds.length>=11) ? toNumberLocaleSmart(tds[0].textContent) : null;
+    }
+    function listarPfNo(no){
+      const trs = trechosQueFinalizamEm(no);
+      const arr = [];
+      trs.forEach(tr=>{
+        const Pf = pressaoFinalTrecho(tr);
+        const pi=(tr.querySelector('.t-pi')?.value||'–').trim();
+        const pf=(tr.querySelector('.t-pf')?.value||'–').trim();
+        if(Pf!=null) arr.push({desc:`${pi} → ${pf}`, Pf});
+      });
+      return arr;
+    }
+    function mostrarDiferencaNo(){
+      const sel=document.getElementById('eq-no-list');
+      const box=document.getElementById('eq-diff');
+      if(!sel || !box) return;
+
+      const no=(sel.value||"").trim();
+      if(!no){ box.innerHTML = ""; return; }
+
+      const vals = listarPfNo(no);
+      if(vals.length < 2){
+        box.innerHTML = `<span class="eq-warn">Nó selecionado não possui ao menos 2 trechos válidos para comparar.</span>`;
+        return;
+      }
+
+      const min = Math.min(...vals.map(v=>v.Pf));
+      const max = Math.max(...vals.map(v=>v.Pf));
+      const delta = max - min;
+
+      const LIM = 0.50;
+      const status = (delta <= LIM + 1e-6)
+        ? `<span class="eq-ok">Dentro do permitido (≤ ${formatBR(LIM,2)} mca)</span>`
+        : `<span class="eq-warn">Acima do permitido (> ${formatBR(LIM,2)} mca). Recomenda-se parametrização.</span>`;
+
+      const linhas = vals.map(v=>`${v.desc}: Pf=${formatBR(v.Pf,2)} mca`).join(' | ');
+
+      box.innerHTML =
+        `<div><strong>Diferença de pressão no nó ${no}:</strong> Δ=${formatBR(delta,2)} mca. ${status}</div>
+         <div style="font-size:12px; color:#333; margin-top:4px;">${linhas}</div>`;
+    }
+
+    /* ========================== TRECHOS ========================== */
+    async function adicionarTrecho(noIso=false){
+      await Promise.all([carregarBancoFatorC(), carregarBancoDiametros(), carregarBancosConexoes()]);
+      doAdd(noIso);
+
+      function doAdd(noIso){
+        const container = document.getElementById("containerTrechos");
+        const bloco=document.createElement("details"); bloco.className="bloco-trecho"; bloco.open=true;
+        bloco.dataset.uid = novaUID('TRC');
+
+        const conexoes=["Curva 45°","Curva 90° raio curto","Curva 90° raio longo","Registro de ângulo Hidrante","Registro de gaveta aberto","Saída de canalização reservatório","Tee passagem direta","Tee saída lateral","Válvula de retenção horizontal","Válvula de retenção vertical","Outro"];
+        const materiaisUnicos=[...new Set(bancoFatorC.map(m=>m["Material"]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+
+        bloco.innerHTML=`
+          <summary><strong>Trecho</strong></summary>
+          <div class="trecho-grid">
+            <div class="trecho-col-esq">
+              <label>Ponto Inicial:</label>
+              <input class="t-pi no-pi" placeholder="Ex: Reservatório" list="listaNosRef" />
+
+              <label>Nó de Referência:</label>
+              <input class="t-pf no-pf" placeholder="Ex: Nó J-01" list="listaNosRef" />
+
+              <label>Material:</label>
+              <select class="t-mat">
+                <option value="">-- Selecione --</option>
+                ${materiaisUnicos.map(m=>`<option value="${m}">${m}</option>`).join("")}
+              </select>
+
+              <label>Fator C:</label>
+              <input class="t-fatorc" placeholder="Ex: 150" />
+
+              <label>Diâmetro Nominal (pol):</label>
+              <select class="t-dnpol" disabled>
+                <option value="">-- Selecione o material --</option>
+              </select>
+
+              <label>Diâmetro Nominal Interno Adotado (mm):</label>
+              <input class="t-dint" placeholder="" />
+
+              <label>Comprimento Real (m):</label>
+              <input class="t-comp" type="text" placeholder="Ex: 15,00" />
+
+              <label>Desnível (m):</label>
+              <input class="t-desn" type="text" placeholder="Ex: -2,00 ou +3,00" />
+
+              <div class="no-resumo" style="margin-top:12px; border:1px dashed #2e7d32; border-radius:8px; padding:10px;">
+                <div style="font-weight:700; color:#1b5e20;">Vazões no nó inicial</div>
+                <div class="no-resumo-conteudo" style="font-size:14px;">(preencha PI / PF para listar as fontes)</div>
+              </div>
+            </div>
+
+            <div class="trecho-col-dir">
+              <label>Indicar conexões no trecho:</label>
+              <table class="tbl-conexoes">
+                <thead><tr><th>Descrição</th><th>Quantidade</th><th>Perda Localizada</th><th>Total</th></tr></thead>
+                <tbody>
+                  ${conexoes.map(desc=>`
+                    <tr>
+                      <td style="text-align:left">${desc}</td>
+                      <td><input class="t-qtd" type="number" min="0" step="1" value="0" /></td>
+                      <td><input class="t-perda" inputmode="decimal" placeholder="-" /></td>
+                      <td><input class="t-total" type="text" inputmode="decimal" placeholder="-" /></td>
+                    </tr>`).join("")}
+                </tbody>
+              </table>
+              <div class="rodape-conexoes"><strong>Total das conexões:</strong> <span class="t-soma">0,00</span></div>
+            </div>
+          </div>
+
+          <table class="resultados-trecho">
+            <thead>
+              <tr>
+                <th>Pressão inicial (mca)</th>
+                <th>Vazão inicial (L/min)</th>
+                <th>Diâmetro da tubulação (mm)</th>
+                <th>Comprimento real (m)</th>
+                <th>Comprimento equivalente (m)</th>
+                <th>Comprimento total (m)</th>
+                <th>Perda de carga (mca/m)</th>
+                <th>Perda de carga total (mca)</th>
+                <th>Desnível (m)</th>
+                <th>Pressão final (mca)</th>
+                <th>Velocidade (m/seg)</th>
+              </tr>
+            </thead>
+            <tbody><tr>
+              <td>–</td><td>–</td><td>–</td><td>–</td><td>–</td>
+              <td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td>
+            </tr></tbody>
+          </table>
+
+          <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="botao-remover" onclick="this.closest('details').remove(); atualizarNos(); atualizarListaNosEqualizacao();">🗑️ Remover</button>
+          </div>
+        `;
+
+        bloco.dataset.perdaAjuste = "0";
+
+        const selMat = bloco.querySelector('.t-mat');
+        const inputC = bloco.querySelector('.t-fatorc');
+        const selDN  = bloco.querySelector('.t-dnpol');
+        const inputDi= bloco.querySelector('.t-dint');
+        const compInput = bloco.querySelector('.t-comp');
+        const desnInput = bloco.querySelector('.t-desn');
+
+        attachBRFormatter(compInput,2);
+        attachBRFormatter(desnInput,2);
+
+        const tbody=bloco.querySelector('.tbl-conexoes tbody');
+        const elSoma=bloco.querySelector('.t-soma');
+
+        function atualizarSomaConexoes(){
+          let soma=0;
+          tbody.querySelectorAll('tr').forEach(tr=>{
+            const total=toNumberLocaleSmart(tr.querySelector('.t-total').value);
+            if(total!=null) soma+=total;
+          });
+          elSoma.textContent=formatBR(soma,2);
+          return soma;
+        }
+        function recalcularLinha(tr){
+          const qtd=toNumberLocaleSmart(tr.querySelector('.t-qtd').value);
+          const perda=toNumberLocaleSmart(tr.querySelector('.t-perda').value);
+          if(qtd!=null && perda!=null){
+            const t=qtd*perda; tr.querySelector('.t-total').value=formatBR(t,2);
+          }else tr.querySelector('.t-total').value="";
+          atualizarSomaConexoes(); recalcularTrecho(bloco);
+        }
+        function limparConexoes(){
+          tbody.querySelectorAll('tr').forEach(tr=>{ tr.querySelector('.t-perda').value=""; tr.querySelector('.t-total').value=""; });
+          atualizarSomaConexoes(); recalcularTrecho(bloco);
+        }
+        function removeAcentosLocal(a){return a.normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+        function materiaisIguais(a,b){ a=removeAcentosLocal(String(a||'').toLowerCase()); b=removeAcentosLocal(String(b||'').toLowerCase()); return a===b||a.includes(b)||b.includes(a); }
+        function buscarPerdaConexao(material,descricao,dnLabel){
+          const col=mapeiaMaterialParaColuna(material); const dnBusca=dnKey(dnLabel); const desc=String(descricao).trim();
+          let linha=bancoConexoes.find(r=>String(r["Conexao"]).trim()===desc && dnKey(r["Diametro_Nominal"])===dnBusca);
+          if(!linha) linha=bancoConexoes.find(r=>String(r["Conexao"]).trim().toLowerCase().includes(desc.toLowerCase()) && dnKey(r["Diametro_Nominal"])===dnBusca);
+          const valor=linha ? (linha[col]??"") : "";
+          return limparCSV(valor);
+        }
+        function carregarPerdasAutomaticas(){
+          const mat=selMat.value, dnLabel=selDN.value;
+          if(!mat||!dnLabel){ limparConexoes(); return; }
+          tbody.querySelectorAll('tr').forEach(tr=>{
+            const desc=tr.children[0].textContent.trim();
+            if(desc.toLowerCase()==="outro"){ tr.querySelector('.t-perda').value=""; tr.querySelector('.t-total').value=""; return; }
+            const perdaAuto=buscarPerdaConexao(mat,desc,dnLabel);
+            if(perdaAuto) tr.querySelector('.t-perda').value=perdaAuto;
+            recalcularLinha(tr);
+          });
+        }
+
+        selMat.addEventListener('change',function(){
+          const mat=this.value;
+          const linhaF=bancoFatorC.find(m=>materiaisIguais(m["Material"],mat));
+          inputC.value=linhaF?.["Fator C"]||"";
+          const dnAnterior=selDN.value;
+          selDN.innerHTML='<option value="">-- Selecione --</option>';
+          selDN.disabled=false; inputDi.value="";
+          if(!mat){ limparConexoes(); return; }
+          const linhas=bancoDiametros.filter(r=>materiaisIguais(limparCSV(r["Material"]),mat));
+          const vistos=new Set();
+          linhas.forEach(row=>{
+            const dnBruto=row["Diametro nominal"]||row["Diâmetro nominal"]; const dnClean=limparCSV(dnBruto);
+            if(!dnClean||vistos.has(dnClean)) return; vistos.add(dnClean);
+            const label=dnClean.includes('"')?dnClean:`${dnClean}"`; selDN.appendChild(new Option(label,label));
+          });
+          if(dnAnterior && [...selDN.options].some(o=>o.value===dnAnterior)) selDN.value=dnAnterior;
+          carregarPerdasAutomaticas(); recalcularTrecho(bloco);
+        });
+
+        selDN.addEventListener('change',function(){
+          inputDi.value="";
+          const mat=selMat.value; const dnEscolhido=limparCSV(this.value.replace(/"/g,""));
+          if(!mat||!dnEscolhido){ limparConexoes(); return; }
+          const linha=bancoDiametros.find(row=>materiaisIguais(limparCSV(row["Material"]),mat) && limparCSV(row["Diametro nominal"]||row["Diâmetro nominal"])===dnEscolhido);
+          const c=linha ? (linha["Diametro Interno (mm)"]||linha["Diâmetro Interno (mm)"]||"") : "";
+          inputDi.value=limparCSV(c);
+          carregarPerdasAutomaticas(); recalcularTrecho(bloco);
+        });
+
+        const tbodyCon=bloco.querySelector('.tbl-conexoes tbody');
+        tbodyCon.querySelectorAll('tr').forEach(tr=>{
+          tr.querySelector('.t-qtd').addEventListener('input', ()=>recalcularLinha(tr));
+          tr.querySelector('.t-perda').addEventListener('input', ()=>recalcularLinha(tr));
+          tr.querySelector('.t-total').addEventListener('input', ()=>{atualizarSomaConexoes();recalcularTrecho(bloco);});
+        });
+
+        bloco.querySelectorAll('.no-pi, .no-pf').forEach(inp => inp.addEventListener('input', ()=>{
+          atualizarNos(); atualizarTituloResumo(bloco,'Trecho'); atualizarListaNosEqualizacao(); renderResumoNoInicial(bloco);
+        }));
+        [inputC,inputDi,compInput,desnInput].forEach(el=>el && el.addEventListener('input', ()=>recalcularTrecho(bloco)));
+
+        container?.appendChild(bloco);
+        bloco.scrollIntoView({behavior:'smooth', block:'end'});
+
+        atualizarNos();
+        atualizarSomaConexoes();
+        atualizarTituloResumo(bloco,'Trecho');
+        recalcularTrecho(bloco);
+        renderResumoNoInicial(bloco);
+        atualizarListaNosEqualizacao();
+      }
+    }
+
+    function recalcularTrecho(bloco){
+      const tds=bloco.querySelectorAll('.resultados-trecho tbody tr td'); if(tds.length<11) return;
+
+      const noInicial=(bloco.querySelector('.t-pi')?.value||'').trim();
+      const {Q:Qin,P:Pin}=estadoNo(noInicial);
+
+      const C   = toNumberLocaleSmart(bloco.querySelector('.t-fatorc')?.value);
+      const Dmm = toNumberLocaleSmart(bloco.querySelector('.t-dint')?.value);
+      const Lr  = toNumberLocaleSmart(bloco.querySelector('.t-comp')?.value) || 0;
+      const Dz  = toNumberLocaleSmart(bloco.querySelector('.t-desn')?.value) || 0;
+
+      let Leq=0; bloco.querySelectorAll('.tbl-conexoes tbody .t-total').forEach(inp=>{ const v=toNumberLocaleSmart(inp.value); if(v!=null) Leq+=v; });
+
+      tds[0].textContent = (Pin!=null)? formatBR(Pin,2) : '–';
+      tds[1].textContent = (Qin>0)? formatBR(Qin,2) : '–';
+      tds[2].textContent = (Dmm>0)? formatBR(Dmm,0) : '–';
+      tds[3].textContent = formatBR(Lr,2);
+      tds[4].textContent = formatBR(Leq,2);
+
+      if(!(Qin>0 && C>0 && Dmm>0)){
+        for(let i=5;i<11;i++) tds[i].textContent='–';
+        if (tds[10] && tds[10].style) tds[10].style.backgroundColor='';
+        return;
+      }
+
+      const Ltot = (Lr||0) + (Leq||0);
+      const J = hwPerdaUnit(Qin, C, Dmm) || 0;
+      const Qm3s = Qin/1000/60, Dm = Dmm/1000;
+      const vel = (Math.PI*Dm*Dm>0) ? (4*Qm3s)/(Math.PI*Dm*Dm) : 0;
+
+      const perdaAjuste = toNumberLocaleSmart(bloco.dataset.perdaAjuste || "0") || 0;
+      const perdaAtrTot = J * Ltot;
+      const perdaTot    = perdaAtrTot + perdaAjuste;
+      const Pfinal      = (Pin!=null) ? (Pin + perdaTot + Dz) : null;
+
+      tds[5].textContent = formatBR(Ltot,2);
+      tds[6].textContent = J ? J.toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4}) : '–';
+      tds[7].textContent = formatBR(perdaTot,2);
+      tds[8].textContent = formatBR(Dz,2);
+      tds[9].textContent = (Pfinal!=null)? formatBR(Pfinal,2) : '–';
+tds[9].textContent = (Pfinal!=null)? formatBR(Pfinal,2) : '–';
+tds[9].style.backgroundColor = (Pfinal!=null && Pfinal>100) ? '#ffebee' : '';
+tds[9].style.color = (Pfinal!=null && Pfinal>100) ? '#b71c1c' : '';
+tds[9].style.fontWeight = (Pfinal!=null && Pfinal>100) ? '700' : '';
+
+
+      tds[10].textContent = formatBR(vel,3);
+      tds[10].style.backgroundColor = (vel>5)? '#f8d7da' : (vel>=4? '#fff3cd' : '');
+    }
+
+    function recalcularTodosTrechos(){ document.querySelectorAll('.bloco-trecho').forEach(recalcularTrecho); 
+ pintarMemoriaPfVel();
+ renderChecagensAbaMemoria();
+ renderChecksPreCMB();
+
+
+}
+
+    /* ====================== Equalização por Nó ====================== */
+    function hidrantesNo(no){
+      const alvo=String(no||'').trim(); const hs=[];
+      document.querySelectorAll('.bloco-hidrante').forEach(bl=>{
+        const nr=(bl.querySelector('.no-ref')?.value||'').trim();
+        if(nr===alvo && !bl.querySelector('.eq-p')) hs.push(bl);
+      });
+      return hs;
+    }
+    function equipamentosNo(no){
+      const alvo=String(no||'').trim(); const eqs=[];
+      document.querySelectorAll('.bloco-hidrante').forEach(bl=>{
+        const nr=(bl.querySelector('.no-ref')?.value||'').trim();
+        if(nr===alvo && bl.querySelector('.eq-p')) eqs.push(bl);
+      });
+      return eqs;
+    }
+
+    function aplicarEqualizacaoNo(){
+      const sel = document.getElementById('eq-no-list');
+      const fb  = document.getElementById('eq-feedback');
+      if(!sel || !fb) return;
+      const noAlvo = sel.value.trim();
+      fb.textContent='';
+
+      if(!noAlvo){
+        fb.innerHTML = `<span class="eq-warn">Selecione um nó com múltiplas ramificações.</span>`;
+        return;
+      }
+
+      const trs = trechosQueFinalizamEm(noAlvo);
+      const pares = trs.map(tr=>({tr, Pf: pressaoFinalTrecho(tr), Pin: pressaoInicialTrecho(tr)})).filter(p=>p.Pf!=null);
+      if(pares.length<2){
+        fb.innerHTML = `<span class="eq-warn">Nó selecionado não possui ramificações válidas.</span>`;
+        return;
+      }
+
+      let alvo = Math.max(...pares.map(p=>p.Pf));
+      let logs = [];
+      let convergiu = false;
+
+      for(let iter=0; iter<3; iter++){
+        let houveAjuste=false;
+
+        pares.forEach(p=>{
+          if(p.Pf==null) return;
+          if(p.Pf < alvo - 1e-6){
+            const delta = (alvo - p.Pf);
+
+            const noInicial = (p.tr.querySelector('.t-pi')?.value||'').trim();
+
+            const PinAtual = p.Pin ?? 0;
+            const PinAlvo  = PinAtual + delta;
+
+            const hs = hidrantesNo(noInicial);
+            if(hs.length){
+              hs.forEach(h=>{
+                const cur = toNumberLocaleSmart(h.dataset.overridePval) || toNumberLocaleSmart(document.getElementById('pressaoMinima').value) || 0;
+                const novo = Math.max(cur, PinAlvo);
+                h.dataset.overridePval = String(novo);
+              });
+            }
+
+            const eqs = equipamentosNo(noInicial);
+            if(eqs.length){
+              eqs.forEach(eq=>{
+                const inp = eq.querySelector('.eq-p');
+                const cur = toNumberLocaleSmart(inp.value) || 0;
+                const novo = Math.max(cur, PinAlvo);
+                inp.value = formatBR(novo,2);
+              });
+            }
+
+            logs.push(`Ajuste em ${noInicial}: +${formatBR(delta,2)} mca para igualar no nó ${noAlvo}.`);
+            houveAjuste=true;
+          }
+        });
+
+        if(houveAjuste){
+          recalcularTodosHidrantes();
+          recalcularTodosTrechos();
+          pares.forEach(p=>{
+            p.Pf = pressaoFinalTrecho(p.tr);
+            p.Pin = pressaoInicialTrecho(p.tr);
+          });
+          alvo = Math.max(...pares.map(p=>p.Pf));
+        }else{
+          convergiu=true;
+          break;
+        }
+      }
+
+      const diffs = pares.map(p=>{
+        return `${(p.tr.querySelector('.t-pi')?.value||'–').trim()} → ${(p.tr.querySelector('.t-pf')?.value||'–').trim()}: Pf=${formatBR(p.Pf,2)} mca`;
+      }).join(' | ');
+
+      if(convergiu){
+        fb.innerHTML = `<span class="eq-ok">✅ Equalização aplicada no nó ${noAlvo}. ${logs.join(' ')} | Situação final: ${diffs}.</span>`;
+      }else{
+        fb.innerHTML = `<span class="eq-warn">⚠️ Equalização no nó ${noAlvo} limitada por iterações. ${logs.join(' ')} | Situação atual: ${diffs}.</span>`;
+      }
+
+      const viol = [];
+      document.querySelectorAll('.bloco-trecho').forEach(tr=>{
+        const tds=tr.querySelectorAll('.resultados-trecho tbody tr td');
+        if(tds.length>=11){
+          const v = toNumberLocaleSmart(tds[10].textContent);
+          if(v!=null && v>5){
+            const pi=(tr.querySelector('.t-pi')?.value||'–').trim();
+            const pf=(tr.querySelector('.t-pf')?.value||'–').trim();
+            viol.push(`${pi} → ${pf} (${formatBR(v,2)} m/s)`);
+          }
+        }
+      });
+      if(viol.length){
+        fb.innerHTML += ` <span class="eq-warn">⚠️ Velocidade > 5 m/s em: ${viol.join('; ')}.</span>`;
+      }
+    }
+
+    // Atualizações de listas/abas após digitação
+    document.addEventListener('input', e=>{
+      if(e.target.matches('.no-ref, .no-pi, .no-pf')){
+        atualizarNos();
+        atualizarListaNosEqualizacao();
+      }
+    });
+
+    // Inicializa lista ao carregar
+    document.addEventListener('DOMContentLoaded', atualizarListaNosEqualizacao);
+document.addEventListener('DOMContentLoaded', updateResumoBombas);
+
+
+    
+
+
+
+document.getElementById('eq-no-list')?.addEventListener('change', mostrarDiferencaNo);
+
+    /* ==================== CONJUNTO MOTO-BOMBA (integração) ==================== */
+
+    // Preenche o select com os trechos existentes (PI → PF)
+function cmb_popularTrechos(){
+  const sel = document.getElementById('cmb-trecho-select');
+  if(!sel) return;
+
+  const atual = sel.value;
+  sel.innerHTML = '<option value="">— selecione um trecho —</option>';
+
+  const trechos = document.querySelectorAll('.bloco-trecho');
+  trechos.forEach((tr, idx) => {
+    const id = tr.dataset.uid || `TRC_${idx+1}`;
+    const pi = (tr.querySelector('.t-pi')?.value || '').trim();
+    const pf = (tr.querySelector('.t-pf')?.value || '').trim();
+    if(!pi || !pf) return;                     // <— ESCONDE enquanto incompleto
+
+    const label = `Trecho ${idx+1}: ${pi} → ${pf}`;
+    const opt = new Option(label, id);
+    opt.title = label;
+    sel.add(opt);
+  });
+
+  // mantém seleção se ainda existir
+  if ([...sel.options].some(o => o.value === atual)) sel.value = atual;
+  else sel.value = '';
+}
+
+
+
+
+    // Lê dados do trecho
+    function cmb_lerTrecho(uid){
+      const tr = [...document.querySelectorAll('.bloco-trecho')].find(t=>t.dataset.uid===uid);
+      if(!tr) return null;
+      const tds = tr.querySelectorAll('.resultados-trecho tbody tr td');
+      if(tds.length<11) return null;
+
+      const Pin_mca = toNumberLocaleSmart(tds[0].textContent);
+      const Qin_lpm = toNumberLocaleSmart(tds[1].textContent);
+      const Pf_mca  = toNumberLocaleSmart(tds[9].textContent);
+
+      return { Qin_lpm, Pin_mca, Pf_mca: Pf_mca };
+    }
+
+// Ligações de eventos e sincronismo
+(function(){
+  const sel = document.getElementById('cmb-trecho-select');
+  if (sel){
+    sel.addEventListener('change', ()=>{ cmb_popularTrechos(); cmb_updateOp(); cmb_updateNPSH(); renderChecksPreCMB(); });
+  }
+
+  // Atualiza SÓ o NPSH quando esses campos mudarem
+['cmb-alt','cmb-temp','cmb-hs','cmb-hf','cmb-npshr','cmb-margem'].forEach(id=>{
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', cmb_updateNPSH);
+});
+
+// Atualiza a POTÊNCIA/valores dos cards quando mudar o rendimento
+const efEl = document.getElementById('cmb-ef');
+if (efEl) efEl.addEventListener('input', cmb_updateOp);
+
+
+
+  const repop = ()=>{ cmb_popularTrechos(); cmb_updateOp(); cmb_updateNPSH(); };
+
+  const _old_addTrecho = adicionarTrecho;
+  adicionarTrecho = async function(){
+    await _old_addTrecho.apply(this, arguments);
+    repop();
+  };
+
+  // ✅ só faz o wrap se existir
+  if (typeof removerTudo === 'function') {
+    const _old_removerTudo = removerTudo;
+    removerTudo = function(){
+      _old_removerTudo.apply(this, arguments);
+      repop();
+    };
+  }
+
+  document.addEventListener('input', e=>{
+    if(e.target.matches('.t-pi, .t-pf')) repop();
+  });
+
+  // ÚNICO init de página
+  document.addEventListener('DOMContentLoaded', ()=>{
+    cmb_resetUI();
+    cmb_popularTrechos();
+    cmb_updateOp();
+    cmb_updateNPSH();
+  });
+})();
+
+
+
+    /* ===== NPSH ===== */
+    function cmb_hatm_m(alt){
+      const p0 = 101325; // Pa
+      const p  = p0 * Math.pow(1 - 2.25577e-5*(alt||0), 5.25588);
+      return p / (1000*9.81); // m de água
+    }
+    function cmb_pvap_kPa(Tc){
+      const es = 0.61078 * Math.exp((17.2694*Tc)/(Tc+237.29)); // kPa
+      return es;
+    }
+    function cmb_updateNPSH(){
+      const alt    = toNumberLocaleSmart(document.getElementById('cmb-alt')?.value)   || 0;
+      const temp   = toNumberLocaleSmart(document.getElementById('cmb-temp')?.value)  || 20;
+      const Hs     = toNumberLocaleSmart(document.getElementById('cmb-hs')?.value)    || 0;
+      const Hf     = toNumberLocaleSmart(document.getElementById('cmb-hf')?.value)    || 0;
+      const NPSHr  = toNumberLocaleSmart(document.getElementById('cmb-npshr')?.value) || 0;
+      const margem = toNumberLocaleSmart(document.getElementById('cmb-margem')?.value)|| 0;
+
+      const Hatm = cmb_hatm_m(alt);
+      const Hvap = cmb_pvap_kPa(temp) * 0.10197; // 1 kPa ≈ 0.10197 mca
+
+      const NPSHa = (Hatm - Hvap + Hs - Hf);
+      const req   = (NPSHr + margem);
+      const ok    = (NPSHa >= req - 1e-6);
+
+      document.getElementById('cmb-npsha').textContent   = formatBR(NPSHa,2);
+      document.getElementById('cmb-npshreq').textContent = formatBR(req,2);
+      const st = document.getElementById('cmb-npshstatus');
+      st.textContent = ok ? 'OK (atende)' : 'ATENÇÃO (não atende)';
+      st.style.color = ok ? '#1b5e20' : '#b00020';
+    }
+  
+
+// =================== MEMÓRIA DE CÁLCULO – funções ===================
+(function(){
+  const tbl = () => document.getElementById('memoriaTabela');
+  const tbody = () => tbl().querySelector('tbody');
+
+  // Lê dados de um bloco de TRECHO e devolve um objeto com os textos exatos da grade
+  function trechoToRowObj(trBloco){
+    const tds = trBloco.querySelectorAll('.resultados-trecho tbody tr td');
+    if (tds.length < 11) return null;
+
+    const pi = (trBloco.querySelector('.t-pi')?.value || '–').trim();
+    const pf = (trBloco.querySelector('.t-pf')?.value || '–').trim();
+
+    return {
+      desc: `${pi} → ${pf}`,
+      pin:  tds[0].textContent || '–',
+      fk:   '–', // trechos não têm fator K (mantido conforme cabeçalho atual)
+      qin:  tds[1].textContent || '–',
+      dmm:  tds[2].textContent || '–',
+      lr:   tds[3].textContent || '–',
+      leq:  tds[4].textContent || '–',
+      ltot: tds[5].textContent || '–',
+      j:    tds[6].textContent || '–',
+      jtot: tds[7].textContent || '–',
+      dz:   tds[8].textContent || '–',
+      pf:   tds[9].textContent || '–',
+      vel:  tds[10].textContent || '–'
+    };
+  }
+
+
+// Lê um bloco de HIDRANTE e devolve objeto para a tabela
+function hidranteToRowObj(hBloco){
+  const tds = getHidranteCells(hBloco);
+  if (!tds || tds.length < 6) return null;
+
+  const pi = (hBloco.querySelector('.hid-pi')?.value || 'Hidrante').trim();
+  const pf = (hBloco.querySelector('.no-ref')?.value || '–').trim();
+
+  // células da tabela do hidrante
+  const pNoz = tds[0].textContent || '–';   // pressão no esguicho
+  const qEsg = tds[1].textContent || '–';   // vazão no esguicho (não usada na memória)
+  const jUni = tds[2].textContent || '–';   // perda unitária (m/m)
+  const jTot = tds[3].textContent || '–';   // perda total
+  const pVal = tds[4].textContent || '–';   // pressão na válvula
+  const qVal = tds[5].textContent || '–';   // vazão na válvula
+
+  const Lm = hBloco.querySelector('.hid-l')?.value
+              ? Number(hBloco.querySelector('.hid-l').value) : null;
+  const K  = hBloco.querySelector('.fator-k')?.value || '–';
+  const Dm = hBloco.querySelector('.diametro-mangueira')?.value || '–';
+
+  return {
+    kind: 'hidrante',
+    desc: `${pi} → ${pf}`,
+    // Para hidrante: mostramos a pressão no esguicho como "inicial"
+    pin:  pNoz,
+    fk:   K,
+    qin:  qVal, // vazão na válvula
+    dmm:  Dm,
+    lr:   Lm!=null ? Lm.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '–',
+    leq:  '0,00',
+    ltot: Lm!=null ? Lm.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '–',
+    j:    jUni,
+    jtot: jTot,
+    dz:   '0,00',
+    pf:   pVal, // pressão na válvula como "final"
+    vel:  '–'
+  };
+}
+
+
+
+
+// Lê um bloco de EQUIPAMENTO e devolve objeto para a tabela
+function equipamentoToRowObj(eqBloco){
+  const piTxt = (eqBloco.querySelector('.eq-pi')?.value || 'Equipamento').trim();
+  const pfTxt = (eqBloco.querySelector('.no-ref')?.value || '–').trim();
+  const p = eqBloco.querySelector('.eq-p')?.value || '';
+  const q = eqBloco.querySelector('.eq-q')?.value || '';
+  const temAlgum = (p && p.trim()) || (q && q.trim());
+  if (!temAlgum) return null;
+
+  return {
+    kind: 'equip',
+    desc: `Equip.: ${piTxt} → ${pfTxt}`,
+    pin:  p || '–',
+    fk:   '–',
+    qin:  q || '–',
+    dmm:  '–',
+    lr:   '0,00',
+    leq:  '0,00',
+    ltot: '0,00',
+    j:    '–',
+    jtot: '0,00',
+    dz:   '0,00',
+    pf:   p || '–',
+    vel:  '–'
+  };
+}
+
+
+  // Cria uma <tr> com células + coluna de ações e suporte a arrastar
+
+// Cria uma <tr> com células + única ação (Excluir) e suporte a arrastar
+function makeRow(obj){
+  const tr = document.createElement('tr');
+  tr.draggable = true;           // drag-and-drop
+  tr.dataset.kind = 'trecho';
+
+  tr.innerHTML = `
+    <td>${obj.desc}</td>
+    <td>${obj.pin}</td>
+    <td>${obj.fk}</td>
+    <td>${obj.qin}</td>
+    <td>${obj.dmm}</td>
+    <td>${obj.lr}</td>
+    <td>${obj.leq}</td>
+    <td>${obj.ltot}</td>
+    <td>${obj.j}</td>
+    <td>${obj.jtot}</td>
+    <td>${obj.dz}</td>
+    <td>${obj.pf}</td>
+    <td>${obj.vel}</td>
+
+  
+      <button class="move-btn" data-act="del" style="background:transparent;border:none"></button>
+    </td>
+  `;
+
+
+
+ 
+
+  // Seleção ao clicar
+  tr.addEventListener('click', ()=>{
+    const tb = tbody();
+    if(!tb) return;
+    tb.querySelectorAll('tr').forEach(r=>r.classList.remove('selected-row'));
+    tr.classList.add('selected-row');
+    // foca o tbody para capturar setas
+    tb.focus();
+  });
+
+  // Drag & drop
+  tr.addEventListener('dragstart', (e)=>{
+    tr.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  tr.addEventListener('dragend', ()=> tr.classList.remove('dragging'));
+
+  // Área de drop na própria tabela (uma vez por tbody)
+  const tb = tbody();
+  if (tb && !tb.dataset.ddBound){
+    tb.dataset.ddBound = '1';
+    tb.addEventListener('dragover', (e)=>{
+      const dragging = tb.querySelector('tr.dragging');
+      if (!dragging) return;
+      e.preventDefault();
+      const after = getDragAfterElement(tb, e.clientY);
+      if (after == null) tb.appendChild(dragging);
+      else tb.insertBefore(dragging, after);
+    });
+  }
+
+  return tr;
+}
+
+
+  // Encontra a linha “logo abaixo” do mouse para posicionar o drop
+  function getDragAfterElement(container, y){
+    const els = [...container.querySelectorAll('tr:not(.dragging)')];
+    return els.reduce((closest, child)=>{
+      const box = child.getBoundingClientRect();
+      const offset = y - (box.top + box.height/2);
+      if (offset < 0 && offset > closest.offset){
+        return { offset, element: child };
+      } else {
+        return closest;
+      }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+  }
+
+// --- mover linha selecionada com teclado (↑ ↓) ---
+(function enableKeyboardRowMove(){
+  const tb = tbody();
+  if(!tb) return;
+
+  // permite foco no tbody
+  tb.tabIndex = 0;
+
+  function moveSelected(dir){
+    const sel = tb.querySelector('tr.selected-row');
+    if(!sel) return;
+    if(dir === 'up' && sel.previousElementSibling){
+      tb.insertBefore(sel, sel.previousElementSibling);
+      sel.scrollIntoView({block:'nearest'});
+    }
+    if(dir === 'down' && sel.nextElementSibling){
+      tb.insertBefore(sel.nextElementSibling, sel);
+      sel.scrollIntoView({block:'nearest'});
+    }
+  }
+
+  tb.addEventListener('keydown', (e)=>{
+    // setas movem; com/sem Ctrl funciona
+    if(e.key === 'ArrowUp'){
+      moveSelected('up'); e.preventDefault();
+    }else if(e.key === 'ArrowDown'){
+      moveSelected('down'); e.preventDefault();
+    }
+  });
+
+  // Seleciona primeira linha ao focar (se nada selecionado)
+  tb.addEventListener('focus', ()=>{
+    if(!tb.querySelector('.selected-row') && tb.firstElementChild){
+      tb.firstElementChild.classList.add('selected-row');
+    }
+  });
+})();
+
+
+
+  // ==== API pública (chamada pelos botões da toolbar) ====
+window.preencherMemoriaCalculo = function(){
+  const tb = tbody();
+  if (!tb) return;
+
+  // limpar (mantém ordem visual do container)
+  tb.innerHTML = '';
+
+  const itens = [...document.querySelectorAll('#containerTrechos > details')];
+
+  itens.forEach(bl=>{
+    let obj = null;
+
+    if (bl.classList.contains('bloco-trecho')){
+      obj = trechoToRowObj(bl);
+      // só adiciona se tiver dados mínimos
+      const ok = obj && ((obj.qin && obj.qin !== '–') || (obj.pf && obj.pf !== '–'));
+      if (ok) tb.appendChild(makeRow(obj));
+  return;
+        }
+
+
+
+    // bloco-hidrante pode ser HIDRANTE ou EQUIPAMENTO (tem .eq-p quando é equipamento)
+    if (bl.classList.contains('bloco-hidrante') && bl.querySelector('.eq-p')){
+      obj = equipamentoToRowObj(bl);
+      if (obj) tb.appendChild(makeRow(obj));
+      return;
+    }
+    if (bl.classList.contains('bloco-hidrante')){
+      obj = hidranteToRowObj(bl);
+      if (obj) tb.appendChild(makeRow(obj));
+      return;
+    }
+  });
+
+// --- garante atualização completa após render ---
+setTimeout(() => {
+  pintarMemoriaPfVel();
+  renderChecagensAbaMemoria();
+  renderChecksPreCMB();
+}, 0);
+
+
+
+};
+
+ 
+
+
+  window.exportarMemoria = function(){
+    const table = tbl();
+    if (!table) return;
+    const head = [...table.tHead.rows[0].cells].map(th => th.textContent.trim());
+    // ignora coluna "Ações" no CSV
+    const lastIsAcoes = head[head.length - 1].toLowerCase().includes('ações');
+    const header = lastIsAcoes ? head.slice(0, -1) : head;
+
+    const rows = [...table.tBodies[0].rows].map(tr=>{
+      const tds = [...tr.cells].map(td => td.textContent.trim());
+      return lastIsAcoes ? tds.slice(0, -1) : tds;
+    });
+
+    const csvLines = [
+      header.join(','), 
+      ...rows.map(r => r.map(s => {
+        // protege vírgulas e quebras
+        if (s.includes(',') || s.includes('"') || s.includes('\n')){
+          return `"${s.replace(/"/g, '""')}"`;
+        }
+        return s;
+      }).join(','))
+    ];
+
+    const blob = new Blob([csvLines.join('\n')], {type:'text/csv;charset=utf-8;'});
+    const url  = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'memoria_calculo.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  window.limparMemoria = function(){
+    const tb = tbody();
+    if (tb) tb.innerHTML = '';
+  };
+
+  // (Opcional) atualiza automaticamente a memória quando recalcular tudo
+  // Se quiser manter manual, deixe comentado.
+  // document.addEventListener('recalc:trechos', preencherMemoriaCalculo);
+
+
+// Lê a carga (MJ/m²) do texto do <select id="ocupacao">
+function parseCargaMJFromText(txt){
+  if(!txt) return null;
+  const m = String(txt).match(/(\d+(?:[.,]\d+)?)\s*MJ/i);
+  if(!m) return null;
+  return Number(m[1].replace(',', '.'));
+}
+
+// Atualiza as duas notas da aba 2
+function updateNotasEdificacao(){
+  // Nota por área ≤ 750 m²
+  const area = toNumberLocaleSmart(document.getElementById('area')?.value);
+  const nArea = document.getElementById('nota-area');
+  if(nArea) nArea.classList.toggle('oculta', !(area!=null && area <= 750));
+
+  // Nota por ocupação I-1 com carga ≤ 200 MJ/m²
+  const ocSel = document.getElementById('ocupacao');
+  const ocTxt = ocSel ? ocSel.value : '';
+  const isI1  = /(^|\s|\|)\s*I-1\b/.test(ocTxt);      // procura a divisão I-1 no texto
+  const carga = parseCargaMJFromText(ocTxt);
+  const nMJ   = document.getElementById('nota-mj');
+  if(nMJ) nMJ.classList.toggle('oculta', !(isI1 && carga!=null && carga <= 200));
+}
+window.updateNotasEdificacao = updateNotasEdificacao;  // torna global
+document.getElementById('area').addEventListener('input', updateNotasEdificacao);
+
+document.addEventListener('DOMContentLoaded', updateNotasEdificacao);
+
+
+})();
+
+
+// —— Helpers locais deste bloco —— //
+function _setTxt(id, val){ const el=document.getElementById(id); if(el) el.textContent = val; }
+function _fmt(n, casas=2){ return (n==null||!isFinite(n))?'—':Number(n).toLocaleString('pt-BR',{minimumFractionDigits:casas,maximumFractionDigits:casas}); }
+
+// Limpa cartão
+function cmb_resetNorma(){
+  _setTxt('nbr-qn','—'); _setTxt('nbr-hn','—');
+  _setTxt('nbr-q-ideal','—'); _setTxt('nbr-q150','—');
+  _setTxt('nbr-h150','—'); _setTxt('nbr-h0max','—');
+  const b1=document.getElementById('nbr-bdg-ideal');
+  const b2=document.getElementById('nbr-bdg-150');
+  const b3=document.getElementById('nbr-bdg-0');
+  if(b1){ b1.textContent='—'; b1.className='badge mute'; }
+  if(b2){ b2.textContent='—'; b2.className='badge mute'; }
+  if(b3){ b3.textContent='—'; b3.className='badge mute'; }
+}
+
+// Atualiza cartão com Qn (L/min) e Hn (m.c.a.)
+function cmb_updateNorma(Qn_lpm, Hn_mca){
+  if(!(Qn_lpm>0) || !(Hn_mca>0)){ cmb_resetNorma(); return; }
+
+  // Vazão nominal em L/min e m³/h
+  const Qm3h = (Qn_lpm/1000)*60;
+  _setTxt('nbr-qn', `${_fmt(Qn_lpm,2)} L/min (${_fmt(Qm3h,2)} m³/h)`);
+
+  // Pressão nominal em m.c.a. e bar
+  const Hbar = Hn_mca / 10.197;   // 1 bar ≈ 10,197 mca
+  _setTxt('nbr-hn', `${_fmt(Hn_mca,2)} m.c.a. (${_fmt(Hbar,2)} bar)`);
+
+  // Faixa operacional ideal (70–120% de Qn)
+  const q70 = 0.70*Qn_lpm, q120 = 1.20*Qn_lpm;
+  const q70m3h = (q70/1000)*60, q120m3h = (q120/1000)*60;
+  _setTxt('nbr-q-ideal', 
+    `${_fmt(q70,2)} a ${_fmt(q120,2)} L/min (${_fmt(q70m3h,2)} a ${_fmt(q120m3h,2)} m³/h)`);
+
+  const bIdeal = document.getElementById('nbr-bdg-ideal');
+  if(bIdeal){ bIdeal.textContent = 'OK'; bIdeal.className='badge'; }
+
+  // 150% da vazão
+  const q150 = 1.5*Qn_lpm;
+  const q150m3h = (q150/1000)*60;
+  _setTxt('nbr-q150', `${_fmt(q150,2)} L/min (${_fmt(q150m3h,2)} m³/h)`);
+
+  // H admissível em m.c.a. e bar
+  const h150min = 0.65*Hn_mca, h150max = 1.20*Hn_mca;
+  _setTxt('nbr-h150', `${_fmt(h150min,2)} a ${_fmt(h150max,2)} m.c.a. (${_fmt(h150min/10.197,2)} a ${_fmt(h150max/10.197,2)} bar)`);
+
+  const b150 = document.getElementById('nbr-bdg-150');
+  if(b150){ b150.textContent = '—'; b150.className='badge mute'; }
+
+  // Shutoff
+  const h0max = 1.40*Hn_mca;
+  _setTxt('nbr-h0max', `${_fmt(h0max,2)} m.c.a. (${_fmt(h0max/10.197,2)} bar)`);
+
+  const b0 = document.getElementById('nbr-bdg-0');
+  if(b0){ b0.textContent = '—'; b0.className='badge mute'; }
+}
+
+
+// ===== MEMORIAL DESCRITIVO =====
+function _txt(el){ return (el && 'value' in el) ? (el.value || '').trim() : (el?.textContent || '').trim(); }
+function _safe(s){ return (s==null?'':String(s)).replace(/[<>&]/g, m => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[m])); }
+
+function coletarCabecalho(){
+  return {
+    sistema:  _txt(document.getElementById('sistema')),
+    ref:      _txt(document.getElementById('referencia')),
+    cliente:  _txt(document.getElementById('cliente')),
+    endereco: _txt(document.getElementById('endereco')),
+    data:     _txt(document.getElementById('data')),
+    art:      _txt(document.getElementById('art'))
+  };
+}
+function coletarEdificacao(){
+  return {
+    grupo: _txt(document.getElementById('grupo')),
+    ocup:  _txt(document.getElementById('ocupacao')),
+    area:  _txt(document.getElementById('area')),
+    tipo:  _txt(document.getElementById('tipoSistema')),
+    rti:   _txt(document.getElementById('volumeMinimo'))
+  };
+}
+function coletarConfigSistema(){
+  return {
+    vazaoMin:   _txt(document.getElementById('vazaoMinima')),
+    pressaoMin: _txt(document.getElementById('pressaoMinima')),
+    esguichoDN:_txt(document.getElementById('diametroEsguicho')),
+    mangDN:     _txt(document.getElementById('diametroMangueira')),
+    fatorK:     _txt(document.getElementById('fatorK')),
+    modelo:     _txt(document.getElementById('modeloEsguicho'))
+  };
+}
+function coletarBombasResumo(){
+  const g = id => _txt(document.getElementById(id));
+  return {
+    p_mca: g('mem-cmb-p-mca'), p_bar: g('mem-cmb-p-bar'),
+    q_lpm: g('mem-cmb-q-lpm'), q_m3h: g('mem-cmb-q-m3h'),
+    cv: g('mem-cmb-pot-cv'),   hp: g('mem-cmb-pot-hp'),
+    j_p_mca: g('mem-jk-p-mca'), j_p_bar: g('mem-jk-p-bar'),
+    j_q_lpm: g('mem-jk-q-lpm'), j_q_m3h: g('mem-jk-q-m3h'),
+    j_cv: g('mem-jk-pot-cv'),   j_hp: g('mem-jk-pot-hp')
+  };
+}
+function coletarMemoriaTabela(){
+  const rows = [];
+  const tb = document.querySelector('#memoriaTabela tbody');
+  if(!tb) return rows;
+  tb.querySelectorAll('tr').forEach(tr=>{
+    const tds = tr.querySelectorAll('td');
+    if(!tds || tds.length < 13) return;
+    rows.push({
+      desc: tds[0].textContent.trim(),
+      pin:  tds[1].textContent.trim(),
+      fk:   tds[2].textContent.trim(),
+      qin:  tds[3].textContent.trim(),
+      dmm:  tds[4].textContent.trim(),
+      lr:   tds[5].textContent.trim(),
+      leq:  tds[6].textContent.trim(),
+      ltot: tds[7].textContent.trim(),
+      j:    tds[8].textContent.trim(),
+      jtot: tds[9].textContent.trim(),
+      dz:   tds[10].textContent.trim(),
+      pf:   tds[11].textContent.trim(),
+      vel:  tds[12].textContent.trim()
+    });
+  });
+  return rows;
+}
+
+function gerarMemorialHTML(){
+  const cab  = coletarCabecalho();
+  const edi  = coletarEdificacao();
+  const cfg  = coletarConfigSistema();
+  const cmb  = coletarBombasResumo();
+  const linhas = coletarMemoriaTabela();
+
+  const blocoIdent = `
+     <h2 class="icone">Memorial Descritivo do Dimensionamento Hidráulico</h2>
+<h2 style="margin-top:25px;">📁 Referência do Projeto</h2>
+    <div class="kv">
+      <div><strong>Sistema dimensionado:</strong> ${_safe(cab.sistema || '—')}</div>
+      <div><strong>Referência:</strong> ${_safe(cab.ref || '—')}</div>
+      <div><strong>Cliente:</strong> ${_safe(cab.cliente || '—')}</div>
+      <div><strong>Endereço:</strong> ${_safe(cab.endereco || '—')}</div>
+      <div><strong>ART:</strong> ${_safe(cab.art || 'Não informado')}</div>
+      <div><strong>Data:</strong> ${_safe(cab.data || '—')}</div>
+    </div>`;
+
+  const blocoEdif = `
+  <h2 style="margin-top:25px;">🏢 Dados da Edificação</h2>    <div class="kv">
+      <div><strong>Uso:</strong> ${_safe(edi.grupo || '—')}</div>
+      <div><strong>Ocupação:</strong> ${_safe(edi.ocup || '—')}</div>
+      <div><strong>Área construída protegida (m²):</strong> ${_safe(edi.area || '—')}</div>
+     
+        </div>`;
+
+  const blocoCfg = `
+    <h2 style="margin-top:25px;">⚙️ Configurações do Sistema de hidrantes</h2>
+    <div class="kv">
+<div><strong>Tipo de sistema:</strong> ${_safe(edi.tipo || '—')}</div>
+      <div><strong>Vazão mínima na válvula (L/min):</strong> ${_safe(cfg.vazaoMin || '—')}</div>
+      <div><strong>Pressão mínima na válvula (m.c.a.):</strong> ${_safe(cfg.pressaoMin || '—')}</div>
+      <div><strong>Esguicho DN (mm):</strong> ${_safe(cfg.esguichoDN || '—')}</div>
+      <div><strong>Mangueira DN (mm):</strong> ${_safe(cfg.mangDN || '—')}</div>
+      <div><strong>Fator K Esguicho:</strong> ${_safe(cfg.fatorK || '—')}</div>
+      <div><strong>Modelo do esguicho:</strong> ${_safe(cfg.modelo || '—')}</div>
+<div><strong>Volume mínimo da reserva (L):</strong> ${_safe(edi.rti || '—')}</div>
+    </div>`;
+
+  const tabelaMemoria = (function(){
+    const linhas = coletarMemoriaTabela();
+    if(!linhas.length){
+      return `
+<h2 style="margin-top:25px;">✏️ Memoria de Cálculo Tabela</h2>
+              <p class="muted">Para carregar, carregar memória em Memória de Cálculo!</p>`;
+    }
+    return `
+      <h2 style="margin-top:25px;">✏️ Memoria de Cálculo Tabela</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Trecho (PI→PF)</th><th>Pin (mca)</th><th>Fator K</th><th>Qin (L/min)</th>
+            <th>Ø (mm)</th><th>L real (m)</th><th>L eq (m)</th><th>L total (m)</th>
+            <th>J (mca/m)</th><th>J total (mca)</th><th>Δz (m)</th><th>Pf (mca)</th><th>Vel (m/s)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${linhas.map(r=>`
+            <tr>
+              <td>${_safe(r.desc)}</td><td>${_safe(r.pin)}</td><td>${_safe(r.fk)}</td>
+              <td>${_safe(r.qin)}</td><td>${_safe(r.dmm)}</td><td>${_safe(r.lr)}</td>
+              <td>${_safe(r.leq)}</td><td>${_safe(r.ltot)}</td><td>${_safe(r.j)}</td>
+              <td>${_safe(r.jtot)}</td><td>${_safe(r.dz)}</td><td>${_safe(r.pf)}</td><td>${_safe(r.vel)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="muted">Obs.: valores conforme estado atual da aba “Memória de Cálculo”.</div>`;
+  })();
+
+
+  const blocoBombas = (function(){
+    const cmb = coletarBombasResumo();
+    return `
+      <h2 style="margin-top:25px;">⚡ Conjunto Moto Bomba</h2>
+      <h3>Principal</h3>
+      <div class="kv">
+        <div><strong>Pressão:</strong> ${_safe(cmb.p_mca)} · ${_safe(cmb.p_bar)}</div>
+        <div><strong>Vazão:</strong> ${_safe(cmb.q_lpm)} · ${_safe(cmb.q_m3h)}</div>
+        <div><strong>Potência:</strong> ${_safe(cmb.cv)} · ${_safe(cmb.hp)}</div>
+      </div>
+      <h3>Jockey (pressurização)</h3>
+      <div class="kv">
+        <div><strong>Pressão:</strong> ${_safe(cmb.j_p_mca)} · ${_safe(cmb.j_p_bar)}</div>
+        <div><strong>Vazão:</strong> ${_safe(cmb.j_q_lpm)} · ${_safe(cmb.j_q_m3h)}</div>
+        <div><strong>Potência:</strong> ${_safe(cmb.j_cv)} · ${_safe(cmb.j_hp)}</div>
+      </div>`;
+  })();
+
+  return [blocoIdent, blocoEdif, blocoCfg, tabelaMemoria, blocoBombas].join('\n');
+}
+
+function atualizarMemorial(){
+  const el = document.getElementById('memorial');
+  if(!el) return;
+  el.innerHTML = gerarMemorialHTML();
+}
+
+// botão “Atualizar Memorial” da própria aba
+document.getElementById('btn-mem-atualizar')?.addEventListener('click', atualizarMemorial);
+
+// garantia extra: se abrir a aba 7 por outros meios, atualiza também
+document.addEventListener('DOMContentLoaded', () => {
+  const aba7btn = Array.from(document.querySelectorAll('.topnav button'))
+    .find(b => (b.textContent || '').includes('Memorial Descritivo'));
+  // se clicar no botão da topbar, atualiza
+  if (aba7btn){
+    aba7btn.addEventListener('click', () => setTimeout(atualizarMemorial, 0));
+  }
+});
+</script>
+
+
+
+<script>
+// Utilitários de leitura (reaproveitam seus IDs atuais)
+function _txt(el){ return (el && 'value' in el) ? (el.value||'').trim() : (el?.textContent||'').trim(); }
+function _esc(s){ return (s==null?'':String(s)).replace(/[<>&]/g, m => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[m]); }
+
+function coletarCabecalho(){
+  return {
+    sistema:  _txt(document.getElementById('sistema')),
+    ref:      _txt(document.getElementById('referencia')),
+    cliente:  _txt(document.getElementById('cliente')),
+    endereco: _txt(document.getElementById('endereco')),
+    data:     _txt(document.getElementById('data')),
+    art:      _txt(document.getElementById('art')),
+  };
+}
+function coletarEdificacao(){
+  return {
+    uso:   _txt(document.getElementById('grupo')),
+    ocup:  _txt(document.getElementById('ocupacao')),
+    area:  _txt(document.getElementById('area')),
+    tipo:  _txt(document.getElementById('tipoSistema')),
+    rti:   _txt(document.getElementById('volumeMinimo'))
+  };
+}
+function coletarConfigSistema(){
+  return {
+    vazaoMin:   _txt(document.getElementById('vazaoMinima')),
+    pressaoMin: _txt(document.getElementById('pressaoMinima')),
+    esgDN:      _txt(document.getElementById('diametroEsguicho')),
+    mangDN:     _txt(document.getElementById('diametroMangueira')),
+    fatorK:     _txt(document.getElementById('fatorK')),
+    modelo:     _txt(document.getElementById('modeloEsguicho'))
+  };
+}
+function coletarBombasResumo(){
+  const g = id => _txt(document.getElementById(id));
+  return {
+    p_mca: g('mem-cmb-p-mca'), p_bar: g('mem-cmb-p-bar'),
+    q_lpm: g('mem-cmb-q-lpm'), q_m3h: g('mem-cmb-q-m3h'),
+    cv:    g('mem-cmb-pot-cv'), hp: g('mem-cmb-pot-hp'),
+    jp_mca:g('jockey-p-mca'),  jp_bar:g('jockey-p-bar'),
+    jq_lpm:g('jockey-q-lpm'),  jq_m3h:g('jockey-q-m3h'),
+    jcv:   g('jockey-pot-cv'), jhp:   g('jockey-pot-hp')
+  };
+}
+function coletarMemoriaTabela(){
+  const linhas = [];
+  const tb = document.querySelector('#memoriaTabela tbody');
+  if (!tb) return linhas;
+  tb.querySelectorAll('tr').forEach(tr=>{
+    const tds = tr.querySelectorAll('td');
+    if (tds.length >= 13){
+      linhas.push({
+        desc: tds[0].textContent.trim(),
+        pin:  tds[1].textContent.trim(),
+        fk:   tds[2].textContent.trim(),
+        qin:  tds[3].textContent.trim(),
+        dmm:  tds[4].textContent.trim(),
+        lr:   tds[5].textContent.trim(),
+        leq:  tds[6].textContent.trim(),
+        ltot: tds[7].textContent.trim(),
+        j:    tds[8].textContent.trim(),
+        jtot: tds[9].textContent.trim(),
+        dz:   tds[10].textContent.trim(),
+        pf:   tds[11].textContent.trim(),
+        vel:  tds[12].textContent.trim()
+      });
+    }
+  });
+  return linhas;
+}
+
+// Renderização do Memorial
+function gerarMemorial(){
+  const cab = coletarCabecalho();
+  const ed  = coletarEdificacao();
+  const cfg = coletarConfigSistema();
+  const bombas = coletarBombasResumo();
+  const linhas = coletarMemoriaTabela();
+
+  const mem = document.getElementById('memorial');
+  if (!mem) return;
+
+  const tabela =
+    linhas.length
+      ? `<table style="width:100%; border-collapse:collapse; margin-top:10px;">
+           <thead>
+             <tr>
+               ${['Trecho (PI→PF)','Pini (mca)','Fator K','Qini (L/min)','DN (mm)','Comp. real (m)','Comp. eq. (m)','Comp. total (m)','J (mca/m)','J total (mca)','Δz (m)','Pfinal (mca)','Vel (m/s)']
+                  .map(h=>`<th style="border:1px solid #bbb; background:#f5f5f5; padding:6px 8px; font-weight:700; text-align:center;">${_esc(h)}</th>`).join('')}
+             </tr>
+           </thead>
+           <tbody>
+             ${linhas.map(l=>`
+               <tr>
+                 ${[_esc(l.desc),l.pin,l.fk,l.qin,l.dmm,l.lr,l.leq,l.ltot,l.j,l.jtot,l.dz,l.pf,l.vel]
+                     .map(c=>`<td style="border:1px solid #ddd; padding:6px 8px; text-align:center;">${_esc(c)}</td>`).join('')}
+               </tr>`).join('')}
+           </tbody>
+         </table>`
+      : `<div style="color:#b00020">A Memória de Cálculo está vazia. Clique em <strong>Carregar Memória</strong> na aba “Memória de Cálculo” e depois volte aqui.</div>`;
+
+// incluir checagens também no memorial
+const checagensHTML = document.getElementById('checagens')?.innerHTML || '';
+mem.innerHTML += `
+  <h3 style="margin-top:18px;color:#1b5e20;">6. Checagens Normativas</h3>
+  ${checagensHTML || '<em>Sem checagens disponíveis.</em>'}
+`;
+
+
+
+  mem.innerHTML = `
+    <div style="font-size:18px; font-weight:700; color:#1b5e20; margin-bottom:8px;">${_esc(cab.sistema||'Memorial Descritivo')}</div>
+
+    <div style="margin-bottom:10px;">
+      <div><strong>Referência:</strong> ${_esc(cab.ref)}</div>
+      <div><strong>Cliente:</strong> ${_esc(cab.cliente)}</div>
+      <div><strong>Endereço:</strong> ${_esc(cab.endereco)}</div>
+      <div><strong>ART:</strong> ${_esc(cab.art)} &nbsp; <strong>Data:</strong> ${_esc(cab.data)}</div>
+    </div>
+
+    <div style="border:1px solid #e0e0e0; border-radius:8px; padding:10px; margin-bottom:12px;">
+      <div style="font-weight:700; color:#1b5e20; margin-bottom:6px;">Dados da Edificação</div>
+      <div><strong>Uso:</strong> ${_esc(ed.uso)}</div>
+      <div><strong>Ocupação:</strong> ${_esc(ed.ocup)}</div>
+      <div><strong>Área construída protegida:</strong> ${_esc(ed.area)} m²</div>
+      <div><strong>Tipo de sistema:</strong> ${_esc(ed.tipo)}</div>
+      <div><strong>Reserva técnica de incêndio (RTI):</strong> ${_esc(ed.rti)} L</div>
+    </div>
+
+    <div style="border:1px solid #e0e0e0; border-radius:8px; padding:10px; margin-bottom:12px;">
+      <div style="font-weight:700; color:#1b5e20; margin-bottom:6px;">Parâmetros do Sistema de Hidrantes</div>
+      <div><strong>Vazão mínima na válvula:</strong> ${_esc(cfg.vazaoMin)} L/min</div>
+      <div><strong>Pressão mínima na válvula:</strong> ${_esc(cfg.pressaoMin)} m.c.a.</div>
+      <div><strong>Esguicho:</strong> ${_esc(cfg.modelo)} (DN ${_esc(cfg.esgDN)} · K=${_esc(cfg.fatorK)})</div>
+      <div><strong>Mangueira:</strong> DN ${_esc(cfg.mangDN)} mm</div>
+    </div>
+
+    <div style="border:1px solid #e0e0e0; border-radius:8px; padding:10px; margin-bottom:12px;">
+      <div style="font-weight:700; color:#1b5e20; margin-bottom:6px;">Conjunto Moto-Bomba (Resumo)</div>
+      <div><strong>Principal:</strong> P=${_esc(bombas.p_mca)} · ${_esc(bombas.p_bar)} | Q=${_esc(bombas.q_lpm)} · ${_esc(bombas.q_m3h)} | Potência=${_esc(bombas.cv)} · ${_esc(bombas.hp)}</div>
+      <div><strong>Jockey:</strong> P=${_esc(bombas.jp_mca)} · ${_esc(bombas.jp_bar)} | Q=${_esc(bombas.jq_lpm)} · ${_esc(bombas.jq_m3h)} | Potência=${_esc(bombas.jcv)} · ${_esc(bombas.jhp)}</div>
+    </div>
+
+    <div style="font-weight:700; color:#1b5e20; margin-bottom:6px;">Memória de Cálculo (tabela)</div>
+    ${tabela}
+  `;
+}
+
+// Botão Atualizar
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('btn-mem-atualizar')?.addEventListener('click', gerarMemorial);
+});
+
+// Atualiza automaticamente ao abrir a aba 7
+const _abrirAba_original = window.abrirAba;
+window.abrirAba = function(evt, nomeAba){
+  _abrirAba_original(evt, nomeAba);
+  if (nomeAba === 'aba7') gerarMemorial();
+};
+
+</script>
+
+
+
+
+<script>
+function gerarMemorial(){
+  const el = document.getElementById('memorial');
+  if(!el) return;
+  el.innerHTML = `
+    <h3 style="margin-top:0">Memorial Descritivo</h3>
+    <p><strong>Sistema:</strong> ${document.getElementById('sistema')?.value || '—'}</p>
+    <p><strong>Cliente:</strong> ${document.getElementById('cliente')?.value || '—'}</p>
+    <p><strong>Referência:</strong> ${document.getElementById('referencia')?.value || '—'}</p>
+    <hr>
+    <p>Conteúdo gerado automaticamente a partir dos dados preenchidos nas abas.</p>
+  `;
+}
+
+// liga o botão da aba 7
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btn-mem-atualizar')
+    ?.addEventListener('click', gerarMemorial);
+});
+
+
+
+<!-- Bloco das checagens automáticas -->
+<script>
+function atualizarChecagens(){
+  const div = document.getElementById('checagens');
+  if(!div) return;
+
+  const linhas = document.querySelectorAll('#memoriaTabela tbody tr');
+  if(linhas.length === 0){
+    div.innerHTML = '';
+    return;
+  }
+
+  let velMax = 0;
+  let pressaoMax = 0;
+  let diferencaNos = 0;
+
+  linhas.forEach(tr => {
+    const tds = tr.querySelectorAll('td');
+    const vel = parseFloat(tds[12]?.textContent.replace(',','.') || 0);
+    const pf = parseFloat(tds[11]?.textContent.replace(',','.') || 0);
+    if(vel > velMax) velMax = vel;
+    if(pf > pressaoMax) pressaoMax = pf;
+  });
+
+  const nos = {};
+  linhas.forEach(tr=>{
+    const trecho = tr.querySelector('td')?.textContent || '';
+    const noFinal = trecho.split('→')[1]?.trim();
+    const pf = parseFloat(tr.querySelectorAll('td')[11]?.textContent.replace(',','.') || 0);
+    if(noFinal){
+      if(!nos[noFinal]) nos[noFinal] = [];
+      nos[noFinal].push(pf);
+    }
+  });
+  Object.values(nos).forEach(arr=>{
+    if(arr.length>1){
+      const diff = Math.max(...arr)-Math.min(...arr);
+      if(diff > diferencaNos) diferencaNos = diff;
+    }
+  });
+
+  const c1ok = velMax <= 5;
+  const c2ok = pressaoMax <= 100;
+  const c3ok = diferencaNos <= 0.5;
+
+  function linha(txt, ok){
+    const cor = ok ? '#0d47a1' : '#b00020';
+    const emoji = ok ? '✅' : '❌';
+    return `<div style="background:${ok?'#e3f2fd':'#ffebee'};color:${cor};
+             border-radius:6px;padding:6px 10px;margin:3px 0;">
+             ${emoji} ${txt}
+           </div>`;
+  }
+
+  div.innerHTML = `
+    ${linha(`Velocidade máxima do fluido < 5,00 m/s → ${c1ok ? 'ok' : 'fora do limite'}`, c1ok)}
+    ${linha(`Pressão máxima na rede < 100 m.c.a. → ${c2ok ? 'ok' : 'fora do limite'}`, c2ok)}
+    ${linha(`Diferença de pressão em nós confluentes < 0,50 m.c.a. → ${c3ok ? 'ok' : 'fora do limite'}`, c3ok)}
+  `;
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('btnCarregarMemoria')?.addEventListener('click', ()=>{
+    setTimeout(atualizarChecagens, 300);
+  });
+});
+
+
+
+function pintarMemoriaPfVel(){
+  const tb = document.querySelector('#memoriaTabela tbody');
+  if(!tb) return;
+
+  [...tb.rows].forEach(tr=>{
+    const pf  = toNumberLocaleSmart(tr.cells[11]?.textContent); // "Pressão final (mca)"
+    const vel = toNumberLocaleSmart(tr.cells[12]?.textContent); // "Velocidade (m/s)"
+
+    // pressão final > 100 → vermelho
+    if (pf!=null && pf > 100){
+      tr.cells[11].style.backgroundColor = '#ffebee';
+      tr.cells[11].style.color = '#b71c1c';
+      tr.cells[11].style.fontWeight = '700';
+    } else {
+      tr.cells[11].style.backgroundColor = '';
+      tr.cells[11].style.color = '';
+      tr.cells[11].style.fontWeight = '';
+    }
+
+    // mantém teu esquema da velocidade
+    if (vel!=null && vel > 5){
+      tr.cells[12].style.backgroundColor = '#ffebee';
+    } else if (vel!=null && vel >= 4){
+      tr.cells[12].style.backgroundColor = '#fff3cd';
+    } else {
+      tr.cells[12].style.backgroundColor = '';
+    }
+  });
+}
+
+function atualizaChecagensMemoria(){
+  const tb  = document.querySelector('#memoriaTabela tbody');
+  const box = document.getElementById('checagens');
+  if(!tb || !box) return;
+
+  // pior velocidade e pior pressão final
+  let maxVel = 0, maxPf = 0;
+  [...tb.rows].forEach(tr=>{
+    const pf  = toNumberLocaleSmart(tr.cells[11]?.textContent);
+    const vel = toNumberLocaleSmart(tr.cells[12]?.textContent);
+    if (pf  != null && pf  > maxPf)  maxPf  = pf;
+    if (vel != null && vel > maxVel) maxVel = vel;
+  });
+
+  // pior Δ de pressão em nós confluentes (usa utilitários que você já tem)
+  let maxDelta = 0;
+  try{
+    const nosRam = nosComRamificacao(); // já existe no seu código
+    nosRam.forEach(no=>{
+      const vals = listarPfNo(no).map(v=>v.Pf).filter(v=>v!=null);
+      if (vals.length >= 2){
+        const d = Math.max(...vals) - Math.min(...vals);
+        if (d > maxDelta) maxDelta = d;
+      }
+    });
+  }catch(_){ /* se ainda não há trechos, ignora */ }
+
+  // limites
+  const okVel   = !(maxVel > 5);
+  const okPf    = !(maxPf  >= 100);
+  const okDelta = !(maxDelta > 0.50);
+
+  box.innerHTML = `
+    <div class="item ${okVel?'ok':'bad'}">${okVel?'✅':'❌'} Velocidade do fluído &lt; 5,00 m/s — pior caso: ${formatBR(maxVel||0,2)} m/s</div>
+    <div class="item ${okPf?'ok':'bad'}">${okPf?'✅':'❌'} Pressão máxima na rede &lt; 100 m.c.a. — pior caso: ${formatBR(maxPf||0,2)} m.c.a.</div>
+    <div class="item ${okDelta?'ok':'bad'}">${okDelta?'✅':'❌'} Diferença de pressão em nós confluentes ≤ 0,50 m.c.a. — pior caso: ${formatBR(maxDelta||0,2)} m.c.a.</div>
+  `;
+}
+
+<script>
+// ——— checagens globais (Memória + Memorial)
+function _coletarLinhasMemoria(){
+  const rows = [...document.querySelectorAll('#memoriaTabela tbody tr')];
+  return rows.map(tr => {
+    const tds = tr.querySelectorAll('td');
+    // colunas da sua tabela (fixas no arquivo): 
+    //  0 desc | 1 Pin | 2 K | 3 Qin | 4 D(mm) | 5 Lr | 6 Leq | 7 Ltot | 8 J | 9 Jtot | 10 Dz | 11 Pf | 12 Vel
+    const desc = tds[0]?.textContent?.trim() ?? '—';
+    const vel  = toNumberLocaleSmart(tds[12]?.textContent);
+    const pf   = toNumberLocaleSmart(tds[11]?.textContent);
+    return {tr, desc, vel, pf};
+  });
+}
+
+function _mapaNosPf(){ // Pf por nó de chegada (PF)
+  const mapa = new Map();
+  document.querySelectorAll('.bloco-trecho').forEach(bl => {
+    const pfNo = (bl.querySelector('.t-pf')?.value || '').trim();
+    if (!pfNo) return;
+    const tds = bl.querySelectorAll('.resultados-trecho tbody tr td');
+    const pf  = (tds.length>=10) ? toNumberLocaleSmart(tds[9].textContent) : null;
+    if (pf==null) return;
+    if (!mapa.has(pfNo)) mapa.set(pfNo, []);
+    const pi = (bl.querySelector('.t-pi')?.value || '–').trim();
+    mapa.get(pfNo).push({pi, pfNo, pf});
+  });
+  return mapa;
+}
+
+function calcularChecagensGlobais(){
+  const linhas = _coletarLinhasMemoria().filter(l => l.desc !== '');
+  const maxVel = Math.max(...linhas.map(l => (l.vel??-Infinity)));
+  const maxPf  = Math.max(...linhas.map(l => (l.pf ?? -Infinity)));
+
+  // maior ΔPf entre trechos que chegam ao mesmo nó
+  const mapa = _mapaNosPf();
+  let maxDelta = 0, noDelta = '';
+  mapa.forEach((arr, no) => {
+    if (arr.length >= 2) {
+      const min = Math.min(...arr.map(a=>a.pf));
+      const max = Math.max(...arr.map(a=>a.pf));
+      if ((max-min) > maxDelta){ maxDelta = (max-min); noDelta = no; }
+    }
+  });
+
+  return {maxVel, maxPf, maxDelta, noDelta};
+}
+
+function renderChecagensAbaMemoria(){
+  const box = document.getElementById('checagens');
+  if (!box) return;
+
+  const {maxVel, maxPf, maxDelta, noDelta} = calcularChecagensGlobais();
+
+  const okVel   = Number.isFinite(maxVel)   ? (maxVel   <= 5.00 + 1e-6) : true;
+  const okPf    = Number.isFinite(maxPf)    ? (maxPf    <  100.00 - 1e-6) : true;
+  const okDelta = Number.isFinite(maxDelta) ? (maxDelta <= 0.50 + 1e-6) : true;
+
+  const li = (ok, txt) => `
+    <div class="item ${ok?'ok':'bad'}">${ok?'✅':'❌'} ${txt}</div>
+  `;
+
+  box.innerHTML = `
+    <div class="checagens">
+      ${li(okVel,   `Velocidade do fluído &lt;= 5,00 m/s — máx. observado: ${formatBR(maxVel||0,2)} m/s`)}
+      ${li(okPf,    `Pressão final na rede &lt; 100,00 m.c.a. — máx. observada: ${formatBR(maxPf||0,2)} m.c.a.`)}
+      ${li(okDelta, \`Diferença de Pf em nós confluentes &lt;= 0,50 m.c.a. — máx.: ${formatBR(maxDelta||0,2)} m.c.a.${noDelta?` (nó ${noDelta})`:''}\`)}
+    </div>
+  `;
+}
+
+// ——— insere o mesmo bloco no Memorial
+function trechoChecagensParaMemorial(){
+  const {maxVel, maxPf, maxDelta, noDelta} = calcularChecagensGlobais();
+  const linha = (ok, t) => `${ok?'✅':'❌'} ${t}`;
+  const okVel   = Number.isFinite(maxVel)   ? (maxVel   <= 5.00 + 1e-6) : true;
+  const okPf    = Number.isFinite(maxPf)    ? (maxPf    <  100.00 - 1e-6) : true;
+  const okDelta = Number.isFinite(maxDelta) ? (maxDelta <= 0.50 + 1e-6) : true;
+
+  return `
+  <h3>Checagens automáticas</h3>
+  <ul>
+    <li>${linha(okVel,   `Velocidade do fluído ≤ 5,00 m/s — máximo observado: ${formatBR(maxVel||0,2)} m/s`)}</li>
+    <li>${linha(okPf,    `Pressão final na rede < 100,00 m.c.a. — máxima observada: ${formatBR(maxPf||0,2)} m.c.a.`)}</li>
+    <li>${linha(okDelta, `Diferença de pressão em nós confluentes ≤ 0,50 m.c.a. — máxima: ${formatBR(maxDelta||0,2)} m.c.a.${noDelta?` (nó ${noDelta})`:''}`)}</li>
+  </ul>`;
+}
+
+// ——— se já existir sua função gerarMemorial(), só injeta o bloco; senão, cria uma simples
+(function hookMemorial(){
+  const btn = document.getElementById('btn-mem-atualizar');
+  if (btn){
+    btn.addEventListener('click', ()=>{
+      const el = document.getElementById('memorial');
+      if (!el) return;
+      // aqui você pode manter o que já gera e só concatenar as checagens:
+      const extra = trechoChecagensParaMemorial();
+      // se já monta um HTML completo, insira `extra` no ponto desejado.
+      el.innerHTML = (el.innerHTML||'') + extra;
+    });
+  }
+})();
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('btn-carregar-memoria');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      // deixa o DOM atualizar a tabela e então pinta/checa
+      setTimeout(() => {
+        pintarMemoriaPfVel();
+        renderChecagensAbaMemoria();
+   renderChecksPreCMB();
+      }, 0);
+
+// === Oculta o botão 🗑 de exclusão após renderização ===
+document.querySelectorAll('[data-act="del"]').forEach(btn => {
+  btn.style.display = 'none'; // mantém a célula, mas oculta o botão
+});
+
+    });
+  }
+});
+
+</script>
+
+
+
+
+<script>
+// === Checagens rápidas antes do bloco "Conjunto Moto-Bomba" (aba Memória) ===
+
+// === Checagens rápidas antes do bloco "Conjunto Moto-Bomba" (aba Memória) ===
+function renderChecksPreCMB() {
+  const host = document.getElementById("checks-pre-cmb");
+  if (!host) return;
+
+  // --- helpers ---
+  const toNum = (s) => {
+    if (s == null) return null;
+    s = String(s).trim();
+    if (!s) return null;
+    s = s.replace(/\./g, '').replace(',', '.');
+    const n = Number(s);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const fmt = (n, c = 2) =>
+    n == null || !isFinite(n)
+      ? "–"
+      : Number(n).toLocaleString("pt-BR", {
+          minimumFractionDigits: c,
+          maximumFractionDigits: c,
+        });
+
+  const norm = (s) =>
+    (s || "")
+      .replace(/\u00A0/g, " ")
+      .replace(/\s+/g, " ")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim();
+
+  // === Lê PRESSÃO FINAL da tabela ===
+  const tabela = document.getElementById("memoriaTabela");
+  let pressaoFinalSel = null;
+  if (tabela) {
+    const headerRow =
+      tabela.tHead && tabela.tHead.rows && tabela.tHead.rows[0]
+        ? tabela.tHead.rows[0]
+        : tabela.querySelector("tr");
+    const ths = headerRow ? Array.from(headerRow.cells) : [];
+    const idxPf = ths.findIndex((th) => {
+      const t = norm(th.innerText || th.textContent);
+      return t.includes("pressao") && t.includes("final");
+    });
+    const rows = Array.from(tabela.querySelectorAll("tbody tr"));
+    if (idxPf >= 0 && rows.length) {
+      const selRef = document.querySelector(
+        "#ponto-ref, #ponto-referencia, #cmb-ponto-ref, [data-id='ponto-ref'], #ponto-ref-mb"
+      );
+      let alvoRow = null;
+      if (selRef) {
+        const labelRaw = selRef.options
+          ? selRef.options[selRef.selectedIndex].text
+          : selRef.value;
+        const lbl = norm(String(labelRaw).replace(/^trecho\s*\d+\s*:\s*/i, ""));
+        rows.some((tr) => {
+          const firstCol = norm(
+            tr.cells[0]?.innerText || tr.cells[0]?.textContent
+          );
+          if (firstCol.includes(lbl)) {
+            alvoRow = tr;
+            return true;
+          }
+          return false;
+        });
+      }
+      if (alvoRow) {
+        pressaoFinalSel = toNum(
+          alvoRow.cells[idxPf]?.innerText || alvoRow.cells[idxPf]?.textContent
+        );
+      } else {
+        rows.forEach((tr) => {
+          const v = toNum(
+            tr.cells[idxPf]?.innerText || tr.cells[idxPf]?.textContent
+          );
+          if (Number.isFinite(v))
+            pressaoFinalSel =
+              pressaoFinalSel == null ? v : Math.max(pressaoFinalSel, v);
+        });
+      }
+    }
+  }
+
+  // === Lê VAZÃO DE PROJETO (div #cmb-q-lpm) ===
+  let vazaoProjeto = null;
+  const elVazaoTela = document.querySelector("#cmb-q-lpm");
+  if (elVazaoTela) {
+    const txt = elVazaoTela.textContent || elVazaoTela.value || "";
+    const num = txt.replace(/[^\d,.-]/g, "").trim();
+    vazaoProjeto = toNum(num);
+  }
+
+  // === Lê Qmín diretamente do input id="vazaoMinima" ===
+  // === Lê Qmín diretamente do input id="vazaoMinima" ou do sessionStorage ===
+let qminSistema = null;
+const elQmin = document.getElementById("vazaoMinima");
+if (elQmin && elQmin.value) {
+  qminSistema = toNum(elQmin.value);
+} else {
+  // fallback para garantir leitura no Tipo 5
+  const qminStorage = sessionStorage.getItem("TipoSistema_Qmin_Lmin") || sessionStorage.getItem("vazaoMinima");
+  if (qminStorage) qminSistema = toNum(qminStorage);
+}
+
+
+
+  // === Montagem das checagens ===
+  const items = [];
+
+  // (1) PRESSÃO
+  if (pressaoFinalSel == null) {
+    items.push(
+      `<div class="nbr-status nbr-warn">⚠️ Não foi possível ler a <b>pressão final</b> na Memória.</div>`
+    );
+  } else {
+    const okPressao = pressaoFinalSel <= 100;
+    items.push(
+      `<div class="nbr-status ${okPressao ? "nbr-ok" : "nbr-err"}">
+        ${okPressao ? "✅" : "❌"} Pressão máxima na rede ≤ <b>100,00 m.c.a.</b> 
+        (selecionada: <b>${fmt(pressaoFinalSel, 2)} m.c.a.</b>)
+      </div>`
+    );
+  }
+
+  // (2) VAZÃO
+  if (vazaoProjeto == null || qminSistema == null) {
+    items.push(
+      `<div class="nbr-status nbr-warn">⚠️ Informe a <b>vazão de projeto</b> e garanta que a <b>Qmín do sistema</b> esteja carregada.</div>`
+    );
+  } else {
+    const okVazao = vazaoProjeto >= qminSistema;
+    items.push(
+      `<div class="nbr-status ${okVazao ? "nbr-ok" : "nbr-err"}">
+        ${okVazao ? "✅" : "❌"} Vazão de projeto ≥ Vazão mínima do sistema 
+        (Q<sub>proj</sub>: <b>${fmt(vazaoProjeto, 2)} L/min</b> · 
+        Q<sub>mín</sub>: <b>${fmt(qminSistema, 2)} L/min</b>)
+      </div>`
+    );
+  }
+
+  // (3) VELOCIDADE
+  let velocidadeMax = null;
+  if (tabela && tabela.tBodies.length > 0) {
+    const ths = Array.from(tabela.tHead.rows[0].cells);
+    const idxVel = ths.findIndex(th => {
+      const txt = (th.innerText || th.textContent || "").toLowerCase();
+      return txt.includes("velocidade");
+    });
+    if (idxVel >= 0) {
+      Array.from(tabela.tBodies[0].rows).forEach(tr => {
+        const val = toNum(tr.cells[idxVel]?.innerText || tr.cells[idxVel]?.textContent);
+        if (Number.isFinite(val)) {
+          velocidadeMax = velocidadeMax == null ? val : Math.max(velocidadeMax, val);
+        }
+      });
+    }
+  }
+
+  if (velocidadeMax == null) {
+    items.push(`<div class="nbr-status nbr-warn">⚠️ Não foi possível ler a <b>velocidade</b> na Memória.</div>`);
+  } else {
+    const okVel = velocidadeMax <= 5;
+    items.push(
+      `<div class="nbr-status ${okVel ? "nbr-ok" : "nbr-err"}">
+        ${okVel ? "✅" : "❌"} Velocidade máxima na rede ≤ <b>5,00 m/s</b>
+        (selecionada: <b>${fmt(velocidadeMax, 2)} m/s</b>)
+      </div>`
+    );
+  }
+
+  // === Exibe todas as checagens ===
+  host.innerHTML = items.join("\n");
+}
+
+
+
+
+
+
+// === Corrigido: garante que a memória carregue toda no primeiro clique ===
+document.getElementById('btn-carregar-memoria')?.addEventListener('click', () => {
+  let tentativas = 0;
+  const timer = setInterval(() => {
+    const tabelaOk = document.querySelector('#memoriaTabela tbody tr');
+    const qminOk = sessionStorage.getItem('vazaoMinima') ||
+                   sessionStorage.getItem('TipoSistema_Qmin_Lmin');
+    if (tabelaOk && qminOk) {
+      clearInterval(timer);
+
+      // aguarda o DOM realmente renderizar
+      requestAnimationFrame(() => {
+        if (typeof pintarMemoriaPfVel === "function") pintarMemoriaPfVel();
+        if (typeof renderChecagensAbaMemoria === "function") renderChecagensAbaMemoria();
+        if (typeof renderChecksPreCMB === "function") renderChecksPreCMB();
+      });
+    }
+
+    // segurança: para após 10 tentativas (~5s)
+    if (++tentativas > 10) clearInterval(timer);
+  }, 300);
+});
+
+
+
+// Atualiza também ao trocar o ponto de referência
+document.addEventListener('change', (e) => {
+  if (e.target.matches('#ponto-ref, #ponto-referencia, #cmb-ponto-ref, [data-id="ponto-ref"]')) {
+    setTimeout(() => renderChecksPreCMB(), 1000);
+  }
+});
+
+// === Remove automaticamente a coluna "Ações" da tabela após carregar a memória ===
+document.getElementById('btn-carregar-memoria')?.addEventListener('click', () => {
+  // Usa uma flag para não repetir a remoção
+  if (window.colunaAcoesRemovida) return;
+
+  // Aguarda a renderização completa da tabela
+  setTimeout(() => {
+    const tabela = document.getElementById('memoriaTabela');
+    if (tabela) {
+      const linhas = tabela.querySelectorAll('tr');
+      linhas.forEach(tr => {
+        const ultimaCelula = tr.lastElementChild;
+        if (ultimaCelula) ultimaCelula.remove();
+      });
+      // Marca que já foi removida
+      window.colunaAcoesRemovida = true;
+      console.log('✅ Coluna "Ações" removida com sucesso.');
+    }
+  }, 500);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btnCarregar = document.getElementById('btn-carregar-memoria');
+  const checksBox = document.getElementById('checks-pre-cmb');
+
+  if (btnCarregar && checksBox) {
+    btnCarregar.addEventListener('click', () => {
+      // exibe o bloco de checagens
+      checksBox.style.display = 'block';
+      // atualiza as checagens normalmente
+      renderChecksPreCMB();
+    });
+  }
+});
+
+
+
+
+</script>
+
+
+
+</body>
+</html>
+
+
+
+
+
+
