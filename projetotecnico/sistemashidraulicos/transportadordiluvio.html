@@ -322,6 +322,114 @@ tr:nth-child(even){
   border-radius:8px;
 }
 
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+
+.modal-sar{
+  width:min(920px,95vw);
+  max-height:90vh;
+  overflow:auto;
+  background:#fff;
+  border:1px solid var(--sar-border);
+  border-radius:14px;
+  box-shadow:0 18px 45px rgba(0,0,0,.25);
+  padding:18px;
+}
+
+.modal-sar-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid var(--sar-border);
+  padding-bottom:10px;
+  margin-bottom:12px;
+}
+
+.modal-sar-header h2{
+  margin:0;
+  font-size:18px;
+  color:var(--sar-green);
+  border-left:5px solid var(--sar-green);
+  padding-left:10px;
+}
+
+.modal-sar-header button{
+  background:#e9eeee;
+  color:#344054;
+  width:34px;
+  height:34px;
+  padding:0;
+}
+
+.modal-sar-info{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  background:#f4f7f6;
+  border:1px solid var(--sar-border);
+  border-radius:10px;
+  padding:10px;
+  margin-bottom:12px;
+  font-size:14px;
+}
+
+.tabela-modal-sar{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+
+.tabela-modal-sar th{
+  background:var(--sar-green);
+  color:#fff;
+  padding:9px;
+  border:1px solid #244b47;
+}
+
+.tabela-modal-sar td{
+  border:1px solid var(--sar-border);
+  padding:7px;
+  text-align:center;
+}
+
+.tabela-modal-sar td:first-child{
+  text-align:left;
+  font-weight:700;
+}
+
+.tabela-modal-sar input{
+  height:32px;
+  font-size:14px;
+  text-align:center;
+  background:#fff9c4;
+}
+
+.modal-sar-footer{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid var(--sar-border);
+}
+
+.total-comp-eq{
+  background:#dff3d5;
+  border:1px solid #b7dfad;
+  border-radius:8px;
+  padding:10px 12px;
+  font-weight:800;
+  color:#14532d;
+}
+
 
 </style>
 
@@ -1407,10 +1515,11 @@ function criarLinhaFinal(referencia,dn){
 
       <td>
         <input
-          class="hidraulica-edit comp-eq"
-          type="text"
-          value="0,00"
-          oninput="recalcularTabelaHidraulica(this.closest('table'))">
+class="hidraulica-edit comp-eq"
+type="text"
+value="0,00"
+readonly
+onclick="abrirModalCompEq(this)"> 
       </td>
 
       <td class="comp-total">0,00</td>
@@ -1691,10 +1800,11 @@ style="width:110px;"
 
     <td>
       <input
-        class="hidraulica-edit comp-eq"
-        type="text"
-        value="0,00"
-        oninput="recalcularTabelaHidraulica(this.closest('table'))">
+class="hidraulica-edit comp-eq"
+type="text"
+value="0,00"
+readonly
+onclick="abrirModalCompEq(this)"> 
     </td>
 
     <td class="comp-total">0,00</td>
@@ -1840,9 +1950,145 @@ async function carregarComprimentosEquivalentesSupabase(){
 
   window.COMP_EQ_SUPABASE = data || [];
 
-console.log("Comprimentos equivalentes:", window.COMP_EQ_SUPABASE); 
+}
+
+let inputCompEqAtivo = null;
+
+function fecharModalCompEq(){
+  document.getElementById("modalCompEq").style.display = "none";
+  inputCompEqAtivo = null;
+}
+
+function materialBancoCompEq(materialTela){
+
+  const mat = String(materialTela || "").toLowerCase();
+
+  if(mat.includes("pvc") || mat.includes("pead")){
+    return "PVC / PEAD";
+  }
+
+  return "Aço";
+}
+
+function recalcularModalCompEq(){
+
+  let totalGeral = 0;
+
+  document.querySelectorAll("#tbodyCompEq tr").forEach(tr => {
+
+    const qtd = valorNum(tr.querySelector(".qtd-comp-eq")?.value);
+    const unit = valorNum(tr.querySelector(".unit-comp-eq")?.value);
+
+    const total = qtd * unit;
+
+    totalGeral += total;
+
+    const celulaTotal = tr.querySelector(".total-linha-comp-eq");
+
+    if(celulaTotal){
+      celulaTotal.textContent = fmt(total);
+    }
+
+  });
+
+  document.getElementById("totalCompEqModal").textContent =
+    `Total = ${fmt(totalGeral)} m`;
 
 }
+
+function abrirModalCompEq(input){
+
+  inputCompEqAtivo = input;
+
+  const linha = input.closest("tr");
+  const tabela = input.closest("table");
+
+  const materialTela = tabela.dataset.material || "-";
+  const materialBanco = materialBancoCompEq(materialTela);
+
+  const dn = Number(linha.querySelector(".dn-edit")?.value || 0);
+  const trecho = linha.children[0]?.textContent?.trim() || "-";
+
+  document.getElementById("modalMaterial").textContent = materialBanco;
+  document.getElementById("modalDN").textContent = dn;
+  document.getElementById("modalTrecho").textContent = trecho;
+
+  const lista = (window.COMP_EQ_SUPABASE || [])
+    .filter(item =>
+      item.material === materialBanco &&
+      Number(item.dn_mm) === Number(dn)
+    )
+    .sort((a,b) => Number(a.ordem || 0) - Number(b.ordem || 0));
+
+  const tbody = document.getElementById("tbodyCompEq");
+  tbody.innerHTML = "";
+
+  if(lista.length === 0){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align:center;font-weight:700;color:#b42318;">
+          Nenhum comprimento equivalente encontrado para ${materialBanco} DN ${dn}.
+        </td>
+      </tr>
+    `;
+
+    document.getElementById("totalCompEqModal").textContent = "Total = 0,00 m";
+    document.getElementById("modalCompEq").style.display = "flex";
+    return;
+  }
+
+  lista.forEach(item => {
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${item.conexao}</td>
+
+        <td>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            value="0"
+            class="qtd-comp-eq"
+            oninput="recalcularModalCompEq()">
+        </td>
+
+        <td>
+          <input
+            type="text"
+            value="${fmt(item.comprimento_equivalente_m)}"
+            class="unit-comp-eq"
+            oninput="recalcularModalCompEq()">
+        </td>
+
+        <td class="total-linha-comp-eq">0,00</td>
+      </tr>
+    `;
+  });
+
+  recalcularModalCompEq();
+
+  document.getElementById("modalCompEq").style.display = "flex";
+}
+
+function aplicarCompEqModal(){
+
+  if(!inputCompEqAtivo) return;
+
+  const totalTexto = document
+    .getElementById("totalCompEqModal")
+    .textContent
+    .replace("Total = ", "")
+    .replace(" m", "")
+    .trim();
+
+  inputCompEqAtivo.value = totalTexto;
+
+  recalcularTabelaHidraulica(inputCompEqAtivo.closest("table"));
+
+  fecharModalCompEq();
+}
+
 
 
 function exportarPDFCompleto(){
@@ -1951,6 +2197,103 @@ carregarComprimentosEquivalentesSupabase();
   
 </script>
 
+
+<!-- ========================================================= -->
+<!-- MODAL - COMPRIMENTOS EQUIVALENTES -->
+<!-- ========================================================= -->
+
+<div id="modalCompEq" class="modal-overlay">
+
+  <div class="modal-sar">
+
+    <div class="modal-sar-header">
+
+      <h2>
+        Comprimento Equivalente
+      </h2>
+
+      <button
+        type="button"
+        onclick="fecharModalCompEq()">
+        ✕
+      </button>
+
+    </div>
+
+    <div class="modal-sar-info">
+
+      <div>
+        <strong>Material:</strong>
+        <span id="modalMaterial">-</span>
+      </div>
+
+      <div>
+        <strong>DN:</strong>
+        <span id="modalDN">-</span> mm
+      </div>
+
+      <div>
+        <strong>Trecho:</strong>
+        <span id="modalTrecho">-</span>
+      </div>
+
+    </div>
+
+    <table class="tabela-modal-sar">
+
+      <thead>
+
+        <tr>
+
+          <th style="width:42%;">
+            Conexão / Singularidade
+          </th>
+
+          <th style="width:18%;">
+            Quantidade
+          </th>
+
+          <th style="width:20%;">
+            Comp. Eq. Unit. (m)
+          </th>
+
+          <th style="width:20%;">
+            Total (m)
+          </th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="tbodyCompEq">
+
+      </tbody>
+
+    </table>
+
+    <div class="modal-sar-footer">
+
+      <div
+        id="totalCompEqModal"
+        class="total-comp-eq">
+
+        Total = 0,00 m
+
+      </div>
+
+      <button
+        class="btn"
+        onclick="aplicarCompEqModal()">
+
+        Aplicar
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 
   
 </body>
