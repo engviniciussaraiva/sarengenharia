@@ -1827,6 +1827,24 @@ async function carregarTubosSupabase(){
 
 }
 
+async function carregarComprimentosEquivalentesSupabase(){
+
+  const { data, error } = await supabaseClient
+    .from("vw_hidraulica_comprimentos_equivalentes")
+    .select("*");
+
+  if(error){
+    console.error("Erro ao carregar comprimentos equivalentes:", error);
+    return;
+  }
+
+  window.COMP_EQ_SUPABASE = data || [];
+
+console.log("Comprimentos equivalentes:", window.COMP_EQ_SUPABASE); 
+
+}
+
+
 function exportarPDFCompleto(){
 
   const tabelaResumo = [...document.querySelectorAll(".card")]
@@ -1928,6 +1946,7 @@ function exportarPDFChave(id){
   
 carregarBicosSupabase();
 carregarTubosSupabase();
+carregarComprimentosEquivalentesSupabase(); 
 
   
 </script>
