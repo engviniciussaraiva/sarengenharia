@@ -641,6 +641,7 @@
                 aria-label="Unidade da pressão"
               >
                 <option value="bar">bar</option>
+<option value="kgfcm2">kgf/cm²</option>
                 <option value="mca">mca</option>
                 <option value="kpa">kPa</option>
                 <option value="mpa">MPa</option>
@@ -1096,6 +1097,7 @@
     const FATORK_LITROS_POR_GALAO_US = 3.785411784;
     const FATORK_BAR_POR_MCA = 0.0980665;
     const FATORK_BAR_POR_PSI = 0.0689475729;
+const FATORK_BAR_POR_KGFCM2 = 0.980665;
 
     /*
       ELEMENTOS
@@ -1378,6 +1380,10 @@
         case "bar":
           return valor;
 
+case "kgfcm2":
+  return valor * FATORK_BAR_POR_KGFCM2;
+
+
         case "mca":
           return valor * FATORK_BAR_POR_MCA;
 
@@ -1409,6 +1415,7 @@
     function fatorkRotuloPressao(unidade) {
       const rotulos = {
         bar: "bar",
+kgfcm2: "kgf/cm²",
         mca: "mca",
         kpa: "kPa",
         mpa: "MPa",
@@ -2814,3 +2821,5 @@
 
 </body>
 </html>
+
+
