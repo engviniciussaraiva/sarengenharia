@@ -11,48 +11,45 @@
   </div>
 
   <section class="sar-consulta">
-    <h3>Consulta</h3>
+  <h3>Consulta</h3>
 
-    <div class="sar-filtros">
-      <div>
-        <label>Pesquisar</label>
-        <input id="plPesquisa" type="search" placeholder="Ex.: curva, tê, registro...">
-      </div>
-
-      <div>
-        <label>Categoria</label>
-        <select id="plFiltroCategoria">
-          <option value="">Todas</option>
-        </select>
-      </div>
-
-      <div>
-        <label>DN</label>
-        <select id="plFiltroDn">
-          <option value="">Todos</option>
-        </select>
-      </div>
-
-      <button id="plLimpar">Limpar</button>
+  <div class="sar-filtros">
+    <div>
+      <label>Material</label>
+      <select id="plFiltroMaterial">
+        <option value="">Todos</option>
+      </select>
     </div>
 
-    <div class="sar-contadores">
-      <span id="plExibidos">Registros exibidos: 0</span>
-      <span id="plTotal">Total no banco: 0</span>
+    <div>
+      <label>DN</label>
+      <select id="plFiltroDn">
+        <option value="">Todos</option>
+      </select>
     </div>
-  </section>
+
+    <button id="plLimpar">Limpar</button>
+  </div>
+
+  <div class="sar-contadores">
+    <span id="plExibidos">Registros exibidos: 0</span>
+    <span id="plTotal">Total no banco: 0</span>
+  </div>
+</section>
+
 
   <section class="sar-tabela-wrap">
     <table class="sar-tabela">
       <thead>
-        <tr>
-          <th>Material</th>
-          <th>Categoria</th>
-          <th>Conexão / Peça</th>
-          <th>DN<br>(mm)</th>
-          <th>Comprimento<br>equivalente (m)</th>
-        </tr>
-      </thead>
+  <tr>
+    <th>Material</th>
+    <th>DN<br>(mm)</th>
+    <th>Categoria</th>
+    <th>Conexão / Peça</th>
+    <th>Comprimento<br>equivalente (m)</th>
+  </tr>
+</thead>
+
 
       <tbody id="plTabelaCorpo">
         <tr>
@@ -218,11 +215,9 @@
 <script>
   const PL_VIEW = "vw_hidraulica_comprimentos_equivalentes";
 
-  let plMaterialAtual = "Aço";
   let plDados = [];
 
-  const plPesquisa = document.getElementById("plPesquisa");
-  const plFiltroCategoria = document.getElementById("plFiltroCategoria");
+  const plFiltroMaterial = document.getElementById("plFiltroMaterial");
   const plFiltroDn = document.getElementById("plFiltroDn");
   const plTabelaCorpo = document.getElementById("plTabelaCorpo");
   const plExibidos = document.getElementById("plExibidos");
@@ -236,14 +231,6 @@
     });
   }
 
-  function plNormalizar(texto) {
-    return String(texto || "")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .trim();
-  }
-
   async function plCarregarDados() {
     plTabelaCorpo.innerHTML = `
       <tr>
@@ -251,7 +238,7 @@
       </tr>
     `;
 
-    const PL_VIEW = "vw_hidraulica_comprimentos_equivalentes";
+    const cliente = window.supabaseClient || window.supabase;
 
     if (!cliente) {
       plTabelaCorpo.innerHTML = `
@@ -265,13 +252,13 @@
     const { data, error } = await cliente
       .from(PL_VIEW)
       .select("*")
-      .eq("ativo", true)
-      .eq("material", plMaterialAtual)
-      .order("ordem", { ascending: true })
-      .order("dn_mm", { ascending: true });
+      .order("material", { ascending: true })
+      .order("dn_mm", { ascending: true })
+      .order("ordem", { ascending: true });
 
     if (error) {
       console.error(error);
+
       plTabelaCorpo.innerHTML = `
         <tr>
           <td colspan="5">Erro ao carregar dados do Supabase.</td>
@@ -287,19 +274,18 @@
   }
 
   function plPreencherFiltros() {
-    const categoriaAtual = plFiltroCategoria.value;
-    const dnAtual = plFiltroDn.value;
+    const materiais = [...new Set(
+      plDados.map(item => item.material).filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b, "pt-BR"));
 
-    const categorias = [...new Set(plDados.map(i => i.categoria).filter(Boolean))]
-      .sort((a, b) => a.localeCompare(b, "pt-BR"));
+    const dns = [...new Set(
+      plDados.map(item => item.dn_mm).filter(Boolean)
+    )].sort((a, b) => Number(a) - Number(b));
 
-    const dns = [...new Set(plDados.map(i => i.dn_mm).filter(Boolean))]
-      .sort((a, b) => Number(a) - Number(b));
-
-    plFiltroCategoria.innerHTML = `<option value="">Todas</option>`;
-    categorias.forEach(categoria => {
-      plFiltroCategoria.innerHTML += `
-        <option value="${categoria}">${categoria}</option>
+    plFiltroMaterial.innerHTML = `<option value="">Todos</option>`;
+    materiais.forEach(material => {
+      plFiltroMaterial.innerHTML += `
+        <option value="${material}">${material}</option>
       `;
     });
 
@@ -309,35 +295,20 @@
         <option value="${dn}">${dn} mm</option>
       `;
     });
-
-    if (categorias.includes(categoriaAtual)) {
-      plFiltroCategoria.value = categoriaAtual;
-    }
-
-    if (dns.map(String).includes(String(dnAtual))) {
-      plFiltroDn.value = dnAtual;
-    }
   }
 
   function plFiltrarDados() {
-    const pesquisa = plNormalizar(plPesquisa.value);
-    const categoria = plFiltroCategoria.value;
+    const material = plFiltroMaterial.value;
     const dn = plFiltroDn.value;
 
     return plDados.filter(item => {
-      const texto = plNormalizar([
-        item.material,
-        item.categoria,
-        item.conexao,
-        item.dn_mm,
-        item.comprimento_equivalente_m
-      ].join(" "));
+      const atendeMaterial =
+        !material || item.material === material;
 
-      const atendePesquisa = !pesquisa || texto.includes(pesquisa);
-      const atendeCategoria = !categoria || item.categoria === categoria;
-      const atendeDn = !dn || String(item.dn_mm) === String(dn);
+      const atendeDn =
+        !dn || String(item.dn_mm) === String(dn);
 
-      return atendePesquisa && atendeCategoria && atendeDn;
+      return atendeMaterial && atendeDn;
     });
   }
 
@@ -359,42 +330,25 @@
     plTabelaCorpo.innerHTML = registros.map(item => `
       <tr>
         <td>${item.material || ""}</td>
+        <td><strong>${item.dn_mm || ""}</strong></td>
         <td>${item.categoria || ""}</td>
         <td>${item.conexao || ""}</td>
-        <td><strong>${item.dn_mm || ""}</strong></td>
         <td><strong>${plFormatarNumero(item.comprimento_equivalente_m)} m</strong></td>
       </tr>
     `).join("");
   }
 
-  document.querySelectorAll(".sar-aba-tecnica").forEach(botao => {
-    botao.addEventListener("click", () => {
-      document.querySelectorAll(".sar-aba-tecnica").forEach(b => {
-        b.classList.remove("ativa");
-      });
-
-      botao.classList.add("ativa");
-
-      plMaterialAtual = botao.dataset.material;
-
-      plPesquisa.value = "";
-      plFiltroCategoria.value = "";
-      plFiltroDn.value = "";
-
-      plCarregarDados();
-    });
-  });
-
-  plPesquisa.addEventListener("input", plRenderizar);
-  plFiltroCategoria.addEventListener("change", plRenderizar);
+  plFiltroMaterial.addEventListener("change", plRenderizar);
   plFiltroDn.addEventListener("change", plRenderizar);
 
   plLimpar.addEventListener("click", () => {
-    plPesquisa.value = "";
-    plFiltroCategoria.value = "";
+    plFiltroMaterial.value = "";
     plFiltroDn.value = "";
     plRenderizar();
   });
 
   plCarregarDados();
 </script>
+
+
+
