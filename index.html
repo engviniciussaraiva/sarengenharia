@@ -20,13 +20,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 
 body{
-  font-family:Inter,Segoe UI,Arial,sans-serif;
-  background:
-    radial-gradient(circle at 70% 18%,rgba(11,143,69,.22),transparent 32%),
-    linear-gradient(180deg,#020805 0%,#031109 60%,#020705 100%);
-  color:var(--texto);
-  min-height:100vh;
-  overflow-x:hidden;
+  font-family: Inter, Segoe UI, Arial, sans-serif; /* Cor de fundo base preta absoluta */ background-color: #000000; /* Cria o brilho verde concentrado no centro-direita */ background-image: radial-gradient(circle at 75% 50%, rgba(11, 143, 69, 0.15) 0%, rgba(0,0,0,0) 60%); color: var(--texto); min-height: 100vh; overflow-x: hidden; margin: 0; 
 }
 
 .page{
@@ -87,6 +81,19 @@ nav{
   gap:34px;
   font-weight:700;
 }
+
+/* Adiciona a grade de fundo sutil */
+.page::after {
+  content: "";
+  position: fixed; /* Fixa para cobrir a tela toda */
+  inset: 0;
+  z-index: -1; /* Fica atrás de tudo, mas na frente do background-color */
+  background-image:
+    linear-gradient(rgba(140, 242, 29, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(140, 242, 29, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px; /* Tamanho dos quadrados da grade */
+}
+
 
 nav a{
   color:#fff;
@@ -249,16 +256,11 @@ h1 span{
 }
 
 .eco-line-strong{
-  fill:none;
-  stroke:rgba(140,242,29,.65);
-  stroke-width:2;
-  filter:drop-shadow(0 0 8px rgba(140,242,29,.55));
-}
+  fill: none; stroke: var(--verde-neon); /* Usa a cor neon cheia */ stroke-width: 2; /* Brilho neon intenso */ filter: drop-shadow(0 0 5px rgba(140, 242, 29, 0.8)) drop-shadow(0 0 10px rgba(140, 242, 29, 0.5));
+ } 
 
 .eco-dot{
-  fill:var(--verde-neon);
-  filter:drop-shadow(0 0 8px rgba(140,242,29,.9));
-}
+  fill: var(--verde-neon); /* Ponto neon muito brilhante */ filter: drop-shadow(0 0 4px rgba(140, 242, 29, 1)) drop-shadow(0 0 8px rgba(140, 242, 29, 0.7)); } 
 
 .circuit{
   fill:none;
@@ -276,9 +278,7 @@ h1 span{
   display:grid;
   place-items:center;
   text-align:center;
-  box-shadow:
-    0 0 42px rgba(140,242,29,.28),
-    inset 0 0 38px rgba(140,242,29,.08);
+  box-shadow: 0 0 30px rgba(11, 143, 69, 0.3);
   z-index:4;
 }
 
@@ -316,7 +316,7 @@ h1 span{
   z-index:5;
   transition:.25s;
   cursor:pointer;
-  box-shadow:0 0 20px rgba(140,242,29,.07);
+  box-shadow: 0 0 15px rgba(11, 143, 69, 0.1); 
 }
 
 .module-node:hover{
@@ -622,3 +622,5 @@ document.getElementById("btnPlataformaHero").addEventListener("click", function(
 
 </body>
 </html>
+
+
