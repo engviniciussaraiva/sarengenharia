@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAR | Teste de Login Google</title>
+  <style>
+    :root{--fundo:#020805;--verde:#0b8f45;--verde2:#13a653;--neon:#8cf21d;--texto:#f5f7f2;--muted:#b9c6b6;--linha:rgba(140,242,29,.30)}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{min-height:100vh;display:grid;place-items:center;padding:24px;color:var(--texto);font-family:Inter,Segoe UI,Arial,sans-serif;background:radial-gradient(circle at 70% 20%,rgba(140,242,29,.15),transparent 28%),linear-gradient(180deg,#020805 0%,#031109 60%,#020705 100%)}
+    .card{width:min(560px,100%);padding:34px;border:1px solid var(--linha);border-radius:20px;background:rgba(5,22,12,.88);box-shadow:0 26px 90px rgba(0,0,0,.58),0 0 34px rgba(140,242,29,.10)}
+    .marca{display:flex;align-items:center;gap:14px;margin-bottom:28px}.simbolo{width:38px;height:48px;background:linear-gradient(145deg,var(--verde),var(--neon));clip-path:polygon(50% 0,72% 28%,63% 25%,80% 61%,61% 100%,39% 100%,20% 62%,32% 35%,39% 48%);filter:drop-shadow(0 0 12px rgba(140,242,29,.45))}
+    h1{font-size:27px}.marca small{display:block;margin-top:4px;color:var(--neon);font-size:10px;font-weight:800;letter-spacing:2px}.intro{margin-bottom:26px;color:var(--muted);line-height:1.6}
+    .estado{padding:15px 16px;margin-bottom:20px;border:1px solid rgba(255,255,255,.08);border-radius:12px;color:var(--muted);background:rgba(255,255,255,.035);line-height:1.5}.estado.erro{color:#ffd7d7;border-color:rgba(255,107,107,.34);background:rgba(255,107,107,.08)}
+    .btn{width:100%;min-height:54px;border:0;border-radius:12px;font-size:16px;font-weight:850;cursor:pointer;transition:.2s}.btn:hover{transform:translateY(-2px);filter:brightness(1.08)}.btn:disabled{cursor:not-allowed;opacity:.58;transform:none}.btn-google{color:#fff;background:linear-gradient(135deg,var(--verde),var(--verde2));box-shadow:0 0 24px rgba(11,143,69,.38)}.btn-sair{margin-top:18px;color:#fff;border:1px solid var(--linha);background:rgba(0,0,0,.22)}
+    .usuario{display:none;margin-top:6px}.usuario.visivel{display:block}.dados{display:grid;gap:12px;margin-top:18px}.linha{padding:14px 15px;border:1px solid rgba(255,255,255,.07);border-radius:11px;background:rgba(255,255,255,.035)}.linha span{display:block;margin-bottom:5px;color:var(--neon);font-size:11px;font-weight:850;letter-spacing:.8px;text-transform:uppercase}.linha strong{display:block;overflow-wrap:anywhere;font-size:15px;font-weight:650}.aviso{margin-top:22px;color:#8fa08c;font-size:12px;line-height:1.5;text-align:center}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="marca"><div class="simbolo" aria-hidden="true"></div><div><h1>SAR Engenharia</h1><small>TESTE ISOLADO DE AUTENTICAÇÃO</small></div></div>
+    <p class="intro">Esta página valida somente o Login Google e a sessão do Supabase. Ela ainda não consulta aprovação, módulos ou permissões.</p>
+    <div id="estado" class="estado">Verificando sessão...</div>
+    <section id="areaLogin"><button id="btnGoogle" class="btn btn-google" type="button">Acessar Plataforma com Google</button></section>
+    <section id="areaUsuario" class="usuario">
+      <div class="dados">
+        <div class="linha"><span>Nome</span><strong id="nomeUsuario">—</strong></div>
+        <div class="linha"><span>E-mail</span><strong id="emailUsuario">—</strong></div>
+        <div class="linha"><span>ID do usuário no Supabase</span><strong id="idUsuario">—</strong></div>
+      </div>
+      <button id="btnSair" class="btn btn-sair" type="button">Sair</button>
+    </section>
+    <p class="aviso">Sem foto de perfil nesta etapa. Nenhuma chave secreta é usada neste arquivo.</p>
+  </main>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL = "https://bjtxbpmrmhfvpmdsthxr.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+    });
+
+    const estado=document.getElementById("estado"),areaLogin=document.getElementById("areaLogin"),areaUsuario=document.getElementById("areaUsuario"),btnGoogle=document.getElementById("btnGoogle"),btnSair=document.getElementById("btnSair"),nomeUsuario=document.getElementById("nomeUsuario"),emailUsuario=document.getElementById("emailUsuario"),idUsuario=document.getElementById("idUsuario");
+
+    function definirEstado(mensagem,erro=false){estado.textContent=mensagem;estado.classList.toggle("erro",erro)}
+    function mostrarDeslogado(){areaLogin.style.display="block";areaUsuario.classList.remove("visivel");definirEstado("Nenhuma sessão ativa.")}
+    function mostrarUsuario(user){nomeUsuario.textContent=user.user_metadata?.full_name||user.user_metadata?.name||"Nome não informado";emailUsuario.textContent=user.email||"E-mail não informado";idUsuario.textContent=user.id;areaLogin.style.display="none";areaUsuario.classList.add("visivel");definirEstado("Login Google realizado com sucesso.")}
+
+    async function verificarSessao(){
+      try{
+        const {data,error}=await supabase.auth.getSession();
+        if(error) throw error;
+        data.session?.user?mostrarUsuario(data.session.user):mostrarDeslogado();
+      }catch(error){console.error(error);definirEstado(`Erro ao verificar sessão: ${error.message}`,true)}
+    }
+
+    btnGoogle.addEventListener("click",async()=>{
+      btnGoogle.disabled=true;definirEstado("Redirecionando para o Google...");
+      const redirectTo=`${window.location.origin}${window.location.pathname}`;
+      const {error}=await supabase.auth.signInWithOAuth({provider:"google",options:{redirectTo}});
+      if(error){console.error(error);definirEstado(`Erro no Login Google: ${error.message}`,true);btnGoogle.disabled=false}
+    });
+
+    btnSair.addEventListener("click",async()=>{
+      btnSair.disabled=true;definirEstado("Encerrando sessão...");
+      const {error}=await supabase.auth.signOut();
+      if(error){console.error(error);definirEstado(`Erro ao sair: ${error.message}`,true);btnSair.disabled=false;return}
+      btnSair.disabled=false;mostrarDeslogado();
+    });
+
+    supabase.auth.onAuthStateChange((_event,session)=>{session?.user?mostrarUsuario(session.user):mostrarDeslogado()});
+    verificarSessao();
+  </script>
+</body>
+</html>
