@@ -54,6 +54,16 @@ async function protegerSistema(){
 
         document.body.style.visibility = "visible";
 
+        window.dispatchEvent(
+    new CustomEvent("sar:autorizado", {
+        detail: {
+            usuario,
+            cadastro,
+            supabase
+        }
+    })
+);
+
     }catch(erro){
 
         console.error(
