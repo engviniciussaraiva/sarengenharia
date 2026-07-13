@@ -767,39 +767,101 @@ document.getElementById("mainContent").innerHTML = `
 
 }
 
+function obterIconeModulo(icone){
+
+    const icones = {
+        home: "🏠",
+        project: "📋",
+        clipboard: "📑",
+        droplet: "💧",
+        repeat: "🔄",
+        building: "🏢",
+        printer: "🖨️",
+        library: "📚",
+        "file-text": "📄",
+        "file-pdf": "📑",
+        cube: "⬡",
+        brain: "🧠"
+    };
+
+    return icones[icone] || "▣";
+}
+
 
 async function carregarModulos(){
 
-    const resposta = await fetch(URL_MODULOS);
-    const texto = await resposta.text();
+    try{
 
-    const linhas = texto.trim().split('\n');
+        const supabase =
+            window.SARGuard?.supabase;
 
-    let html = '';
+        if(!supabase){
+            throw new Error(
+                "Conexão segura com o Supabase não disponível."
+            );
+        }
 
-    for(let i = 1; i < linhas.length; i++){
+        const { data, error } = await supabase
+            .from("sar_modulos")
+            .select(`
+                codigo,
+                modulo,
+                icone,
+                ordem_menu
+            `)
+            .is("modulo_pai", null)
+            .eq("ativo", true)
+            .eq("exibir_menu_logado", true)
+            .order("ordem_menu", {
+                ascending: true
+            });
 
-        const colunas = linhas[i].split(',');
+        if(error){
+            throw error;
+        }
 
-        const modulo = colunas[0];
-        const titulo = colunas[1];
-        const icone = colunas[2];
+        let html = "";
 
-        html += `
-            <div class="menu-item"
-                 onclick="abrirModulo('${modulo}')">
+        data.forEach(function(item){
 
-                ${icone}
-                <span class="menu-text">
-                    ${titulo}
-                </span>
+            const icone =
+                obterIconeModulo(item.icone);
 
+            html += `
+                <div
+                    class="menu-item"
+                    onclick='abrirModulo(
+                        ${JSON.stringify(item.codigo)}
+                    )'
+                >
+                    ${icone}
+
+                    <span class="menu-text">
+                        ${item.modulo}
+                    </span>
+                </div>
+            `;
+        });
+
+        document.getElementById(
+            "menuDinamico"
+        ).innerHTML = html;
+
+    }catch(erro){
+
+        console.error(
+            "Erro ao carregar módulos do Supabase:",
+            erro
+        );
+
+        document.getElementById(
+            "menuDinamico"
+        ).innerHTML = `
+            <div class="menu-item">
+                Erro ao carregar módulos
             </div>
         `;
     }
-
-    document.getElementById("menuDinamico").innerHTML = html;
-
 }
 
 function abrirModulo(modulo){
@@ -1439,8 +1501,15 @@ function imprimirFerramentaAtual(){
 }
 
 
-carregarModulos();
-carregarMenuRodape();  
+window.addEventListener(
+    "sar:autorizado",
+    async function(){
+
+        await carregarModulos();
+
+        carregarMenuRodape();
+    }
+);
 
 </script>
 
