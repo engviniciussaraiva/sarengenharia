@@ -18,6 +18,7 @@ body{
     font-family:Segoe UI, sans-serif;
     background:#f5f6f8;
     overflow:hidden;
+    visibility:hidden;
 }
 
 /* ==========================
@@ -1331,12 +1332,14 @@ function executarItemRodape(tipo, destino){
    SAIR DO SISTEMA
 ========================================= */
 
-function sairDoSistema(){
+async function sairDoSistema(){
 
-    alert(
-        "A função de sair será ativada junto com o login do sistema."
-    );
+    if(window.SARGuard){
+        await window.SARGuard.sair();
+        return;
+    }
 
+    window.location.replace("acesso.html");
 }
 
 /* =========================================
@@ -1440,6 +1443,8 @@ carregarModulos();
 carregarMenuRodape();  
 
 </script>
+
+<script type="module" src="js/sar.guard.js"></script>
 
 </body>
 </html>
