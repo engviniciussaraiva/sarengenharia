@@ -620,9 +620,6 @@ id="menuRodape"
 
 <script>
 
-const URL_MENU_RODAPE =
-'https://docs.google.com/spreadsheets/d/e/2PACX-1vRHBUZjWugfqIlz1w1Kc4A9Za7o_GftCwzgxKkW2ygnl8DGp2hzrwopSzDdVPniRK3u-rDFcFGGIRmy/pub?output=csv';
-
 let SAR_MENU_COMPLETO = [];
 
 async function carregarEstruturaMenuSupabase(){
@@ -1259,67 +1256,44 @@ async function carregarMenuRodape(){
 
     try{
 
-        const resposta = await fetch(URL_MENU_RODAPE);
-        const texto = await resposta.text();
+        const supabase =
+            window.SARGuard?.supabase;
 
-        const linhas = texto
-            .trim()
-            .split(/\r?\n/);
+        if(!supabase){
 
-        const itensRodape = [];
-
-        for(let i = 1; i < linhas.length; i++){
-
-            const colunas = linhas[i].split(",");
-
-            const codigo = String(colunas[0] || "")
-                .trim();
-
-            const titulo = String(colunas[1] || "")
-                .trim();
-
-            const icone = String(colunas[2] || "")
-                .trim();
-
-            const tipo = String(colunas[3] || "")
-                .trim()
-                .toUpperCase();
-
-            const destino = String(colunas[4] || "")
-                .trim();
-
-            const ordem = Number(
-                String(colunas[5] || "").trim()
+            throw new Error(
+                "Conexão segura com o Supabase não disponível."
             );
-
-            const status = String(colunas[6] || "")
-                .trim()
-                .toUpperCase();
-
-            if(status === "ATIVO"){
-
-                itensRodape.push({
-                    codigo: codigo,
-                    titulo: titulo,
-                    icone: icone,
-                    tipo: tipo,
-                    destino: destino,
-                    ordem: ordem
-                });
-
-            }
         }
 
-        itensRodape.sort(function(a, b){
-            return a.ordem - b.ordem;
-        });
+        const { data, error } = await supabase
+            .from("sar_menu_rodape")
+            .select(`
+                codigo,
+                titulo,
+                icone,
+                tipo,
+                destino,
+                ordem,
+                ativo
+            `)
+            .eq("ativo", true)
+            .order("ordem", {
+                ascending: true
+            });
+
+        if(error){
+            throw error;
+        }
 
         let html = "";
 
-        itensRodape.forEach(function(item){
+        (data || []).forEach(function(item){
 
             const classeSair =
-                item.destino.toUpperCase() === "SAIR"
+                String(item.destino || "")
+                    .trim()
+                    .toUpperCase() === "SAIR"
                     ? " logout"
                     : "";
 
@@ -1337,11 +1311,11 @@ async function carregarMenuRodape(){
                     ${item.icone}
                 </button>
             `;
-
         });
 
-        document.getElementById("menuRodape")
-            .innerHTML = html;
+        document.getElementById(
+            "menuRodape"
+        ).innerHTML = html;
 
     }catch(erro){
 
@@ -1350,12 +1324,12 @@ async function carregarMenuRodape(){
             erro
         );
 
-        document.getElementById("menuRodape")
-            .innerHTML = "";
-
+        document.getElementById(
+            "menuRodape"
+        ).innerHTML = "";
     }
-
 }
+
 
 
 /* =========================================
@@ -1364,29 +1338,73 @@ async function carregarMenuRodape(){
 
 function executarItemRodape(tipo, destino){
 
-    const tipoSelecionado = String(tipo || "")
-        .trim()
-        .toUpperCase();
+    const tipoSelecionado =
+        String(tipo || "")
+            .trim()
+            .toUpperCase();
 
-    const destinoSelecionado = String(destino || "")
-        .trim()
-        .toUpperCase();
-
-    if(tipoSelecionado === "MODULO"){
-
-        abrirModulo(destinoSelecionado);
-        return;
-
-    }
+    const destinoSelecionado =
+        String(destino || "")
+            .trim()
+            .toUpperCase();
 
     if(
         tipoSelecionado === "ACAO" &&
         destinoSelecionado === "SAIR"
     ){
-
         sairDoSistema();
         return;
+    }
 
+    if(
+        tipoSelecionado === "ACAO" &&
+        destinoSelecionado === "INFORMACOES"
+    ){
+        esconderSubabas();
+
+        document.getElementById(
+            "tabs"
+        ).style.display = "none";
+
+        document.getElementById(
+            "mainContent"
+        ).innerHTML = `
+            <div class="welcome">
+                <h1>Informações</h1>
+                <p>SAR – Sistema Avançado de Resposta</p>
+                <p>Versão Beta</p>
+            </div>
+        `;
+
+        return;
+    }
+
+    if(
+        tipoSelecionado === "ACAO" &&
+        destinoSelecionado === "AJUDA"
+    ){
+        esconderSubabas();
+
+        document.getElementById(
+            "tabs"
+        ).style.display = "none";
+
+        document.getElementById(
+            "mainContent"
+        ).innerHTML = `
+            <div class="welcome">
+                <h1>Ajuda</h1>
+                <p>Central de ajuda em desenvolvimento.</p>
+            </div>
+        `;
+
+        return;
+    }
+
+    if(tipoSelecionado === "MODULO"){
+
+        abrirModulo(destinoSelecionado);
+        return;
     }
 
     console.warn(
@@ -1394,23 +1412,8 @@ function executarItemRodape(tipo, destino){
         tipo,
         destino
     );
-
 }
 
-
-/* =========================================
-   SAIR DO SISTEMA
-========================================= */
-
-async function sairDoSistema(){
-
-    if(window.SARGuard){
-        await window.SARGuard.sair();
-        return;
-    }
-
-    window.location.replace("acesso.html");
-}
 
 /* =========================================
    IMPRIMIR FERRAMENTA ATUAL
