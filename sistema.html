@@ -1414,6 +1414,40 @@ function executarItemRodape(tipo, destino){
     );
 }
 
+/* =========================================
+   SAIR DO SISTEMA
+========================================= */
+
+async function sairDoSistema(){
+
+    try{
+
+        if(
+            window.SARGuard &&
+            typeof window.SARGuard.sair === "function"
+        ){
+            await window.SARGuard.sair();
+            return;
+        }
+
+        console.warn(
+            "SARGuard não disponível. Redirecionando para acesso."
+        );
+
+        window.location.replace("acesso.html");
+
+    }catch(erro){
+
+        console.error(
+            "Erro ao sair do sistema:",
+            erro
+        );
+
+        window.location.replace("acesso.html");
+    }
+}
+
+
 
 /* =========================================
    IMPRIMIR FERRAMENTA ATUAL
@@ -1549,6 +1583,7 @@ window.addEventListener(
 
 </body>
 </html>
+
 
 
 
