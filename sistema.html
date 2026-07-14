@@ -620,18 +620,42 @@ id="menuRodape"
 
 <script>
 
-const URL_MODULOS =
-'https://docs.google.com/spreadsheets/d/e/2PACX-1vSUOh5Dd8Gi7pmgkfvto7qOG-_Puoki7wR9yeYf0Jmx8bJMCmkXE3JXHvzepxHBXxTUfOWiRs_oPgK7/pub?output=csv';
-
-const URL_ABAS =
-'https://docs.google.com/spreadsheets/d/e/2PACX-1vRwpMRjaaBEej8ZIzU2cv4Jl8TU4uJY0yfe51P1laWa7Xh9zhlVpLTi8khkyvBcM1wZ7pDMH9OmPpFf/pub?output=csv';
-
-const URL_SUBABAS =
-'https://docs.google.com/spreadsheets/d/e/2PACX-1vSArC3E9K0Tx0JbLN7_cGPo_SeLXnbsbPvz4-MoRqIwM-aXHIJPFRE9n65CcfdkpwPoGYUWuvZWgCW6/pub?output=csv';
-
 const URL_MENU_RODAPE =
 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRHBUZjWugfqIlz1w1Kc4A9Za7o_GftCwzgxKkW2ygnl8DGp2hzrwopSzDdVPniRK3u-rDFcFGGIRmy/pub?output=csv';
 
+let SAR_MENU_COMPLETO = [];
+
+async function carregarEstruturaMenuSupabase(){
+
+    const supabase = window.SARGuard?.supabase;
+
+    if(!supabase){
+        throw new Error(
+            "Conexão segura com o Supabase não disponível."
+        );
+    }
+
+    const { data, error } = await supabase
+        .from("vw_sar_menu_completo")
+        .select("*")
+        .order("modulo_ordem", {
+            ascending: true
+        })
+        .order("aba_ordem", {
+            ascending: true,
+            nullsFirst: true
+        })
+        .order("subaba_ordem", {
+            ascending: true,
+            nullsFirst: true
+        });
+
+    if(error){
+        throw error;
+    }
+
+    SAR_MENU_COMPLETO = data || [];
+}
 
 
 
@@ -788,41 +812,41 @@ function obterIconeModulo(icone){
 }
 
 
-async function carregarModulos(){
+function carregarModulos(){
 
     try{
 
-        const supabase =
-            window.SARGuard?.supabase;
+        const modulosMap = new Map();
 
-        if(!supabase){
-            throw new Error(
-                "Conexão segura com o Supabase não disponível."
-            );
-        }
+        SAR_MENU_COMPLETO.forEach(function(item){
 
-        const { data, error } = await supabase
-            .from("sar_modulos")
-            .select(`
-                codigo,
-                modulo,
-                icone,
-                ordem_menu
-            `)
-            .is("modulo_pai", null)
-            .eq("ativo", true)
-            .eq("exibir_menu_logado", true)
-            .order("ordem_menu", {
-                ascending: true
-            });
+            if(!item.modulo_id){
+                return;
+            }
 
-        if(error){
-            throw error;
-        }
+            if(!modulosMap.has(item.modulo_id)){
+
+                modulosMap.set(item.modulo_id, {
+                    id: item.modulo_id,
+                    codigo: item.modulo_codigo,
+                    nome: item.modulo_nome,
+                    icone: item.modulo_icone,
+                    ordem: item.modulo_ordem,
+                    rota: item.modulo_rota
+                });
+            }
+        });
+
+        const modulos = Array.from(
+            modulosMap.values()
+        ).sort(function(a, b){
+            return Number(a.ordem || 0) -
+                   Number(b.ordem || 0);
+        });
 
         let html = "";
 
-        data.forEach(function(item){
+        modulos.forEach(function(item){
 
             const icone =
                 obterIconeModulo(item.icone);
@@ -837,7 +861,7 @@ async function carregarModulos(){
                     ${icone}
 
                     <span class="menu-text">
-                        ${item.modulo}
+                        ${item.nome}
                     </span>
                 </div>
             `;
@@ -850,7 +874,7 @@ async function carregarModulos(){
     }catch(erro){
 
         console.error(
-            "Erro ao carregar módulos do Supabase:",
+            "Erro ao montar módulos:",
             erro
         );
 
@@ -863,6 +887,7 @@ async function carregarModulos(){
         `;
     }
 }
+
 
 function abrirModulo(modulo){
 
@@ -910,59 +935,47 @@ function abrirArquivo(arquivo){
 }
 
 
-async function carregarAbas(modulo){
+function carregarAbas(modulo){
 
-
-    const resposta = await fetch(URL_ABAS);
-    const texto = await resposta.text();
-
-    const linhas = texto.trim().split('\n');
-
-    const moduloSelecionado = String(modulo || "")
+    const codigoModulo = String(modulo || "")
         .trim()
         .toUpperCase();
 
-    const abasEncontradas = [];
+    const abasMap = new Map();
 
-    for(let i = 1; i < linhas.length; i++){
+    SAR_MENU_COMPLETO.forEach(function(item){
 
-        const colunas = linhas[i].split(',');
-
-        const moduloLinha = String(colunas[0] || "")
-            .trim()
-            .toUpperCase();
-
-        const nomeAba = String(colunas[1] || "")
-            .trim();
-
-        const arquivo = String(colunas[3] || "")
-            .trim();
-
-        const ordem = Number(
-            String(colunas[4] || "")
+        const moduloLinha =
+            String(item.modulo_codigo || "")
                 .trim()
-        );
-
-        const status = String(colunas[5] || "")
-            .trim()
-            .toUpperCase();
+                .toUpperCase();
 
         if(
-            moduloLinha === moduloSelecionado &&
-            status === "ATIVO"
+            moduloLinha !== codigoModulo ||
+            !item.aba_id
         ){
-            abasEncontradas.push({
-                modulo: moduloSelecionado,
-                nome: nomeAba,
-                arquivo: arquivo,
-                ordem: ordem
+            return;
+        }
+
+        if(!abasMap.has(item.aba_id)){
+
+            abasMap.set(item.aba_id, {
+                id: item.aba_id,
+                codigo: item.aba_codigo,
+                nome: item.aba_nome,
+                icone: item.aba_icone,
+                ordem: item.aba_ordem,
+                arquivo: item.aba_rota
             });
         }
-    }
-
-    abasEncontradas.sort(function(a, b){
-        return a.ordem - b.ordem;
     });
+
+    const abasEncontradas =
+        Array.from(abasMap.values())
+            .sort(function(a, b){
+                return Number(a.ordem || 0) -
+                       Number(b.ordem || 0);
+            });
 
     let htmlAbas = "";
 
@@ -972,9 +985,10 @@ async function carregarAbas(modulo){
             <div
                 class="tab"
                 onclick='abrirAba(
-                    ${JSON.stringify(aba.modulo)},
+                    ${JSON.stringify(codigoModulo)},
+                    ${JSON.stringify(aba.codigo)},
                     ${JSON.stringify(aba.nome)},
-                    ${JSON.stringify(aba.arquivo)},
+                    ${JSON.stringify(aba.arquivo || "")},
                     this
                 )'
             >
@@ -983,7 +997,8 @@ async function carregarAbas(modulo){
         `;
     });
 
-    const tabs = document.getElementById("tabs");
+    const tabs =
+        document.getElementById("tabs");
 
     tabs.innerHTML = htmlAbas;
 
@@ -996,12 +1011,14 @@ async function carregarAbas(modulo){
 }
 
 
+
 /* =========================================
    ABRIR ABA PRINCIPAL
 ========================================= */
 
-async function abrirAba(
+function abrirAba(
     modulo,
+    codigoAba,
     nomeAba,
     arquivo,
     elementoClicado
@@ -1010,23 +1027,15 @@ async function abrirAba(
     marcarAbaAtiva(elementoClicado);
 
     const possuiSubabas =
-        await carregarSubabas(modulo, nomeAba);
-
-    /*
-      Quando existem subabas:
-      a própria função carregarSubabas abre
-      automaticamente a primeira subaba ativa.
-    */
+        carregarSubabas(
+            modulo,
+            codigoAba,
+            nomeAba
+        );
 
     if(possuiSubabas){
         return;
     }
-
-    /*
-      Quando não existem subabas:
-      esconde a segunda faixa e abre diretamente
-      o arquivo cadastrado em SAR_MENU_ABAS.
-    */
 
     esconderSubabas();
 
@@ -1035,7 +1044,9 @@ async function abrirAba(
         return;
     }
 
-    document.getElementById("mainContent").innerHTML = `
+    document.getElementById(
+        "mainContent"
+    ).innerHTML = `
         <div class="welcome">
             <h1>${nomeAba}</h1>
             <p>Nenhuma ferramenta ativa cadastrada.</p>
@@ -1044,75 +1055,73 @@ async function abrirAba(
 }
 
 
+
 /* =========================================
    CARREGAR SUBABAS
 ========================================= */
-
-async function carregarSubabas(modulo, abaPai){
+function carregarSubabas(
+    modulo,
+    codigoAba,
+    nomeAba
+){
 
     try{
 
-        const resposta = await fetch(URL_SUBABAS);
-        const texto = await resposta.text();
-
-        const linhas = texto.trim().split('\n');
-
-        const moduloSelecionado = String(modulo || "")
-            .trim()
-            .toUpperCase();
-
-        const abaSelecionada = String(abaPai || "")
-            .trim()
-            .toUpperCase();
-
-        const subabasEncontradas = [];
-
-        for(let i = 1; i < linhas.length; i++){
-
-            const colunas = linhas[i].split(',');
-
-            const moduloLinha = String(colunas[0] || "")
+        const moduloSelecionado =
+            String(modulo || "")
                 .trim()
                 .toUpperCase();
 
-            const abaPaiLinha = String(colunas[1] || "")
+        const abaSelecionada =
+            String(codigoAba || "")
                 .trim()
                 .toUpperCase();
 
-            const nomeSubaba = String(colunas[2] || "")
-                .trim();
+        const subabasMap = new Map();
 
-            const arquivo = String(colunas[3] || "")
-                .trim();
+        SAR_MENU_COMPLETO.forEach(function(item){
 
-            const ordem = Number(
-                String(colunas[4] || "")
+            const moduloLinha =
+                String(item.modulo_codigo || "")
                     .trim()
-            );
+                    .toUpperCase();
 
-            const status = String(colunas[5] || "")
-                .trim()
-                .toUpperCase();
+            const abaLinha =
+                String(item.aba_codigo || "")
+                    .trim()
+                    .toUpperCase();
 
             if(
-                moduloLinha === moduloSelecionado &&
-                abaPaiLinha === abaSelecionada &&
-                status === "ATIVO"
+                moduloLinha !== moduloSelecionado ||
+                abaLinha !== abaSelecionada ||
+                !item.subaba_id
             ){
-                subabasEncontradas.push({
-                    nome: nomeSubaba,
-                    arquivo: arquivo,
-                    ordem: ordem
+                return;
+            }
+
+            if(!subabasMap.has(item.subaba_id)){
+
+                subabasMap.set(item.subaba_id, {
+                    id: item.subaba_id,
+                    codigo: item.subaba_codigo,
+                    nome: item.subaba_nome,
+                    arquivo: item.subaba_rota,
+                    ordem: item.subaba_ordem
                 });
             }
-        }
-
-        subabasEncontradas.sort(function(a, b){
-            return a.ordem - b.ordem;
         });
 
+        const subabasEncontradas =
+            Array.from(subabasMap.values())
+                .sort(function(a, b){
+                    return Number(a.ordem || 0) -
+                           Number(b.ordem || 0);
+                });
+
         if(subabasEncontradas.length === 0){
+
             esconderSubabas();
+
             return false;
         }
 
@@ -1127,7 +1136,9 @@ async function carregarSubabas(modulo, abaPai){
                 <div
                     class="subtab"
                     onclick='abrirSubaba(
-                        ${JSON.stringify(subaba.arquivo)},
+                        ${JSON.stringify(
+                            subaba.arquivo || ""
+                        )},
                         this
                     )'
                 >
@@ -1139,20 +1150,16 @@ async function carregarSubabas(modulo, abaPai){
         subtabs.innerHTML = htmlSubabas;
         subtabs.style.display = "flex";
 
-        
-/*
-  Exibe as subabas, mas não abre nenhuma
-  automaticamente.
-*/
+        document.getElementById(
+            "mainContent"
+        ).innerHTML = `
+            <div class="welcome">
+                <h1>${nomeAba}</h1>
+                <p>Selecione uma ferramenta acima.</p>
+            </div>
+        `;
 
-document.getElementById("mainContent").innerHTML = `
-    <div class="welcome">
-        <h1>${abaPai}</h1>
-        <p>Selecione uma ferramenta acima.</p>
-    </div>
-`;
-
-return true;
+        return true;
 
     }catch(erro){
 
@@ -1166,6 +1173,7 @@ return true;
         return false;
     }
 }
+
 
 
 /* =========================================
@@ -1505,11 +1513,32 @@ window.addEventListener(
     "sar:autorizado",
     async function(){
 
-        await carregarModulos();
+        try{
 
-        carregarMenuRodape();
+            await carregarEstruturaMenuSupabase();
+
+            carregarModulos();
+
+            carregarMenuRodape();
+
+        }catch(erro){
+
+            console.error(
+                "Erro ao inicializar o menu do SAR:",
+                erro
+            );
+
+            document.getElementById(
+                "menuDinamico"
+            ).innerHTML = `
+                <div class="menu-item">
+                    Erro ao carregar menu
+                </div>
+            `;
+        }
     }
 );
+
 
 </script>
 
@@ -1517,5 +1546,6 @@ window.addEventListener(
 
 </body>
 </html>
+
 
 
