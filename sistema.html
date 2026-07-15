@@ -1290,7 +1290,8 @@ async function carregarMenuRodape(){
                 tipo,
                 destino,
                 ordem,
-                ativo
+                ativo,
+                somente_master
             `)
             .eq("ativo", true)
             .order("ordem", {
@@ -1298,12 +1299,24 @@ async function carregarMenuRodape(){
             });
 
         if(error){
-            throw error;
-        }
+    throw error;
+}
 
-        let html = "";
+const ehMaster =
+    String(
+        SAR_CADASTRO_ATUAL?.tipo_usuario || ""
+    ).toLowerCase() === "master";
 
-        (data || []).forEach(function(item){
+let html = "";
+
+(data || []).forEach(function(item){
+
+    if(
+        item.somente_master === true &&
+        !ehMaster
+    ){
+        return;
+    }
 
             const classeSair =
                 String(item.destino || "")
@@ -1371,6 +1384,46 @@ function executarItemRodape(tipo, destino){
         return;
     }
 
+if(
+        tipoSelecionado === "ACAO" &&
+        destinoSelecionado === "ADMINISTRACAO"
+    ){
+        document.getElementById(
+            "tabs"
+        ).style.display = "none";
+
+        esconderSubabas();
+
+        abrirArquivo(
+            "admin/usuarios.html"
+        );
+
+        return;
+    }
+
+if(
+        tipoSelecionado === "ACAO" &&
+        destinoSelecionado === "MEU_PERFIL"
+    ){
+        document.getElementById(
+            "tabs"
+        ).style.display = "none";
+
+        esconderSubabas();
+
+        document.getElementById(
+            "mainContent"
+        ).innerHTML = `
+            <div class="welcome">
+                <h1>Meu Perfil</h1>
+                <p>Área de perfil em desenvolvimento.</p>
+            </div>
+        `;
+
+        return;
+    }
+
+    
     if(
         tipoSelecionado === "ACAO" &&
         destinoSelecionado === "INFORMACOES"
