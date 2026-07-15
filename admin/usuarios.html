@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAR | Administração de Usuários</title>
+  <style>
+    :root{--sar:#315858;--verde:#7cb342;--bg:#f5f6f8;--line:#dfe4e4;--text:#374343;--muted:#718080;--ok:#16834b;--okbg:#e9f7ef;--pending:#a86d00;--pendingbg:#fff6dc;--err:#b83232;--errbg:#fff0f0}
+    *{box-sizing:border-box;margin:0;padding:0}body{min-height:100vh;padding:24px;color:var(--text);font-family:Segoe UI,Arial,sans-serif;background:var(--bg)}
+    .page{width:min(1320px,100%);margin:auto}.head{display:flex;justify-content:space-between;gap:20px;margin-bottom:20px}h1{color:var(--sar);font-size:28px}.sub{margin-top:6px;color:var(--muted);font-size:14px;line-height:1.5}
+    .btn{min-height:40px;padding:0 16px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:700;cursor:pointer}.btn:disabled{opacity:.55;cursor:not-allowed}
+    .summary{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px;margin-bottom:18px}.card{padding:16px;border:1px solid var(--line);border-radius:10px;background:#fff}.card span{display:block;color:var(--muted);font-size:12px;text-transform:uppercase}.card strong{display:block;margin-top:7px;color:var(--sar);font-size:25px}
+    .state{display:none;margin-bottom:16px;padding:14px 16px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--muted)}.state.show{display:block}.state.error{color:var(--err);border-color:#efcaca;background:var(--errbg)}
+    .wrap{overflow:auto;border:1px solid var(--line);border-radius:11px;background:#fff}table{width:100%;min-width:1000px;border-collapse:collapse}th,td{padding:13px 14px;border-bottom:1px solid #edf0f0;text-align:left}th{position:sticky;top:0;background:#f8fafa;color:#526161;font-size:12px;text-transform:uppercase}.name{color:var(--sar);font-weight:750}.email{color:#536363}.date{white-space:nowrap;color:#647272;font-size:13px}
+    .type,.status{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800;text-transform:uppercase}.type{color:#3f5555;background:#edf2f2}.type.master{color:#fff;background:var(--sar)}.status{align-items:center;gap:6px}.status:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}.status.active{color:var(--ok);background:var(--okbg)}.status.pending{color:var(--pending);background:var(--pendingbg)}.empty{padding:40px 20px!important;text-align:center;color:var(--muted)}
+    @media(max-width:760px){body{padding:16px}.head{flex-direction:column}.summary{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="head">
+    <div><h1>Administração de usuários</h1><p class="sub">Consulta protegida dos usuários cadastrados no SAR. Nesta etapa, a tela é somente para visualização.</p></div>
+    <button id="refresh" class="btn" type="button">Atualizar lista</button>
+  </header>
+  <section class="summary">
+    <div class="card"><span>Total</span><strong id="total">0</strong></div>
+    <div class="card"><span>Ativos</span><strong id="active">0</strong></div>
+    <div class="card"><span>Pendentes</span><strong id="pending">0</strong></div>
+    <div class="card"><span>Administradores</span><strong id="masters">0</strong></div>
+  </section>
+  <div id="state" class="state show">Validando acesso administrativo...</div>
+  <section class="wrap">
+    <table>
+      <thead><tr><th>Nome</th><th>E-mail</th><th>Tipo</th><th>Status</th><th>Cadastro</th><th>Último login</th><th>Aprovação</th></tr></thead>
+      <tbody id="body"><tr><td class="empty" colspan="7">Carregando usuários...</td></tr></tbody>
+    </table>
+  </section>
+</main>
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+const supabase=createClient("https://bjtxbpmrmhfvpmdsthxr.supabase.co","sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const el={refresh:document.getElementById('refresh'),state:document.getElementById('state'),body:document.getElementById('body'),total:document.getElementById('total'),active:document.getElementById('active'),pending:document.getElementById('pending'),masters:document.getElementById('masters')};
+const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+function date(v){if(!v)return'—';const d=new Date(v);return Number.isNaN(d.getTime())?'—':new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(d)}
+function state(msg,error=false){el.state.textContent=msg;el.state.classList.add('show');el.state.classList.toggle('error',error)}function hide(){el.state.classList.remove('show','error')}
+function render(users){el.total.textContent=users.length;el.active.textContent=users.filter(u=>u.ativo===true).length;el.pending.textContent=users.filter(u=>u.ativo!==true).length;el.masters.textContent=users.filter(u=>String(u.tipo_usuario||'').toLowerCase()==='master').length;if(!users.length){el.body.innerHTML='<tr><td class="empty" colspan="7">Nenhum usuário cadastrado.</td></tr>';return}el.body.innerHTML=users.map(u=>{const t=String(u.tipo_usuario||'teste').toLowerCase(),a=u.ativo===true;return `<tr><td class="name">${esc(u.nome||'Sem nome')}</td><td class="email">${esc(u.email||'—')}</td><td><span class="type ${t==='master'?'master':''}">${esc(t)}</span></td><td><span class="status ${a?'active':'pending'}">${a?'Ativo':'Pendente'}</span></td><td class="date">${date(u.created_at)}</td><td class="date">${date(u.ultimo_login)}</td><td class="date">${date(u.aprovado_em)}</td></tr>`}).join('')}
+async function load(){el.refresh.disabled=true;state('Carregando usuários...');try{const {data:s,error:e}=await supabase.auth.getSession();if(e)throw new Error('Falha ao verificar sessão: '+e.message);if(!s.session?.user){window.top.location.replace('../acesso.html');return}const {data,error}=await supabase.rpc('sar_admin_listar_usuarios',{});if(error){console.error('Erro completo da RPC:',error);throw new Error(error.message||'Acesso administrativo não autorizado.')}render(data||[]);hide()}catch(err){console.error(err);el.body.innerHTML='<tr><td class="empty" colspan="7">Não foi possível carregar os usuários.</td></tr>';state(err instanceof Error?err.message:String(err),true)}finally{el.refresh.disabled=false}}
+el.refresh.addEventListener('click',load);load();
+</script>
+</body>
+</html>
