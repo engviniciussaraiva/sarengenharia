@@ -621,6 +621,8 @@ id="menuRodape"
 <script>
 
 let SAR_MENU_COMPLETO = [];
+let SAR_USUARIO_ATUAL = null;
+let SAR_CADASTRO_ATUAL = null;
 
 async function carregarEstruturaMenuSupabase(){
 
@@ -802,7 +804,9 @@ function obterIconeModulo(icone){
         "file-text": "📄",
         "file-pdf": "📑",
         cube: "⬡",
-        brain: "🧠"
+        brain: "🧠",
+        settings: "⚙️",
+        users: "👥"
     };
 
     return icones[icone] || "▣";
@@ -845,6 +849,17 @@ function carregarModulos(){
 
         modulos.forEach(function(item){
 
+            const ehAdministracao =
+    item.codigo === "ADMINISTRACAO";
+
+const ehMaster =
+    String(
+        SAR_CADASTRO_ATUAL?.tipo_usuario || ""
+    ).toLowerCase() === "master";
+
+if(ehAdministracao && !ehMaster){
+    return;
+}
             const icone =
                 obterIconeModulo(item.icone);
 
@@ -1548,7 +1563,13 @@ function imprimirFerramentaAtual(){
 
 window.addEventListener(
     "sar:autorizado",
-    async function(){
+    async function(event){
+
+        SAR_USUARIO_ATUAL =
+            event.detail?.usuario || null;
+
+        SAR_CADASTRO_ATUAL =
+            event.detail?.cadastro || null;
 
         try{
 
@@ -1556,7 +1577,7 @@ window.addEventListener(
 
             carregarModulos();
 
-            carregarMenuRodape();
+            await carregarMenuRodape();
 
         }catch(erro){
 
