@@ -4,68 +4,1076 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SAR | Administração</title>
+
   <style>
-    :root{--sar:#315858;--sar-verde:#7cb342;--fundo:#f5f6f8;--painel:#fff;--linha:#dfe4e4;--texto:#374343;--muted:#718080;--sucesso:#16834b;--sucesso-bg:#e9f7ef;--pendente:#a86d00;--pendente-bg:#fff6dc;--erro:#b83232;--erro-bg:#fff0f0}
-    *{box-sizing:border-box;margin:0;padding:0} body{min-height:100vh;color:var(--texto);font-family:Segoe UI,Arial,sans-serif;background:var(--fundo)}
-    .admin{min-height:100vh;display:grid;grid-template-columns:220px 1fr}.admin-sidebar{padding:22px 14px;border-right:1px solid var(--linha);background:#fff}.admin-brand{padding:0 10px 20px;margin-bottom:12px;border-bottom:1px solid var(--linha)}.admin-brand strong{display:block;color:var(--sar);font-size:20px}.admin-brand span{display:block;margin-top:4px;color:var(--muted);font-size:12px}
-    .admin-nav{display:grid;gap:7px}.admin-nav button{width:100%;min-height:44px;padding:0 13px;border:0;border-radius:8px;color:#4e5e5e;background:transparent;font-size:14px;text-align:left;cursor:pointer;transition:.2s}.admin-nav button:hover{background:#f0f4f4}.admin-nav button.ativo{color:#fff;background:var(--sar)}
-    .admin-content{min-width:0;padding:24px}.painel{display:none}.painel.ativo{display:block}.cabecalho{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:20px}h1{color:var(--sar);font-size:28px;line-height:1.2}.subtitulo{margin-top:6px;color:var(--muted);font-size:14px;line-height:1.5}.acoes{display:flex;gap:10px;flex-wrap:wrap}
-    .btn{min-height:40px;padding:0 16px;border:1px solid var(--linha);border-radius:8px;color:var(--texto);background:#fff;font-weight:700;cursor:pointer;transition:.2s}.btn:hover{transform:translateY(-1px);border-color:#bcc9c9}.btn.primary{color:#fff;border-color:var(--sar);background:var(--sar)}.btn:disabled{cursor:not-allowed;opacity:.55;transform:none}
-    .resumo{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px;margin-bottom:18px}.card{padding:16px;border:1px solid var(--linha);border-radius:10px;background:var(--painel)}.card span{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px}.card strong{display:block;margin-top:7px;color:var(--sar);font-size:25px}
-    .estado{display:none;margin-bottom:16px;padding:14px 16px;border:1px solid var(--linha);border-radius:9px;color:var(--muted);background:#fff;line-height:1.5}.estado.visivel{display:block}.estado.erro{color:var(--erro);border-color:#efcaca;background:var(--erro-bg)}
-    .tabela-wrapper{overflow:auto;border:1px solid var(--linha);border-radius:11px;background:var(--painel)}table{width:100%;min-width:1000px;border-collapse:collapse}th,td{padding:13px 14px;border-bottom:1px solid #edf0f0;text-align:left;vertical-align:middle}th{position:sticky;top:0;z-index:1;color:#526161;background:#f8fafa;font-size:12px;text-transform:uppercase;letter-spacing:.45px}td{font-size:14px}tbody tr:hover{background:#fbfcfc}tbody tr:last-child td{border-bottom:none}.nome{color:var(--sar);font-weight:750}.email{color:#536363}.tipo{display:inline-flex;padding:5px 9px;border-radius:999px;color:#3f5555;background:#edf2f2;font-size:11px;font-weight:800;text-transform:uppercase}.tipo.master{color:#fff;background:var(--sar)}.status{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800;text-transform:uppercase}.status.ativo{color:var(--sucesso);background:var(--sucesso-bg)}.status.pendente{color:var(--pendente);background:var(--pendente-bg)}.status::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}.data{color:#647272;white-space:nowrap;font-size:13px}.vazio{padding:40px 20px!important;color:var(--muted);text-align:center}
-    .editor-site{display:grid;gap:14px}.conteudo-card{padding:18px;border:1px solid var(--linha);border-radius:11px;background:#fff}.conteudo-card h3{color:var(--sar);font-size:15px}.conteudo-card small{display:block;margin-top:4px;color:var(--muted)}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px}.campo{display:grid;gap:6px}.campo.full{grid-column:1/-1}.campo label{color:#596868;font-size:12px;font-weight:700}.campo input,.campo textarea{width:100%;padding:10px 11px;border:1px solid var(--linha);border-radius:7px;color:var(--texto);background:#fff;font:inherit}.campo textarea{min-height:90px;resize:vertical}.linha-acoes{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}.placeholder{padding:50px 20px;border:1px dashed #c8d1d1;border-radius:10px;color:var(--muted);background:#fff;text-align:center}
-    @media(max-width:900px){.admin{grid-template-columns:1fr}.admin-sidebar{border-right:0;border-bottom:1px solid var(--linha)}.admin-nav{grid-template-columns:repeat(2,1fr)}.resumo{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr}.campo.full{grid-column:auto}}
+    :root{
+      --sar:#315858;
+      --sar-verde:#7cb342;
+      --fundo:#f5f6f8;
+      --painel:#ffffff;
+      --linha:#dfe4e4;
+      --texto:#374343;
+      --muted:#718080;
+      --sucesso:#16834b;
+      --sucesso-bg:#e9f7ef;
+      --pendente:#a86d00;
+      --pendente-bg:#fff6dc;
+      --erro:#b83232;
+      --erro-bg:#fff0f0;
+      --overlay:rgba(15,28,28,.34);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+
+    body{
+      min-height:100vh;
+      color:var(--texto);
+      font-family:Segoe UI,Arial,sans-serif;
+      background:var(--fundo);
+    }
+
+    .admin{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:220px 1fr;
+    }
+
+    .admin-sidebar{
+      padding:22px 14px;
+      border-right:1px solid var(--linha);
+      background:#fff;
+    }
+
+    .admin-brand{
+      padding:0 10px 20px;
+      margin-bottom:12px;
+      border-bottom:1px solid var(--linha);
+    }
+
+    .admin-brand strong{
+      display:block;
+      color:var(--sar);
+      font-size:20px;
+    }
+
+    .admin-brand span{
+      display:block;
+      margin-top:4px;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .admin-nav{
+      display:grid;
+      gap:7px;
+    }
+
+    .admin-nav button{
+      width:100%;
+      min-height:44px;
+      padding:0 13px;
+      border:0;
+      border-radius:8px;
+      color:#4e5e5e;
+      background:transparent;
+      font-size:14px;
+      text-align:left;
+      cursor:pointer;
+      transition:.2s;
+    }
+
+    .admin-nav button:hover{background:#f0f4f4}
+    .admin-nav button.ativo{color:#fff;background:var(--sar)}
+
+    .admin-content{
+      min-width:0;
+      padding:24px;
+    }
+
+    .painel{display:none}
+    .painel.ativo{display:block}
+
+    .cabecalho{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:20px;
+      margin-bottom:20px;
+    }
+
+    h1{
+      color:var(--sar);
+      font-size:28px;
+      line-height:1.2;
+    }
+
+    .subtitulo{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .acoes{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      min-height:40px;
+      padding:0 16px;
+      border:1px solid var(--linha);
+      border-radius:8px;
+      color:var(--texto);
+      background:#fff;
+      font-weight:700;
+      cursor:pointer;
+      transition:.2s;
+    }
+
+    .btn:hover{
+      transform:translateY(-1px);
+      border-color:#bcc9c9;
+    }
+
+    .btn.primary{
+      color:#fff;
+      border-color:var(--sar);
+      background:var(--sar);
+    }
+
+    .btn.danger{
+      color:#fff;
+      border-color:#a73434;
+      background:#a73434;
+    }
+
+    .btn:disabled{
+      cursor:not-allowed;
+      opacity:.55;
+      transform:none;
+    }
+
+    .resumo{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(150px,1fr));
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    .card{
+      padding:16px;
+      border:1px solid var(--linha);
+      border-radius:10px;
+      background:var(--painel);
+    }
+
+    .card span{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.5px;
+    }
+
+    .card strong{
+      display:block;
+      margin-top:7px;
+      color:var(--sar);
+      font-size:25px;
+    }
+
+    .estado{
+      display:none;
+      margin-bottom:16px;
+      padding:14px 16px;
+      border:1px solid var(--linha);
+      border-radius:9px;
+      color:var(--muted);
+      background:#fff;
+      line-height:1.5;
+    }
+
+    .estado.visivel{display:block}
+
+    .estado.erro{
+      color:var(--erro);
+      border-color:#efcaca;
+      background:var(--erro-bg);
+    }
+
+    .tabela-wrapper{
+      overflow:auto;
+      border:1px solid var(--linha);
+      border-radius:11px;
+      background:var(--painel);
+    }
+
+    table{
+      width:100%;
+      min-width:1100px;
+      border-collapse:collapse;
+    }
+
+    th,td{
+      padding:13px 14px;
+      border-bottom:1px solid #edf0f0;
+      text-align:left;
+      vertical-align:middle;
+    }
+
+    th{
+      position:sticky;
+      top:0;
+      z-index:1;
+      color:#526161;
+      background:#f8fafa;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.45px;
+    }
+
+    td{font-size:14px}
+    tbody tr:hover{background:#fbfcfc}
+    tbody tr:last-child td{border-bottom:none}
+
+    .nome{color:var(--sar);font-weight:750}
+    .email{color:#536363}
+
+    .tipo{
+      display:inline-flex;
+      padding:5px 9px;
+      border-radius:999px;
+      color:#3f5555;
+      background:#edf2f2;
+      font-size:11px;
+      font-weight:800;
+      text-transform:uppercase;
+    }
+
+    .tipo.master{color:#fff;background:var(--sar)}
+
+    .status{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:5px 9px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      text-transform:uppercase;
+    }
+
+    .status.ativo{color:var(--sucesso);background:var(--sucesso-bg)}
+    .status.pendente{color:var(--pendente);background:var(--pendente-bg)}
+
+    .status::before{
+      content:"";
+      width:7px;
+      height:7px;
+      border-radius:50%;
+      background:currentColor;
+    }
+
+    .data{
+      color:#647272;
+      white-space:nowrap;
+      font-size:13px;
+    }
+
+    .vazio{
+      padding:40px 20px !important;
+      color:var(--muted);
+      text-align:center;
+    }
+
+    .editor-site{
+      display:grid;
+      gap:14px;
+    }
+
+    .conteudo-card{
+      padding:18px;
+      border:1px solid var(--linha);
+      border-radius:11px;
+      background:#fff;
+    }
+
+    .conteudo-card h3{
+      color:var(--sar);
+      font-size:15px;
+    }
+
+    .conteudo-card small{
+      display:block;
+      margin-top:4px;
+      color:var(--muted);
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:15px;
+    }
+
+    .campo{
+      display:grid;
+      gap:6px;
+    }
+
+    .campo.full{grid-column:1/-1}
+
+    .campo label{
+      color:#596868;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .campo input,
+    .campo textarea,
+    .campo select{
+      width:100%;
+      padding:10px 11px;
+      border:1px solid var(--linha);
+      border-radius:7px;
+      color:var(--texto);
+      background:#fff;
+      font:inherit;
+    }
+
+    .campo textarea{
+      min-height:90px;
+      resize:vertical;
+    }
+
+    .linha-acoes{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .placeholder{
+      padding:50px 20px;
+      border:1px dashed #c8d1d1;
+      border-radius:10px;
+      color:var(--muted);
+      background:#fff;
+      text-align:center;
+    }
+
+    .drawer-overlay{
+      position:fixed;
+      inset:0;
+      z-index:1000;
+      display:none;
+      background:var(--overlay);
+    }
+
+    .drawer-overlay.aberto{display:block}
+
+    .drawer{
+      position:absolute;
+      top:0;
+      right:0;
+      width:min(460px,100%);
+      height:100%;
+      padding:22px;
+      overflow:auto;
+      border-left:1px solid var(--linha);
+      background:#fff;
+      box-shadow:-18px 0 50px rgba(0,0,0,.16);
+    }
+
+    .drawer-topo{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .drawer-topo h2{
+      color:var(--sar);
+      font-size:23px;
+    }
+
+    .drawer-topo p{
+      margin-top:5px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    .drawer-fechar{
+      width:36px;
+      height:36px;
+      border:1px solid var(--linha);
+      border-radius:8px;
+      background:#fff;
+      font-size:19px;
+      cursor:pointer;
+    }
+
+    .identidade{
+      padding:14px;
+      margin-bottom:16px;
+      border:1px solid var(--linha);
+      border-radius:9px;
+      background:#f8fafa;
+    }
+
+    .identidade strong{
+      display:block;
+      color:var(--sar);
+      font-size:16px;
+    }
+
+    .identidade span{
+      display:block;
+      margin-top:4px;
+      color:var(--muted);
+      overflow-wrap:anywhere;
+      font-size:13px;
+    }
+
+    .switch-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:15px;
+      padding:13px 0;
+      border-bottom:1px solid #edf0f0;
+    }
+
+    .switch-row strong{
+      display:block;
+      color:#4c5d5d;
+      font-size:14px;
+    }
+
+    .switch-row small{
+      display:block;
+      margin-top:3px;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .switch-row input{
+      width:20px;
+      height:20px;
+    }
+
+    .drawer-acoes{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      margin-top:22px;
+    }
+
+    @media(max-width:900px){
+      .admin{grid-template-columns:1fr}
+      .admin-sidebar{border-right:0;border-bottom:1px solid var(--linha)}
+      .admin-nav{grid-template-columns:repeat(2,1fr)}
+      .resumo{grid-template-columns:repeat(2,1fr)}
+      .form-grid{grid-template-columns:1fr}
+      .campo.full{grid-column:auto}
+    }
   </style>
 </head>
+
 <body>
-<main class="admin">
-  <aside class="admin-sidebar">
-    <div class="admin-brand"><strong>Administração SAR</strong><span>Gestão central da plataforma</span></div>
-    <nav class="admin-nav">
-      <button class="ativo" data-painel="usuarios">👤 Usuários</button>
-      <button data-painel="site">🌐 Site</button>
-      <button data-painel="modulos">📦 Módulos</button>
-      <button data-painel="permissoes">🔐 Permissões</button>
-      <button data-painel="logs">📊 Logs</button>
-      <button data-painel="configuracoes">⚙️ Configurações</button>
-    </nav>
-  </aside>
-  <section class="admin-content">
-    <section id="painel-usuarios" class="painel ativo">
-      <header class="cabecalho"><div><h1>Usuários</h1><p class="subtitulo">Consulta protegida dos usuários cadastrados no SAR.</p></div><div class="acoes"><button id="btnAtualizarUsuarios" class="btn" type="button">Atualizar lista</button></div></header>
-      <section class="resumo"><div class="card"><span>Total</span><strong id="totalUsuarios">0</strong></div><div class="card"><span>Ativos</span><strong id="totalAtivos">0</strong></div><div class="card"><span>Pendentes</span><strong id="totalPendentes">0</strong></div><div class="card"><span>Administradores</span><strong id="totalMasters">0</strong></div></section>
-      <div id="estadoUsuarios" class="estado visivel">Validando acesso administrativo...</div>
-      <section class="tabela-wrapper"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Tipo</th><th>Status</th><th>Cadastro</th><th>Último login</th><th>Aprovação</th></tr></thead><tbody id="corpoUsuarios"><tr><td class="vazio" colspan="7">Carregando usuários...</td></tr></tbody></table></section>
+  <main class="admin">
+    <aside class="admin-sidebar">
+      <div class="admin-brand">
+        <strong>Administração SAR</strong>
+        <span>Gestão central da plataforma</span>
+      </div>
+
+      <nav class="admin-nav">
+        <button class="ativo" data-painel="usuarios">👤 Usuários</button>
+        <button data-painel="site">🌐 Site</button>
+        <button data-painel="modulos">📦 Módulos</button>
+        <button data-painel="permissoes">🔐 Permissões</button>
+        <button data-painel="logs">📊 Logs</button>
+        <button data-painel="configuracoes">⚙️ Configurações</button>
+      </nav>
+    </aside>
+
+    <section class="admin-content">
+      <section id="painel-usuarios" class="painel ativo">
+        <header class="cabecalho">
+          <div>
+            <h1>Usuários</h1>
+            <p class="subtitulo">
+              Aprovação, bloqueio e definição do tipo de usuário.
+            </p>
+          </div>
+
+          <div class="acoes">
+            <button id="btnAtualizarUsuarios" class="btn" type="button">
+              Atualizar lista
+            </button>
+          </div>
+        </header>
+
+        <section class="resumo">
+          <div class="card"><span>Total</span><strong id="totalUsuarios">0</strong></div>
+          <div class="card"><span>Ativos</span><strong id="totalAtivos">0</strong></div>
+          <div class="card"><span>Pendentes</span><strong id="totalPendentes">0</strong></div>
+          <div class="card"><span>Administradores</span><strong id="totalMasters">0</strong></div>
+        </section>
+
+        <div id="estadoUsuarios" class="estado visivel">
+          Validando acesso administrativo...
+        </div>
+
+        <section class="tabela-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Tipo</th>
+                <th>Status</th>
+                <th>Cadastro</th>
+                <th>Último login</th>
+                <th>Aprovação</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="corpoUsuarios">
+              <tr><td class="vazio" colspan="8">Carregando usuários...</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </section>
+
+      <section id="painel-site" class="painel">
+        <header class="cabecalho">
+          <div>
+            <h1>Conteúdo do site</h1>
+            <p class="subtitulo">
+              Edite os textos e links da página comercial do SAR.
+            </p>
+          </div>
+
+          <div class="acoes">
+            <button id="btnAtualizarSite" class="btn" type="button">
+              Atualizar conteúdo
+            </button>
+          </div>
+        </header>
+
+        <div id="estadoSite" class="estado visivel">
+          Abra esta seção para carregar os conteúdos.
+        </div>
+
+        <div id="editorSite" class="editor-site"></div>
+      </section>
+
+      <section id="painel-modulos" class="painel">
+        <header class="cabecalho">
+          <div>
+            <h1>Módulos</h1>
+            <p class="subtitulo">Gestão do catálogo oficial do SAR.</p>
+          </div>
+        </header>
+        <div class="placeholder">Tela de módulos será implementada na próxima etapa.</div>
+      </section>
+
+      <section id="painel-permissoes" class="painel">
+        <header class="cabecalho">
+          <div>
+            <h1>Permissões</h1>
+            <p class="subtitulo">Controle de acesso por usuário e módulo.</p>
+          </div>
+        </header>
+        <div class="placeholder">Tela de permissões será implementada depois da gestão de usuários.</div>
+      </section>
+
+      <section id="painel-logs" class="painel">
+        <header class="cabecalho">
+          <div>
+            <h1>Logs</h1>
+            <p class="subtitulo">Auditoria dos acessos realizados na plataforma.</p>
+          </div>
+        </header>
+        <div class="placeholder">Tela de logs em desenvolvimento.</div>
+      </section>
+
+      <section id="painel-configuracoes" class="painel">
+        <header class="cabecalho">
+          <div>
+            <h1>Configurações</h1>
+            <p class="subtitulo">Configurações gerais do SAR.</p>
+          </div>
+        </header>
+        <div class="placeholder">Configurações gerais em desenvolvimento.</div>
+      </section>
     </section>
-    <section id="painel-site" class="painel">
-      <header class="cabecalho"><div><h1>Conteúdo do site</h1><p class="subtitulo">Edite os textos e links da página comercial do SAR.</p></div><div class="acoes"><button id="btnAtualizarSite" class="btn" type="button">Atualizar conteúdo</button></div></header>
-      <div id="estadoSite" class="estado visivel">Abra esta seção para carregar os conteúdos.</div><div id="editorSite" class="editor-site"></div>
-    </section>
-    <section id="painel-modulos" class="painel"><header class="cabecalho"><div><h1>Módulos</h1><p class="subtitulo">Gestão do catálogo oficial do SAR.</p></div></header><div class="placeholder">Tela de módulos será implementada na próxima etapa.</div></section>
-    <section id="painel-permissoes" class="painel"><header class="cabecalho"><div><h1>Permissões</h1><p class="subtitulo">Controle de acesso por usuário e módulo.</p></div></header><div class="placeholder">Tela de permissões será implementada depois da gestão de usuários.</div></section>
-    <section id="painel-logs" class="painel"><header class="cabecalho"><div><h1>Logs</h1><p class="subtitulo">Auditoria dos acessos realizados na plataforma.</p></div></header><div class="placeholder">Tela de logs em desenvolvimento.</div></section>
-    <section id="painel-configuracoes" class="painel"><header class="cabecalho"><div><h1>Configurações</h1><p class="subtitulo">Configurações gerais do SAR.</p></div></header><div class="placeholder">Configurações gerais em desenvolvimento.</div></section>
-  </section>
-</main>
-<script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-const SUPABASE_URL="https://bjtxbpmrmhfvpmdsthxr.supabase.co"; const SUPABASE_KEY="sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM";
-const supabase=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-const elementos={botoesNav:document.querySelectorAll("[data-painel]"),paineis:document.querySelectorAll(".painel"),btnAtualizarUsuarios:document.getElementById("btnAtualizarUsuarios"),estadoUsuarios:document.getElementById("estadoUsuarios"),corpoUsuarios:document.getElementById("corpoUsuarios"),totalUsuarios:document.getElementById("totalUsuarios"),totalAtivos:document.getElementById("totalAtivos"),totalPendentes:document.getElementById("totalPendentes"),totalMasters:document.getElementById("totalMasters"),btnAtualizarSite:document.getElementById("btnAtualizarSite"),estadoSite:document.getElementById("estadoSite"),editorSite:document.getElementById("editorSite")};
-function escaparHtml(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
-function formatarData(v){if(!v)return"—";const d=new Date(v);if(Number.isNaN(d.getTime()))return"—";return new Intl.DateTimeFormat("pt-BR",{dateStyle:"short",timeStyle:"short"}).format(d)}
-function definirEstado(el,msg,erro=false){el.textContent=msg;el.classList.add("visivel");el.classList.toggle("erro",erro)} function ocultarEstado(el){el.classList.remove("visivel","erro")}
-async function validarSessao(){const{data,error}=await supabase.auth.getSession();if(error)throw new Error(`Falha ao verificar sessão: ${error.message}`);if(!data.session?.user){window.top.location.replace("../acesso.html");return false}return true}
-function abrirPainel(nome){elementos.botoesNav.forEach(b=>b.classList.toggle("ativo",b.dataset.painel===nome));elementos.paineis.forEach(p=>p.classList.toggle("ativo",p.id===`painel-${nome}`));if(nome==="usuarios")carregarUsuarios();if(nome==="site")carregarSite()}
-elementos.botoesNav.forEach(b=>b.addEventListener("click",()=>abrirPainel(b.dataset.painel)));
-function atualizarResumoUsuarios(us){elementos.totalUsuarios.textContent=us.length;elementos.totalAtivos.textContent=us.filter(u=>u.ativo===true).length;elementos.totalPendentes.textContent=us.filter(u=>u.ativo!==true).length;elementos.totalMasters.textContent=us.filter(u=>String(u.tipo_usuario||"").toLowerCase()==="master").length}
-function renderizarUsuarios(us){atualizarResumoUsuarios(us);if(!us.length){elementos.corpoUsuarios.innerHTML='<tr><td class="vazio" colspan="7">Nenhum usuário cadastrado.</td></tr>';return}elementos.corpoUsuarios.innerHTML=us.map(u=>{const t=String(u.tipo_usuario||"teste").toLowerCase(),a=u.ativo===true;return `<tr><td class="nome">${escaparHtml(u.nome||"Sem nome")}</td><td class="email">${escaparHtml(u.email||"—")}</td><td><span class="tipo ${t==="master"?"master":""}">${escaparHtml(t)}</span></td><td><span class="status ${a?"ativo":"pendente"}">${a?"Ativo":"Pendente"}</span></td><td class="data">${formatarData(u.created_at)}</td><td class="data">${formatarData(u.ultimo_login)}</td><td class="data">${formatarData(u.aprovado_em)}</td></tr>`}).join("")}
-async function carregarUsuarios(){elementos.btnAtualizarUsuarios.disabled=true;definirEstado(elementos.estadoUsuarios,"Carregando usuários...");try{if(!await validarSessao())return;const{data,error}=await supabase.rpc("sar_admin_listar_usuarios");if(error)throw new Error(error.message||"Acesso administrativo não autorizado.");renderizarUsuarios(data||[]);ocultarEstado(elementos.estadoUsuarios)}catch(error){elementos.corpoUsuarios.innerHTML='<tr><td class="vazio" colspan="7">Não foi possível carregar os usuários.</td></tr>';definirEstado(elementos.estadoUsuarios,error instanceof Error?error.message:String(error),true)}finally{elementos.btnAtualizarUsuarios.disabled=false}}
-function renderizarSite(cs){if(!cs.length){elementos.editorSite.innerHTML='<div class="placeholder">Nenhum conteúdo cadastrado.</div>';return}elementos.editorSite.innerHTML=cs.map(i=>`<article class="conteudo-card" data-id="${i.id}"><h3>${escaparHtml(i.chave)}</h3><small>Registro editável da página comercial</small><div class="form-grid"><div class="campo full"><label>Título</label><input data-campo="titulo" value="${escaparHtml(i.titulo||"")}"></div><div class="campo full"><label>Texto</label><textarea data-campo="texto">${escaparHtml(i.texto||"")}</textarea></div><div class="campo"><label>Link</label><input data-campo="link" value="${escaparHtml(i.link||"")}"></div><div class="campo"><label>Ordem</label><input data-campo="ordem" type="number" value="${Number(i.ordem||0)}"></div><div class="campo"><label><input data-campo="ativo" type="checkbox" ${i.ativo?"checked":""}> Conteúdo ativo</label></div></div><div class="linha-acoes"><button class="btn primary" type="button" data-salvar="${i.id}">Salvar</button></div></article>`).join("");elementos.editorSite.querySelectorAll("[data-salvar]").forEach(b=>b.addEventListener("click",()=>salvarConteudoSite(b.dataset.salvar)))}
-async function carregarSite(){elementos.btnAtualizarSite.disabled=true;definirEstado(elementos.estadoSite,"Carregando conteúdo do site...");try{if(!await validarSessao())return;const{data,error}=await supabase.rpc("sar_admin_listar_site_conteudo");if(error)throw new Error(error.message||"Não foi possível carregar o conteúdo.");renderizarSite(data||[]);ocultarEstado(elementos.estadoSite)}catch(error){elementos.editorSite.innerHTML='<div class="placeholder">Não foi possível carregar o conteúdo.</div>';definirEstado(elementos.estadoSite,error instanceof Error?error.message:String(error),true)}finally{elementos.btnAtualizarSite.disabled=false}}
-async function salvarConteudoSite(id){const card=elementos.editorSite.querySelector(`[data-id="${id}"]`);if(!card)return;const botao=card.querySelector("[data-salvar]");botao.disabled=true;botao.textContent="Salvando...";try{const titulo=card.querySelector('[data-campo="titulo"]').value.trim(),texto=card.querySelector('[data-campo="texto"]').value.trim(),link=card.querySelector('[data-campo="link"]').value.trim(),ordem=Number(card.querySelector('[data-campo="ordem"]').value||0),ativo=card.querySelector('[data-campo="ativo"]').checked;const{error}=await supabase.rpc("sar_admin_atualizar_site_conteudo",{p_id:id,p_titulo:titulo||null,p_texto:texto||null,p_link:link||null,p_ordem:ordem,p_ativo:ativo});if(error)throw new Error(error.message||"Não foi possível salvar.");definirEstado(elementos.estadoSite,"Conteúdo salvo com sucesso.");setTimeout(()=>ocultarEstado(elementos.estadoSite),2200)}catch(error){definirEstado(elementos.estadoSite,error instanceof Error?error.message:String(error),true)}finally{botao.disabled=false;botao.textContent="Salvar"}}
-elementos.btnAtualizarUsuarios.addEventListener("click",carregarUsuarios);elementos.btnAtualizarSite.addEventListener("click",carregarSite);carregarUsuarios();
-</script>
+  </main>
+
+  <div id="drawerOverlay" class="drawer-overlay" aria-hidden="true">
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitulo">
+      <div class="drawer-topo">
+        <div>
+          <h2 id="drawerTitulo">Editar usuário</h2>
+          <p>Defina o tipo e o status de acesso à plataforma.</p>
+        </div>
+        <button id="btnFecharDrawer" class="drawer-fechar" type="button" aria-label="Fechar">×</button>
+      </div>
+
+      <div class="identidade">
+        <strong id="drawerNome">—</strong>
+        <span id="drawerEmail">—</span>
+      </div>
+
+      <div class="campo">
+        <label for="drawerTipo">Tipo de usuário</label>
+        <select id="drawerTipo">
+          <option value="teste">Teste</option>
+          <option value="cliente">Cliente</option>
+          <option value="funcionario">Funcionário</option>
+          <option value="gestor">Gestor</option>
+          <option value="master">Master</option>
+        </select>
+      </div>
+
+      <div class="switch-row">
+        <div>
+          <strong>Conta ativa</strong>
+          <small>Usuários inativos permanecem bloqueados no acesso.</small>
+        </div>
+        <input id="drawerAtivo" type="checkbox">
+      </div>
+
+      <div id="estadoEdicao" class="estado"></div>
+
+      <div class="drawer-acoes">
+        <button id="btnCancelarEdicao" class="btn" type="button">Cancelar</button>
+        <button id="btnSalvarUsuario" class="btn primary" type="button">Salvar alterações</button>
+      </div>
+    </aside>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL = "https://bjtxbpmrmhfvpmdsthxr.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
+
+    let usuariosCache = [];
+    let usuarioEdicao = null;
+
+    const elementos = {
+      botoesNav: document.querySelectorAll("[data-painel]"),
+      paineis: document.querySelectorAll(".painel"),
+
+      btnAtualizarUsuarios: document.getElementById("btnAtualizarUsuarios"),
+      estadoUsuarios: document.getElementById("estadoUsuarios"),
+      corpoUsuarios: document.getElementById("corpoUsuarios"),
+      totalUsuarios: document.getElementById("totalUsuarios"),
+      totalAtivos: document.getElementById("totalAtivos"),
+      totalPendentes: document.getElementById("totalPendentes"),
+      totalMasters: document.getElementById("totalMasters"),
+
+      btnAtualizarSite: document.getElementById("btnAtualizarSite"),
+      estadoSite: document.getElementById("estadoSite"),
+      editorSite: document.getElementById("editorSite"),
+
+      drawerOverlay: document.getElementById("drawerOverlay"),
+      drawerNome: document.getElementById("drawerNome"),
+      drawerEmail: document.getElementById("drawerEmail"),
+      drawerTipo: document.getElementById("drawerTipo"),
+      drawerAtivo: document.getElementById("drawerAtivo"),
+      estadoEdicao: document.getElementById("estadoEdicao"),
+      btnFecharDrawer: document.getElementById("btnFecharDrawer"),
+      btnCancelarEdicao: document.getElementById("btnCancelarEdicao"),
+      btnSalvarUsuario: document.getElementById("btnSalvarUsuario")
+    };
+
+    function escaparHtml(valor){
+      return String(valor ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function formatarData(valor){
+      if(!valor) return "—";
+
+      const data = new Date(valor);
+
+      if(Number.isNaN(data.getTime())){
+        return "—";
+      }
+
+      return new Intl.DateTimeFormat("pt-BR", {
+        dateStyle:"short",
+        timeStyle:"short"
+      }).format(data);
+    }
+
+    function definirEstado(elemento, mensagem, erro = false){
+      elemento.textContent = mensagem;
+      elemento.classList.add("visivel");
+      elemento.classList.toggle("erro", erro);
+    }
+
+    function ocultarEstado(elemento){
+      elemento.classList.remove("visivel","erro");
+    }
+
+    async function validarSessao(){
+      const { data, error } = await supabase.auth.getSession();
+
+      if(error){
+        throw new Error(`Falha ao verificar sessão: ${error.message}`);
+      }
+
+      if(!data.session?.user){
+        window.top.location.replace("acesso.html");
+        return false;
+      }
+
+      return true;
+    }
+
+    function abrirPainel(nome){
+      elementos.botoesNav.forEach((botao) => {
+        botao.classList.toggle("ativo", botao.dataset.painel === nome);
+      });
+
+      elementos.paineis.forEach((painel) => {
+        painel.classList.toggle("ativo", painel.id === `painel-${nome}`);
+      });
+
+      if(nome === "usuarios"){
+        carregarUsuarios();
+      }
+
+      if(nome === "site"){
+        carregarSite();
+      }
+    }
+
+    elementos.botoesNav.forEach((botao) => {
+      botao.addEventListener("click", () => abrirPainel(botao.dataset.painel));
+    });
+
+    function atualizarResumoUsuarios(usuarios){
+      elementos.totalUsuarios.textContent = usuarios.length;
+      elementos.totalAtivos.textContent = usuarios.filter((u) => u.ativo === true).length;
+      elementos.totalPendentes.textContent = usuarios.filter((u) => u.ativo !== true).length;
+      elementos.totalMasters.textContent = usuarios.filter(
+        (u) => String(u.tipo_usuario || "").toLowerCase() === "master"
+      ).length;
+    }
+
+    function renderizarUsuarios(usuarios){
+      atualizarResumoUsuarios(usuarios);
+
+      if(!usuarios.length){
+        elementos.corpoUsuarios.innerHTML =
+          '<tr><td class="vazio" colspan="8">Nenhum usuário cadastrado.</td></tr>';
+        return;
+      }
+
+      elementos.corpoUsuarios.innerHTML = usuarios.map((usuario) => {
+        const tipo = String(usuario.tipo_usuario || "teste").toLowerCase();
+        const ativo = usuario.ativo === true;
+
+        return `
+          <tr>
+            <td class="nome">${escaparHtml(usuario.nome || "Sem nome")}</td>
+            <td class="email">${escaparHtml(usuario.email || "—")}</td>
+            <td>
+              <span class="tipo ${tipo === "master" ? "master" : ""}">
+                ${escaparHtml(tipo)}
+              </span>
+            </td>
+            <td>
+              <span class="status ${ativo ? "ativo" : "pendente"}">
+                ${ativo ? "Ativo" : "Pendente"}
+              </span>
+            </td>
+            <td class="data">${formatarData(usuario.created_at)}</td>
+            <td class="data">${formatarData(usuario.ultimo_login)}</td>
+            <td class="data">${formatarData(usuario.aprovado_em)}</td>
+            <td>
+              <button
+                class="btn"
+                type="button"
+                data-editar-usuario="${usuario.id}"
+              >
+                Editar
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      elementos.corpoUsuarios
+        .querySelectorAll("[data-editar-usuario]")
+        .forEach((botao) => {
+          botao.addEventListener("click", () => abrirEdicaoUsuario(botao.dataset.editarUsuario));
+        });
+    }
+
+    async function carregarUsuarios(){
+      elementos.btnAtualizarUsuarios.disabled = true;
+      definirEstado(elementos.estadoUsuarios,"Carregando usuários...");
+
+      try{
+        if(!await validarSessao()) return;
+
+        const { data, error } = await supabase.rpc("sar_admin_listar_usuarios");
+
+        if(error){
+          throw new Error(error.message || "Acesso administrativo não autorizado.");
+        }
+
+        usuariosCache = data || [];
+        renderizarUsuarios(usuariosCache);
+        ocultarEstado(elementos.estadoUsuarios);
+
+      }catch(error){
+        elementos.corpoUsuarios.innerHTML =
+          '<tr><td class="vazio" colspan="8">Não foi possível carregar os usuários.</td></tr>';
+
+        definirEstado(
+          elementos.estadoUsuarios,
+          error instanceof Error ? error.message : String(error),
+          true
+        );
+      }finally{
+        elementos.btnAtualizarUsuarios.disabled = false;
+      }
+    }
+
+    function abrirEdicaoUsuario(id){
+      usuarioEdicao = usuariosCache.find((usuario) => usuario.id === id) || null;
+
+      if(!usuarioEdicao){
+        return;
+      }
+
+      elementos.drawerNome.textContent = usuarioEdicao.nome || "Sem nome";
+      elementos.drawerEmail.textContent = usuarioEdicao.email || "—";
+      elementos.drawerTipo.value = String(usuarioEdicao.tipo_usuario || "teste").toLowerCase();
+      elementos.drawerAtivo.checked = usuarioEdicao.ativo === true;
+
+      ocultarEstado(elementos.estadoEdicao);
+      elementos.drawerOverlay.classList.add("aberto");
+      elementos.drawerOverlay.setAttribute("aria-hidden","false");
+    }
+
+    function fecharEdicaoUsuario(){
+      usuarioEdicao = null;
+      elementos.drawerOverlay.classList.remove("aberto");
+      elementos.drawerOverlay.setAttribute("aria-hidden","true");
+      ocultarEstado(elementos.estadoEdicao);
+    }
+
+    async function salvarUsuario(){
+      if(!usuarioEdicao){
+        return;
+      }
+
+      elementos.btnSalvarUsuario.disabled = true;
+      elementos.btnSalvarUsuario.textContent = "Salvando...";
+      definirEstado(elementos.estadoEdicao,"Salvando alterações...");
+
+      try{
+        const { data, error } = await supabase.rpc(
+          "sar_admin_atualizar_usuario",
+          {
+            p_usuario_id: usuarioEdicao.id,
+            p_tipo_usuario: elementos.drawerTipo.value,
+            p_ativo: elementos.drawerAtivo.checked
+          }
+        );
+
+        if(error){
+          throw new Error(error.message || "Não foi possível atualizar o usuário.");
+        }
+
+        definirEstado(elementos.estadoEdicao,"Usuário atualizado com sucesso.");
+
+        await carregarUsuarios();
+
+        setTimeout(() => {
+          fecharEdicaoUsuario();
+        }, 700);
+
+      }catch(error){
+        definirEstado(
+          elementos.estadoEdicao,
+          error instanceof Error ? error.message : String(error),
+          true
+        );
+      }finally{
+        elementos.btnSalvarUsuario.disabled = false;
+        elementos.btnSalvarUsuario.textContent = "Salvar alterações";
+      }
+    }
+
+    function renderizarSite(conteudos){
+      if(!conteudos.length){
+        elementos.editorSite.innerHTML =
+          '<div class="placeholder">Nenhum conteúdo cadastrado.</div>';
+        return;
+      }
+
+      elementos.editorSite.innerHTML = conteudos.map((item) => `
+        <article class="conteudo-card" data-id="${item.id}">
+          <h3>${escaparHtml(item.chave)}</h3>
+          <small>Registro editável da página comercial</small>
+
+          <div class="form-grid">
+            <div class="campo full">
+              <label>Título</label>
+              <input data-campo="titulo" value="${escaparHtml(item.titulo || "")}">
+            </div>
+
+            <div class="campo full">
+              <label>Texto</label>
+              <textarea data-campo="texto">${escaparHtml(item.texto || "")}</textarea>
+            </div>
+
+            <div class="campo">
+              <label>Link</label>
+              <input data-campo="link" value="${escaparHtml(item.link || "")}">
+            </div>
+
+            <div class="campo">
+              <label>Ordem</label>
+              <input data-campo="ordem" type="number" value="${Number(item.ordem || 0)}">
+            </div>
+
+            <div class="campo">
+              <label>
+                <input data-campo="ativo" type="checkbox" ${item.ativo ? "checked" : ""}>
+                Conteúdo ativo
+              </label>
+            </div>
+          </div>
+
+          <div class="linha-acoes">
+            <button class="btn primary" type="button" data-salvar="${item.id}">
+              Salvar
+            </button>
+          </div>
+        </article>
+      `).join("");
+
+      elementos.editorSite.querySelectorAll("[data-salvar]").forEach((botao) => {
+        botao.addEventListener("click", () => salvarConteudoSite(botao.dataset.salvar));
+      });
+    }
+
+    async function carregarSite(){
+      elementos.btnAtualizarSite.disabled = true;
+      definirEstado(elementos.estadoSite,"Carregando conteúdo do site...");
+
+      try{
+        if(!await validarSessao()) return;
+
+        const { data, error } = await supabase.rpc("sar_admin_listar_site_conteudo");
+
+        if(error){
+          throw new Error(error.message || "Não foi possível carregar o conteúdo.");
+        }
+
+        renderizarSite(data || []);
+        ocultarEstado(elementos.estadoSite);
+
+      }catch(error){
+        elementos.editorSite.innerHTML =
+          '<div class="placeholder">Não foi possível carregar o conteúdo.</div>';
+
+        definirEstado(
+          elementos.estadoSite,
+          error instanceof Error ? error.message : String(error),
+          true
+        );
+      }finally{
+        elementos.btnAtualizarSite.disabled = false;
+      }
+    }
+
+    async function salvarConteudoSite(id){
+      const card = elementos.editorSite.querySelector(`[data-id="${id}"]`);
+
+      if(!card) return;
+
+      const botao = card.querySelector("[data-salvar]");
+      botao.disabled = true;
+      botao.textContent = "Salvando...";
+
+      try{
+        const titulo = card.querySelector('[data-campo="titulo"]').value.trim();
+        const texto = card.querySelector('[data-campo="texto"]').value.trim();
+        const link = card.querySelector('[data-campo="link"]').value.trim();
+        const ordem = Number(card.querySelector('[data-campo="ordem"]').value || 0);
+        const ativo = card.querySelector('[data-campo="ativo"]').checked;
+
+        const { error } = await supabase.rpc(
+          "sar_admin_atualizar_site_conteudo",
+          {
+            p_id:id,
+            p_titulo:titulo || null,
+            p_texto:texto || null,
+            p_link:link || null,
+            p_ordem:ordem,
+            p_ativo:ativo
+          }
+        );
+
+        if(error){
+          throw new Error(error.message || "Não foi possível salvar.");
+        }
+
+        definirEstado(elementos.estadoSite,"Conteúdo salvo com sucesso.");
+        setTimeout(() => ocultarEstado(elementos.estadoSite),2200);
+
+      }catch(error){
+        definirEstado(
+          elementos.estadoSite,
+          error instanceof Error ? error.message : String(error),
+          true
+        );
+      }finally{
+        botao.disabled = false;
+        botao.textContent = "Salvar";
+      }
+    }
+
+    elementos.btnAtualizarUsuarios.addEventListener("click",carregarUsuarios);
+    elementos.btnAtualizarSite.addEventListener("click",carregarSite);
+    elementos.btnFecharDrawer.addEventListener("click",fecharEdicaoUsuario);
+    elementos.btnCancelarEdicao.addEventListener("click",fecharEdicaoUsuario);
+    elementos.btnSalvarUsuario.addEventListener("click",salvarUsuario);
+
+    elementos.drawerOverlay.addEventListener("click",(event) => {
+      if(event.target === elementos.drawerOverlay){
+        fecharEdicaoUsuario();
+      }
+    });
+
+    carregarUsuarios();
+  </script>
 </body>
 </html>
