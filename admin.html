@@ -637,6 +637,84 @@
       margin-top:22px;
     }
 
+
+    .conhecimento-toolbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .conhecimento-lista{
+      display:grid;
+      gap:12px;
+    }
+
+    .conhecimento-item{
+      padding:18px;
+      border:1px solid var(--linha);
+      border-radius:11px;
+      background:#fff;
+    }
+
+    .conhecimento-item-topo{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+    }
+
+    .conhecimento-item h3{
+      color:var(--sar);
+      font-size:17px;
+      line-height:1.35;
+    }
+
+    .conhecimento-item p{
+      margin-top:8px;
+      color:#566666;
+      line-height:1.6;
+      white-space:pre-wrap;
+    }
+
+    .conhecimento-meta{
+      display:block;
+      margin-top:10px;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .conhecimento-acoes{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      flex:0 0 auto;
+    }
+
+    .editor-conhecimento{
+      display:none;
+      margin-bottom:18px;
+      padding:18px;
+      border:1px solid var(--linha);
+      border-radius:11px;
+      background:#fff;
+    }
+
+    .editor-conhecimento.aberto{
+      display:block;
+    }
+
+    .editor-conhecimento h2{
+      color:var(--sar);
+      font-size:20px;
+      margin-bottom:14px;
+    }
+
+    .editor-conhecimento textarea{
+      min-height:320px;
+    }
+
     @media(max-width:900px){
       .admin{grid-template-columns:1fr}
       .admin-sidebar{border-right:0;border-bottom:1px solid var(--linha)}
@@ -662,6 +740,7 @@
         <button data-painel="modulos">📦 Módulos</button>
         <button data-painel="permissoes">🔐 Permissões</button>
         <button data-painel="logs">📊 Logs</button>
+        <button data-painel="conhecimento">📚 Central de Conhecimento</button>
         <button data-painel="configuracoes">⚙️ Configurações</button>
       </nav>
     </aside>
@@ -766,6 +845,70 @@
           </div>
         </header>
         <div class="placeholder">Tela de logs em desenvolvimento.</div>
+      </section>
+
+
+      <section id="painel-conhecimento" class="painel">
+        <header class="cabecalho">
+          <div>
+            <h1>Central de Conhecimento</h1>
+            <p class="subtitulo">
+              Documentação oficial, padrões e orientações internas do SAR.
+            </p>
+          </div>
+
+          <div class="acoes">
+            <button id="btnAtualizarConhecimento" class="btn" type="button">
+              Atualizar
+            </button>
+            <button id="btnNovoConhecimento" class="btn primary" type="button">
+              + Novo conteúdo
+            </button>
+          </div>
+        </header>
+
+        <div id="estadoConhecimento" class="estado">
+          Abra esta seção para carregar os conteúdos.
+        </div>
+
+        <section id="editorConhecimento" class="editor-conhecimento">
+          <h2 id="tituloEditorConhecimento">Novo conteúdo</h2>
+
+          <div class="form-grid">
+            <div class="campo full">
+              <label for="conhecimentoTitulo">Título</label>
+              <input
+                id="conhecimentoTitulo"
+                type="text"
+                maxlength="180"
+                placeholder="Ex.: Padrão de Desenvolvimento do SAR"
+              >
+            </div>
+
+            <div class="campo full">
+              <label for="conhecimentoTexto">Texto</label>
+              <textarea
+                id="conhecimentoTexto"
+                placeholder="Digite o conteúdo..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="linha-acoes">
+            <button id="btnCancelarConhecimento" class="btn" type="button">
+              Cancelar
+            </button>
+            <button id="btnSalvarConhecimento" class="btn primary" type="button">
+              Salvar conteúdo
+            </button>
+          </div>
+        </section>
+
+        <div id="listaConhecimento" class="conhecimento-lista">
+          <div class="placeholder">
+            Clique em “Atualizar” para carregar os conteúdos.
+          </div>
+        </div>
       </section>
 
       <section id="painel-configuracoes" class="painel">
@@ -878,6 +1021,9 @@
     let usuarioEdicao = null;
     let permissoesEdicao = [];
 
+    let conhecimentoCache = [];
+    let conhecimentoEdicaoId = null;
+
     const elementos = {
       botoesNav: document.querySelectorAll("[data-painel]"),
       paineis: document.querySelectorAll(".painel"),
@@ -893,6 +1039,17 @@
       btnAtualizarSite: document.getElementById("btnAtualizarSite"),
       estadoSite: document.getElementById("estadoSite"),
       editorSite: document.getElementById("editorSite"),
+
+      btnAtualizarConhecimento: document.getElementById("btnAtualizarConhecimento"),
+      btnNovoConhecimento: document.getElementById("btnNovoConhecimento"),
+      estadoConhecimento: document.getElementById("estadoConhecimento"),
+      editorConhecimento: document.getElementById("editorConhecimento"),
+      tituloEditorConhecimento: document.getElementById("tituloEditorConhecimento"),
+      conhecimentoTitulo: document.getElementById("conhecimentoTitulo"),
+      conhecimentoTexto: document.getElementById("conhecimentoTexto"),
+      btnCancelarConhecimento: document.getElementById("btnCancelarConhecimento"),
+      btnSalvarConhecimento: document.getElementById("btnSalvarConhecimento"),
+      listaConhecimento: document.getElementById("listaConhecimento"),
 
       drawerOverlay: document.getElementById("drawerOverlay"),
       drawerNome: document.getElementById("drawerNome"),
@@ -970,6 +1127,10 @@
 
       if(nome === "site"){
         carregarSite();
+      }
+
+      if(nome === "conhecimento"){
+        carregarConhecimento();
       }
     }
 
@@ -1470,8 +1631,240 @@
       }
     }
 
+
+    function abrirEditorConhecimento(item = null){
+      conhecimentoEdicaoId = item?.id || null;
+
+      elementos.tituloEditorConhecimento.textContent =
+        conhecimentoEdicaoId ? "Editar conteúdo" : "Novo conteúdo";
+
+      elementos.conhecimentoTitulo.value = item?.titulo || "";
+      elementos.conhecimentoTexto.value = item?.conteudo || "";
+      elementos.editorConhecimento.classList.add("aberto");
+      elementos.conhecimentoTitulo.focus();
+    }
+
+    function fecharEditorConhecimento(){
+      conhecimentoEdicaoId = null;
+      elementos.conhecimentoTitulo.value = "";
+      elementos.conhecimentoTexto.value = "";
+      elementos.editorConhecimento.classList.remove("aberto");
+    }
+
+    function renderizarConhecimento(itens){
+      if(!itens.length){
+        elementos.listaConhecimento.innerHTML =
+          '<div class="placeholder">Nenhum conteúdo cadastrado.</div>';
+        return;
+      }
+
+      elementos.listaConhecimento.innerHTML = itens.map((item) => `
+        <article class="conhecimento-item">
+          <div class="conhecimento-item-topo">
+            <div>
+              <h3>${escaparHtml(item.titulo || "Sem título")}</h3>
+              <p>${escaparHtml(item.conteudo || "")}</p>
+              <span class="conhecimento-meta">
+                Atualizado em ${formatarData(item.atualizado_em)}
+              </span>
+            </div>
+
+            <div class="conhecimento-acoes">
+              <button
+                class="btn"
+                type="button"
+                data-editar-conhecimento="${item.id}"
+              >
+                Editar
+              </button>
+
+              <button
+                class="btn danger"
+                type="button"
+                data-inativar-conhecimento="${item.id}"
+              >
+                Inativar
+              </button>
+            </div>
+          </div>
+        </article>
+      `).join("");
+
+      elementos.listaConhecimento
+        .querySelectorAll("[data-editar-conhecimento]")
+        .forEach((botao) => {
+          botao.addEventListener("click", () => {
+            const item = conhecimentoCache.find(
+              (registro) => registro.id === botao.dataset.editarConhecimento
+            );
+
+            if(item){
+              abrirEditorConhecimento(item);
+            }
+          });
+        });
+
+      elementos.listaConhecimento
+        .querySelectorAll("[data-inativar-conhecimento]")
+        .forEach((botao) => {
+          botao.addEventListener("click", () => {
+            inativarConhecimento(botao.dataset.inativarConhecimento);
+          });
+        });
+    }
+
+    async function carregarConhecimento(){
+      elementos.btnAtualizarConhecimento.disabled = true;
+      definirEstado(
+        elementos.estadoConhecimento,
+        "Carregando conteúdos..."
+      );
+
+      try{
+        if(!await validarSessao()) return;
+
+        const { data, error } = await supabase.rpc(
+          "sar_admin_listar_base_conhecimento"
+        );
+
+        if(error){
+          throw new Error(
+            error.message ||
+            "Não foi possível carregar a Central de Conhecimento."
+          );
+        }
+
+        conhecimentoCache = data || [];
+        renderizarConhecimento(conhecimentoCache);
+        ocultarEstado(elementos.estadoConhecimento);
+
+      }catch(error){
+        elementos.listaConhecimento.innerHTML =
+          '<div class="placeholder">Não foi possível carregar os conteúdos.</div>';
+
+        definirEstado(
+          elementos.estadoConhecimento,
+          error instanceof Error ? error.message : String(error),
+          true
+        );
+      }finally{
+        elementos.btnAtualizarConhecimento.disabled = false;
+      }
+    }
+
+    async function salvarConhecimento(){
+      const titulo = elementos.conhecimentoTitulo.value.trim();
+      const conteudo = elementos.conhecimentoTexto.value.trim();
+
+      if(!titulo){
+        definirEstado(
+          elementos.estadoConhecimento,
+          "Informe o título.",
+          true
+        );
+        elementos.conhecimentoTitulo.focus();
+        return;
+      }
+
+      if(!conteudo){
+        definirEstado(
+          elementos.estadoConhecimento,
+          "Informe o texto.",
+          true
+        );
+        elementos.conhecimentoTexto.focus();
+        return;
+      }
+
+      elementos.btnSalvarConhecimento.disabled = true;
+      elementos.btnSalvarConhecimento.textContent = "Salvando...";
+
+      try{
+        const { error } = await supabase.rpc(
+          "sar_admin_salvar_base_conhecimento",
+          {
+            p_id: conhecimentoEdicaoId,
+            p_titulo: titulo,
+            p_conteudo: conteudo
+          }
+        );
+
+        if(error){
+          throw new Error(
+            error.message || "Não foi possível salvar o conteúdo."
+          );
+        }
+
+        fecharEditorConhecimento();
+
+        definirEstado(
+          elementos.estadoConhecimento,
+          "Conteúdo salvo com sucesso."
+        );
+
+        await carregarConhecimento();
+
+      }catch(error){
+        definirEstado(
+          elementos.estadoConhecimento,
+          error instanceof Error ? error.message : String(error),
+          true
+        );
+      }finally{
+        elementos.btnSalvarConhecimento.disabled = false;
+        elementos.btnSalvarConhecimento.textContent = "Salvar conteúdo";
+      }
+    }
+
+    async function inativarConhecimento(id){
+      const item = conhecimentoCache.find(
+        (registro) => registro.id === id
+      );
+
+      if(!item) return;
+
+      const confirmar = window.confirm(
+        `Inativar o conteúdo "${item.titulo}"?`
+      );
+
+      if(!confirmar) return;
+
+      try{
+        const { error } = await supabase.rpc(
+          "sar_admin_inativar_base_conhecimento",
+          {
+            p_id:id
+          }
+        );
+
+        if(error){
+          throw new Error(
+            error.message || "Não foi possível inativar o conteúdo."
+          );
+        }
+
+        definirEstado(
+          elementos.estadoConhecimento,
+          "Conteúdo inativado com sucesso."
+        );
+
+        await carregarConhecimento();
+
+      }catch(error){
+        definirEstado(
+          elementos.estadoConhecimento,
+          error instanceof Error ? error.message : String(error),
+          true
+        );
+      }
+    }
+
     elementos.btnAtualizarUsuarios.addEventListener("click",carregarUsuarios);
     elementos.btnAtualizarSite.addEventListener("click",carregarSite);
+    elementos.btnAtualizarConhecimento.addEventListener("click",carregarConhecimento);
+    elementos.btnNovoConhecimento.addEventListener("click",() => abrirEditorConhecimento());
+    elementos.btnCancelarConhecimento.addEventListener("click",fecharEditorConhecimento);
+    elementos.btnSalvarConhecimento.addEventListener("click",salvarConhecimento);
     elementos.btnFecharDrawer.addEventListener("click",fecharEdicaoUsuario);
     elementos.btnCancelarEdicao.addEventListener("click",fecharEdicaoUsuario);
     elementos.btnSalvarUsuario.addEventListener("click",salvarUsuario);
