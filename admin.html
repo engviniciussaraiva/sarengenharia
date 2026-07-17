@@ -529,10 +529,50 @@
     }
 
     .permissao-card{
+      --nivel:0;
+      position:relative;
+      margin-left:calc(var(--nivel) * 22px);
       padding:13px;
       border:1px solid var(--linha);
       border-radius:9px;
       background:#fbfcfc;
+    }
+
+    .permissao-card.nivel-0{
+      border-color:#cdd9d9;
+      background:#f8fafa;
+    }
+
+    .permissao-card.nivel-1{
+      background:#fcfdfd;
+    }
+
+    .permissao-card.nivel-2{
+      background:#fff;
+    }
+
+    .permissao-card.nivel-1::before,
+    .permissao-card.nivel-2::before{
+      content:"";
+      position:absolute;
+      left:-13px;
+      top:-11px;
+      width:10px;
+      height:34px;
+      border-left:1px solid #cfd8d8;
+      border-bottom:1px solid #cfd8d8;
+      border-bottom-left-radius:6px;
+    }
+
+    .permissao-nivel{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      margin-top:4px;
+      color:var(--muted);
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:.35px;
     }
 
     .permissao-modulo{
@@ -1030,10 +1070,12 @@
     function normalizarPermissao(item){
       return {
         modulo_id:item.modulo_id,
+        modulo_pai:item.modulo_pai || null,
         codigo:item.codigo,
         modulo:item.modulo,
         icone:item.icone,
         ordem_menu:item.ordem_menu,
+        nivel:Number(item.nivel || 0),
         visualizar:item.visualizar === true,
         editar:item.editar === true,
         excluir:item.excluir === true,
@@ -1057,6 +1099,54 @@
       permissao.administrar = liberado;
     }
 
+    function obterDescendentes(moduloId){
+      const encontrados = [];
+      const fila = [moduloId];
+
+      while(fila.length){
+        const paiAtual = fila.shift();
+
+        permissoesEdicao.forEach((item) => {
+          if(item.modulo_pai === paiAtual){
+            encontrados.push(item);
+            fila.push(item.modulo_id);
+          }
+        });
+      }
+
+      return encontrados;
+    }
+
+    function liberarItemEFilhos(permissao, liberado){
+      definirModuloLiberado(permissao,liberado);
+
+      obterDescendentes(permissao.modulo_id)
+        .forEach((filho) => definirModuloLiberado(filho,liberado));
+    }
+
+    function garantirPaisLiberados(permissao){
+      let paiId = permissao.modulo_pai;
+
+      while(paiId){
+        const pai = permissoesEdicao.find(
+          (item) => item.modulo_id === paiId
+        );
+
+        if(!pai){
+          break;
+        }
+
+        definirModuloLiberado(pai,true);
+        paiId = pai.modulo_pai;
+      }
+    }
+
+    function rotuloNivel(nivel){
+      if(nivel === 0) return "Módulo principal";
+      if(nivel === 1) return "Aba";
+      return "Ferramenta";
+    }
+
     function renderizarPermissoes(){
       if(!permissoesEdicao.length){
         elementos.listaPermissoes.innerHTML =
@@ -1066,13 +1156,22 @@
 
       elementos.listaPermissoes.innerHTML = permissoesEdicao.map((item,index) => {
         const liberado = permissaoEstaLiberada(item);
+        const nivel = Math.max(0,Number(item.nivel || 0));
 
         return `
-          <article class="permissao-card" data-indice-permissao="${index}">
+          <article
+            class="permissao-card nivel-${Math.min(nivel,2)}"
+            data-indice-permissao="${index}"
+            style="--nivel:${nivel}"
+          >
             <div class="permissao-modulo">
               <div>
                 <strong>${escaparHtml(item.modulo || item.codigo)}</strong>
                 <small>${escaparHtml(item.codigo || "")}</small>
+
+                <span class="permissao-nivel">
+                  ${rotuloNivel(nivel)}
+                </span>
               </div>
 
               <div class="permissoes-grid">
@@ -1097,8 +1196,18 @@
             const card = input.closest("[data-indice-permissao]");
             const indice = Number(card.dataset.indicePermissao);
             const permissao = permissoesEdicao[indice];
+            const liberado = input.checked;
 
-            definirModuloLiberado(permissao,input.checked);
+            /*
+              Ao liberar um filho, os pais são liberados.
+              Ao alterar um pai, todos os descendentes seguem a mesma opção.
+            */
+            liberarItemEFilhos(permissao,liberado);
+
+            if(liberado){
+              garantirPaisLiberados(permissao);
+            }
+
             renderizarPermissoes();
           });
         });
