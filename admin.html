@@ -491,6 +491,34 @@
       line-height:1.45;
     }
 
+    .legenda-permissoes{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin:12px 0 16px;
+    }
+
+    .legenda-permissoes div{
+      padding:11px 12px;
+      border:1px solid var(--linha);
+      border-radius:8px;
+      background:#f8fafa;
+    }
+
+    .legenda-permissoes strong{
+      display:block;
+      margin-bottom:4px;
+      color:var(--sar);
+      font-size:12px;
+    }
+
+    .legenda-permissoes span{
+      display:block;
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.45;
+    }
+
     .permissoes-lista{
       display:grid;
       gap:10px;
@@ -749,6 +777,37 @@
               Visualizar libera o módulo. Editar, excluir e administrar
               dependem de visualização.
             </p>
+          </div>
+        </div>
+
+        <div class="legenda-permissoes">
+          <div>
+            <strong>Visualizar</strong>
+            <span>
+              Permite acessar o módulo e consultar seus dados e ferramentas.
+            </span>
+          </div>
+
+          <div>
+            <strong>Editar</strong>
+            <span>
+              Permite criar e alterar informações. Inclui a permissão de visualizar.
+            </span>
+          </div>
+
+          <div>
+            <strong>Excluir</strong>
+            <span>
+              Permite remover registros e dados do módulo. Inclui a permissão de visualizar.
+            </span>
+          </div>
+
+          <div>
+            <strong>Administrar</strong>
+            <span>
+              Concede controle total do módulo, incluindo visualizar, editar,
+              excluir e gerenciar configurações.
+            </span>
           </div>
         </div>
 
