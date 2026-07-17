@@ -1034,15 +1034,51 @@ if(ehAdministracao && !ehMaster){
 }
 
 
-function abrirModulo(modulo){
+function mostrarAcessoNegado(recurso){
 
-    if(modulo === "INICIO"){
-   mostrarHome();
-   return;
+    const nomeRecurso =
+        String(recurso || "este recurso")
+            .trim();
+
+    document.getElementById(
+        "tabs"
+    ).style.display = "none";
+
+    esconderSubabas();
+
+    document.getElementById(
+        "mainContent"
+    ).innerHTML = `
+        <div class="welcome">
+            <h1>Acesso não autorizado</h1>
+            <p>
+                O recurso <b>${nomeRecurso}</b>
+                não está liberado para seu usuário.
+            </p>
+        </div>
+    `;
 }
 
-esconderSubabas();
-carregarAbas(modulo);
+
+function abrirModulo(modulo){
+
+    const codigoModulo =
+        String(modulo || "")
+            .trim()
+            .toUpperCase();
+
+    if(codigoModulo === "INICIO"){
+        mostrarHome();
+        return;
+    }
+
+    if(!podeVisualizar(codigoModulo)){
+        mostrarAcessoNegado(codigoModulo);
+        return;
+    }
+
+    esconderSubabas();
+    carregarAbas(codigoModulo);
 
 
     document.getElementById("mainContent").innerHTML = `
@@ -1061,7 +1097,20 @@ carregarAbas(modulo);
 
 
 
-function abrirArquivo(arquivo){
+function abrirArquivo(arquivo, codigoRecurso = ""){
+
+    const codigoNormalizado =
+        String(codigoRecurso || "")
+            .trim()
+            .toUpperCase();
+
+    if(
+        codigoNormalizado &&
+        !podeVisualizar(codigoNormalizado)
+    ){
+        mostrarAcessoNegado(codigoNormalizado);
+        return false;
+    }
 
     document.getElementById("mainContent").innerHTML = `
 
@@ -1077,6 +1126,7 @@ function abrirArquivo(arquivo){
 
     `;
 
+    return true;
 }
 
 
@@ -1170,6 +1220,16 @@ function abrirAba(
     elementoClicado
 ){
 
+    const codigoAbaNormalizado =
+        String(codigoAba || "")
+            .trim()
+            .toUpperCase();
+
+    if(!podeVisualizar(codigoAbaNormalizado)){
+        mostrarAcessoNegado(nomeAba || codigoAbaNormalizado);
+        return;
+    }
+
     marcarAbaAtiva(elementoClicado);
 
     const possuiSubabas =
@@ -1186,7 +1246,10 @@ function abrirAba(
     esconderSubabas();
 
     if(arquivo && arquivo.trim() !== ""){
-        abrirArquivo(arquivo);
+        abrirArquivo(
+            arquivo,
+            codigoAbaNormalizado
+        );
         return;
     }
 
@@ -1284,6 +1347,9 @@ function carregarSubabas(
                     class="subtab"
                     onclick='abrirSubaba(
                         ${JSON.stringify(
+                            subaba.codigo || ""
+                        )},
+                        ${JSON.stringify(
                             subaba.arquivo || ""
                         )},
                         this
@@ -1327,7 +1393,21 @@ function carregarSubabas(
    ABRIR SUBABA
 ========================================= */
 
-function abrirSubaba(arquivo, elementoClicado){
+function abrirSubaba(
+    codigoSubaba,
+    arquivo,
+    elementoClicado
+){
+
+    const codigoNormalizado =
+        String(codigoSubaba || "")
+            .trim()
+            .toUpperCase();
+
+    if(!podeVisualizar(codigoNormalizado)){
+        mostrarAcessoNegado(codigoNormalizado);
+        return;
+    }
 
     marcarSubabaAtiva(elementoClicado);
 
@@ -1343,7 +1423,10 @@ function abrirSubaba(arquivo, elementoClicado){
         return;
     }
 
-    abrirArquivo(arquivo);
+    abrirArquivo(
+        arquivo,
+        codigoNormalizado
+    );
 }
 
 
@@ -1530,7 +1613,8 @@ if(
         esconderSubabas();
 
         abrirArquivo(
-            "admin.html"
+            "admin.html",
+            "ADMINISTRACAO"
         );
 
         return;
