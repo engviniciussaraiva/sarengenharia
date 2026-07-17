@@ -114,13 +114,23 @@
         );
     }
 
-    function estaDentroDoSistema() {
-        try {
-            return window.self !== window.top;
-        } catch (erro) {
-            return true;
-        }
+  function estaDentroDoSistema() {
+    try {
+        const estaEmIframe =
+            window.self !== window.top;
+
+        const origemPai =
+            document.referrer || "";
+
+        const veioDoSistema =
+            origemPai.includes("/sistema.html");
+
+        return estaEmIframe || veioDoSistema;
+
+    } catch (erro) {
+        return true;
     }
+}
 
     function mostrarAcessoNegado(
         codigo,
