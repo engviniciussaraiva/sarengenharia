@@ -624,6 +624,9 @@ let SAR_MENU_COMPLETO = [];
 let SAR_USUARIO_ATUAL = null;
 let SAR_CADASTRO_ATUAL = null;
 
+let SAR_PERMISSOES_ATUAIS = [];
+let SAR_PERMISSOES_POR_CODIGO = new Map();
+
 async function carregarEstruturaMenuSupabase(){
 
     const supabase = window.SARGuard?.supabase;
@@ -655,6 +658,132 @@ async function carregarEstruturaMenuSupabase(){
 
     SAR_MENU_COMPLETO = data || [];
 }
+
+
+async function carregarMinhasPermissoes(){
+
+    const supabase =
+        window.SARGuard?.supabase;
+
+    if(!supabase){
+        throw new Error(
+            "Conexão segura com o Supabase não disponível."
+        );
+    }
+
+    const { data, error } = await supabase.rpc(
+        "sar_minhas_permissoes"
+    );
+
+    if(error){
+        throw error;
+    }
+
+    SAR_PERMISSOES_ATUAIS = data || [];
+    SAR_PERMISSOES_POR_CODIGO = new Map();
+
+    SAR_PERMISSOES_ATUAIS.forEach(function(item){
+
+        const codigo =
+            String(item.codigo || "")
+                .trim()
+                .toUpperCase();
+
+        if(codigo){
+            SAR_PERMISSOES_POR_CODIGO.set(
+                codigo,
+                item
+            );
+        }
+    });
+}
+
+
+function obterPermissao(codigo){
+
+    const codigoNormalizado =
+        String(codigo || "")
+            .trim()
+            .toUpperCase();
+
+    return (
+        SAR_PERMISSOES_POR_CODIGO.get(
+            codigoNormalizado
+        ) || null
+    );
+}
+
+
+function podeVisualizar(codigo){
+
+    const codigoNormalizado =
+        String(codigo || "")
+            .trim()
+            .toUpperCase();
+
+    /*
+      A tela inicial permanece disponível
+      para qualquer usuário ativo.
+    */
+    if(codigoNormalizado === "INICIO"){
+        return true;
+    }
+
+    return (
+        obterPermissao(codigoNormalizado)
+            ?.visualizar === true
+    );
+}
+
+
+function podeEditar(codigo){
+
+    return (
+        obterPermissao(codigo)
+            ?.editar === true
+    );
+}
+
+
+function podeExcluir(codigo){
+
+    return (
+        obterPermissao(codigo)
+            ?.excluir === true
+    );
+}
+
+
+function podeAdministrar(codigo){
+
+    return (
+        obterPermissao(codigo)
+            ?.administrar === true
+    );
+}
+
+
+/*
+  API interna disponível ao sistema principal.
+  Os módulos carregados em iframe poderão receber
+  essa API por uma etapa posterior de comunicação segura.
+*/
+window.SARPermissoes = {
+
+    obter: obterPermissao,
+
+    podeVisualizar: podeVisualizar,
+
+    podeEditar: podeEditar,
+
+    podeExcluir: podeExcluir,
+
+    podeAdministrar: podeAdministrar,
+
+    listar: function(){
+        return [...SAR_PERMISSOES_ATUAIS];
+    }
+};
 
 
 
@@ -849,6 +978,10 @@ function carregarModulos(){
 
         modulos.forEach(function(item){
 
+            if(!podeVisualizar(item.codigo)){
+                return;
+            }
+
             const ehAdministracao =
     item.codigo === "ADMINISTRACAO";
 
@@ -964,7 +1097,8 @@ function carregarAbas(modulo){
 
         if(
             moduloLinha !== codigoModulo ||
-            !item.aba_id
+            !item.aba_id ||
+            !podeVisualizar(item.aba_codigo)
         ){
             return;
         }
@@ -1106,7 +1240,8 @@ function carregarSubabas(
             if(
                 moduloLinha !== moduloSelecionado ||
                 abaLinha !== abaSelecionada ||
-                !item.subaba_id
+                !item.subaba_id ||
+                !podeVisualizar(item.subaba_codigo)
             ){
                 return;
             }
@@ -1395,7 +1530,7 @@ if(
         esconderSubabas();
 
         abrirArquivo(
-            "admin.html"
+            "admin/usuarios.html"
         );
 
         return;
@@ -1628,6 +1763,8 @@ window.addEventListener(
 
             await carregarEstruturaMenuSupabase();
 
+            await carregarMinhasPermissoes();
+
             carregarModulos();
 
             await carregarMenuRodape();
@@ -1657,7 +1794,6 @@ window.addEventListener(
 
 </body>
 </html>
-
 
 
 
