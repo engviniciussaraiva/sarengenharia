@@ -1651,67 +1651,115 @@
       elementos.editorConhecimento.classList.remove("aberto");
     }
 
-    function renderizarConhecimento(itens){
-      if(!itens.length){
-        elementos.listaConhecimento.innerHTML =
-          '<div class="placeholder">Nenhum conteúdo cadastrado.</div>';
-        return;
-      }
+function renderizarConhecimento(itens){
+  if(!itens.length){
+    elementos.listaConhecimento.innerHTML =
+      '<div class="placeholder">Nenhum conteúdo cadastrado.</div>';
+    return;
+  }
 
-      elementos.listaConhecimento.innerHTML = itens.map((item) => `
-        <article class="conhecimento-item">
-          <div class="conhecimento-item-topo">
-            <div>
-              <h3>${escaparHtml(item.titulo || "Sem título")}</h3>
-              <p>${escaparHtml(item.conteudo || "")}</p>
-              <span class="conhecimento-meta">
-                Atualizado em ${formatarData(item.atualizado_em)}
-              </span>
-            </div>
+  elementos.listaConhecimento.innerHTML = itens.map((item) => `
+    <article class="conhecimento-item" data-conhecimento-item="${item.id}">
+      <div class="conhecimento-item-topo">
+        <div>
+          <h3>${escaparHtml(item.titulo || "Sem título")}</h3>
 
-            <div class="conhecimento-acoes">
-              <button
-                class="btn"
-                type="button"
-                data-editar-conhecimento="${item.id}"
-              >
-                Editar
-              </button>
+          <span class="conhecimento-meta">
+            Atualizado em ${formatarData(item.atualizado_em)}
+          </span>
+        </div>
 
-              <button
-                class="btn danger"
-                type="button"
-                data-inativar-conhecimento="${item.id}"
-              >
-                Inativar
-              </button>
-            </div>
-          </div>
-        </article>
-      `).join("");
+        <div class="conhecimento-acoes">
+          <button
+            class="btn"
+            type="button"
+            data-abrir-conhecimento="${item.id}"
+          >
+            Abrir
+          </button>
 
-      elementos.listaConhecimento
-        .querySelectorAll("[data-editar-conhecimento]")
-        .forEach((botao) => {
-          botao.addEventListener("click", () => {
-            const item = conhecimentoCache.find(
-              (registro) => registro.id === botao.dataset.editarConhecimento
-            );
+          <button
+            class="btn"
+            type="button"
+            data-editar-conhecimento="${item.id}"
+          >
+            Editar
+          </button>
 
-            if(item){
-              abrirEditorConhecimento(item);
-            }
+          <button
+            class="btn danger"
+            type="button"
+            data-inativar-conhecimento="${item.id}"
+          >
+            Inativar
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="conhecimento-conteudo"
+        data-conteudo-conhecimento="${item.id}"
+        hidden
+      >
+        ${escaparHtml(item.conteudo || "")}
+      </div>
+    </article>
+  `).join("");
+
+  elementos.listaConhecimento
+    .querySelectorAll("[data-abrir-conhecimento]")
+    .forEach((botao) => {
+      botao.addEventListener("click", () => {
+        const id = botao.dataset.abrirConhecimento;
+
+        const conteudoAtual =
+          elementos.listaConhecimento.querySelector(
+            `[data-conteudo-conhecimento="${id}"]`
+          );
+
+        const estavaAberto = !conteudoAtual.hidden;
+
+        elementos.listaConhecimento
+          .querySelectorAll("[data-conteudo-conhecimento]")
+          .forEach((conteudo) => {
+            conteudo.hidden = true;
           });
-        });
 
-      elementos.listaConhecimento
-        .querySelectorAll("[data-inativar-conhecimento]")
-        .forEach((botao) => {
-          botao.addEventListener("click", () => {
-            inativarConhecimento(botao.dataset.inativarConhecimento);
+        elementos.listaConhecimento
+          .querySelectorAll("[data-abrir-conhecimento]")
+          .forEach((outroBotao) => {
+            outroBotao.textContent = "Abrir";
           });
-        });
-    }
+
+        if(!estavaAberto){
+          conteudoAtual.hidden = false;
+          botao.textContent = "Recolher";
+        }
+      });
+    });
+
+  elementos.listaConhecimento
+    .querySelectorAll("[data-editar-conhecimento]")
+    .forEach((botao) => {
+      botao.addEventListener("click", () => {
+        const item = conhecimentoCache.find(
+          (registro) => registro.id === botao.dataset.editarConhecimento
+        );
+
+        if(item){
+          abrirEditorConhecimento(item);
+        }
+      });
+    });
+
+  elementos.listaConhecimento
+    .querySelectorAll("[data-inativar-conhecimento]")
+    .forEach((botao) => {
+      botao.addEventListener("click", () => {
+        inativarConhecimento(botao.dataset.inativarConhecimento);
+      });
+    });
+}
 
     async function carregarConhecimento(){
       elementos.btnAtualizarConhecimento.disabled = true;
