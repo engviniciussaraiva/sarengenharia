@@ -373,9 +373,13 @@
          * Ela precisa ser carregada pelo sistema.html.
          */
         if (!estaDentroDoSistema()) {
-            redirecionarParaSistema();
-            return;
-        }
+    mostrarAcessoNegado(
+        codigo,
+        "Esta ferramenta não pode ser aberta diretamente. Acesse o recurso pelo menu do SAR."
+    );
+
+    return;
+}
 
         const {
             data: permissoes,
