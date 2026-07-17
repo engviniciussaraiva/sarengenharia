@@ -505,6 +505,10 @@
       background:#f8fafa;
     }
 
+    .legenda-permissoes-simples{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
     .legenda-permissoes strong{
       display:block;
       margin-bottom:4px;
@@ -550,8 +554,9 @@
     }
 
     .permissoes-grid{
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
       gap:8px;
     }
 
@@ -774,39 +779,27 @@
           <div>
             <h3>Permissões por módulo</h3>
             <p>
-              Visualizar libera o módulo. Editar, excluir e administrar
-              dependem de visualização.
+              Libere ou bloqueie cada módulo para o usuário.
+              Ao liberar, o sistema concede acesso completo ao módulo.
             </p>
           </div>
         </div>
 
-        <div class="legenda-permissoes">
+        <div class="legenda-permissoes legenda-permissoes-simples">
           <div>
-            <strong>Visualizar</strong>
+            <strong>Liberado</strong>
             <span>
-              Permite acessar o módulo e consultar seus dados e ferramentas.
+              O usuário pode acessar e utilizar integralmente o módulo.
+              O sistema grava automaticamente visualizar, editar, excluir
+              e administrar como verdadeiros.
             </span>
           </div>
 
           <div>
-            <strong>Editar</strong>
+            <strong>Bloqueado</strong>
             <span>
-              Permite criar e alterar informações. Inclui a permissão de visualizar.
-            </span>
-          </div>
-
-          <div>
-            <strong>Excluir</strong>
-            <span>
-              Permite remover registros e dados do módulo. Inclui a permissão de visualizar.
-            </span>
-          </div>
-
-          <div>
-            <strong>Administrar</strong>
-            <span>
-              Concede controle total do módulo, incluindo visualizar, editar,
-              excluir e gerenciar configurações.
+              O módulo não aparece para o usuário e nenhuma operação é permitida.
+              As quatro permissões são gravadas como falsas.
             </span>
           </div>
         </div>
@@ -1048,31 +1041,20 @@
       };
     }
 
-    function aplicarRegrasPermissao(permissao, campoAlterado){
-      if(campoAlterado === "administrar" && permissao.administrar){
-        permissao.visualizar = true;
-        permissao.editar = true;
-        permissao.excluir = true;
-      }
+    function permissaoEstaLiberada(permissao){
+      return (
+        permissao.visualizar === true &&
+        permissao.editar === true &&
+        permissao.excluir === true &&
+        permissao.administrar === true
+      );
+    }
 
-      if(
-        (campoAlterado === "editar" && permissao.editar) ||
-        (campoAlterado === "excluir" && permissao.excluir)
-      ){
-        permissao.visualizar = true;
-      }
-
-      if(campoAlterado === "visualizar" && !permissao.visualizar){
-        permissao.editar = false;
-        permissao.excluir = false;
-        permissao.administrar = false;
-      }
-
-      if(!permissao.visualizar){
-        permissao.editar = false;
-        permissao.excluir = false;
-        permissao.administrar = false;
-      }
+    function definirModuloLiberado(permissao, liberado){
+      permissao.visualizar = liberado;
+      permissao.editar = liberado;
+      permissao.excluir = liberado;
+      permissao.administrar = liberado;
     }
 
     function renderizarPermissoes(){
@@ -1082,64 +1064,41 @@
         return;
       }
 
-      elementos.listaPermissoes.innerHTML = permissoesEdicao.map((item,index) => `
-        <article class="permissao-card" data-indice-permissao="${index}">
-          <div class="permissao-modulo">
-            <strong>${escaparHtml(item.modulo || item.codigo)}</strong>
-            <small>${escaparHtml(item.codigo || "")}</small>
-          </div>
+      elementos.listaPermissoes.innerHTML = permissoesEdicao.map((item,index) => {
+        const liberado = permissaoEstaLiberada(item);
 
-          <div class="permissoes-grid">
-            <label class="permissao-check">
-              <input
-                type="checkbox"
-                data-permissao-campo="visualizar"
-                ${item.visualizar ? "checked" : ""}
-              >
-              Visualizar
-            </label>
+        return `
+          <article class="permissao-card" data-indice-permissao="${index}">
+            <div class="permissao-modulo">
+              <div>
+                <strong>${escaparHtml(item.modulo || item.codigo)}</strong>
+                <small>${escaparHtml(item.codigo || "")}</small>
+              </div>
 
-            <label class="permissao-check">
-              <input
-                type="checkbox"
-                data-permissao-campo="editar"
-                ${item.editar ? "checked" : ""}
-              >
-              Editar
-            </label>
-
-            <label class="permissao-check">
-              <input
-                type="checkbox"
-                data-permissao-campo="excluir"
-                ${item.excluir ? "checked" : ""}
-              >
-              Excluir
-            </label>
-
-            <label class="permissao-check">
-              <input
-                type="checkbox"
-                data-permissao-campo="administrar"
-                ${item.administrar ? "checked" : ""}
-              >
-              Administrar
-            </label>
-          </div>
-        </article>
-      `).join("");
+              <div class="permissoes-grid">
+                <label class="permissao-check">
+                  <input
+                    type="checkbox"
+                    data-permissao-liberado
+                    ${liberado ? "checked" : ""}
+                  >
+                  Liberado
+                </label>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
 
       elementos.listaPermissoes
-        .querySelectorAll("[data-permissao-campo]")
+        .querySelectorAll("[data-permissao-liberado]")
         .forEach((input) => {
           input.addEventListener("change", () => {
             const card = input.closest("[data-indice-permissao]");
             const indice = Number(card.dataset.indicePermissao);
-            const campo = input.dataset.permissaoCampo;
             const permissao = permissoesEdicao[indice];
 
-            permissao[campo] = input.checked;
-            aplicarRegrasPermissao(permissao,campo);
+            definirModuloLiberado(permissao,input.checked);
             renderizarPermissoes();
           });
         });
