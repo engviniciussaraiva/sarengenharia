@@ -465,6 +465,98 @@
       height:20px;
     }
 
+    .permissoes-bloco{
+      margin-top:18px;
+      padding-top:18px;
+      border-top:1px solid var(--linha);
+    }
+
+    .permissoes-cabecalho{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:12px;
+    }
+
+    .permissoes-cabecalho h3{
+      color:var(--sar);
+      font-size:16px;
+    }
+
+    .permissoes-cabecalho p{
+      margin-top:4px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .permissoes-lista{
+      display:grid;
+      gap:10px;
+    }
+
+    .permissao-card{
+      padding:13px;
+      border:1px solid var(--linha);
+      border-radius:9px;
+      background:#fbfcfc;
+    }
+
+    .permissao-modulo{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+    }
+
+    .permissao-modulo strong{
+      color:#465858;
+      font-size:14px;
+    }
+
+    .permissao-modulo small{
+      color:var(--muted);
+      font-size:11px;
+    }
+
+    .permissoes-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:8px;
+    }
+
+    .permissao-check{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      min-height:34px;
+      padding:7px 8px;
+      border:1px solid #e7ecec;
+      border-radius:7px;
+      background:#fff;
+      color:#526262;
+      font-size:11px;
+      font-weight:700;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    .permissao-check input{
+      width:16px;
+      height:16px;
+      flex:0 0 auto;
+    }
+
+    .permissoes-carregando{
+      padding:18px;
+      border:1px dashed #c8d1d1;
+      border-radius:9px;
+      color:var(--muted);
+      text-align:center;
+    }
+
     .drawer-acoes{
       display:flex;
       justify-content:flex-end;
@@ -649,6 +741,24 @@
         <input id="drawerAtivo" type="checkbox">
       </div>
 
+      <section class="permissoes-bloco">
+        <div class="permissoes-cabecalho">
+          <div>
+            <h3>Permissões por módulo</h3>
+            <p>
+              Visualizar libera o módulo. Editar, excluir e administrar
+              dependem de visualização.
+            </p>
+          </div>
+        </div>
+
+        <div id="listaPermissoes" class="permissoes-lista">
+          <div class="permissoes-carregando">
+            Selecione um usuário para carregar as permissões.
+          </div>
+        </div>
+      </section>
+
       <div id="estadoEdicao" class="estado"></div>
 
       <div class="drawer-acoes">
@@ -674,6 +784,7 @@
 
     let usuariosCache = [];
     let usuarioEdicao = null;
+    let permissoesEdicao = [];
 
     const elementos = {
       botoesNav: document.querySelectorAll("[data-painel]"),
@@ -696,6 +807,7 @@
       drawerEmail: document.getElementById("drawerEmail"),
       drawerTipo: document.getElementById("drawerTipo"),
       drawerAtivo: document.getElementById("drawerAtivo"),
+      listaPermissoes: document.getElementById("listaPermissoes"),
       estadoEdicao: document.getElementById("estadoEdicao"),
       btnFecharDrawer: document.getElementById("btnFecharDrawer"),
       btnCancelarEdicao: document.getElementById("btnCancelarEdicao"),
@@ -863,7 +975,135 @@
       }
     }
 
-    function abrirEdicaoUsuario(id){
+    function normalizarPermissao(item){
+      return {
+        modulo_id:item.modulo_id,
+        codigo:item.codigo,
+        modulo:item.modulo,
+        icone:item.icone,
+        ordem_menu:item.ordem_menu,
+        visualizar:item.visualizar === true,
+        editar:item.editar === true,
+        excluir:item.excluir === true,
+        administrar:item.administrar === true
+      };
+    }
+
+    function aplicarRegrasPermissao(permissao, campoAlterado){
+      if(campoAlterado === "administrar" && permissao.administrar){
+        permissao.visualizar = true;
+        permissao.editar = true;
+        permissao.excluir = true;
+      }
+
+      if(
+        (campoAlterado === "editar" && permissao.editar) ||
+        (campoAlterado === "excluir" && permissao.excluir)
+      ){
+        permissao.visualizar = true;
+      }
+
+      if(campoAlterado === "visualizar" && !permissao.visualizar){
+        permissao.editar = false;
+        permissao.excluir = false;
+        permissao.administrar = false;
+      }
+
+      if(!permissao.visualizar){
+        permissao.editar = false;
+        permissao.excluir = false;
+        permissao.administrar = false;
+      }
+    }
+
+    function renderizarPermissoes(){
+      if(!permissoesEdicao.length){
+        elementos.listaPermissoes.innerHTML =
+          '<div class="permissoes-carregando">Nenhum módulo ativo disponível.</div>';
+        return;
+      }
+
+      elementos.listaPermissoes.innerHTML = permissoesEdicao.map((item,index) => `
+        <article class="permissao-card" data-indice-permissao="${index}">
+          <div class="permissao-modulo">
+            <strong>${escaparHtml(item.modulo || item.codigo)}</strong>
+            <small>${escaparHtml(item.codigo || "")}</small>
+          </div>
+
+          <div class="permissoes-grid">
+            <label class="permissao-check">
+              <input
+                type="checkbox"
+                data-permissao-campo="visualizar"
+                ${item.visualizar ? "checked" : ""}
+              >
+              Visualizar
+            </label>
+
+            <label class="permissao-check">
+              <input
+                type="checkbox"
+                data-permissao-campo="editar"
+                ${item.editar ? "checked" : ""}
+              >
+              Editar
+            </label>
+
+            <label class="permissao-check">
+              <input
+                type="checkbox"
+                data-permissao-campo="excluir"
+                ${item.excluir ? "checked" : ""}
+              >
+              Excluir
+            </label>
+
+            <label class="permissao-check">
+              <input
+                type="checkbox"
+                data-permissao-campo="administrar"
+                ${item.administrar ? "checked" : ""}
+              >
+              Administrar
+            </label>
+          </div>
+        </article>
+      `).join("");
+
+      elementos.listaPermissoes
+        .querySelectorAll("[data-permissao-campo]")
+        .forEach((input) => {
+          input.addEventListener("change", () => {
+            const card = input.closest("[data-indice-permissao]");
+            const indice = Number(card.dataset.indicePermissao);
+            const campo = input.dataset.permissaoCampo;
+            const permissao = permissoesEdicao[indice];
+
+            permissao[campo] = input.checked;
+            aplicarRegrasPermissao(permissao,campo);
+            renderizarPermissoes();
+          });
+        });
+    }
+
+    async function carregarPermissoesUsuario(usuarioId){
+      elementos.listaPermissoes.innerHTML =
+        '<div class="permissoes-carregando">Carregando permissões...</div>';
+
+      const { data, error } = await supabase.rpc(
+        "sar_admin_listar_permissoes_usuario",
+        { p_usuario_id:usuarioId }
+      );
+
+      if(error){
+        throw new Error(error.message || "Não foi possível carregar as permissões.");
+      }
+
+      permissoesEdicao = (data || []).map(normalizarPermissao);
+      renderizarPermissoes();
+    }
+
+    async function abrirEdicaoUsuario(id){
       usuarioEdicao = usuariosCache.find((usuario) => usuario.id === id) || null;
 
       if(!usuarioEdicao){
@@ -875,16 +1115,53 @@
       elementos.drawerTipo.value = String(usuarioEdicao.tipo_usuario || "teste").toLowerCase();
       elementos.drawerAtivo.checked = usuarioEdicao.ativo === true;
 
+      permissoesEdicao = [];
       ocultarEstado(elementos.estadoEdicao);
       elementos.drawerOverlay.classList.add("aberto");
       elementos.drawerOverlay.setAttribute("aria-hidden","false");
+
+      try{
+        await carregarPermissoesUsuario(usuarioEdicao.id);
+      }catch(error){
+        elementos.listaPermissoes.innerHTML =
+          '<div class="permissoes-carregando">Não foi possível carregar as permissões.</div>';
+
+        definirEstado(
+          elementos.estadoEdicao,
+          error instanceof Error ? error.message : String(error),
+          true
+        );
+      }
     }
 
     function fecharEdicaoUsuario(){
       usuarioEdicao = null;
+      permissoesEdicao = [];
       elementos.drawerOverlay.classList.remove("aberto");
       elementos.drawerOverlay.setAttribute("aria-hidden","true");
       ocultarEstado(elementos.estadoEdicao);
+    }
+
+    async function salvarPermissoesUsuario(usuarioId){
+      for(const permissao of permissoesEdicao){
+        const { error } = await supabase.rpc(
+          "sar_admin_salvar_permissao_usuario",
+          {
+            p_usuario_id:usuarioId,
+            p_modulo_id:permissao.modulo_id,
+            p_visualizar:permissao.visualizar,
+            p_editar:permissao.editar,
+            p_excluir:permissao.excluir,
+            p_administrar:permissao.administrar
+          }
+        );
+
+        if(error){
+          throw new Error(
+            `Falha ao salvar ${permissao.modulo}: ${error.message}`
+          );
+        }
+      }
     }
 
     async function salvarUsuario(){
@@ -894,15 +1171,15 @@
 
       elementos.btnSalvarUsuario.disabled = true;
       elementos.btnSalvarUsuario.textContent = "Salvando...";
-      definirEstado(elementos.estadoEdicao,"Salvando alterações...");
+      definirEstado(elementos.estadoEdicao,"Salvando usuário e permissões...");
 
       try{
-        const { data, error } = await supabase.rpc(
+        const { error } = await supabase.rpc(
           "sar_admin_atualizar_usuario",
           {
-            p_usuario_id: usuarioEdicao.id,
-            p_tipo_usuario: elementos.drawerTipo.value,
-            p_ativo: elementos.drawerAtivo.checked
+            p_usuario_id:usuarioEdicao.id,
+            p_tipo_usuario:elementos.drawerTipo.value,
+            p_ativo:elementos.drawerAtivo.checked
           }
         );
 
@@ -910,13 +1187,18 @@
           throw new Error(error.message || "Não foi possível atualizar o usuário.");
         }
 
-        definirEstado(elementos.estadoEdicao,"Usuário atualizado com sucesso.");
+        await salvarPermissoesUsuario(usuarioEdicao.id);
+
+        definirEstado(
+          elementos.estadoEdicao,
+          "Usuário e permissões atualizados com sucesso."
+        );
 
         await carregarUsuarios();
 
         setTimeout(() => {
           fecharEdicaoUsuario();
-        }, 700);
+        },800);
 
       }catch(error){
         definirEstado(
