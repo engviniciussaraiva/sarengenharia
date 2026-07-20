@@ -692,6 +692,19 @@
       flex:0 0 auto;
     }
 
+    .conhecimento-conteudo{
+      margin-top:16px;
+      padding-top:16px;
+      border-top:1px solid var(--linha);
+      color:#566666;
+      line-height:1.7;
+      white-space:pre-wrap;
+    }
+
+    .conhecimento-conteudo[hidden]{
+      display:none;
+    }
+
     .editor-conhecimento{
       display:none;
       margin-bottom:18px;
@@ -715,19 +728,126 @@
       min-height:320px;
     }
 
-.conhecimento-conteudo{
-  margin-top:16px;
-  padding-top:16px;
-  border-top:1px solid var(--linha);
-  color:#566666;
-  line-height:1.7;
-  white-space:pre-wrap;
-}
 
-.conhecimento-conteudo[hidden]{
-  display:none;
-}
-    
+    .modulos-filtros{
+      display:grid;
+      grid-template-columns:minmax(260px,1fr) 220px;
+      gap:12px;
+      margin-bottom:16px;
+      padding:14px;
+      border:1px solid var(--linha);
+      border-radius:10px;
+      background:#fff;
+    }
+
+    .tabela-modulos{
+      min-width:1250px;
+    }
+
+    .estrutura-modulo{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      min-width:240px;
+    }
+
+    .estrutura-modulo .icone{
+      width:30px;
+      flex:0 0 30px;
+      font-size:20px;
+      text-align:center;
+    }
+
+    .estrutura-modulo strong{
+      display:block;
+      color:var(--sar);
+      font-size:14px;
+    }
+
+    .estrutura-modulo small{
+      display:block;
+      margin-top:3px;
+      color:var(--muted);
+      font-size:11px;
+    }
+
+    .codigo-modulo{
+      font-family:Consolas,Monaco,monospace;
+      color:#526161;
+      font-size:12px;
+    }
+
+    .rota-modulo{
+      max-width:260px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      color:#647272;
+      font-size:12px;
+    }
+
+    .badge-sim,
+    .badge-nao{
+      display:inline-flex;
+      min-width:42px;
+      justify-content:center;
+      padding:5px 8px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      text-transform:uppercase;
+    }
+
+    .badge-sim{
+      color:var(--sucesso);
+      background:var(--sucesso-bg);
+    }
+
+    .badge-nao{
+      color:#697777;
+      background:#edf1f1;
+    }
+
+    .status-modulo{
+      display:inline-flex;
+      padding:5px 9px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      text-transform:uppercase;
+    }
+
+    .status-modulo.disponivel{
+      color:var(--sucesso);
+      background:var(--sucesso-bg);
+    }
+
+    .status-modulo.em-desenvolvimento{
+      color:var(--pendente);
+      background:var(--pendente-bg);
+    }
+
+    .status-modulo.inativo,
+    .status-modulo.desativado{
+      color:var(--erro);
+      background:var(--erro-bg);
+    }
+
+    .drawer-modulo{
+      width:min(620px,100%);
+    }
+
+    .opcoes-modulo{
+      margin-top:18px;
+      border-top:1px solid var(--linha);
+    }
+
+    @media(max-width:700px){
+      .modulos-filtros{
+        grid-template-columns:1fr;
+      }
+    }
+
     @media(max-width:900px){
       .admin{grid-template-columns:1fr}
       .admin-sidebar{border-right:0;border-bottom:1px solid var(--linha)}
@@ -833,11 +953,74 @@
       <section id="painel-modulos" class="painel">
         <header class="cabecalho">
           <div>
-            <h1>Módulos</h1>
-            <p class="subtitulo">Gestão do catálogo oficial do SAR.</p>
+            <h1>Estrutura do SAR</h1>
+            <p class="subtitulo">
+              Gestão central dos módulos, abas, ferramentas, rotas e publicação.
+            </p>
+          </div>
+
+          <div class="acoes">
+            <button id="btnAtualizarModulos" class="btn" type="button">
+              Atualizar
+            </button>
+            <button id="btnNovoModulo" class="btn primary" type="button">
+              + Novo módulo
+            </button>
           </div>
         </header>
-        <div class="placeholder">Tela de módulos será implementada na próxima etapa.</div>
+
+        <section class="resumo">
+          <div class="card"><span>Total</span><strong id="totalModulos">0</strong></div>
+          <div class="card"><span>Ativos</span><strong id="totalModulosAtivos">0</strong></div>
+          <div class="card"><span>No menu</span><strong id="totalModulosMenu">0</strong></div>
+          <div class="card"><span>Em breve</span><strong id="totalModulosBreve">0</strong></div>
+        </section>
+
+        <div class="modulos-filtros">
+          <div class="campo">
+            <label for="pesquisaModulos">Pesquisar</label>
+            <input
+              id="pesquisaModulos"
+              type="search"
+              placeholder="Nome, código, categoria ou rota"
+            >
+          </div>
+
+          <div class="campo">
+            <label for="filtroStatusModulo">Status</label>
+            <select id="filtroStatusModulo">
+              <option value="">Todos</option>
+              <option value="ativo">Ativos</option>
+              <option value="inativo">Inativos</option>
+              <option value="em_breve">Em breve</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="estadoModulos" class="estado">
+          Abra esta seção para carregar os módulos.
+        </div>
+
+        <section class="tabela-wrapper">
+          <table class="tabela-modulos">
+            <thead>
+              <tr>
+                <th>Estrutura</th>
+                <th>Código</th>
+                <th>Categoria</th>
+                <th>Rota</th>
+                <th>Ordem</th>
+                <th>Menu</th>
+                <th>Site</th>
+                <th>Status</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="corpoModulos">
+              <tr><td class="vazio" colspan="9">Carregando módulos...</td></tr>
+            </tbody>
+          </table>
+        </section>
       </section>
 
       <section id="painel-permissoes" class="painel">
@@ -935,6 +1118,131 @@
       </section>
     </section>
   </main>
+
+
+  <div id="drawerModuloOverlay" class="drawer-overlay" aria-hidden="true">
+    <aside class="drawer drawer-modulo" role="dialog" aria-modal="true" aria-labelledby="drawerModuloTitulo">
+      <div class="drawer-topo">
+        <div>
+          <h2 id="drawerModuloTitulo">Novo módulo</h2>
+          <p>Cadastre ou edite a estrutura oficial do SAR.</p>
+        </div>
+        <button id="btnFecharDrawerModulo" class="drawer-fechar" type="button" aria-label="Fechar">×</button>
+      </div>
+
+      <div class="form-grid">
+        <div class="campo full">
+          <label for="moduloNome">Nome do módulo *</label>
+          <input id="moduloNome" type="text" maxlength="160">
+        </div>
+
+        <div class="campo full">
+          <label for="moduloCodigo">Código único *</label>
+          <input id="moduloCodigo" type="text" maxlength="160" placeholder="EXEMPLO_MODULO_FERRAMENTA">
+        </div>
+
+        <div class="campo">
+          <label for="moduloIcone">Ícone</label>
+          <input id="moduloIcone" type="text" maxlength="20" placeholder="📦">
+        </div>
+
+        <div class="campo">
+          <label for="moduloCor">Cor</label>
+          <input id="moduloCor" type="text" maxlength="50" placeholder="verde">
+        </div>
+
+        <div class="campo full">
+          <label for="moduloDescricao">Descrição</label>
+          <textarea id="moduloDescricao"></textarea>
+        </div>
+
+        <div class="campo">
+          <label for="moduloCategoria">Categoria</label>
+          <input id="moduloCategoria" type="text" maxlength="100">
+        </div>
+
+        <div class="campo">
+          <label for="moduloPai">Módulo pai</label>
+          <select id="moduloPai">
+            <option value="">Nenhum — módulo principal</option>
+          </select>
+        </div>
+
+        <div class="campo full">
+          <label for="moduloRota">Rota</label>
+          <input id="moduloRota" type="text" maxlength="500" placeholder="hidraulica/ferramenta.html">
+        </div>
+
+        <div class="campo">
+          <label for="moduloOrdemMenu">Ordem no menu</label>
+          <input id="moduloOrdemMenu" type="number" step="1" value="0">
+        </div>
+
+        <div class="campo">
+          <label for="moduloOrdem">Ordem geral</label>
+          <input id="moduloOrdem" type="number" step="1" value="0">
+        </div>
+
+        <div class="campo full">
+          <label for="moduloStatusDesenvolvimento">Status de desenvolvimento</label>
+          <select id="moduloStatusDesenvolvimento">
+            <option value="disponivel">Disponível</option>
+            <option value="em_desenvolvimento">Em desenvolvimento</option>
+            <option value="desativado">Desativado</option>
+          </select>
+        </div>
+      </div>
+
+      <section class="opcoes-modulo">
+        <label class="switch-row">
+          <span>
+            <strong>Módulo ativo</strong>
+            <small>Permite que o recurso seja utilizado pelo sistema.</small>
+          </span>
+          <input id="moduloAtivo" type="checkbox" checked>
+        </label>
+
+        <label class="switch-row">
+          <span>
+            <strong>Exibir no menu logado</strong>
+            <small>Mostra o recurso na navegação interna.</small>
+          </span>
+          <input id="moduloExibirMenu" type="checkbox" checked>
+        </label>
+
+        <label class="switch-row">
+          <span>
+            <strong>Exibir no site público</strong>
+            <small>Permite divulgar o recurso na página comercial.</small>
+          </span>
+          <input id="moduloExibirSite" type="checkbox">
+        </label>
+
+        <label class="switch-row">
+          <span>
+            <strong>Destaque no site</strong>
+            <small>Apresenta o recurso com maior evidência.</small>
+          </span>
+          <input id="moduloDestaqueSite" type="checkbox">
+        </label>
+
+        <label class="switch-row">
+          <span>
+            <strong>Em breve</strong>
+            <small>Identifica uma funcionalidade ainda não liberada.</small>
+          </span>
+          <input id="moduloEmBreve" type="checkbox">
+        </label>
+      </section>
+
+      <div id="estadoModuloEdicao" class="estado"></div>
+
+      <div class="drawer-acoes">
+        <button id="btnCancelarModulo" class="btn" type="button">Cancelar</button>
+        <button id="btnSalvarModulo" class="btn primary" type="button">Salvar módulo</button>
+      </div>
+    </aside>
+  </div>
 
   <div id="drawerOverlay" class="drawer-overlay" aria-hidden="true">
     <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitulo">
@@ -1034,6 +1342,9 @@
     let usuarioEdicao = null;
     let permissoesEdicao = [];
 
+    let modulosCache = [];
+    let moduloEdicaoId = null;
+
     let conhecimentoCache = [];
     let conhecimentoEdicaoId = null;
 
@@ -1052,6 +1363,40 @@
       btnAtualizarSite: document.getElementById("btnAtualizarSite"),
       estadoSite: document.getElementById("estadoSite"),
       editorSite: document.getElementById("editorSite"),
+
+      btnAtualizarModulos: document.getElementById("btnAtualizarModulos"),
+      btnNovoModulo: document.getElementById("btnNovoModulo"),
+      estadoModulos: document.getElementById("estadoModulos"),
+      corpoModulos: document.getElementById("corpoModulos"),
+      pesquisaModulos: document.getElementById("pesquisaModulos"),
+      filtroStatusModulo: document.getElementById("filtroStatusModulo"),
+      totalModulos: document.getElementById("totalModulos"),
+      totalModulosAtivos: document.getElementById("totalModulosAtivos"),
+      totalModulosMenu: document.getElementById("totalModulosMenu"),
+      totalModulosBreve: document.getElementById("totalModulosBreve"),
+
+      drawerModuloOverlay: document.getElementById("drawerModuloOverlay"),
+      drawerModuloTitulo: document.getElementById("drawerModuloTitulo"),
+      moduloNome: document.getElementById("moduloNome"),
+      moduloCodigo: document.getElementById("moduloCodigo"),
+      moduloIcone: document.getElementById("moduloIcone"),
+      moduloCor: document.getElementById("moduloCor"),
+      moduloDescricao: document.getElementById("moduloDescricao"),
+      moduloCategoria: document.getElementById("moduloCategoria"),
+      moduloPai: document.getElementById("moduloPai"),
+      moduloRota: document.getElementById("moduloRota"),
+      moduloOrdemMenu: document.getElementById("moduloOrdemMenu"),
+      moduloOrdem: document.getElementById("moduloOrdem"),
+      moduloStatusDesenvolvimento: document.getElementById("moduloStatusDesenvolvimento"),
+      moduloAtivo: document.getElementById("moduloAtivo"),
+      moduloExibirMenu: document.getElementById("moduloExibirMenu"),
+      moduloExibirSite: document.getElementById("moduloExibirSite"),
+      moduloDestaqueSite: document.getElementById("moduloDestaqueSite"),
+      moduloEmBreve: document.getElementById("moduloEmBreve"),
+      estadoModuloEdicao: document.getElementById("estadoModuloEdicao"),
+      btnFecharDrawerModulo: document.getElementById("btnFecharDrawerModulo"),
+      btnCancelarModulo: document.getElementById("btnCancelarModulo"),
+      btnSalvarModulo: document.getElementById("btnSalvarModulo"),
 
       btnAtualizarConhecimento: document.getElementById("btnAtualizarConhecimento"),
       btnNovoConhecimento: document.getElementById("btnNovoConhecimento"),
@@ -1513,6 +1858,362 @@
       }
     }
 
+
+    function normalizarCodigoModulo(valor){
+      return String(valor || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g,"")
+        .toUpperCase()
+        .replace(/[^A-Z0-9]+/g,"_")
+        .replace(/^_+|_+$/g,"");
+    }
+
+    function obterNivelModulo(item){
+      let nivel = 0;
+      let paiId = item?.modulo_pai || null;
+      const visitados = new Set();
+
+      while(paiId && !visitados.has(paiId)){
+        visitados.add(paiId);
+        const pai = modulosCache.find((modulo) => modulo.id === paiId);
+        if(!pai) break;
+        nivel += 1;
+        paiId = pai.modulo_pai || null;
+      }
+
+      return nivel;
+    }
+
+    function nomeModuloPai(item){
+      if(!item.modulo_pai) return "Módulo principal";
+      const pai = modulosCache.find((modulo) => modulo.id === item.modulo_pai);
+      return pai?.modulo || "Pai não encontrado";
+    }
+
+    function atualizarResumoModulos(){
+      elementos.totalModulos.textContent = modulosCache.length;
+      elementos.totalModulosAtivos.textContent =
+        modulosCache.filter((item) => item.ativo === true).length;
+      elementos.totalModulosMenu.textContent =
+        modulosCache.filter((item) => item.exibir_menu_logado === true).length;
+      elementos.totalModulosBreve.textContent =
+        modulosCache.filter((item) => item.em_breve === true).length;
+    }
+
+    function filtrarModulos(){
+      const termo = elementos.pesquisaModulos.value
+        .trim()
+        .toLocaleLowerCase("pt-BR");
+
+      const status = elementos.filtroStatusModulo.value;
+
+      const filtrados = modulosCache.filter((item) => {
+        const texto = [
+          item.modulo,
+          item.codigo,
+          item.categoria,
+          item.rota,
+          item.descricao
+        ].join(" ").toLocaleLowerCase("pt-BR");
+
+        const correspondeTermo = !termo || texto.includes(termo);
+
+        let correspondeStatus = true;
+
+        if(status === "ativo"){
+          correspondeStatus = item.ativo === true;
+        }else if(status === "inativo"){
+          correspondeStatus = item.ativo !== true;
+        }else if(status === "em_breve"){
+          correspondeStatus = item.em_breve === true;
+        }
+
+        return correspondeTermo && correspondeStatus;
+      });
+
+      renderizarModulos(filtrados);
+    }
+
+    function renderizarModulos(modulos){
+      if(!modulos.length){
+        elementos.corpoModulos.innerHTML =
+          '<tr><td class="vazio" colspan="9">Nenhum módulo encontrado.</td></tr>';
+        return;
+      }
+
+      elementos.corpoModulos.innerHTML = modulos.map((item) => {
+        const nivel = obterNivelModulo(item);
+        const statusClasse = item.ativo !== true
+          ? "inativo"
+          : String(item.status_desenvolvimento || "disponivel")
+              .replaceAll("_","-");
+
+        const statusTexto = item.ativo !== true
+          ? "Inativo"
+          : item.em_breve === true
+            ? "Em breve"
+            : String(item.status_desenvolvimento || "disponivel")
+                .replaceAll("_"," ");
+
+        return `
+          <tr>
+            <td>
+              <div class="estrutura-modulo" style="padding-left:${nivel * 22}px">
+                <span class="icone">${escaparHtml(item.icone || "•")}</span>
+                <div>
+                  <strong>${escaparHtml(item.modulo || "Sem nome")}</strong>
+                  <small>${escaparHtml(nomeModuloPai(item))}</small>
+                </div>
+              </div>
+            </td>
+
+            <td class="codigo-modulo">${escaparHtml(item.codigo || "—")}</td>
+            <td>${escaparHtml(item.categoria || "—")}</td>
+
+            <td>
+              <div class="rota-modulo" title="${escaparHtml(item.rota || "")}">
+                ${escaparHtml(item.rota || "—")}
+              </div>
+            </td>
+
+            <td>${Number(item.ordem_menu || 0)}</td>
+
+            <td>
+              <span class="${item.exibir_menu_logado ? "badge-sim" : "badge-nao"}">
+                ${item.exibir_menu_logado ? "Sim" : "Não"}
+              </span>
+            </td>
+
+            <td>
+              <span class="${item.exibir_site_publico ? "badge-sim" : "badge-nao"}">
+                ${item.exibir_site_publico ? "Sim" : "Não"}
+              </span>
+            </td>
+
+            <td>
+              <span class="status-modulo ${statusClasse}">
+                ${escaparHtml(statusTexto)}
+              </span>
+            </td>
+
+            <td>
+              <button
+                class="btn"
+                type="button"
+                data-editar-modulo="${item.id}"
+              >
+                Editar
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      elementos.corpoModulos
+        .querySelectorAll("[data-editar-modulo]")
+        .forEach((botao) => {
+          botao.addEventListener("click", () => {
+            abrirEdicaoModulo(botao.dataset.editarModulo);
+          });
+        });
+    }
+
+    function preencherModulosPai(moduloAtualId = null){
+      const opcoes = modulosCache
+        .filter((item) => item.id !== moduloAtualId)
+        .sort((a,b) =>
+          Number(a.ordem_menu || 0) - Number(b.ordem_menu || 0) ||
+          String(a.modulo || "").localeCompare(String(b.modulo || ""),"pt-BR")
+        );
+
+      elementos.moduloPai.innerHTML = `
+        <option value="">Nenhum — módulo principal</option>
+        ${opcoes.map((item) => `
+          <option value="${item.id}">
+            ${escaparHtml(item.icone || "")} ${escaparHtml(item.modulo || item.codigo)}
+          </option>
+        `).join("")}
+      `;
+    }
+
+    function limparFormularioModulo(){
+      elementos.moduloNome.value = "";
+      elementos.moduloCodigo.value = "";
+      elementos.moduloIcone.value = "";
+      elementos.moduloCor.value = "verde";
+      elementos.moduloDescricao.value = "";
+      elementos.moduloCategoria.value = "";
+      elementos.moduloPai.value = "";
+      elementos.moduloRota.value = "";
+      elementos.moduloOrdemMenu.value = "0";
+      elementos.moduloOrdem.value = "0";
+      elementos.moduloStatusDesenvolvimento.value = "disponivel";
+      elementos.moduloAtivo.checked = true;
+      elementos.moduloExibirMenu.checked = true;
+      elementos.moduloExibirSite.checked = false;
+      elementos.moduloDestaqueSite.checked = false;
+      elementos.moduloEmBreve.checked = false;
+    }
+
+    function abrirEdicaoModulo(id = null){
+      moduloEdicaoId = id || null;
+      delete elementos.moduloCodigo.dataset.editadoManual;
+      const item = id
+        ? modulosCache.find((modulo) => modulo.id === id)
+        : null;
+
+      preencherModulosPai(id);
+      ocultarEstado(elementos.estadoModuloEdicao);
+
+      if(item){
+        elementos.drawerModuloTitulo.textContent = "Editar módulo";
+        elementos.moduloNome.value = item.modulo || "";
+        elementos.moduloCodigo.value = item.codigo || "";
+        elementos.moduloIcone.value = item.icone || "";
+        elementos.moduloCor.value = item.cor || "verde";
+        elementos.moduloDescricao.value = item.descricao || "";
+        elementos.moduloCategoria.value = item.categoria || "";
+        elementos.moduloPai.value = item.modulo_pai || "";
+        elementos.moduloRota.value = item.rota || "";
+        elementos.moduloOrdemMenu.value = Number(item.ordem_menu || 0);
+        elementos.moduloOrdem.value = Number(item.ordem || 0);
+        elementos.moduloStatusDesenvolvimento.value =
+          item.status_desenvolvimento || "disponivel";
+        elementos.moduloAtivo.checked = item.ativo === true;
+        elementos.moduloExibirMenu.checked = item.exibir_menu_logado === true;
+        elementos.moduloExibirSite.checked = item.exibir_site_publico === true;
+        elementos.moduloDestaqueSite.checked = item.destaque_site === true;
+        elementos.moduloEmBreve.checked = item.em_breve === true;
+      }else{
+        elementos.drawerModuloTitulo.textContent = "Novo módulo";
+        limparFormularioModulo();
+        preencherModulosPai();
+      }
+
+      elementos.drawerModuloOverlay.classList.add("aberto");
+      elementos.drawerModuloOverlay.setAttribute("aria-hidden","false");
+      elementos.moduloNome.focus();
+    }
+
+    function fecharEdicaoModulo(){
+      moduloEdicaoId = null;
+      elementos.drawerModuloOverlay.classList.remove("aberto");
+      elementos.drawerModuloOverlay.setAttribute("aria-hidden","true");
+      ocultarEstado(elementos.estadoModuloEdicao);
+    }
+
+    async function carregarModulos(){
+      elementos.btnAtualizarModulos.disabled = true;
+      definirEstado(elementos.estadoModulos,"Carregando módulos...");
+
+      try{
+        if(!await validarSessao()) return;
+
+        const { data, error } = await supabase.rpc(
+          "sar_admin_listar_modulos"
+        );
+
+        if(error){
+          throw new Error(
+            error.message || "Não foi possível carregar os módulos."
+          );
+        }
+
+        modulosCache = data || [];
+        atualizarResumoModulos();
+        filtrarModulos();
+        ocultarEstado(elementos.estadoModulos);
+
+      }catch(error){
+        elementos.corpoModulos.innerHTML =
+          '<tr><td class="vazio" colspan="9">Não foi possível carregar os módulos.</td></tr>';
+
+        definirEstado(
+          elementos.estadoModulos,
+          error instanceof Error ? error.message : String(error),
+          true
+        );
+      }finally{
+        elementos.btnAtualizarModulos.disabled = false;
+      }
+    }
+
+    async function salvarModulo(){
+      const modulo = elementos.moduloNome.value.trim();
+      const codigo = normalizarCodigoModulo(elementos.moduloCodigo.value);
+
+      if(!modulo){
+        definirEstado(elementos.estadoModuloEdicao,"Informe o nome do módulo.",true);
+        elementos.moduloNome.focus();
+        return;
+      }
+
+      if(!codigo){
+        definirEstado(elementos.estadoModuloEdicao,"Informe o código único.",true);
+        elementos.moduloCodigo.focus();
+        return;
+      }
+
+      elementos.btnSalvarModulo.disabled = true;
+      elementos.btnSalvarModulo.textContent = "Salvando...";
+      definirEstado(elementos.estadoModuloEdicao,"Salvando módulo...");
+
+      try{
+        const { error } = await supabase.rpc(
+          "sar_admin_salvar_modulo",
+          {
+            p_id:moduloEdicaoId,
+            p_codigo:codigo,
+            p_modulo:modulo,
+            p_submodulo:null,
+            p_descricao:elementos.moduloDescricao.value.trim() || null,
+            p_icone:elementos.moduloIcone.value.trim() || null,
+            p_ordem:Number(elementos.moduloOrdem.value || 0),
+            p_ativo:elementos.moduloAtivo.checked,
+            p_rota:elementos.moduloRota.value.trim() || null,
+            p_exibir_site_publico:elementos.moduloExibirSite.checked,
+            p_exibir_menu_logado:elementos.moduloExibirMenu.checked,
+            p_destaque_site:elementos.moduloDestaqueSite.checked,
+            p_status_desenvolvimento:
+              elementos.moduloStatusDesenvolvimento.value,
+            p_categoria:elementos.moduloCategoria.value.trim() || null,
+            p_cor:elementos.moduloCor.value.trim() || "verde",
+            p_em_breve:elementos.moduloEmBreve.checked,
+            p_modulo_pai:elementos.moduloPai.value || null,
+            p_ordem_menu:Number(elementos.moduloOrdemMenu.value || 0)
+          }
+        );
+
+        if(error){
+          throw new Error(
+            error.message || "Não foi possível salvar o módulo."
+          );
+        }
+
+        definirEstado(
+          elementos.estadoModuloEdicao,
+          "Módulo salvo com sucesso."
+        );
+
+        await carregarModulos();
+
+        setTimeout(() => {
+          fecharEdicaoModulo();
+        },700);
+
+      }catch(error){
+        definirEstado(
+          elementos.estadoModuloEdicao,
+          error instanceof Error ? error.message : String(error),
+          true
+        );
+      }finally{
+        elementos.btnSalvarModulo.disabled = false;
+        elementos.btnSalvarModulo.textContent = "Salvar módulo";
+      }
+    }
+
+
     function renderizarSite(conteudos){
       if(!conteudos.length){
         elementos.editorSite.innerHTML =
@@ -1664,115 +2365,108 @@
       elementos.editorConhecimento.classList.remove("aberto");
     }
 
-function renderizarConhecimento(itens){
-  if(!itens.length){
-    elementos.listaConhecimento.innerHTML =
-      '<div class="placeholder">Nenhum conteúdo cadastrado.</div>';
-    return;
-  }
+    function renderizarConhecimento(itens){
+      if(!itens.length){
+        elementos.listaConhecimento.innerHTML =
+          '<div class="placeholder">Nenhum conteúdo cadastrado.</div>';
+        return;
+      }
 
-  elementos.listaConhecimento.innerHTML = itens.map((item) => `
-    <article class="conhecimento-item" data-conhecimento-item="${item.id}">
-      <div class="conhecimento-item-topo">
-        <div>
-          <h3>${escaparHtml(item.titulo || "Sem título")}</h3>
+      elementos.listaConhecimento.innerHTML = itens.map((item) => `
+        <article class="conhecimento-item">
+          <div class="conhecimento-item-topo">
+            <div>
+              <h3>${escaparHtml(item.titulo || "Sem título")}</h3>
+              <span class="conhecimento-meta">
+                Atualizado em ${formatarData(item.atualizado_em)}
+              </span>
+            </div>
 
-          <span class="conhecimento-meta">
-            Atualizado em ${formatarData(item.atualizado_em)}
-          </span>
-        </div>
+            <div class="conhecimento-acoes">
+              <button
+                class="btn"
+                type="button"
+                data-abrir-conhecimento="${item.id}"
+              >
+                Abrir
+              </button>
 
-        <div class="conhecimento-acoes">
-          <button
-            class="btn"
-            type="button"
-            data-abrir-conhecimento="${item.id}"
+              <button
+                class="btn"
+                type="button"
+                data-editar-conhecimento="${item.id}"
+              >
+                Editar
+              </button>
+
+              <button
+                class="btn danger"
+                type="button"
+                data-inativar-conhecimento="${item.id}"
+              >
+                Inativar
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="conhecimento-conteudo"
+            data-conteudo-conhecimento="${item.id}"
+            hidden
           >
-            Abrir
-          </button>
+            ${escaparHtml(item.conteudo || "")}
+          </div>
+        </article>
+      `).join("");
 
-          <button
-            class="btn"
-            type="button"
-            data-editar-conhecimento="${item.id}"
-          >
-            Editar
-          </button>
+      elementos.listaConhecimento
+        .querySelectorAll("[data-abrir-conhecimento]")
+        .forEach((botao) => {
+          botao.addEventListener("click", () => {
+            const id = botao.dataset.abrirConhecimento;
+            const conteudoAtual = elementos.listaConhecimento.querySelector(
+              `[data-conteudo-conhecimento="${id}"]`
+            );
 
-          <button
-            class="btn danger"
-            type="button"
-            data-inativar-conhecimento="${item.id}"
-          >
-            Inativar
-          </button>
-        </div>
-      </div>
+            const estavaAberto = !conteudoAtual.hidden;
 
-      <div
-        class="conhecimento-conteudo"
-        data-conteudo-conhecimento="${item.id}"
-        hidden
-      >
-        ${escaparHtml(item.conteudo || "")}
-      </div>
-    </article>
-  `).join("");
+            elementos.listaConhecimento
+              .querySelectorAll("[data-conteudo-conhecimento]")
+              .forEach((conteudo) => conteudo.hidden = true);
 
-  elementos.listaConhecimento
-    .querySelectorAll("[data-abrir-conhecimento]")
-    .forEach((botao) => {
-      botao.addEventListener("click", () => {
-        const id = botao.dataset.abrirConhecimento;
+            elementos.listaConhecimento
+              .querySelectorAll("[data-abrir-conhecimento]")
+              .forEach((outro) => outro.textContent = "Abrir");
 
-        const conteudoAtual =
-          elementos.listaConhecimento.querySelector(
-            `[data-conteudo-conhecimento="${id}"]`
-          );
-
-        const estavaAberto = !conteudoAtual.hidden;
-
-        elementos.listaConhecimento
-          .querySelectorAll("[data-conteudo-conhecimento]")
-          .forEach((conteudo) => {
-            conteudo.hidden = true;
+            if(!estavaAberto){
+              conteudoAtual.hidden = false;
+              botao.textContent = "Recolher";
+            }
           });
+        });
 
-        elementos.listaConhecimento
-          .querySelectorAll("[data-abrir-conhecimento]")
-          .forEach((outroBotao) => {
-            outroBotao.textContent = "Abrir";
+      elementos.listaConhecimento
+        .querySelectorAll("[data-editar-conhecimento]")
+        .forEach((botao) => {
+          botao.addEventListener("click", () => {
+            const item = conhecimentoCache.find(
+              (registro) => registro.id === botao.dataset.editarConhecimento
+            );
+
+            if(item){
+              abrirEditorConhecimento(item);
+            }
           });
+        });
 
-        if(!estavaAberto){
-          conteudoAtual.hidden = false;
-          botao.textContent = "Recolher";
-        }
-      });
-    });
-
-  elementos.listaConhecimento
-    .querySelectorAll("[data-editar-conhecimento]")
-    .forEach((botao) => {
-      botao.addEventListener("click", () => {
-        const item = conhecimentoCache.find(
-          (registro) => registro.id === botao.dataset.editarConhecimento
-        );
-
-        if(item){
-          abrirEditorConhecimento(item);
-        }
-      });
-    });
-
-  elementos.listaConhecimento
-    .querySelectorAll("[data-inativar-conhecimento]")
-    .forEach((botao) => {
-      botao.addEventListener("click", () => {
-        inativarConhecimento(botao.dataset.inativarConhecimento);
-      });
-    });
-}
+      elementos.listaConhecimento
+        .querySelectorAll("[data-inativar-conhecimento]")
+        .forEach((botao) => {
+          botao.addEventListener("click", () => {
+            inativarConhecimento(botao.dataset.inativarConhecimento);
+          });
+        });
+    }
 
     async function carregarConhecimento(){
       elementos.btnAtualizarConhecimento.disabled = true;
@@ -1919,6 +2613,35 @@ function renderizarConhecimento(itens){
         );
       }
     }
+
+    elementos.btnAtualizarModulos.addEventListener("click",carregarModulos);
+    elementos.btnNovoModulo.addEventListener("click",() => abrirEdicaoModulo());
+    elementos.pesquisaModulos.addEventListener("input",filtrarModulos);
+    elementos.filtroStatusModulo.addEventListener("change",filtrarModulos);
+    elementos.btnFecharDrawerModulo.addEventListener("click",fecharEdicaoModulo);
+    elementos.btnCancelarModulo.addEventListener("click",fecharEdicaoModulo);
+    elementos.btnSalvarModulo.addEventListener("click",salvarModulo);
+
+    elementos.moduloNome.addEventListener("input",() => {
+      if(!moduloEdicaoId && !elementos.moduloCodigo.dataset.editadoManual){
+        elementos.moduloCodigo.value =
+          normalizarCodigoModulo(elementos.moduloNome.value);
+      }
+    });
+
+    elementos.moduloCodigo.addEventListener("input",() => {
+      elementos.moduloCodigo.dataset.editadoManual = "true";
+      const inicio = elementos.moduloCodigo.selectionStart;
+      elementos.moduloCodigo.value =
+        normalizarCodigoModulo(elementos.moduloCodigo.value);
+      elementos.moduloCodigo.setSelectionRange(inicio,inicio);
+    });
+
+    elementos.drawerModuloOverlay.addEventListener("click",(event) => {
+      if(event.target === elementos.drawerModuloOverlay){
+        fecharEdicaoModulo();
+      }
+    });
 
     elementos.btnAtualizarUsuarios.addEventListener("click",carregarUsuarios);
     elementos.btnAtualizarSite.addEventListener("click",carregarSite);
