@@ -842,6 +842,61 @@
       border-top:1px solid var(--linha);
     }
 
+
+    /* Ajustes da tabela de módulos */
+    #painel-modulos{
+      min-width:0;
+      overflow:hidden;
+    }
+
+    #painel-modulos .tabela-wrapper{
+      width:100%;
+      max-width:100%;
+      max-height:calc(100vh - 365px);
+      min-height:320px;
+      overflow:auto;
+      scrollbar-gutter:stable;
+    }
+
+    #painel-modulos .tabela-modulos{
+      width:max-content;
+      min-width:1250px;
+    }
+
+    #painel-modulos .tabela-modulos thead th{
+      position:sticky;
+      top:0;
+      z-index:2;
+      background:#f8fafa;
+      box-shadow:0 1px 0 var(--linha);
+    }
+
+    #painel-modulos .estrutura-modulo{
+      min-width:270px;
+    }
+
+    #painel-modulos .estrutura-modulo .icone{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:30px;
+      height:30px;
+      flex:0 0 30px;
+      overflow:hidden;
+      border-radius:7px;
+      background:#eef4f3;
+      font-size:18px;
+      line-height:1;
+      white-space:nowrap;
+    }
+
+    @media(max-height:760px){
+      #painel-modulos .tabela-wrapper{
+        max-height:calc(100vh - 315px);
+        min-height:250px;
+      }
+    }
+
     @media(max-width:700px){
       .modulos-filtros{
         grid-template-columns:1fr;
@@ -1934,6 +1989,60 @@
       renderizarModulos(filtrados);
     }
 
+
+    function iconeVisualModulo(valor){
+      const original = String(valor || "").trim();
+
+      if(!original){
+        return "🧩";
+      }
+
+      const chave = original.toLocaleLowerCase("pt-BR");
+
+      const mapa = {
+        brain:"🧠",
+        clipboard:"📋",
+        repeat:"🔁",
+        droplet:"💧",
+        water:"💧",
+        calculator:"🧮",
+        wrench:"🔧",
+        settings:"⚙️",
+        gear:"⚙️",
+        printer:"🖨️",
+        cube:"🧊",
+        building:"🏢",
+        stairs:"🪜",
+        fire:"🔥",
+        flame:"🔥",
+        pump:"⚙️",
+        book:"📚",
+        database:"🗄️",
+        shield:"🛡️",
+        lock:"🔒",
+        chart:"📊",
+        home:"🏠",
+        project:"📐",
+        ruler:"📏",
+        pipe:"🔩",
+        conversion:"🔄"
+      };
+
+      if(mapa[chave]){
+        return mapa[chave];
+      }
+
+      /*
+       * Nomes simples vindos de bibliotecas de ícones, como "clipboard",
+       * não devem ser impressos como texto dentro da tabela.
+       */
+      if(/^[a-z0-9_-]+$/i.test(original)){
+        return "🧩";
+      }
+
+      return original;
+    }
+
     function renderizarModulos(modulos){
       if(!modulos.length){
         elementos.corpoModulos.innerHTML =
@@ -1959,7 +2068,7 @@
           <tr>
             <td>
               <div class="estrutura-modulo" style="padding-left:${nivel * 22}px">
-                <span class="icone">${escaparHtml(item.icone || "•")}</span>
+                <span class="icone">${escaparHtml(iconeVisualModulo(item.icone))}</span>
                 <div>
                   <strong>${escaparHtml(item.modulo || "Sem nome")}</strong>
                   <small>${escaparHtml(nomeModuloPai(item))}</small>
