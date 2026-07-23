@@ -637,26 +637,248 @@ async function carregarEstruturaMenuSupabase(){
         );
     }
 
+    /*
+      A estrutura visual continua exatamente igual:
+
+      Módulo → Aba → Subaba
+
+      A única alteração é a fonte dos dados.
+      Agora o sistema lê diretamente public.sar_modulos
+      e monta internamente o mesmo formato que antes
+      era fornecido por vw_sar_menu_completo.
+    */
     const { data, error } = await supabase
-        .from("vw_sar_menu_completo")
-        .select("*")
-        .order("modulo_ordem", {
-            ascending: true
-        })
-        .order("aba_ordem", {
-            ascending: true,
-            nullsFirst: true
-        })
-        .order("subaba_ordem", {
-            ascending: true,
-            nullsFirst: true
-        });
+        .from("sar_modulos")
+        .select(`
+            id,
+            codigo,
+            modulo,
+            submodulo,
+            icone,
+            rota,
+            categoria,
+            modulo_pai,
+            ordem,
+            ordem_menu,
+            ativo,
+            exibir_menu_logado,
+            status_desenvolvimento,
+            em_breve
+        `)
+        .eq("ativo", true)
+        .eq("exibir_menu_logado", true);
 
     if(error){
         throw error;
     }
 
-    SAR_MENU_COMPLETO = data || [];
+    const registros = data || [];
+    const porId = new Map();
+
+    registros.forEach(function(item){
+        porId.set(String(item.id), item);
+    });
+
+    function ordemDoItem(item){
+        const ordemMenu = Number(item?.ordem_menu);
+        const ordemGeral = Number(item?.ordem);
+
+        if(Number.isFinite(ordemMenu)){
+            return ordemMenu;
+        }
+
+        if(Number.isFinite(ordemGeral)){
+            return ordemGeral;
+        }
+
+        return 999999;
+    }
+
+    function ordenarItens(a, b){
+
+        const diferencaOrdem =
+            ordemDoItem(a) - ordemDoItem(b);
+
+        if(diferencaOrdem !== 0){
+            return diferencaOrdem;
+        }
+
+        return String(a?.modulo || "")
+            .localeCompare(
+                String(b?.modulo || ""),
+                "pt-BR"
+            );
+    }
+
+    const filhosPorPai = new Map();
+
+    registros.forEach(function(item){
+
+        if(!item.modulo_pai){
+            return;
+        }
+
+        const idPai = String(item.modulo_pai);
+
+        if(!filhosPorPai.has(idPai)){
+            filhosPorPai.set(idPai, []);
+        }
+
+        filhosPorPai.get(idPai).push(item);
+    });
+
+    filhosPorPai.forEach(function(filhos){
+        filhos.sort(ordenarItens);
+    });
+
+    const modulosPrincipais = registros
+        .filter(function(item){
+            return !item.modulo_pai;
+        })
+        .sort(ordenarItens);
+
+    const estruturaConvertida = [];
+
+    modulosPrincipais.forEach(function(modulo){
+
+        const abas =
+            filhosPorPai.get(String(modulo.id)) || [];
+
+        /*
+          Mesmo que o módulo ainda não tenha abas,
+          ele continua aparecendo no menu lateral.
+        */
+        if(abas.length === 0){
+
+            estruturaConvertida.push({
+                modulo_id: modulo.id,
+                modulo_codigo: modulo.codigo,
+                modulo_nome: modulo.modulo,
+                modulo_icone: modulo.icone,
+                modulo_ordem: ordemDoItem(modulo),
+                modulo_rota: modulo.rota,
+                modulo_status_desenvolvimento:
+                    modulo.status_desenvolvimento,
+                modulo_em_breve: modulo.em_breve,
+
+                aba_id: null,
+                aba_codigo: null,
+                aba_nome: null,
+                aba_icone: null,
+                aba_ordem: null,
+                aba_rota: null,
+
+                subaba_id: null,
+                subaba_codigo: null,
+                subaba_nome: null,
+                subaba_icone: null,
+                subaba_ordem: null,
+                subaba_rota: null
+            });
+
+            return;
+        }
+
+        abas.forEach(function(aba){
+
+            const subabas =
+                filhosPorPai.get(String(aba.id)) || [];
+
+            /*
+              Aba sem subaba: mantém a rota diretamente
+              na aba superior, como já ocorre hoje.
+            */
+            if(subabas.length === 0){
+
+                estruturaConvertida.push({
+                    modulo_id: modulo.id,
+                    modulo_codigo: modulo.codigo,
+                    modulo_nome: modulo.modulo,
+                    modulo_icone: modulo.icone,
+                    modulo_ordem: ordemDoItem(modulo),
+                    modulo_rota: modulo.rota,
+                    modulo_status_desenvolvimento:
+                        modulo.status_desenvolvimento,
+                    modulo_em_breve: modulo.em_breve,
+
+                    aba_id: aba.id,
+                    aba_codigo: aba.codigo,
+                    aba_nome: aba.modulo,
+                    aba_icone: aba.icone,
+                    aba_ordem: ordemDoItem(aba),
+                    aba_rota: aba.rota,
+                    aba_status_desenvolvimento:
+                        aba.status_desenvolvimento,
+                    aba_em_breve: aba.em_breve,
+
+                    subaba_id: null,
+                    subaba_codigo: null,
+                    subaba_nome: null,
+                    subaba_icone: null,
+                    subaba_ordem: null,
+                    subaba_rota: null
+                });
+
+                return;
+            }
+
+            subabas.forEach(function(subaba){
+
+                estruturaConvertida.push({
+                    modulo_id: modulo.id,
+                    modulo_codigo: modulo.codigo,
+                    modulo_nome: modulo.modulo,
+                    modulo_icone: modulo.icone,
+                    modulo_ordem: ordemDoItem(modulo),
+                    modulo_rota: modulo.rota,
+                    modulo_status_desenvolvimento:
+                        modulo.status_desenvolvimento,
+                    modulo_em_breve: modulo.em_breve,
+
+                    aba_id: aba.id,
+                    aba_codigo: aba.codigo,
+                    aba_nome: aba.modulo,
+                    aba_icone: aba.icone,
+                    aba_ordem: ordemDoItem(aba),
+                    aba_rota: aba.rota,
+                    aba_status_desenvolvimento:
+                        aba.status_desenvolvimento,
+                    aba_em_breve: aba.em_breve,
+
+                    subaba_id: subaba.id,
+                    subaba_codigo: subaba.codigo,
+                    subaba_nome: subaba.modulo,
+                    subaba_icone: subaba.icone,
+                    subaba_ordem: ordemDoItem(subaba),
+                    subaba_rota: subaba.rota,
+                    subaba_status_desenvolvimento:
+                        subaba.status_desenvolvimento,
+                    subaba_em_breve: subaba.em_breve
+                });
+            });
+        });
+    });
+
+    /*
+      Registros órfãos não são exibidos, pois não possuem
+      uma cadeia válida Módulo → Aba → Subaba.
+      O aviso facilita localizar eventual erro no cadastro.
+    */
+    registros.forEach(function(item){
+
+        if(
+            item.modulo_pai &&
+            !porId.has(String(item.modulo_pai))
+        ){
+            console.warn(
+                "Módulo ignorado porque o pai não foi encontrado:",
+                item.codigo,
+                item.modulo_pai
+            );
+        }
+    });
+
+    SAR_MENU_COMPLETO = estruturaConvertida;
 }
 
 
