@@ -1,323 +1,265 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <title>Classificação da Edificação e Tipo de Certificação</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 30px auto;
-    }
-    h2 {
-      color: #006400;
-    }
-    label {
-      display: block;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-    input[type="number"],
-    input[type="text"],
-    select {
-      width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-    }
-    .bloco-descontos {
-      margin-top: 10px;
-      padding: 10px;
-      background-color: #f2f2f2;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    .resposta {
-      margin-top: 20px;
-      padding: 15px;
-      background: #f9f9f9;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-weight: bold;
-    }
-    button {
-      padding: 8px 16px;
-      margin-top: 20px;
-      margin-right: 10px;
-      cursor: pointer;
-    }
-    #infoAltura, #dadosDescricao {
-      background: #eef;
-      padding: 10px;
-      margin-top: 10px;
-      display: none;
-    }
-    fieldset label {
-      margin-bottom: 4px;
-      display: block;
-    }
-    fieldset select {
-      margin-top: 2px;
-      margin-bottom: 4px;
-      padding: 4px;
-    }
-  </style>
-</head>
-<body>
-  <h2>Classificação da Edificação e Tipo de Certificação</h2>
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-  <label>Área total edificada (m²):</label>
-  <input type="number" id="areaTotal" oninput="calcularArea(); habilitarCampoIsolamento();">
+  const SUPABASE_URL = "https://bjtxbpmrmhfvpmdsthxr.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM";
 
-  <div style="margin-top: 15px;">
-    <input type="checkbox" id="mostrarDescontos" onchange="toggleDescontos()">
-    <span style="font-weight: bold;">Deseja aplicar descontos permitidos pela IT-42/2025?</span>
-  </div>
-
-  <p id="infoDescontos" style="margin-top: 10px; font-weight: bold; color: #333;">
-    Total de área desconsiderada: <span id="totalDescontadoSpan">0,00</span> m²
-  </p>
-
-  <div class="bloco-descontos" id="blocoDescontos" style="display: none;">
-    <h4>Áreas a serem desconsideradas</h4>
-    <label>Residência unifamiliar com acesso direto à rua (m²):</label><input type="number" class="descontar permitido" oninput="calcularArea()">
-    <label>Piscinas (m²):</label><input type="number" class="descontar permitido" oninput="calcularArea()">
-    <label>Cobertura de bombas (50% abertas) (m²):</label><input type="number" class="descontar permitido" oninput="calcularArea()">
-    <label>Praça de pedágio (50% abertas) (m²):</label><input type="number" class="descontar permitido" oninput="calcularArea()">
-    <label>Telheiros com laterais abertas (m²):</label><input type="number" class="descontar nao-permitido" oninput="calcularArea()">
-    <label>Platibandas e beirais (m²):</label><input type="number" class="descontar nao-permitido" oninput="calcularArea()">
-    <label>Passagens laterais abertas (m²):</label><input type="number" class="descontar nao-permitido" oninput="calcularArea()">
-    <label>Reservatórios (m²):</label><input type="number" class="descontar nao-permitido" oninput="calcularArea()">
-    <label>Escadas enclausuradas (m²):</label><input type="number" class="descontar nao-permitido" oninput="calcularArea()">
-    <label>Dutos de ventilação (m²):</label><input type="number" class="descontar nao-permitido" oninput="calcularArea()">
-    <label>Banheiros ou vestiários (m²):</label><input type="number" class="descontar nao-permitido" oninput="calcularArea()">
-  </div>
-
-  <label>Área computada (após descontos) (m²):</label>
-  <input type="text" id="areaComputadaExibida" readonly style="background-color: #eee;">
-  <input type="hidden" id="areaComputada">
-
-  <!-- Fim da Parte 1 -->
-
-  <!-- Início da Parte 2 -->
-
-  <label>Tipologia da edificação em pavimentos:</label>
-  <select id="pavimentos">
-    <option value="">Selecione...</option>
-    <option value="1">Um pavimento</option>
-    <option value="2">Dois pavimentos</option>
-    <option value="3">Três pavimentos</option>
-    <option value="4">Mais de três pavimentos</option>
-  </select>
-
-  <label>Classificação da altura:</label>
-  <select id="alturaClassificada" onchange="atualizarAlturaClassificada()">
-    <option value="">Selecione...</option>
-    <option value="I|Edificação Térrea|3">Um pavimento</option>
-    <option value="II|Edificação Baixa|6">H ≤ 6,00 m</option>
-    <option value="III|Edificação de Baixa-Média Altura|12">6,00 m < H ≤ 12,00 m</option>
-    <option value="IV|Edificação de Média Altura|23">12,00 m < H ≤ 23,00 m</option>
-    <option value="V|Edificação Mediatamente Alta|30">23,00 m < H ≤ 30,00 m</option>
-    <option value="VI|Edificação Alta|100">Acima de 30,00 m</option>
-  </select>
-
-  <div id="infoAltura">
-    <strong>Classificação Altura:</strong> Tipo <span id="tipoAltura"></span> – <span id="nomeAltura"></span>
-  </div>
-
-  <label>Ocupação / Uso:</label>
-  <select id="grupo">
-    <option value="">(simulado)</option>
-  </select>
-
-  <label>Descrição:</label>
-  <select id="descricao">
-    <option value="">(simulado)</option>
-  </select>
-
-  <div id="dadosDescricao">
-    <strong>Divisão:</strong> <span id="divisao">A-2</span><br>
-    <strong>Carga de Incêndio:</strong> <span id="carga">300</span> MJ/m²<br>
-    <strong>Risco:</strong> <span id="risco">BAIXO</span>
-  </div>
-
-  <legend style="font-weight: bold; margin-top: 30px;">Critérios Técnicos Adicionais</legend>
-
-  <div style="margin-bottom: 10px;">
-    <label for="item412">Há mais de uma edificação no terreno que necessita de comprovação de isolamento de risco, mantendo-as com áreas individuais abaixo de 750,00 m²?</label>
-    <select id="item412" style="width: 100%;" disabled>
-      <option value="">Selecione...</option>
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select>
-  </div>
-
-  <script>
-    function habilitarCampoIsolamento() {
-      const area = parseFloat(document.getElementById("areaTotal").value) || 0;
-      document.getElementById("item412").disabled = area <= 750;
-    }
-  </script>
-
-  <!-- Fim da Parte 2 -->
-  <div style="margin-bottom: 10px;">
-    <label>É destinada à comercialização ou revenda de gás liquefeito de petróleo (GLP)?</label>
-    <select id="itemn" style="width: 100%;">
-      <option value="">Selecione...</option>
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select>
-  </div>
-  
-  <div style="margin-bottom: 10px;">
-    <label>Utiliza ou armazena mais que 190 kg de GLP?</label>
-    <select id="itemo" style="width: 100%;">
-      <option value="">Selecione...</option>
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select>
-  </div>
-  
-  <div style="margin-bottom: 10px;">
-    <label>Armazena gases combustíveis em recipientes transportáveis ou estacionários?</label>
-    <select id="itemp" style="width: 100%;">
-      <option value="">Selecione...</option>
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select>
-  </div>
-  
-  <div style="margin-bottom: 10px;">
-    <label>Armazena líquidos inflamáveis em quantidade superior a 1.000 L (exceto em tanques enterrados)?</label>
-    <select id="itemq" style="width: 100%;">
-      <option value="">Selecione...</option>
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select>
-  </div>
-  
-  <div style="margin-bottom: 10px;">
-    <label>Possui instalação de processo com líquidos inflamáveis acima de 250 L?</label>
-    <select id="itemr" style="width: 100%;">
-      <option value="">Selecione...</option>
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select>
-  </div>
-  
-  <div style="margin-bottom: 10px;">
-    <label>Possui produtos perigosos à saúde humana, meio ambiente ou patrimônio?</label>
-    <select id="items" style="width: 100%;">
-      <option value="">Selecione...</option>
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select>
-  </div>
-  
-  <div style="margin-bottom: 10px;">
-    <label>Possui mais de 2.500 m² de área descoberta para materiais combustíveis?</label>
-    <select id="itemt" style="width: 100%;">
-      <option value="">Selecione...</option>
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select>
-  </div>
-  
-  <div style="margin-top: 30px;">
-    <button onclick="classificarEdificacao()">Classificar</button>
-    <button onclick="limparCampos()">Limpar Tudo</button>
-  </div>
-  
-  <div id="resultado" class="resposta"></div>
-  
-  <!-- Fim da Parte 3 -->
-  <div style="margin-bottom: 10px;">
-    <label>É destinada à comercialização ou revenda de gás liquefeito de petróleo (GLP)?</label>
-    <select id="itemn" style="width: 100%;">
-      <option value="">Selecione...</option>
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select>
-  </div>
-  
-  <div style="margin-bottom: 10px;">
-    <label>Utiliza ou armazena mais que 190 kg de GLP?</label>
-    <select id="itemo" style="width: 100%;">
-      <option value="">Selecione...</option>
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select>
-  </div>
-  
-  <div style="margin-bottom: 10px;">
-    <label>Armazena gases combustíveis em recipientes transportáveis ou estacionários?</label>
-    <select id="itemp" style="width: 100%;">
-      <option value="">Selecione...</option>
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select>
-  </div>
-  
-  <div style="margin-bottom: 10px;">
-    <label>Armazena líquidos inflamáveis em quantidade superior a 1.000 L (exceto em tanques enterrados)?</label>
-    <select id="itemq" style="width: 100%;">
-      <option value="">Selecione...</option>
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select>
-  </div>
-  
-  <div style="margin-bottom: 10px;">
-    <label>Possui instalação de processo com líquidos inflamáveis acima de 250 L?</label>
-    <select id="itemr" style="width: 100%;">
-      <option value="">Selecione...</option>
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select>
-  </div>
-  
-  <div style="margin-bottom: 10px;">
-    <label>Possui produtos perigosos à saúde humana, meio ambiente ou patrimônio?</label>
-    <select id="items" style="width: 100%;">
-      <option value="">Selecione...</option>
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select>
-  </div>
-  
-  <div style="margin-bottom: 10px;">
-    <label>Possui mais de 2.500 m² de área descoberta para materiais combustíveis?</label>
-    <select id="itemt" style="width: 100%;">
-      <option value="">Selecione...</option>
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select>
-  </div>
-  
-  <div style="margin-top: 30px;">
-    <button onclick="classificarEdificacao()">Classificar</button>
-    <button onclick="limparCampos()">Limpar Tudo</button>
-  </div>
-  
-  <div id="resultado" class="resposta"></div>
-  
-  <!-- Fim da Parte 3 -->
-  
-  <!-- Início da Parte 4 -->
-  
-  <script>
-  // Habilita o campo de isolamento apenas se a área for maior que 750 m²
-  document.getElementById("areaTotal").addEventListener("input", function () {
-    const area = parseFloat(this.value) || 0;
-    const item412 = document.getElementById("item412");
-    item412.disabled = !(area > 750);
-    if (!item412.disabled) {
-      item412.style.backgroundColor = "";
-    } else {
-      item412.selectedIndex = 0;
-      item412.style.backgroundColor = "#eee";
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
     }
   });
-  </script>
-  
-  <!-- Continuação da Parte 4 nas próximas seções -->
-  
+
+  const fallbackIcones = {
+    brain:"🧠",
+    clipboard:"📋",
+    repeat:"🔁",
+    droplet:"💧",
+    water:"💧",
+    calculator:"🧮",
+    wrench:"🔧",
+    settings:"⚙️",
+    gear:"⚙️",
+    printer:"🖨️",
+    cube:"🧊",
+    building:"🏢",
+    stairs:"🪜",
+    fire:"🔥",
+    flame:"🔥",
+    pump:"⚙️",
+    book:"📚",
+    database:"🗄️",
+    shield:"🛡️",
+    lock:"🔒",
+    chart:"📊",
+    home:"🏠",
+    project:"📐",
+    ruler:"📏",
+    pipe:"🔩",
+    conversion:"🔄"
+  };
+
+  function escaparHtml(valor){
+    return String(valor ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function obterIcone(valor){
+    const original = String(valor || "").trim();
+    if(!original) return "🧩";
+    const chave = original.toLocaleLowerCase("pt-BR");
+    return fallbackIcones[chave] || original;
+  }
+
+  function obterOuCriarId(chave, armazenamento){
+    let valor = armazenamento.getItem(chave);
+    if(!valor){
+      valor = crypto.randomUUID();
+      armazenamento.setItem(chave, valor);
+    }
+    return valor;
+  }
+
+  async function registrarAcesso(){
+    try{
+      const visitanteId = obterOuCriarId("sar_visitante_id", localStorage);
+      const sessaoId = obterOuCriarId("sar_sessao_id", sessionStorage);
+
+      await supabase.rpc("sar_registrar_acesso_site", {
+        p_visitante_id: visitanteId,
+        p_sessao_id: sessaoId,
+        p_pagina: window.location.pathname || "/",
+        p_origem: document.referrer || null,
+        p_user_agent: navigator.userAgent || null
+      });
+    }catch(error){
+      console.warn("SAR CMS: não foi possível registrar o acesso.", error);
+    }
+  }
+
+  async function carregarMenu(){
+    const { data, error } = await supabase.rpc("sar_site_publico_menu", {
+      p_local_menu:"cabecalho"
+    });
+
+    if(error){
+      console.error("SAR CMS — menu:", error);
+      return;
+    }
+
+    const menu = document.getElementById("menuPublico");
+    if(!menu) return;
+
+    menu.innerHTML = (data || []).map((item, indice) => `
+      <a
+        class="${indice === 0 ? "active" : ""}${item.destaque ? " destaque" : ""}"
+        href="${escaparHtml(item.link || "#")}"
+        target="${item.alvo === "_blank" ? "_blank" : "_self"}"
+        ${item.alvo === "_blank" ? 'rel="noopener noreferrer"' : ""}
+      >
+        ${item.icone ? `<span aria-hidden="true">${escaparHtml(item.icone)}</span> ` : ""}
+        ${escaparHtml(item.rotulo || "Link")}
+      </a>
+    `).join("");
+  }
+
+  function mapearSecoes(secoes){
+    return new Map((secoes || []).map(item => [String(item.chave || "").toUpperCase(), item]));
+  }
+
+  function aplicarTexto(id, valor){
+    const el = document.getElementById(id);
+    if(el && valor != null && String(valor).trim() !== ""){
+      el.textContent = valor;
+    }
+  }
+
+  function aplicarLink(id, titulo, link, ativo = true){
+    const el = document.getElementById(id);
+    if(!el) return;
+
+    if(ativo === false){
+      el.style.display = "none";
+      return;
+    }
+
+    el.style.display = "";
+    if(titulo) el.textContent = titulo;
+    if(link) el.href = link;
+  }
+
+  async function carregarConteudo(){
+    const [{ data: secoes, error: erroSecoes }, { data: paginas, error: erroPaginas }] =
+      await Promise.all([
+        supabase.rpc("sar_site_publico_secoes", { p_slug:"home" }),
+        supabase.from("sar_site_paginas")
+          .select("titulo_seo,descricao_seo")
+          .eq("slug","home")
+          .eq("ativo",true)
+          .maybeSingle()
+      ]);
+
+    if(!erroPaginas && paginas){
+      if(paginas.titulo_seo) document.title = paginas.titulo_seo;
+      const meta = document.querySelector('meta[name="description"]');
+      if(meta && paginas.descricao_seo) meta.setAttribute("content", paginas.descricao_seo);
+    }
+
+    if(erroSecoes){
+      console.error("SAR CMS — seções:", erroSecoes);
+      return;
+    }
+
+    const mapa = mapearSecoes(secoes);
+
+    const hero = mapa.get("HERO");
+    if(hero){
+      aplicarTexto("heroBadge", hero.dados?.badge || hero.subtitulo);
+      aplicarTexto("heroTitulo", hero.titulo);
+      aplicarTexto("heroDestaque", hero.dados?.destaque);
+      aplicarTexto("heroDescricao", hero.texto);
+
+      aplicarLink(
+        "btnConhecerSar",
+        hero.dados?.botao_secundario_rotulo,
+        hero.dados?.botao_secundario_link,
+        hero.dados?.botao_secundario_ativo !== false
+      );
+
+      aplicarLink(
+        "btnAcessarHero",
+        hero.dados?.botao_principal_rotulo,
+        hero.dados?.botao_principal_link || "/acesso.html",
+        hero.dados?.botao_principal_ativo !== false
+      );
+
+      aplicarLink(
+        "btnAcessarPlataforma",
+        hero.dados?.botao_cabecalho_rotulo,
+        hero.dados?.botao_cabecalho_link || "/acesso.html",
+        hero.dados?.botao_cabecalho_ativo !== false
+      );
+    }
+
+    const plataforma = mapa.get("PLATAFORMA");
+    if(plataforma){
+      aplicarTexto("plataformaTitulo", plataforma.titulo);
+      aplicarTexto("plataformaSubtitulo", plataforma.subtitulo);
+      aplicarTexto("plataformaNota", plataforma.texto);
+      aplicarTexto("plataformaRodape", plataforma.dados?.rodape);
+    }
+
+    const beneficios = mapa.get("BENEFICIOS");
+    if(beneficios && Array.isArray(beneficios.dados?.itens)){
+      beneficios.dados.itens.slice(0,6).forEach((item, indice) => {
+        aplicarTexto(`beneficioTitulo${indice + 1}`, item.titulo);
+        aplicarTexto(`beneficioTexto${indice + 1}`, item.texto);
+        const card = document.querySelector(`[data-beneficio-indice="${indice + 1}"]`);
+        if(card){
+          card.style.display = item.ativo === false ? "none" : "";
+        }
+      });
+    }
+  }
+
+  async function carregarModulosPublicos(){
+    const { data, error } = await supabase
+      .from("sar_modulos")
+      .select("id,codigo,modulo,descricao,icone,rota,em_breve,status_desenvolvimento,ordem_menu,destaque_site")
+      .eq("ativo",true)
+      .eq("exibir_site_publico",true)
+      .is("modulo_pai",null)
+      .order("destaque_site",{ascending:false})
+      .order("ordem_menu",{ascending:true});
+
+    const grid = document.getElementById("modulos");
+    if(!grid) return;
+
+    if(error){
+      console.error("SAR CMS — módulos:", error);
+      grid.innerHTML = '<article class="module-card"><h3>Módulos indisponíveis</h3><p>Não foi possível carregar os módulos neste momento.</p></article>';
+      return;
+    }
+
+    if(!(data || []).length){
+      grid.innerHTML = '<article class="module-card"><h3>Novos módulos em preparação</h3><p>Em breve novos recursos serão publicados.</p></article>';
+      return;
+    }
+
+    grid.innerHTML = data.map(item => {
+      const futuro = item.em_breve === true ||
+        String(item.status_desenvolvimento || "") === "em_desenvolvimento";
+
+      const status = item.em_breve === true
+        ? "Em breve"
+        : String(item.status_desenvolvimento || "disponivel")
+            .replaceAll("_"," ");
+
+      return `
+        <article class="module-card ${futuro ? "future" : ""}">
+          <div class="module-icon" aria-hidden="true" style="font-size:25px">
+            ${escaparHtml(obterIcone(item.icone))}
+          </div>
+          <h3>${escaparHtml(item.modulo || item.codigo)}</h3>
+          <p>${escaparHtml(item.descricao || "Módulo técnico da plataforma SAR.")}</p>
+          <span class="status-tag">${escaparHtml(status)}</span>
+        </article>
+      `;
+    }).join("");
+  }
+
+  async function inicializarSite(){
+    await Promise.allSettled([
+      carregarMenu(),
+      carregarConteudo(),
+      carregarModulosPublicos(),
+      registrarAcesso()
+    ]);
+  }
+
+  inicializarSite();
