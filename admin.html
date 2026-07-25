@@ -34,60 +34,142 @@
 
     .admin{
       min-height:100vh;
-      display:grid;
-      grid-template-columns:220px 1fr;
+      display:flex;
+      flex-direction:column;
     }
 
     .admin-sidebar{
-      padding:22px 14px;
-      border-right:1px solid var(--linha);
+      position:sticky;
+      top:0;
+      z-index:50;
+      padding:14px 24px 0;
+      border-bottom:1px solid var(--linha);
       background:#fff;
+      box-shadow:0 2px 10px rgba(20,45,45,.05);
     }
 
     .admin-brand{
-      padding:0 10px 20px;
-      margin-bottom:12px;
-      border-bottom:1px solid var(--linha);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:0 4px 12px;
+      margin:0;
+      border:0;
     }
 
     .admin-brand strong{
       display:block;
       color:var(--sar);
-      font-size:20px;
+      font-size:21px;
     }
 
     .admin-brand span{
       display:block;
-      margin-top:4px;
+      margin-top:3px;
       color:var(--muted);
       font-size:12px;
     }
 
     .admin-nav{
-      display:grid;
-      gap:7px;
+      display:flex;
+      align-items:flex-end;
+      gap:4px;
+      overflow-x:auto;
+      scrollbar-width:thin;
     }
 
     .admin-nav button{
-      width:100%;
+      flex:0 0 auto;
       min-height:44px;
-      padding:0 13px;
+      padding:0 14px;
       border:0;
-      border-radius:8px;
+      border-bottom:3px solid transparent;
+      border-radius:8px 8px 0 0;
       color:#4e5e5e;
       background:transparent;
-      font-size:14px;
-      text-align:left;
+      font-size:13px;
+      text-align:center;
+      white-space:nowrap;
       cursor:pointer;
       transition:.2s;
     }
 
     .admin-nav button:hover{background:#f0f4f4}
-    .admin-nav button.ativo{color:#fff;background:var(--sar)}
+    .admin-nav button.ativo{
+      color:#fff;
+      border-bottom-color:var(--sar-verde);
+      background:var(--sar);
+    }
 
     .admin-content{
       min-width:0;
+      width:100%;
       padding:24px;
+    }
+
+    .pagina-ajuda{
+      display:grid;
+      grid-template-columns:minmax(0,1.4fr) minmax(260px,.6fr);
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .pagina-ajuda-card{
+      padding:16px 18px;
+      border:1px solid var(--linha);
+      border-radius:10px;
+      background:#fff;
+    }
+
+    .pagina-ajuda-card h2{
+      color:var(--sar);
+      font-size:15px;
+      margin-bottom:8px;
+    }
+
+    .pagina-ajuda-card p{
+      color:#5c6b6b;
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .pagina-ajuda-card ul{
+      margin:8px 0 0 18px;
+      color:#5c6b6b;
+      font-size:13px;
+      line-height:1.7;
+    }
+
+    .pagina-ajuda-meta{
+      display:grid;
+      gap:8px;
+    }
+
+    .pagina-ajuda-meta div{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding-bottom:7px;
+      border-bottom:1px solid #edf0f0;
+      font-size:12px;
+    }
+
+    .pagina-ajuda-meta div:last-child{
+      padding-bottom:0;
+      border-bottom:0;
+    }
+
+    .pagina-ajuda-meta span{color:var(--muted)}
+    .pagina-ajuda-meta strong{color:var(--sar);text-align:right}
+
+    .estrutura-frame{
+      width:100%;
+      height:calc(100vh - 265px);
+      min-height:620px;
+      border:1px solid var(--linha);
+      border-radius:11px;
+      background:#fff;
     }
 
     .painel{display:none}
@@ -904,12 +986,20 @@
     }
 
     @media(max-width:900px){
-      .admin{grid-template-columns:1fr}
-      .admin-sidebar{border-right:0;border-bottom:1px solid var(--linha)}
-      .admin-nav{grid-template-columns:repeat(2,1fr)}
+      .admin-sidebar{padding:12px 14px 0}
+      .admin-brand{align-items:flex-start}
+      .admin-content{padding:16px}
+      .pagina-ajuda{grid-template-columns:1fr}
       .resumo{grid-template-columns:repeat(2,1fr)}
       .form-grid{grid-template-columns:1fr}
       .campo.full{grid-column:auto}
+      .estrutura-frame{height:700px;min-height:700px}
+    }
+
+    @media(max-width:560px){
+      .admin-brand span{display:none}
+      .admin-nav button{padding:0 11px;font-size:12px}
+      .resumo{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -926,6 +1016,7 @@
         <button class="ativo" data-painel="usuarios">👤 Usuários</button>
         <button data-painel="site">🌐 Site</button>
         <button data-painel="modulos">📦 Módulos</button>
+        <button data-painel="estrutura">🌳 Estrutura</button>
         <button data-painel="permissoes">🔐 Permissões</button>
         <button data-painel="logs">📊 Logs</button>
         <button data-painel="conhecimento">📚 Central de Conhecimento</button>
@@ -949,6 +1040,24 @@
             </button>
           </div>
         </header>
+
+        <section class="pagina-ajuda">
+          <article class="pagina-ajuda-card">
+            <h2>O que esta página faz</h2>
+            <p>Gerencia quem pode entrar no SAR, o tipo de conta e os módulos liberados para cada usuário.</p>
+            <ul>
+              <li>Aprovar ou bloquear usuários</li><li>Alterar o tipo de conta</li><li>Liberar módulos e ferramentas</li>
+            </ul>
+          </article>
+          <aside class="pagina-ajuda-card">
+            <h2>Impacto no sistema</h2>
+            <div class="pagina-ajuda-meta">
+              <div><span>Área</span><strong>Login e controle de acesso</strong></div>
+              <div><span>Nível</span><strong>Administração</strong></div>
+              <div><span>Alterações</span><strong>Aplicadas no SAR</strong></div>
+            </div>
+          </aside>
+        </section>
 
         <section class="resumo">
           <div class="card"><span>Total</span><strong id="totalUsuarios">0</strong></div>
@@ -998,6 +1107,24 @@
           </div>
         </header>
 
+        <section class="pagina-ajuda">
+          <article class="pagina-ajuda-card">
+            <h2>O que esta página faz</h2>
+            <p>Centraliza os textos, links e conteúdos exibidos na página pública do SAR.</p>
+            <ul>
+              <li>Editar títulos e textos comerciais</li><li>Alterar links e ordem de exibição</li><li>Ativar ou ocultar conteúdos</li>
+            </ul>
+          </article>
+          <aside class="pagina-ajuda-card">
+            <h2>Impacto no sistema</h2>
+            <div class="pagina-ajuda-meta">
+              <div><span>Área</span><strong>Site público</strong></div>
+              <div><span>Nível</span><strong>Administração</strong></div>
+              <div><span>Alterações</span><strong>Aplicadas no SAR</strong></div>
+            </div>
+          </aside>
+        </section>
+
         <div id="estadoSite" class="estado visivel">
           Abra esta seção para carregar os conteúdos.
         </div>
@@ -1023,6 +1150,24 @@
             </button>
           </div>
         </header>
+
+        <section class="pagina-ajuda">
+          <article class="pagina-ajuda-card">
+            <h2>O que esta página faz</h2>
+            <p>Cadastra e mantém os módulos, abas, ferramentas, rotas e regras de publicação do SAR.</p>
+            <ul>
+              <li>Criar e editar módulos</li><li>Definir rota, ícone e categoria</li><li>Controlar exibição no menu e no site</li>
+            </ul>
+          </article>
+          <aside class="pagina-ajuda-card">
+            <h2>Impacto no sistema</h2>
+            <div class="pagina-ajuda-meta">
+              <div><span>Área</span><strong>Estrutura funcional</strong></div>
+              <div><span>Nível</span><strong>Administração</strong></div>
+              <div><span>Alterações</span><strong>Aplicadas no SAR</strong></div>
+            </div>
+          </aside>
+        </section>
 
         <section class="resumo">
           <div class="card"><span>Total</span><strong id="totalModulos">0</strong></div>
@@ -1078,6 +1223,56 @@
         </section>
       </section>
 
+
+      <section id="painel-estrutura" class="painel">
+        <header class="cabecalho">
+          <div>
+            <h1>Estrutura do Sistema</h1>
+            <p class="subtitulo">
+              Organização visual da hierarquia Módulo → Aba → Subaba.
+            </p>
+          </div>
+
+          <div class="acoes">
+            <button id="btnRecarregarEstrutura" class="btn" type="button">
+              Recarregar
+            </button>
+          </div>
+        </header>
+
+        <section class="pagina-ajuda">
+          <article class="pagina-ajuda-card">
+            <h2>O que esta página faz</h2>
+            <p>
+              Permite reorganizar o menu do SAR sem editar SQL ou alterar o
+              sistema.html manualmente.
+            </p>
+            <ul>
+              <li>Mover itens para cima ou para baixo</li>
+              <li>Alterar o módulo pai</li>
+              <li>Transformar módulo em aba ou subaba</li>
+              <li>Salvar a nova ordem diretamente no banco</li>
+            </ul>
+          </article>
+
+          <aside class="pagina-ajuda-card">
+            <h2>Impacto no sistema</h2>
+            <div class="pagina-ajuda-meta">
+              <div><span>Área</span><strong>Menu logado</strong></div>
+              <div><span>Estrutura</span><strong>3 níveis</strong></div>
+              <div><span>Fonte</span><strong>sar_modulos</strong></div>
+            </div>
+          </aside>
+        </section>
+
+        <iframe
+          id="frameEstrutura"
+          class="estrutura-frame"
+          src="admin_organizador_estrutura.html"
+          title="Organizador visual da estrutura do SAR"
+        ></iframe>
+      </section>
+
       <section id="painel-permissoes" class="painel">
         <header class="cabecalho">
           <div>
@@ -1085,6 +1280,24 @@
             <p class="subtitulo">Controle de acesso por usuário e módulo.</p>
           </div>
         </header>
+
+        <section class="pagina-ajuda">
+          <article class="pagina-ajuda-card">
+            <h2>O que esta página faz</h2>
+            <p>Área reservada para a visão consolidada das permissões de acesso por usuário e módulo.</p>
+            <ul>
+              <li>Consultar acessos</li><li>Revisar liberações</li><li>Auditar restrições</li>
+            </ul>
+          </article>
+          <aside class="pagina-ajuda-card">
+            <h2>Impacto no sistema</h2>
+            <div class="pagina-ajuda-meta">
+              <div><span>Área</span><strong>Segurança</strong></div>
+              <div><span>Nível</span><strong>Administração</strong></div>
+              <div><span>Alterações</span><strong>Aplicadas no SAR</strong></div>
+            </div>
+          </aside>
+        </section>
         <div class="placeholder">Tela de permissões será implementada depois da gestão de usuários.</div>
       </section>
 
@@ -1095,6 +1308,24 @@
             <p class="subtitulo">Auditoria dos acessos realizados na plataforma.</p>
           </div>
         </header>
+
+        <section class="pagina-ajuda">
+          <article class="pagina-ajuda-card">
+            <h2>O que esta página faz</h2>
+            <p>Reúne os registros de acesso e atividades administrativas para auditoria.</p>
+            <ul>
+              <li>Consultar logins</li><li>Identificar falhas de acesso</li><li>Acompanhar atividades</li>
+            </ul>
+          </article>
+          <aside class="pagina-ajuda-card">
+            <h2>Impacto no sistema</h2>
+            <div class="pagina-ajuda-meta">
+              <div><span>Área</span><strong>Auditoria</strong></div>
+              <div><span>Nível</span><strong>Administração</strong></div>
+              <div><span>Alterações</span><strong>Aplicadas no SAR</strong></div>
+            </div>
+          </aside>
+        </section>
         <div class="placeholder">Tela de logs em desenvolvimento.</div>
       </section>
 
@@ -1117,6 +1348,24 @@
             </button>
           </div>
         </header>
+
+        <section class="pagina-ajuda">
+          <article class="pagina-ajuda-card">
+            <h2>O que esta página faz</h2>
+            <p>Armazena a documentação interna, padrões e orientações oficiais de uso e desenvolvimento do SAR.</p>
+            <ul>
+              <li>Criar documentação</li><li>Editar procedimentos</li><li>Manter orientações centralizadas</li>
+            </ul>
+          </article>
+          <aside class="pagina-ajuda-card">
+            <h2>Impacto no sistema</h2>
+            <div class="pagina-ajuda-meta">
+              <div><span>Área</span><strong>Documentação</strong></div>
+              <div><span>Nível</span><strong>Administração</strong></div>
+              <div><span>Alterações</span><strong>Aplicadas no SAR</strong></div>
+            </div>
+          </aside>
+        </section>
 
         <div id="estadoConhecimento" class="estado">
           Abra esta seção para carregar os conteúdos.
@@ -1169,6 +1418,24 @@
             <p class="subtitulo">Configurações gerais do SAR.</p>
           </div>
         </header>
+
+        <section class="pagina-ajuda">
+          <article class="pagina-ajuda-card">
+            <h2>O que esta página faz</h2>
+            <p>Concentrará parâmetros gerais da plataforma que não pertencem a um módulo específico.</p>
+            <ul>
+              <li>Ajustar parâmetros globais</li><li>Definir padrões administrativos</li><li>Centralizar preferências do sistema</li>
+            </ul>
+          </article>
+          <aside class="pagina-ajuda-card">
+            <h2>Impacto no sistema</h2>
+            <div class="pagina-ajuda-meta">
+              <div><span>Área</span><strong>Configuração geral</strong></div>
+              <div><span>Nível</span><strong>Administração</strong></div>
+              <div><span>Alterações</span><strong>Aplicadas no SAR</strong></div>
+            </div>
+          </aside>
+        </section>
         <div class="placeholder">Configurações gerais em desenvolvimento.</div>
       </section>
     </section>
@@ -1406,6 +1673,8 @@
     const elementos = {
       botoesNav: document.querySelectorAll("[data-painel]"),
       paineis: document.querySelectorAll(".painel"),
+      btnRecarregarEstrutura: document.getElementById("btnRecarregarEstrutura"),
+      frameEstrutura: document.getElementById("frameEstrutura"),
 
       btnAtualizarUsuarios: document.getElementById("btnAtualizarUsuarios"),
       estadoUsuarios: document.getElementById("estadoUsuarios"),
@@ -1535,7 +1804,15 @@
       });
 
       if(nome === "usuarios"){
-        carregarUsuarios();
+        if(elementos.btnRecarregarEstrutura){
+      elementos.btnRecarregarEstrutura.addEventListener("click",() => {
+        if(elementos.frameEstrutura){
+          elementos.frameEstrutura.contentWindow?.location.reload();
+        }
+      });
+    }
+
+    carregarUsuarios();
       }
 
       if(nome === "site"){
@@ -1544,6 +1821,14 @@
 
       if(nome === "conhecimento"){
         carregarConhecimento();
+      }
+
+      if(nome === "modulos"){
+        carregarModulos();
+      }
+
+      if(nome === "estrutura" && elementos.frameEstrutura){
+        elementos.frameEstrutura.contentWindow?.location.reload();
       }
     }
 
@@ -2767,6 +3052,14 @@
         fecharEdicaoUsuario();
       }
     });
+
+    if(elementos.btnRecarregarEstrutura){
+      elementos.btnRecarregarEstrutura.addEventListener("click",() => {
+        if(elementos.frameEstrutura){
+          elementos.frameEstrutura.contentWindow?.location.reload();
+        }
+      });
+    }
 
     carregarUsuarios();
   </script>
