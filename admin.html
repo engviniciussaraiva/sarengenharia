@@ -1143,6 +1143,181 @@
       }
     }
 
+
+    .dashboard-duplo{
+      display:grid;
+      grid-template-columns:minmax(0,1.35fr) minmax(320px,.65fr);
+      gap:16px;
+      margin-top:22px;
+    }
+
+    .dashboard-bloco{
+      padding:18px;
+      border:1px solid var(--linha);
+      border-radius:12px;
+      background:#fff;
+      box-shadow:0 3px 12px rgba(20,45,45,.035);
+    }
+
+    .dashboard-bloco-cabecalho{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:15px;
+    }
+
+    .dashboard-bloco-cabecalho h2{
+      margin:0;
+      color:var(--sar);
+      font-size:18px;
+    }
+
+    .dashboard-bloco-cabecalho p{
+      margin-top:5px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .saude-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+    }
+
+    .saude-item{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-height:82px;
+      padding:13px;
+      border:1px solid var(--linha);
+      border-radius:10px;
+      background:#fbfdfd;
+    }
+
+    .saude-indicador{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:34px;
+      height:34px;
+      flex:0 0 34px;
+      border-radius:50%;
+      font-size:15px;
+      font-weight:800;
+      background:#eef2f2;
+      color:#657575;
+    }
+
+    .saude-item[data-status="ok"] .saude-indicador{
+      background:#e3f6eb;
+      color:#187443;
+    }
+
+    .saude-item[data-status="alerta"] .saude-indicador{
+      background:#fff3d6;
+      color:#9a6200;
+    }
+
+    .saude-item[data-status="erro"] .saude-indicador{
+      background:#fde7e7;
+      color:#b32929;
+    }
+
+    .saude-item[data-status="carregando"] .saude-indicador{
+      background:#eef2f2;
+      color:#657575;
+    }
+
+    .saude-conteudo{
+      min-width:0;
+    }
+
+    .saude-conteudo strong{
+      display:block;
+      color:#425454;
+      font-size:13px;
+    }
+
+    .saude-conteudo span{
+      display:block;
+      margin-top:4px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.35;
+      text-transform:none;
+      letter-spacing:0;
+    }
+
+    .acoes-rapidas-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+    }
+
+    .acao-rapida{
+      display:flex;
+      align-items:center;
+      gap:11px;
+      min-height:70px;
+      padding:12px;
+      border:1px solid var(--linha);
+      border-radius:10px;
+      background:#fbfdfd;
+      color:#3f5151;
+      text-align:left;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+
+    .acao-rapida:hover{
+      transform:translateY(-1px);
+      border-color:#9eb8b5;
+      background:#f1f7f6;
+      box-shadow:0 5px 14px rgba(22,66,61,.08);
+    }
+
+    .acao-rapida-icone{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:36px;
+      height:36px;
+      flex:0 0 36px;
+      border-radius:9px;
+      background:#eaf2f1;
+      font-size:18px;
+    }
+
+    .acao-rapida strong{
+      display:block;
+      font-size:13px;
+      line-height:1.25;
+    }
+
+    .acao-rapida small{
+      display:block;
+      margin-top:3px;
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.3;
+    }
+
+    @media(max-width:980px){
+      .dashboard-duplo{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media(max-width:620px){
+      .saude-grid,
+      .acoes-rapidas-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
   </style>
 </head>
 
@@ -1323,6 +1498,146 @@
               <div class="dashboard-icone">🕘</div>
             </div>
             <small id="dashUltimoUsuario">Nenhum acesso localizado.</small>
+          </article>
+        </section>
+
+
+        <section class="dashboard-duplo">
+          <article class="dashboard-bloco">
+            <div class="dashboard-bloco-cabecalho">
+              <div>
+                <h2>Saúde do Sistema</h2>
+                <p>Verificações executadas com dados reais da sessão e do Supabase.</p>
+              </div>
+              <button id="btnTestarSaude" class="btn" type="button">
+                Testar novamente
+              </button>
+            </div>
+
+            <div class="saude-grid">
+              <div id="saudeSessao" class="saude-item" data-status="carregando">
+                <div class="saude-indicador">•</div>
+                <div class="saude-conteudo">
+                  <strong>Sessão administrativa</strong>
+                  <span>Verificando autenticação...</span>
+                </div>
+              </div>
+
+              <div id="saudeSupabase" class="saude-item" data-status="carregando">
+                <div class="saude-indicador">•</div>
+                <div class="saude-conteudo">
+                  <strong>Supabase</strong>
+                  <span>Verificando comunicação...</span>
+                </div>
+              </div>
+
+              <div id="saudeUsuarios" class="saude-item" data-status="carregando">
+                <div class="saude-indicador">•</div>
+                <div class="saude-conteudo">
+                  <strong>Cadastro de usuários</strong>
+                  <span>Verificando consulta administrativa...</span>
+                </div>
+              </div>
+
+              <div id="saudeModulos" class="saude-item" data-status="carregando">
+                <div class="saude-indicador">•</div>
+                <div class="saude-conteudo">
+                  <strong>Módulos do SAR</strong>
+                  <span>Verificando estrutura cadastrada...</span>
+                </div>
+              </div>
+
+              <div id="saudeConhecimento" class="saude-item" data-status="carregando">
+                <div class="saude-indicador">•</div>
+                <div class="saude-conteudo">
+                  <strong>Central de Conhecimento</strong>
+                  <span>Verificando disponibilidade...</span>
+                </div>
+              </div>
+
+              <div id="saudeEstrutura" class="saude-item" data-status="carregando">
+                <div class="saude-indicador">•</div>
+                <div class="saude-conteudo">
+                  <strong>Integridade da estrutura</strong>
+                  <span>Analisando vínculos entre módulos...</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="dashboard-bloco">
+            <div class="dashboard-bloco-cabecalho">
+              <div>
+                <h2>Ações Rápidas</h2>
+                <p>Atalhos para as tarefas administrativas mais usadas.</p>
+              </div>
+            </div>
+
+            <div class="acoes-rapidas-grid">
+              <button class="acao-rapida" type="button" data-acao-dashboard="aprovar-usuarios">
+                <span class="acao-rapida-icone">👤</span>
+                <span>
+                  <strong>Aprovar usuários</strong>
+                  <small>Abrir cadastros pendentes</small>
+                </span>
+              </button>
+
+              <button class="acao-rapida" type="button" data-acao-dashboard="novo-modulo">
+                <span class="acao-rapida-icone">📦</span>
+                <span>
+                  <strong>Novo módulo</strong>
+                  <small>Abrir cadastro de módulo</small>
+                </span>
+              </button>
+
+              <button class="acao-rapida" type="button" data-acao-dashboard="estrutura">
+                <span class="acao-rapida-icone">🌳</span>
+                <span>
+                  <strong>Organizar estrutura</strong>
+                  <small>Reordenar módulos e páginas</small>
+                </span>
+              </button>
+
+              <button class="acao-rapida" type="button" data-acao-dashboard="novo-conhecimento">
+                <span class="acao-rapida-icone">📚</span>
+                <span>
+                  <strong>Novo conteúdo</strong>
+                  <small>Adicionar conhecimento ao SAR</small>
+                </span>
+              </button>
+
+              <button class="acao-rapida" type="button" data-acao-dashboard="permissoes">
+                <span class="acao-rapida-icone">🔐</span>
+                <span>
+                  <strong>Permissões</strong>
+                  <small>Gerenciar acessos por usuário</small>
+                </span>
+              </button>
+
+              <button class="acao-rapida" type="button" data-acao-dashboard="logs">
+                <span class="acao-rapida-icone">📊</span>
+                <span>
+                  <strong>Logs</strong>
+                  <small>Consultar atividade registrada</small>
+                </span>
+              </button>
+
+              <button class="acao-rapida" type="button" data-acao-dashboard="configuracoes">
+                <span class="acao-rapida-icone">⚙️</span>
+                <span>
+                  <strong>Configurações</strong>
+                  <small>Abrir parâmetros gerais</small>
+                </span>
+              </button>
+
+              <button class="acao-rapida" type="button" data-acao-dashboard="sistema">
+                <span class="acao-rapida-icone">🏠</span>
+                <span>
+                  <strong>Ir para o sistema</strong>
+                  <small>Abrir o painel principal</small>
+                </span>
+              </button>
+            </div>
           </article>
         </section>
 
@@ -2009,6 +2324,16 @@
       dashboardPendencias: document.getElementById("dashboardPendencias"),
       dashboardUltimosUsuarios: document.getElementById("dashboardUltimosUsuarios"),
 
+      btnTestarSaude: document.getElementById("btnTestarSaude"),
+      saudeSessao: document.getElementById("saudeSessao"),
+      saudeSupabase: document.getElementById("saudeSupabase"),
+      saudeUsuarios: document.getElementById("saudeUsuarios"),
+      saudeModulos: document.getElementById("saudeModulos"),
+      saudeConhecimento: document.getElementById("saudeConhecimento"),
+      saudeEstrutura: document.getElementById("saudeEstrutura"),
+      acoesRapidas: document.querySelectorAll("[data-acao-dashboard]"),
+
+
 
       btnAtualizarUsuarios: document.getElementById("btnAtualizarUsuarios"),
       estadoUsuarios: document.getElementById("estadoUsuarios"),
@@ -2171,6 +2496,188 @@
     });
 
 
+
+    function definirSaude(elemento,status,mensagem){
+      if(!elemento) return;
+
+      const indicador = elemento.querySelector(".saude-indicador");
+      const texto = elemento.querySelector(".saude-conteudo span");
+
+      elemento.dataset.status = status;
+
+      const simbolos = {
+        ok:"✓",
+        alerta:"!",
+        erro:"×",
+        carregando:"•"
+      };
+
+      if(indicador){
+        indicador.textContent = simbolos[status] || "•";
+      }
+
+      if(texto){
+        texto.textContent = mensagem;
+      }
+    }
+
+    function prepararSaudeCarregando(){
+      definirSaude(elementos.saudeSessao,"carregando","Verificando autenticação...");
+      definirSaude(elementos.saudeSupabase,"carregando","Verificando comunicação...");
+      definirSaude(elementos.saudeUsuarios,"carregando","Verificando consulta administrativa...");
+      definirSaude(elementos.saudeModulos,"carregando","Verificando estrutura cadastrada...");
+      definirSaude(elementos.saudeConhecimento,"carregando","Verificando disponibilidade...");
+      definirSaude(elementos.saudeEstrutura,"carregando","Analisando vínculos entre módulos...");
+    }
+
+    function avaliarIntegridadeEstrutura(modulos){
+      const ids = new Set(modulos.map((item) => String(item.id)));
+      const orfaos = modulos.filter((item) =>
+        item.modulo_pai &&
+        !ids.has(String(item.modulo_pai))
+      );
+
+      const codigosVazios = modulos.filter((item) =>
+        !String(item.codigo || "").trim()
+      );
+
+      const codigos = new Map();
+      modulos.forEach((item) => {
+        const codigo = String(item.codigo || "").trim();
+        if(!codigo) return;
+        codigos.set(codigo,(codigos.get(codigo) || 0) + 1);
+      });
+
+      const duplicados = [...codigos.values()]
+        .filter((quantidade) => quantidade > 1)
+        .length;
+
+      return {
+        orfaos:orfaos.length,
+        codigosVazios:codigosVazios.length,
+        duplicados
+      };
+    }
+
+    function atualizarSaudeSistema({
+      sessaoOk,
+      usuariosResposta,
+      modulosResposta,
+      conhecimentoResposta
+    }){
+      definirSaude(
+        elementos.saudeSessao,
+        sessaoOk ? "ok" : "erro",
+        sessaoOk ? "Administrador autenticado." : "Sessão não validada."
+      );
+
+      const usuariosOk = !usuariosResposta?.error;
+      const modulosOk = !modulosResposta?.error;
+      const conhecimentoOk = !conhecimentoResposta?.error;
+      const supabaseOk = usuariosOk || modulosOk || conhecimentoOk;
+
+      definirSaude(
+        elementos.saudeSupabase,
+        supabaseOk ? "ok" : "erro",
+        supabaseOk
+          ? "Comunicação com o Supabase confirmada."
+          : "Não foi possível consultar o Supabase."
+      );
+
+      definirSaude(
+        elementos.saudeUsuarios,
+        usuariosOk ? "ok" : "erro",
+        usuariosOk
+          ? `${(usuariosResposta.data || []).length} usuário(s) localizado(s).`
+          : `Falha: ${usuariosResposta?.error?.message || "consulta indisponível"}`
+      );
+
+      definirSaude(
+        elementos.saudeModulos,
+        modulosOk ? "ok" : "erro",
+        modulosOk
+          ? `${(modulosResposta.data || []).length} registro(s) carregado(s).`
+          : `Falha: ${modulosResposta?.error?.message || "consulta indisponível"}`
+      );
+
+      if(conhecimentoOk){
+        const total = (conhecimentoResposta.data || []).length;
+        definirSaude(
+          elementos.saudeConhecimento,
+          total ? "ok" : "alerta",
+          total
+            ? `${total} conteúdo(s) disponível(is).`
+            : "Conectada, porém ainda sem conteúdos."
+        );
+      }else{
+        definirSaude(
+          elementos.saudeConhecimento,
+          "erro",
+          `Falha: ${conhecimentoResposta?.error?.message || "consulta indisponível"}`
+        );
+      }
+
+      if(modulosOk){
+        const integridade = avaliarIntegridadeEstrutura(modulosResposta.data || []);
+        const totalProblemas =
+          integridade.orfaos +
+          integridade.codigosVazios +
+          integridade.duplicados;
+
+        definirSaude(
+          elementos.saudeEstrutura,
+          totalProblemas ? "alerta" : "ok",
+          totalProblemas
+            ? `${integridade.orfaos} órfão(s), ${integridade.codigosVazios} código(s) vazio(s) e ${integridade.duplicados} duplicidade(s).`
+            : "Nenhum vínculo órfão ou código duplicado identificado."
+        );
+      }else{
+        definirSaude(
+          elementos.saudeEstrutura,
+          "erro",
+          "A estrutura não pôde ser analisada."
+        );
+      }
+    }
+
+    function executarAcaoRapida(acao){
+      switch(acao){
+        case "aprovar-usuarios":
+          abrirPainel("usuarios");
+          break;
+
+        case "novo-modulo":
+          abrirPainel("modulos");
+          window.setTimeout(() => abrirEdicaoModulo(),80);
+          break;
+
+        case "estrutura":
+          abrirPainel("estrutura");
+          break;
+
+        case "novo-conhecimento":
+          abrirPainel("conhecimento");
+          window.setTimeout(() => abrirEditorConhecimento(),80);
+          break;
+
+        case "permissoes":
+          abrirPainel("permissoes");
+          break;
+
+        case "logs":
+          abrirPainel("logs");
+          break;
+
+        case "configuracoes":
+          abrirPainel("configuracoes");
+          break;
+
+        case "sistema":
+          window.location.href = "/sistema.html";
+          break;
+      }
+    }
+
     function mesmaDataLocal(valor, referencia = new Date()){
       if(!valor) return false;
       const data = new Date(valor);
@@ -2314,6 +2821,8 @@
       if(!elementos.btnAtualizarDashboard) return;
 
       elementos.btnAtualizarDashboard.disabled = true;
+      if(elementos.btnTestarSaude) elementos.btnTestarSaude.disabled = true;
+      prepararSaudeCarregando();
       definirEstado(elementos.estadoDashboard,"Atualizando visão administrativa...");
 
       try{
@@ -2328,6 +2837,13 @@
           supabase.rpc("sar_admin_listar_modulos"),
           supabase.rpc("sar_admin_listar_base_conhecimento")
         ]);
+
+        atualizarSaudeSistema({
+          sessaoOk:true,
+          usuariosResposta:respostaUsuarios,
+          modulosResposta:respostaModulos,
+          conhecimentoResposta:respostaConhecimento
+        });
 
         if(respostaUsuarios.error){
           throw new Error(respostaUsuarios.error.message);
@@ -2407,8 +2923,18 @@
           error instanceof Error ? error.message : String(error),
           true
         );
+
+        if(elementos.saudeSessao?.dataset.status === "carregando"){
+          definirSaude(elementos.saudeSessao,"erro","Não foi possível validar a sessão.");
+          definirSaude(elementos.saudeSupabase,"erro","Falha durante a atualização.");
+          definirSaude(elementos.saudeUsuarios,"erro","Consulta não concluída.");
+          definirSaude(elementos.saudeModulos,"erro","Consulta não concluída.");
+          definirSaude(elementos.saudeConhecimento,"erro","Consulta não concluída.");
+          definirSaude(elementos.saudeEstrutura,"erro","Análise não concluída.");
+        }
       }finally{
         elementos.btnAtualizarDashboard.disabled = false;
+        if(elementos.btnTestarSaude) elementos.btnTestarSaude.disabled = false;
       }
     }
 
@@ -3585,6 +4111,13 @@
     }
 
     elementos.btnAtualizarDashboard.addEventListener("click",carregarDashboard);
+    elementos.btnTestarSaude.addEventListener("click",carregarDashboard);
+
+    elementos.acoesRapidas.forEach((botao) => {
+      botao.addEventListener("click",() => {
+        executarAcaoRapida(botao.dataset.acaoDashboard);
+      });
+    });
     elementos.btnAtualizarModulos.addEventListener("click",carregarModulos);
     elementos.btnNovoModulo.addEventListener("click",() => abrirEdicaoModulo());
     elementos.pesquisaModulos.addEventListener("input",filtrarModulos);
