@@ -1143,6 +1143,9 @@ document.getElementById("mainContent").innerHTML = `
 
 function obterIconeModulo(icone){
 
+    const valorIcone =
+        String(icone || "").trim();
+
     const icones = {
         home: "🏠",
         project: "📋",
@@ -1156,11 +1159,21 @@ function obterIconeModulo(icone){
         "file-pdf": "📑",
         cube: "⬡",
         brain: "🧠",
+        robot: "🤖",
         settings: "⚙️",
         users: "👥"
     };
 
-    return icones[icone] || "▣";
+    if(!valorIcone){
+        return "▣";
+    }
+
+    /*
+      Se for um nome conhecido, converte.
+      Se for emoji informado no administrador,
+      utiliza diretamente.
+    */
+    return icones[valorIcone] || valorIcone;
 }
 
 
@@ -1299,24 +1312,76 @@ function abrirModulo(modulo){
         return;
     }
 
+    /*
+      Procura o módulo principal dentro da estrutura
+      carregada diretamente do Supabase.
+    */
+    const registroModulo =
+        SAR_MENU_COMPLETO.find(function(item){
+
+            return (
+                String(item.modulo_codigo || "")
+                    .trim()
+                    .toUpperCase() === codigoModulo
+            );
+        });
+
+    const rotaModulo =
+        String(
+            registroModulo?.modulo_rota || ""
+        ).trim();
+
+    /*
+      Verifica se o módulo possui abas filhas.
+    */
+    const possuiAbas =
+        SAR_MENU_COMPLETO.some(function(item){
+
+            return (
+                String(item.modulo_codigo || "")
+                    .trim()
+                    .toUpperCase() === codigoModulo
+                &&
+                item.aba_id
+            );
+        });
+
+    /*
+      Módulo principal com rota e sem abas:
+      abre diretamente o arquivo cadastrado no admin.
+    */
+    if(rotaModulo && !possuiAbas){
+
+        document.getElementById(
+            "tabs"
+        ).style.display = "none";
+
+        esconderSubabas();
+
+        abrirArquivo(
+            rotaModulo,
+            codigoModulo
+        );
+
+        return;
+    }
+
+    /*
+      Módulo com abas:
+      mantém o comportamento atual.
+    */
     esconderSubabas();
     carregarAbas(codigoModulo);
 
-
-    document.getElementById("mainContent").innerHTML = `
-
+    document.getElementById(
+        "mainContent"
+    ).innerHTML = `
         <div class="welcome">
-
-            <h1>${modulo}</h1>
-
+            <h1>${registroModulo?.modulo_nome || modulo}</h1>
             <p>Selecione uma ferramenta acima.</p>
-
         </div>
-
     `;
-
 }
-
 
 
 function abrirArquivo(arquivo, codigoRecurso = ""){
