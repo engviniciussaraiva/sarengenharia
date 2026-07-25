@@ -1452,7 +1452,7 @@
       <nav class="admin-nav">
         <button class="ativo" data-painel="dashboard">📊 Dashboard</button>
         <button data-painel="usuarios">👤 Usuários</button>
-        <button data-painel="site">🌐 Site</button>
+        <button data-painel="site">🌐 Site (CMS)</button>
         <button data-painel="modulos">📦 Módulos</button>
         <button data-painel="estrutura">🌳 Estrutura</button>
         <button data-painel="permissoes">🔐 Permissões</button>
@@ -1845,7 +1845,7 @@
       <section id="painel-site" class="painel">
         <header class="cabecalho">
           <div>
-            <h1>CMS do Site</h1>
+            <h1>Site (CMS)</h1>
             <p class="subtitulo">Gerencie páginas, menu, conteúdo e estatísticas do site público.</p>
           </div>
 
@@ -1880,7 +1880,11 @@
           <button class="cms-tab ativo" type="button" data-cms-tab="visao-geral">Visão geral</button>
           <button class="cms-tab" type="button" data-cms-tab="paginas">Páginas</button>
           <button class="cms-tab" type="button" data-cms-tab="menu">Menu</button>
-          <button class="cms-tab" type="button" data-cms-tab="conteudo">Conteúdo</button>
+          <button class="cms-tab" type="button" data-cms-tab="conteudo">Blocos</button>
+          <button class="cms-tab" type="button" data-cms-tab="midias">Mídias</button>
+          <button class="cms-tab" type="button" data-cms-tab="formularios">Formulários</button>
+          <button class="cms-tab" type="button" data-cms-tab="seo">SEO</button>
+          <button class="cms-tab" type="button" data-cms-tab="publicacao">Publicação</button>
           <button class="cms-tab" type="button" data-cms-tab="estatisticas">Estatísticas</button>
         </nav>
 
@@ -1943,6 +1947,38 @@
             <button id="btnNovaSecaoCms" class="btn primary" type="button">+ Nova seção</button>
           </div>
           <div id="cmsListaSecoes" class="cms-lista"></div>
+        </section>
+
+
+        <section class="cms-painel" data-cms-painel="midias">
+          <div class="placeholder">
+            <strong>Mídias do site</strong><br><br>
+            Área reservada para upload no Supabase Storage e cadastro por URL.
+            Nesta etapa, imagens existentes continuam funcionando normalmente.
+          </div>
+        </section>
+
+        <section class="cms-painel" data-cms-painel="formularios">
+          <div class="placeholder">
+            <strong>Formulários públicos</strong><br><br>
+            Área reservada para contato, solicitação de acesso e captação de interessados.
+          </div>
+        </section>
+
+        <section class="cms-painel" data-cms-painel="seo">
+          <div class="placeholder">
+            <strong>SEO</strong><br><br>
+            O título e a descrição SEO já podem ser administrados na aba Páginas.
+            Esta área receberá configurações avançadas, imagem social e indexação.
+          </div>
+        </section>
+
+        <section class="cms-painel" data-cms-painel="publicacao">
+          <div class="placeholder">
+            <strong>Publicação</strong><br><br>
+            A publicação já é controlada pelos campos Ativo das páginas, itens do menu e blocos.
+            Esta área será usada para visão consolidada e publicação programada.
+          </div>
         </section>
 
         <section class="cms-painel" data-cms-painel="estatisticas">
