@@ -1001,6 +1001,148 @@
       .admin-nav button{padding:0 11px;font-size:12px}
       .resumo{grid-template-columns:1fr}
     }
+
+    .dashboard-grid{
+      display:grid;
+      grid-template-columns:repeat(12,minmax(0,1fr));
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .dashboard-card{
+      grid-column:span 3;
+      min-height:132px;
+      padding:17px;
+      border:1px solid var(--linha);
+      border-radius:12px;
+      background:#fff;
+      box-shadow:0 3px 12px rgba(20,45,45,.035);
+    }
+
+    .dashboard-card.largo{grid-column:span 6}
+    .dashboard-card.total{grid-column:span 12}
+
+    .dashboard-card-topo{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .dashboard-icone{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:38px;
+      height:38px;
+      flex:0 0 38px;
+      border-radius:10px;
+      background:#eef4f3;
+      font-size:20px;
+    }
+
+    .dashboard-card span{
+      color:var(--muted);
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.45px;
+    }
+
+    .dashboard-card strong{
+      display:block;
+      margin-top:8px;
+      color:var(--sar);
+      font-size:28px;
+      line-height:1;
+    }
+
+    .dashboard-card small{
+      display:block;
+      margin-top:9px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .dashboard-secao{
+      margin-top:22px;
+    }
+
+    .dashboard-secao h2{
+      margin-bottom:12px;
+      color:var(--sar);
+      font-size:18px;
+    }
+
+    .dashboard-lista{
+      display:grid;
+      gap:10px;
+    }
+
+    .dashboard-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:13px 14px;
+      border:1px solid var(--linha);
+      border-radius:9px;
+      background:#fff;
+    }
+
+    .dashboard-item-conteudo{
+      min-width:0;
+    }
+
+    .dashboard-item strong{
+      display:block;
+      color:#465858;
+      font-size:14px;
+    }
+
+    .dashboard-item p{
+      margin-top:4px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .dashboard-alerta{
+      border-left:4px solid var(--pendente);
+    }
+
+    .dashboard-alerta.erro{
+      border-left-color:var(--erro);
+    }
+
+    .dashboard-alerta.sucesso{
+      border-left-color:var(--sucesso);
+    }
+
+    .dashboard-vazio{
+      padding:28px 18px;
+      border:1px dashed #c8d1d1;
+      border-radius:10px;
+      color:var(--muted);
+      background:#fff;
+      text-align:center;
+    }
+
+    @media(max-width:1100px){
+      .dashboard-card{grid-column:span 6}
+      .dashboard-card.largo{grid-column:span 12}
+    }
+
+    @media(max-width:620px){
+      .dashboard-card,
+      .dashboard-card.largo,
+      .dashboard-card.total{grid-column:span 12}
+      .dashboard-item{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+    }
+
   </style>
 </head>
 
@@ -1013,7 +1155,8 @@
       </div>
 
       <nav class="admin-nav">
-        <button class="ativo" data-painel="usuarios">👤 Usuários</button>
+        <button class="ativo" data-painel="dashboard">📊 Dashboard</button>
+        <button data-painel="usuarios">👤 Usuários</button>
         <button data-painel="site">🌐 Site</button>
         <button data-painel="modulos">📦 Módulos</button>
         <button data-painel="estrutura">🌳 Estrutura</button>
@@ -1025,7 +1168,180 @@
     </aside>
 
     <section class="admin-content">
-      <section id="painel-usuarios" class="painel ativo">
+
+      <section id="painel-dashboard" class="painel ativo">
+        <header class="cabecalho">
+          <div>
+            <h1>Dashboard Administrativo</h1>
+            <p class="subtitulo">
+              Visão geral da plataforma, usuários, módulos e pendências do SAR.
+            </p>
+          </div>
+
+          <div class="acoes">
+            <button id="btnAtualizarDashboard" class="btn" type="button">
+              Atualizar painel
+            </button>
+          </div>
+        </header>
+
+        <section class="pagina-ajuda">
+          <article class="pagina-ajuda-card">
+            <h2>O que esta página faz</h2>
+            <p>
+              Resume as principais informações administrativas do SAR e destaca
+              situações que precisam de análise.
+            </p>
+            <ul>
+              <li>Acompanha usuários ativos e aguardando aprovação</li>
+              <li>Mostra o estado dos módulos cadastrados</li>
+              <li>Aponta rotas ausentes e itens fora do menu</li>
+              <li>Facilita o acesso às áreas que exigem ação</li>
+            </ul>
+          </article>
+
+          <aside class="pagina-ajuda-card">
+            <h2>Impacto no sistema</h2>
+            <div class="pagina-ajuda-meta">
+              <div><span>Área</span><strong>Visão administrativa</strong></div>
+              <div><span>Fonte</span><strong>Dados reais do Supabase</strong></div>
+              <div><span>Atualização</span><strong>Sob demanda</strong></div>
+            </div>
+          </aside>
+        </section>
+
+        <div id="estadoDashboard" class="estado visivel">
+          Carregando visão geral do SAR...
+        </div>
+
+        <section class="dashboard-grid">
+          <article class="dashboard-card">
+            <div class="dashboard-card-topo">
+              <div>
+                <span>Usuários</span>
+                <strong id="dashUsuariosTotal">0</strong>
+              </div>
+              <div class="dashboard-icone">👤</div>
+            </div>
+            <small>Total de contas cadastradas.</small>
+          </article>
+
+          <article class="dashboard-card">
+            <div class="dashboard-card-topo">
+              <div>
+                <span>Ativos</span>
+                <strong id="dashUsuariosAtivos">0</strong>
+              </div>
+              <div class="dashboard-icone">✅</div>
+            </div>
+            <small>Usuários liberados para acessar a plataforma.</small>
+          </article>
+
+          <article class="dashboard-card">
+            <div class="dashboard-card-topo">
+              <div>
+                <span>Aguardando aprovação</span>
+                <strong id="dashUsuariosPendentes">0</strong>
+              </div>
+              <div class="dashboard-icone">⏳</div>
+            </div>
+            <small>Contas que ainda permanecem bloqueadas.</small>
+          </article>
+
+          <article class="dashboard-card">
+            <div class="dashboard-card-topo">
+              <div>
+                <span>Acessaram hoje</span>
+                <strong id="dashAcessosHoje">0</strong>
+              </div>
+              <div class="dashboard-icone">📅</div>
+            </div>
+            <small>Usuários com último login registrado na data de hoje.</small>
+          </article>
+
+          <article class="dashboard-card">
+            <div class="dashboard-card-topo">
+              <div>
+                <span>Módulos</span>
+                <strong id="dashModulosTotal">0</strong>
+              </div>
+              <div class="dashboard-icone">📦</div>
+            </div>
+            <small>Total de registros na estrutura do SAR.</small>
+          </article>
+
+          <article class="dashboard-card">
+            <div class="dashboard-card-topo">
+              <div>
+                <span>Módulos ativos</span>
+                <strong id="dashModulosAtivos">0</strong>
+              </div>
+              <div class="dashboard-icone">🟢</div>
+            </div>
+            <small>Recursos atualmente habilitados.</small>
+          </article>
+
+          <article class="dashboard-card">
+            <div class="dashboard-card-topo">
+              <div>
+                <span>No menu</span>
+                <strong id="dashModulosMenu">0</strong>
+              </div>
+              <div class="dashboard-icone">🧭</div>
+            </div>
+            <small>Itens configurados para aparecer no sistema logado.</small>
+          </article>
+
+          <article class="dashboard-card">
+            <div class="dashboard-card-topo">
+              <div>
+                <span>Em desenvolvimento</span>
+                <strong id="dashModulosDesenvolvimento">0</strong>
+              </div>
+              <div class="dashboard-icone">🛠️</div>
+            </div>
+            <small>Funcionalidades ainda em construção.</small>
+          </article>
+
+          <article class="dashboard-card largo">
+            <div class="dashboard-card-topo">
+              <div>
+                <span>Central de Conhecimento</span>
+                <strong id="dashConhecimentoTotal">0</strong>
+              </div>
+              <div class="dashboard-icone">📚</div>
+            </div>
+            <small id="dashConhecimentoUltimo">Nenhum conteúdo carregado.</small>
+          </article>
+
+          <article class="dashboard-card largo">
+            <div class="dashboard-card-topo">
+              <div>
+                <span>Último acesso registrado</span>
+                <strong id="dashUltimoAcesso" style="font-size:19px;line-height:1.25">—</strong>
+              </div>
+              <div class="dashboard-icone">🕘</div>
+            </div>
+            <small id="dashUltimoUsuario">Nenhum acesso localizado.</small>
+          </article>
+        </section>
+
+        <section class="dashboard-secao">
+          <h2>Pendências administrativas</h2>
+          <div id="dashboardPendencias" class="dashboard-lista">
+            <div class="dashboard-vazio">Analisando pendências...</div>
+          </div>
+        </section>
+
+        <section class="dashboard-secao">
+          <h2>Últimos usuários cadastrados</h2>
+          <div id="dashboardUltimosUsuarios" class="dashboard-lista">
+            <div class="dashboard-vazio">Carregando usuários recentes...</div>
+          </div>
+        </section>
+      </section>
+
+      <section id="painel-usuarios" class="painel">
         <header class="cabecalho">
           <div>
             <h1>Usuários</h1>
@@ -1676,6 +1992,24 @@
       btnRecarregarEstrutura: document.getElementById("btnRecarregarEstrutura"),
       frameEstrutura: document.getElementById("frameEstrutura"),
 
+      btnAtualizarDashboard: document.getElementById("btnAtualizarDashboard"),
+      estadoDashboard: document.getElementById("estadoDashboard"),
+      dashUsuariosTotal: document.getElementById("dashUsuariosTotal"),
+      dashUsuariosAtivos: document.getElementById("dashUsuariosAtivos"),
+      dashUsuariosPendentes: document.getElementById("dashUsuariosPendentes"),
+      dashAcessosHoje: document.getElementById("dashAcessosHoje"),
+      dashModulosTotal: document.getElementById("dashModulosTotal"),
+      dashModulosAtivos: document.getElementById("dashModulosAtivos"),
+      dashModulosMenu: document.getElementById("dashModulosMenu"),
+      dashModulosDesenvolvimento: document.getElementById("dashModulosDesenvolvimento"),
+      dashConhecimentoTotal: document.getElementById("dashConhecimentoTotal"),
+      dashConhecimentoUltimo: document.getElementById("dashConhecimentoUltimo"),
+      dashUltimoAcesso: document.getElementById("dashUltimoAcesso"),
+      dashUltimoUsuario: document.getElementById("dashUltimoUsuario"),
+      dashboardPendencias: document.getElementById("dashboardPendencias"),
+      dashboardUltimosUsuarios: document.getElementById("dashboardUltimosUsuarios"),
+
+
       btnAtualizarUsuarios: document.getElementById("btnAtualizarUsuarios"),
       estadoUsuarios: document.getElementById("estadoUsuarios"),
       corpoUsuarios: document.getElementById("corpoUsuarios"),
@@ -1835,6 +2169,248 @@
     elementos.botoesNav.forEach((botao) => {
       botao.addEventListener("click", () => abrirPainel(botao.dataset.painel));
     });
+
+
+    function mesmaDataLocal(valor, referencia = new Date()){
+      if(!valor) return false;
+      const data = new Date(valor);
+      if(Number.isNaN(data.getTime())) return false;
+
+      return (
+        data.getFullYear() === referencia.getFullYear() &&
+        data.getMonth() === referencia.getMonth() &&
+        data.getDate() === referencia.getDate()
+      );
+    }
+
+    function renderizarDashboardPendencias(usuarios, modulos){
+      const pendencias = [];
+
+      const usuariosPendentes = usuarios.filter((item) => item.ativo !== true).length;
+      const modulosSemRota = modulos.filter((item) =>
+        item.ativo === true &&
+        !item.modulo_pai &&
+        !String(item.rota || "").trim()
+      ).length;
+      const ativosForaMenu = modulos.filter((item) =>
+        item.ativo === true &&
+        item.exibir_menu_logado !== true &&
+        String(item.status_desenvolvimento || "") !== "desativado"
+      ).length;
+      const emDesenvolvimento = modulos.filter((item) =>
+        String(item.status_desenvolvimento || "") === "em_desenvolvimento"
+      ).length;
+      const emBreve = modulos.filter((item) => item.em_breve === true).length;
+
+      if(usuariosPendentes){
+        pendencias.push({
+          titulo:`${usuariosPendentes} usuário(s) aguardando aprovação`,
+          texto:"Analise as contas pendentes e defina o acesso necessário.",
+          painel:"usuarios",
+          classe:"erro"
+        });
+      }
+
+      if(modulosSemRota){
+        pendencias.push({
+          titulo:`${modulosSemRota} módulo(s) principal(is) ativo(s) sem rota`,
+          texto:"Confira se estes itens são apenas agrupadores ou se falta definir uma página.",
+          painel:"modulos",
+          classe:""
+        });
+      }
+
+      if(ativosForaMenu){
+        pendencias.push({
+          titulo:`${ativosForaMenu} recurso(s) ativo(s) fora do menu`,
+          texto:"Verifique se a ocultação é intencional.",
+          painel:"modulos",
+          classe:""
+        });
+      }
+
+      if(emDesenvolvimento){
+        pendencias.push({
+          titulo:`${emDesenvolvimento} recurso(s) em desenvolvimento`,
+          texto:"Acompanhe o andamento antes da liberação ao usuário.",
+          painel:"modulos",
+          classe:""
+        });
+      }
+
+      if(emBreve){
+        pendencias.push({
+          titulo:`${emBreve} recurso(s) marcado(s) como “Em breve”`,
+          texto:"Esses itens podem aparecer como funcionalidades futuras.",
+          painel:"modulos",
+          classe:""
+        });
+      }
+
+      if(!pendencias.length){
+        elementos.dashboardPendencias.innerHTML = `
+          <article class="dashboard-item dashboard-alerta sucesso">
+            <div class="dashboard-item-conteudo">
+              <strong>Nenhuma pendência crítica identificada</strong>
+              <p>Os dados administrativos analisados não apresentam alertas.</p>
+            </div>
+          </article>
+        `;
+        return;
+      }
+
+      elementos.dashboardPendencias.innerHTML = pendencias.map((item) => `
+        <article class="dashboard-item dashboard-alerta ${item.classe}">
+          <div class="dashboard-item-conteudo">
+            <strong>${escaparHtml(item.titulo)}</strong>
+            <p>${escaparHtml(item.texto)}</p>
+          </div>
+          <button class="btn" type="button" data-dashboard-abrir="${item.painel}">
+            Abrir área
+          </button>
+        </article>
+      `).join("");
+
+      elementos.dashboardPendencias
+        .querySelectorAll("[data-dashboard-abrir]")
+        .forEach((botao) => {
+          botao.addEventListener("click",() => {
+            abrirPainel(botao.dataset.dashboardAbrir);
+          });
+        });
+    }
+
+    function renderizarUltimosUsuariosDashboard(usuarios){
+      const recentes = [...usuarios]
+        .sort((a,b) =>
+          new Date(b.created_at || 0).getTime() -
+          new Date(a.created_at || 0).getTime()
+        )
+        .slice(0,5);
+
+      if(!recentes.length){
+        elementos.dashboardUltimosUsuarios.innerHTML =
+          '<div class="dashboard-vazio">Nenhum usuário cadastrado.</div>';
+        return;
+      }
+
+      elementos.dashboardUltimosUsuarios.innerHTML = recentes.map((usuario) => `
+        <article class="dashboard-item">
+          <div class="dashboard-item-conteudo">
+            <strong>${escaparHtml(usuario.nome || "Sem nome")}</strong>
+            <p>
+              ${escaparHtml(usuario.email || "—")} ·
+              Cadastro: ${formatarData(usuario.created_at)}
+            </p>
+          </div>
+          <span class="status ${usuario.ativo === true ? "ativo" : "pendente"}">
+            ${usuario.ativo === true ? "Ativo" : "Pendente"}
+          </span>
+        </article>
+      `).join("");
+    }
+
+    async function carregarDashboard(){
+      if(!elementos.btnAtualizarDashboard) return;
+
+      elementos.btnAtualizarDashboard.disabled = true;
+      definirEstado(elementos.estadoDashboard,"Atualizando visão administrativa...");
+
+      try{
+        if(!await validarSessao()) return;
+
+        const [
+          respostaUsuarios,
+          respostaModulos,
+          respostaConhecimento
+        ] = await Promise.all([
+          supabase.rpc("sar_admin_listar_usuarios"),
+          supabase.rpc("sar_admin_listar_modulos"),
+          supabase.rpc("sar_admin_listar_base_conhecimento")
+        ]);
+
+        if(respostaUsuarios.error){
+          throw new Error(respostaUsuarios.error.message);
+        }
+
+        if(respostaModulos.error){
+          throw new Error(respostaModulos.error.message);
+        }
+
+        const usuarios = respostaUsuarios.data || [];
+        const modulos = respostaModulos.data || [];
+        const conhecimentos = respostaConhecimento.error
+          ? []
+          : (respostaConhecimento.data || []);
+
+        usuariosCache = usuarios;
+        modulosCache = modulos;
+        conhecimentoCache = conhecimentos;
+
+        const hoje = new Date();
+        const ativos = usuarios.filter((item) => item.ativo === true);
+        const pendentes = usuarios.filter((item) => item.ativo !== true);
+        const acessaramHoje = usuarios.filter((item) =>
+          mesmaDataLocal(item.ultimo_login,hoje)
+        );
+
+        const modulosAtivos = modulos.filter((item) => item.ativo === true);
+        const modulosMenu = modulos.filter((item) =>
+          item.exibir_menu_logado === true
+        );
+        const modulosDesenvolvimento = modulos.filter((item) =>
+          String(item.status_desenvolvimento || "") === "em_desenvolvimento"
+        );
+
+        elementos.dashUsuariosTotal.textContent = usuarios.length;
+        elementos.dashUsuariosAtivos.textContent = ativos.length;
+        elementos.dashUsuariosPendentes.textContent = pendentes.length;
+        elementos.dashAcessosHoje.textContent = acessaramHoje.length;
+        elementos.dashModulosTotal.textContent = modulos.length;
+        elementos.dashModulosAtivos.textContent = modulosAtivos.length;
+        elementos.dashModulosMenu.textContent = modulosMenu.length;
+        elementos.dashModulosDesenvolvimento.textContent =
+          modulosDesenvolvimento.length;
+        elementos.dashConhecimentoTotal.textContent = conhecimentos.length;
+
+        const conhecimentoMaisRecente = [...conhecimentos].sort((a,b) =>
+          new Date(b.atualizado_em || 0).getTime() -
+          new Date(a.atualizado_em || 0).getTime()
+        )[0];
+
+        elementos.dashConhecimentoUltimo.textContent = conhecimentoMaisRecente
+          ? `Última atualização: ${conhecimentoMaisRecente.titulo || "Sem título"} — ${formatarData(conhecimentoMaisRecente.atualizado_em)}`
+          : "Nenhum conteúdo cadastrado ou acesso indisponível.";
+
+        const ultimoUsuario = [...usuarios]
+          .filter((item) => item.ultimo_login)
+          .sort((a,b) =>
+            new Date(b.ultimo_login).getTime() -
+            new Date(a.ultimo_login).getTime()
+          )[0];
+
+        elementos.dashUltimoAcesso.textContent = ultimoUsuario
+          ? formatarData(ultimoUsuario.ultimo_login)
+          : "—";
+
+        elementos.dashUltimoUsuario.textContent = ultimoUsuario
+          ? `${ultimoUsuario.nome || "Sem nome"} · ${ultimoUsuario.email || "—"}`
+          : "Nenhum acesso localizado.";
+
+        renderizarDashboardPendencias(usuarios,modulos);
+        renderizarUltimosUsuariosDashboard(usuarios);
+        ocultarEstado(elementos.estadoDashboard);
+
+      }catch(error){
+        definirEstado(
+          elementos.estadoDashboard,
+          error instanceof Error ? error.message : String(error),
+          true
+        );
+      }finally{
+        elementos.btnAtualizarDashboard.disabled = false;
+      }
+    }
 
     function atualizarResumoUsuarios(usuarios){
       elementos.totalUsuarios.textContent = usuarios.length;
@@ -3008,6 +3584,7 @@
       }
     }
 
+    elementos.btnAtualizarDashboard.addEventListener("click",carregarDashboard);
     elementos.btnAtualizarModulos.addEventListener("click",carregarModulos);
     elementos.btnNovoModulo.addEventListener("click",() => abrirEdicaoModulo());
     elementos.pesquisaModulos.addEventListener("input",filtrarModulos);
@@ -3060,8 +3637,7 @@
         }
       });
     }
-
-    carregarUsuarios();
+    carregarDashboard();
   </script>
 </body>
 </html>
