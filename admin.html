@@ -1,4176 +1,735 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SAR | Administração</title>
-
-  <style>
-    :root{
-      --sar:#315858;
-      --sar-verde:#7cb342;
-      --fundo:#f5f6f8;
-      --painel:#ffffff;
-      --linha:#dfe4e4;
-      --texto:#374343;
-      --muted:#718080;
-      --sucesso:#16834b;
-      --sucesso-bg:#e9f7ef;
-      --pendente:#a86d00;
-      --pendente-bg:#fff6dc;
-      --erro:#b83232;
-      --erro-bg:#fff0f0;
-      --overlay:rgba(15,28,28,.34);
-    }
-
-    *{box-sizing:border-box;margin:0;padding:0}
-
-    body{
-      min-height:100vh;
-      color:var(--texto);
-      font-family:Segoe UI,Arial,sans-serif;
-      background:var(--fundo);
-    }
-
-    .admin{
-      min-height:100vh;
-      display:flex;
-      flex-direction:column;
-    }
-
-    .admin-sidebar{
-      position:sticky;
-      top:0;
-      z-index:50;
-      padding:14px 24px 0;
-      border-bottom:1px solid var(--linha);
-      background:#fff;
-      box-shadow:0 2px 10px rgba(20,45,45,.05);
-    }
-
-    .admin-brand{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      padding:0 4px 12px;
-      margin:0;
-      border:0;
-    }
-
-    .admin-brand strong{
-      display:block;
-      color:var(--sar);
-      font-size:21px;
-    }
-
-    .admin-brand span{
-      display:block;
-      margin-top:3px;
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    .admin-nav{
-      display:flex;
-      align-items:flex-end;
-      gap:4px;
-      overflow-x:auto;
-      scrollbar-width:thin;
-    }
-
-    .admin-nav button{
-      flex:0 0 auto;
-      min-height:44px;
-      padding:0 14px;
-      border:0;
-      border-bottom:3px solid transparent;
-      border-radius:8px 8px 0 0;
-      color:#4e5e5e;
-      background:transparent;
-      font-size:13px;
-      text-align:center;
-      white-space:nowrap;
-      cursor:pointer;
-      transition:.2s;
-    }
-
-    .admin-nav button:hover{background:#f0f4f4}
-    .admin-nav button.ativo{
-      color:#fff;
-      border-bottom-color:var(--sar-verde);
-      background:var(--sar);
-    }
-
-    .admin-content{
-      min-width:0;
-      width:100%;
-      padding:24px;
-    }
-
-    .pagina-ajuda{
-      display:grid;
-      grid-template-columns:minmax(0,1.4fr) minmax(260px,.6fr);
-      gap:14px;
-      margin-bottom:18px;
-    }
-
-    .pagina-ajuda-card{
-      padding:16px 18px;
-      border:1px solid var(--linha);
-      border-radius:10px;
-      background:#fff;
-    }
-
-    .pagina-ajuda-card h2{
-      color:var(--sar);
-      font-size:15px;
-      margin-bottom:8px;
-    }
-
-    .pagina-ajuda-card p{
-      color:#5c6b6b;
-      font-size:13px;
-      line-height:1.6;
-    }
-
-    .pagina-ajuda-card ul{
-      margin:8px 0 0 18px;
-      color:#5c6b6b;
-      font-size:13px;
-      line-height:1.7;
-    }
-
-    .pagina-ajuda-meta{
-      display:grid;
-      gap:8px;
-    }
-
-    .pagina-ajuda-meta div{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      padding-bottom:7px;
-      border-bottom:1px solid #edf0f0;
-      font-size:12px;
-    }
-
-    .pagina-ajuda-meta div:last-child{
-      padding-bottom:0;
-      border-bottom:0;
-    }
-
-    .pagina-ajuda-meta span{color:var(--muted)}
-    .pagina-ajuda-meta strong{color:var(--sar);text-align:right}
-
-    .estrutura-frame{
-      width:100%;
-      height:calc(100vh - 265px);
-      min-height:620px;
-      border:1px solid var(--linha);
-      border-radius:11px;
-      background:#fff;
-    }
-
-    .painel{display:none}
-    .painel.ativo{display:block}
-
-    .cabecalho{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:20px;
-      margin-bottom:20px;
-    }
-
-    h1{
-      color:var(--sar);
-      font-size:28px;
-      line-height:1.2;
-    }
-
-    .subtitulo{
-      margin-top:6px;
-      color:var(--muted);
-      font-size:14px;
-      line-height:1.5;
-    }
-
-    .acoes{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .btn{
-      min-height:40px;
-      padding:0 16px;
-      border:1px solid var(--linha);
-      border-radius:8px;
-      color:var(--texto);
-      background:#fff;
-      font-weight:700;
-      cursor:pointer;
-      transition:.2s;
-    }
-
-    .btn:hover{
-      transform:translateY(-1px);
-      border-color:#bcc9c9;
-    }
-
-    .btn.primary{
-      color:#fff;
-      border-color:var(--sar);
-      background:var(--sar);
-    }
-
-    .btn.danger{
-      color:#fff;
-      border-color:#a73434;
-      background:#a73434;
-    }
-
-    .btn:disabled{
-      cursor:not-allowed;
-      opacity:.55;
-      transform:none;
-    }
-
-    .resumo{
-      display:grid;
-      grid-template-columns:repeat(4,minmax(150px,1fr));
-      gap:12px;
-      margin-bottom:18px;
-    }
-
-    .card{
-      padding:16px;
-      border:1px solid var(--linha);
-      border-radius:10px;
-      background:var(--painel);
-    }
-
-    .card span{
-      display:block;
-      color:var(--muted);
-      font-size:12px;
-      text-transform:uppercase;
-      letter-spacing:.5px;
-    }
-
-    .card strong{
-      display:block;
-      margin-top:7px;
-      color:var(--sar);
-      font-size:25px;
-    }
-
-    .estado{
-      display:none;
-      margin-bottom:16px;
-      padding:14px 16px;
-      border:1px solid var(--linha);
-      border-radius:9px;
-      color:var(--muted);
-      background:#fff;
-      line-height:1.5;
-    }
-
-    .estado.visivel{display:block}
-
-    .estado.erro{
-      color:var(--erro);
-      border-color:#efcaca;
-      background:var(--erro-bg);
-    }
-
-    .tabela-wrapper{
-      overflow:auto;
-      border:1px solid var(--linha);
-      border-radius:11px;
-      background:var(--painel);
-    }
-
-    table{
-      width:100%;
-      min-width:1100px;
-      border-collapse:collapse;
-    }
-
-    th,td{
-      padding:13px 14px;
-      border-bottom:1px solid #edf0f0;
-      text-align:left;
-      vertical-align:middle;
-    }
-
-    th{
-      position:sticky;
-      top:0;
-      z-index:1;
-      color:#526161;
-      background:#f8fafa;
-      font-size:12px;
-      text-transform:uppercase;
-      letter-spacing:.45px;
-    }
-
-    td{font-size:14px}
-    tbody tr:hover{background:#fbfcfc}
-    tbody tr:last-child td{border-bottom:none}
-
-    .nome{color:var(--sar);font-weight:750}
-    .email{color:#536363}
-
-    .tipo{
-      display:inline-flex;
-      padding:5px 9px;
-      border-radius:999px;
-      color:#3f5555;
-      background:#edf2f2;
-      font-size:11px;
-      font-weight:800;
-      text-transform:uppercase;
-    }
-
-    .tipo.master{color:#fff;background:var(--sar)}
-
-    .status{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:5px 9px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:800;
-      text-transform:uppercase;
-    }
-
-    .status.ativo{color:var(--sucesso);background:var(--sucesso-bg)}
-    .status.pendente{color:var(--pendente);background:var(--pendente-bg)}
-
-    .status::before{
-      content:"";
-      width:7px;
-      height:7px;
-      border-radius:50%;
-      background:currentColor;
-    }
-
-    .data{
-      color:#647272;
-      white-space:nowrap;
-      font-size:13px;
-    }
-
-    .vazio{
-      padding:40px 20px !important;
-      color:var(--muted);
-      text-align:center;
-    }
-
-    .editor-site{
-      display:grid;
-      gap:14px;
-    }
-
-    .conteudo-card{
-      padding:18px;
-      border:1px solid var(--linha);
-      border-radius:11px;
-      background:#fff;
-    }
-
-    .conteudo-card h3{
-      color:var(--sar);
-      font-size:15px;
-    }
-
-    .conteudo-card small{
-      display:block;
-      margin-top:4px;
-      color:var(--muted);
-    }
-
-    .form-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      margin-top:15px;
-    }
-
-    .campo{
-      display:grid;
-      gap:6px;
-    }
-
-    .campo.full{grid-column:1/-1}
-
-    .campo label{
-      color:#596868;
-      font-size:12px;
-      font-weight:700;
-    }
-
-    .campo input,
-    .campo textarea,
-    .campo select{
-      width:100%;
-      padding:10px 11px;
-      border:1px solid var(--linha);
-      border-radius:7px;
-      color:var(--texto);
-      background:#fff;
-      font:inherit;
-    }
-
-    .campo textarea{
-      min-height:90px;
-      resize:vertical;
-    }
-
-    .linha-acoes{
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
-      margin-top:14px;
-    }
-
-    .placeholder{
-      padding:50px 20px;
-      border:1px dashed #c8d1d1;
-      border-radius:10px;
-      color:var(--muted);
-      background:#fff;
-      text-align:center;
-    }
-
-    .drawer-overlay{
-      position:fixed;
-      inset:0;
-      z-index:1000;
-      display:none;
-      background:var(--overlay);
-    }
-
-    .drawer-overlay.aberto{display:block}
-
-    .drawer{
-      position:absolute;
-      top:0;
-      right:0;
-      width:min(460px,100%);
-      height:100%;
-      padding:22px;
-      overflow:auto;
-      border-left:1px solid var(--linha);
-      background:#fff;
-      box-shadow:-18px 0 50px rgba(0,0,0,.16);
-    }
-
-    .drawer-topo{
-      display:flex;
-      justify-content:space-between;
-      gap:14px;
-      margin-bottom:18px;
-    }
-
-    .drawer-topo h2{
-      color:var(--sar);
-      font-size:23px;
-    }
-
-    .drawer-topo p{
-      margin-top:5px;
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.45;
-    }
-
-    .drawer-fechar{
-      width:36px;
-      height:36px;
-      border:1px solid var(--linha);
-      border-radius:8px;
-      background:#fff;
-      font-size:19px;
-      cursor:pointer;
-    }
-
-    .identidade{
-      padding:14px;
-      margin-bottom:16px;
-      border:1px solid var(--linha);
-      border-radius:9px;
-      background:#f8fafa;
-    }
-
-    .identidade strong{
-      display:block;
-      color:var(--sar);
-      font-size:16px;
-    }
-
-    .identidade span{
-      display:block;
-      margin-top:4px;
-      color:var(--muted);
-      overflow-wrap:anywhere;
-      font-size:13px;
-    }
-
-    .switch-row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:15px;
-      padding:13px 0;
-      border-bottom:1px solid #edf0f0;
-    }
-
-    .switch-row strong{
-      display:block;
-      color:#4c5d5d;
-      font-size:14px;
-    }
-
-    .switch-row small{
-      display:block;
-      margin-top:3px;
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    .switch-row input{
-      width:20px;
-      height:20px;
-    }
-
-    .permissoes-bloco{
-      margin-top:18px;
-      padding-top:18px;
-      border-top:1px solid var(--linha);
-    }
-
-    .permissoes-cabecalho{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:14px;
-      margin-bottom:12px;
-    }
-
-    .permissoes-cabecalho h3{
-      color:var(--sar);
-      font-size:16px;
-    }
-
-    .permissoes-cabecalho p{
-      margin-top:4px;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.45;
-    }
-
-    .legenda-permissoes{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:10px;
-      margin:12px 0 16px;
-    }
-
-    .legenda-permissoes div{
-      padding:11px 12px;
-      border:1px solid var(--linha);
-      border-radius:8px;
-      background:#f8fafa;
-    }
-
-    .legenda-permissoes-simples{
-      grid-template-columns:repeat(2,minmax(0,1fr));
-    }
-
-    .legenda-permissoes strong{
-      display:block;
-      margin-bottom:4px;
-      color:var(--sar);
-      font-size:12px;
-    }
-
-    .legenda-permissoes span{
-      display:block;
-      color:var(--muted);
-      font-size:11px;
-      line-height:1.45;
-    }
-
-    .permissoes-lista{
-      display:grid;
-      gap:10px;
-    }
-
-    .permissao-card{
-      --nivel:0;
-      position:relative;
-      margin-left:calc(var(--nivel) * 22px);
-      padding:13px;
-      border:1px solid var(--linha);
-      border-radius:9px;
-      background:#fbfcfc;
-    }
-
-    .permissao-card.nivel-0{
-      border-color:#cdd9d9;
-      background:#f8fafa;
-    }
-
-    .permissao-card.nivel-1{
-      background:#fcfdfd;
-    }
-
-    .permissao-card.nivel-2{
-      background:#fff;
-    }
-
-    .permissao-card.nivel-1::before,
-    .permissao-card.nivel-2::before{
-      content:"";
-      position:absolute;
-      left:-13px;
-      top:-11px;
-      width:10px;
-      height:34px;
-      border-left:1px solid #cfd8d8;
-      border-bottom:1px solid #cfd8d8;
-      border-bottom-left-radius:6px;
-    }
-
-    .permissao-nivel{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      margin-top:4px;
-      color:var(--muted);
-      font-size:10px;
-      text-transform:uppercase;
-      letter-spacing:.35px;
-    }
-
-    .permissao-modulo{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:10px;
-    }
-
-    .permissao-modulo strong{
-      color:#465858;
-      font-size:14px;
-    }
-
-    .permissao-modulo small{
-      color:var(--muted);
-      font-size:11px;
-    }
-
-    .permissoes-grid{
-      display:flex;
-      justify-content:flex-end;
-      align-items:center;
-      gap:8px;
-    }
-
-    .permissao-check{
-      display:flex;
-      align-items:center;
-      gap:7px;
-      min-height:34px;
-      padding:7px 8px;
-      border:1px solid #e7ecec;
-      border-radius:7px;
-      background:#fff;
-      color:#526262;
-      font-size:11px;
-      font-weight:700;
-      cursor:pointer;
-      user-select:none;
-    }
-
-    .permissao-check input{
-      width:16px;
-      height:16px;
-      flex:0 0 auto;
-    }
-
-    .permissoes-carregando{
-      padding:18px;
-      border:1px dashed #c8d1d1;
-      border-radius:9px;
-      color:var(--muted);
-      text-align:center;
-    }
-
-    .drawer-acoes{
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
-      margin-top:22px;
-    }
-
-
-    .conhecimento-toolbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:16px;
-    }
-
-    .conhecimento-lista{
-      display:grid;
-      gap:12px;
-    }
-
-    .conhecimento-item{
-      padding:18px;
-      border:1px solid var(--linha);
-      border-radius:11px;
-      background:#fff;
-    }
-
-    .conhecimento-item-topo{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:16px;
-    }
-
-    .conhecimento-item h3{
-      color:var(--sar);
-      font-size:17px;
-      line-height:1.35;
-    }
-
-    .conhecimento-item p{
-      margin-top:8px;
-      color:#566666;
-      line-height:1.6;
-      white-space:pre-wrap;
-    }
-
-    .conhecimento-meta{
-      display:block;
-      margin-top:10px;
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    .conhecimento-acoes{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      flex:0 0 auto;
-    }
-
-    .conhecimento-conteudo{
-      margin-top:16px;
-      padding-top:16px;
-      border-top:1px solid var(--linha);
-      color:#566666;
-      line-height:1.7;
-      white-space:pre-wrap;
-    }
-
-    .conhecimento-conteudo[hidden]{
-      display:none;
-    }
-
-    .editor-conhecimento{
-      display:none;
-      margin-bottom:18px;
-      padding:18px;
-      border:1px solid var(--linha);
-      border-radius:11px;
-      background:#fff;
-    }
-
-    .editor-conhecimento.aberto{
-      display:block;
-    }
-
-    .editor-conhecimento h2{
-      color:var(--sar);
-      font-size:20px;
-      margin-bottom:14px;
-    }
-
-    .editor-conhecimento textarea{
-      min-height:320px;
-    }
-
-
-    .modulos-filtros{
-      display:grid;
-      grid-template-columns:minmax(260px,1fr) 220px;
-      gap:12px;
-      margin-bottom:16px;
-      padding:14px;
-      border:1px solid var(--linha);
-      border-radius:10px;
-      background:#fff;
-    }
-
-    .tabela-modulos{
-      min-width:1250px;
-    }
-
-    .estrutura-modulo{
-      display:flex;
-      align-items:flex-start;
-      gap:10px;
-      min-width:240px;
-    }
-
-    .estrutura-modulo .icone{
-      width:30px;
-      flex:0 0 30px;
-      font-size:20px;
-      text-align:center;
-    }
-
-    .estrutura-modulo strong{
-      display:block;
-      color:var(--sar);
-      font-size:14px;
-    }
-
-    .estrutura-modulo small{
-      display:block;
-      margin-top:3px;
-      color:var(--muted);
-      font-size:11px;
-    }
-
-    .codigo-modulo{
-      font-family:Consolas,Monaco,monospace;
-      color:#526161;
-      font-size:12px;
-    }
-
-    .rota-modulo{
-      max-width:260px;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      color:#647272;
-      font-size:12px;
-    }
-
-    .badge-sim,
-    .badge-nao{
-      display:inline-flex;
-      min-width:42px;
-      justify-content:center;
-      padding:5px 8px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:800;
-      text-transform:uppercase;
-    }
-
-    .badge-sim{
-      color:var(--sucesso);
-      background:var(--sucesso-bg);
-    }
-
-    .badge-nao{
-      color:#697777;
-      background:#edf1f1;
-    }
-
-    .status-modulo{
-      display:inline-flex;
-      padding:5px 9px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:800;
-      text-transform:uppercase;
-    }
-
-    .status-modulo.disponivel{
-      color:var(--sucesso);
-      background:var(--sucesso-bg);
-    }
-
-    .status-modulo.em-desenvolvimento{
-      color:var(--pendente);
-      background:var(--pendente-bg);
-    }
-
-    .status-modulo.inativo,
-    .status-modulo.desativado{
-      color:var(--erro);
-      background:var(--erro-bg);
-    }
-
-    .drawer-modulo{
-      width:min(620px,100%);
-    }
-
-    .opcoes-modulo{
-      margin-top:18px;
-      border-top:1px solid var(--linha);
-    }
-
-
-    /* Ajustes da tabela de módulos */
-    #painel-modulos{
-      min-width:0;
-      overflow:hidden;
-    }
-
-    #painel-modulos .tabela-wrapper{
-      width:100%;
-      max-width:100%;
-      max-height:calc(100vh - 365px);
-      min-height:320px;
-      overflow:auto;
-      scrollbar-gutter:stable;
-    }
-
-    #painel-modulos .tabela-modulos{
-      width:max-content;
-      min-width:1250px;
-    }
-
-    #painel-modulos .tabela-modulos thead th{
-      position:sticky;
-      top:0;
-      z-index:2;
-      background:#f8fafa;
-      box-shadow:0 1px 0 var(--linha);
-    }
-
-    #painel-modulos .estrutura-modulo{
-      min-width:270px;
-    }
-
-    #painel-modulos .estrutura-modulo .icone{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width:30px;
-      height:30px;
-      flex:0 0 30px;
-      overflow:hidden;
-      border-radius:7px;
-      background:#eef4f3;
-      font-size:18px;
-      line-height:1;
-      white-space:nowrap;
-    }
-
-    @media(max-height:760px){
-      #painel-modulos .tabela-wrapper{
-        max-height:calc(100vh - 315px);
-        min-height:250px;
-      }
-    }
-
-    @media(max-width:700px){
-      .modulos-filtros{
-        grid-template-columns:1fr;
-      }
-    }
-
-    @media(max-width:900px){
-      .admin-sidebar{padding:12px 14px 0}
-      .admin-brand{align-items:flex-start}
-      .admin-content{padding:16px}
-      .pagina-ajuda{grid-template-columns:1fr}
-      .resumo{grid-template-columns:repeat(2,1fr)}
-      .form-grid{grid-template-columns:1fr}
-      .campo.full{grid-column:auto}
-      .estrutura-frame{height:700px;min-height:700px}
-    }
-
-    @media(max-width:560px){
-      .admin-brand span{display:none}
-      .admin-nav button{padding:0 11px;font-size:12px}
-      .resumo{grid-template-columns:1fr}
-    }
-
-    .dashboard-grid{
-      display:grid;
-      grid-template-columns:repeat(12,minmax(0,1fr));
-      gap:14px;
-      margin-bottom:18px;
-    }
-
-    .dashboard-card{
-      grid-column:span 3;
-      min-height:132px;
-      padding:17px;
-      border:1px solid var(--linha);
-      border-radius:12px;
-      background:#fff;
-      box-shadow:0 3px 12px rgba(20,45,45,.035);
-    }
-
-    .dashboard-card.largo{grid-column:span 6}
-    .dashboard-card.total{grid-column:span 12}
-
-    .dashboard-card-topo{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-    }
-
-    .dashboard-icone{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width:38px;
-      height:38px;
-      flex:0 0 38px;
-      border-radius:10px;
-      background:#eef4f3;
-      font-size:20px;
-    }
-
-    .dashboard-card span{
-      color:var(--muted);
-      font-size:12px;
-      text-transform:uppercase;
-      letter-spacing:.45px;
-    }
-
-    .dashboard-card strong{
-      display:block;
-      margin-top:8px;
-      color:var(--sar);
-      font-size:28px;
-      line-height:1;
-    }
-
-    .dashboard-card small{
-      display:block;
-      margin-top:9px;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.45;
-    }
-
-    .dashboard-secao{
-      margin-top:22px;
-    }
-
-    .dashboard-secao h2{
-      margin-bottom:12px;
-      color:var(--sar);
-      font-size:18px;
-    }
-
-    .dashboard-lista{
-      display:grid;
-      gap:10px;
-    }
-
-    .dashboard-item{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      padding:13px 14px;
-      border:1px solid var(--linha);
-      border-radius:9px;
-      background:#fff;
-    }
-
-    .dashboard-item-conteudo{
-      min-width:0;
-    }
-
-    .dashboard-item strong{
-      display:block;
-      color:#465858;
-      font-size:14px;
-    }
-
-    .dashboard-item p{
-      margin-top:4px;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.45;
-    }
-
-    .dashboard-alerta{
-      border-left:4px solid var(--pendente);
-    }
-
-    .dashboard-alerta.erro{
-      border-left-color:var(--erro);
-    }
-
-    .dashboard-alerta.sucesso{
-      border-left-color:var(--sucesso);
-    }
-
-    .dashboard-vazio{
-      padding:28px 18px;
-      border:1px dashed #c8d1d1;
-      border-radius:10px;
-      color:var(--muted);
-      background:#fff;
-      text-align:center;
-    }
-
-    @media(max-width:1100px){
-      .dashboard-card{grid-column:span 6}
-      .dashboard-card.largo{grid-column:span 12}
-    }
-
-    @media(max-width:620px){
-      .dashboard-card,
-      .dashboard-card.largo,
-      .dashboard-card.total{grid-column:span 12}
-      .dashboard-item{
-        align-items:flex-start;
-        flex-direction:column;
-      }
-    }
-
-
-    .dashboard-duplo{
-      display:grid;
-      grid-template-columns:minmax(0,1.35fr) minmax(320px,.65fr);
-      gap:16px;
-      margin-top:22px;
-    }
-
-    .dashboard-bloco{
-      padding:18px;
-      border:1px solid var(--linha);
-      border-radius:12px;
-      background:#fff;
-      box-shadow:0 3px 12px rgba(20,45,45,.035);
-    }
-
-    .dashboard-bloco-cabecalho{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:14px;
-      margin-bottom:15px;
-    }
-
-    .dashboard-bloco-cabecalho h2{
-      margin:0;
-      color:var(--sar);
-      font-size:18px;
-    }
-
-    .dashboard-bloco-cabecalho p{
-      margin-top:5px;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.45;
-    }
-
-    .saude-grid{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:10px;
-    }
-
-    .saude-item{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-height:82px;
-      padding:13px;
-      border:1px solid var(--linha);
-      border-radius:10px;
-      background:#fbfdfd;
-    }
-
-    .saude-indicador{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      width:34px;
-      height:34px;
-      flex:0 0 34px;
-      border-radius:50%;
-      font-size:15px;
-      font-weight:800;
-      background:#eef2f2;
-      color:#657575;
-    }
-
-    .saude-item[data-status="ok"] .saude-indicador{
-      background:#e3f6eb;
-      color:#187443;
-    }
-
-    .saude-item[data-status="alerta"] .saude-indicador{
-      background:#fff3d6;
-      color:#9a6200;
-    }
-
-    .saude-item[data-status="erro"] .saude-indicador{
-      background:#fde7e7;
-      color:#b32929;
-    }
-
-    .saude-item[data-status="carregando"] .saude-indicador{
-      background:#eef2f2;
-      color:#657575;
-    }
-
-    .saude-conteudo{
-      min-width:0;
-    }
-
-    .saude-conteudo strong{
-      display:block;
-      color:#425454;
-      font-size:13px;
-    }
-
-    .saude-conteudo span{
-      display:block;
-      margin-top:4px;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.35;
-      text-transform:none;
-      letter-spacing:0;
-    }
-
-    .acoes-rapidas-grid{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:10px;
-    }
-
-    .acao-rapida{
-      display:flex;
-      align-items:center;
-      gap:11px;
-      min-height:70px;
-      padding:12px;
-      border:1px solid var(--linha);
-      border-radius:10px;
-      background:#fbfdfd;
-      color:#3f5151;
-      text-align:left;
-      cursor:pointer;
-      transition:.18s ease;
-    }
-
-    .acao-rapida:hover{
-      transform:translateY(-1px);
-      border-color:#9eb8b5;
-      background:#f1f7f6;
-      box-shadow:0 5px 14px rgba(22,66,61,.08);
-    }
-
-    .acao-rapida-icone{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      width:36px;
-      height:36px;
-      flex:0 0 36px;
-      border-radius:9px;
-      background:#eaf2f1;
-      font-size:18px;
-    }
-
-    .acao-rapida strong{
-      display:block;
-      font-size:13px;
-      line-height:1.25;
-    }
-
-    .acao-rapida small{
-      display:block;
-      margin-top:3px;
-      color:var(--muted);
-      font-size:11px;
-      line-height:1.3;
-    }
-
-    @media(max-width:980px){
-      .dashboard-duplo{
-        grid-template-columns:1fr;
-      }
-    }
-
-    @media(max-width:620px){
-      .saude-grid,
-      .acoes-rapidas-grid{
-        grid-template-columns:1fr;
-      }
-    }
-
-  </style>
-</head>
-
-<body>
-  <main class="admin">
-    <aside class="admin-sidebar">
-      <div class="admin-brand">
-        <strong>Administração SAR</strong>
-        <span>Gestão central da plataforma</span>
-      </div>
-
-      <nav class="admin-nav">
-        <button class="ativo" data-painel="dashboard">📊 Dashboard</button>
-        <button data-painel="usuarios">👤 Usuários</button>
-        <button data-painel="site">🌐 Site</button>
-        <button data-painel="modulos">📦 Módulos</button>
-        <button data-painel="estrutura">🌳 Estrutura</button>
-        <button data-painel="permissoes">🔐 Permissões</button>
-        <button data-painel="logs">📊 Logs</button>
-        <button data-painel="conhecimento">📚 Central de Conhecimento</button>
-        <button data-painel="configuracoes">⚙️ Configurações</button>
-      </nav>
-    </aside>
-
-    <section class="admin-content">
-
-      <section id="painel-dashboard" class="painel ativo">
-        <header class="cabecalho">
-          <div>
-            <h1>Dashboard Administrativo</h1>
-            <p class="subtitulo">
-              Visão geral da plataforma, usuários, módulos e pendências do SAR.
-            </p>
-          </div>
-
-          <div class="acoes">
-            <button id="btnAtualizarDashboard" class="btn" type="button">
-              Atualizar painel
-            </button>
-          </div>
-        </header>
-
-        <section class="pagina-ajuda">
-          <article class="pagina-ajuda-card">
-            <h2>O que esta página faz</h2>
-            <p>
-              Resume as principais informações administrativas do SAR e destaca
-              situações que precisam de análise.
-            </p>
-            <ul>
-              <li>Acompanha usuários ativos e aguardando aprovação</li>
-              <li>Mostra o estado dos módulos cadastrados</li>
-              <li>Aponta rotas ausentes e itens fora do menu</li>
-              <li>Facilita o acesso às áreas que exigem ação</li>
-            </ul>
-          </article>
-
-          <aside class="pagina-ajuda-card">
-            <h2>Impacto no sistema</h2>
-            <div class="pagina-ajuda-meta">
-              <div><span>Área</span><strong>Visão administrativa</strong></div>
-              <div><span>Fonte</span><strong>Dados reais do Supabase</strong></div>
-              <div><span>Atualização</span><strong>Sob demanda</strong></div>
-            </div>
-          </aside>
-        </section>
-
-        <div id="estadoDashboard" class="estado visivel">
-          Carregando visão geral do SAR...
-        </div>
-
-        <section class="dashboard-grid">
-          <article class="dashboard-card">
-            <div class="dashboard-card-topo">
-              <div>
-                <span>Usuários</span>
-                <strong id="dashUsuariosTotal">0</strong>
-              </div>
-              <div class="dashboard-icone">👤</div>
-            </div>
-            <small>Total de contas cadastradas.</small>
-          </article>
-
-          <article class="dashboard-card">
-            <div class="dashboard-card-topo">
-              <div>
-                <span>Ativos</span>
-                <strong id="dashUsuariosAtivos">0</strong>
-              </div>
-              <div class="dashboard-icone">✅</div>
-            </div>
-            <small>Usuários liberados para acessar a plataforma.</small>
-          </article>
-
-          <article class="dashboard-card">
-            <div class="dashboard-card-topo">
-              <div>
-                <span>Aguardando aprovação</span>
-                <strong id="dashUsuariosPendentes">0</strong>
-              </div>
-              <div class="dashboard-icone">⏳</div>
-            </div>
-            <small>Contas que ainda permanecem bloqueadas.</small>
-          </article>
-
-          <article class="dashboard-card">
-            <div class="dashboard-card-topo">
-              <div>
-                <span>Acessaram hoje</span>
-                <strong id="dashAcessosHoje">0</strong>
-              </div>
-              <div class="dashboard-icone">📅</div>
-            </div>
-            <small>Usuários com último login registrado na data de hoje.</small>
-          </article>
-
-          <article class="dashboard-card">
-            <div class="dashboard-card-topo">
-              <div>
-                <span>Módulos</span>
-                <strong id="dashModulosTotal">0</strong>
-              </div>
-              <div class="dashboard-icone">📦</div>
-            </div>
-            <small>Total de registros na estrutura do SAR.</small>
-          </article>
-
-          <article class="dashboard-card">
-            <div class="dashboard-card-topo">
-              <div>
-                <span>Módulos ativos</span>
-                <strong id="dashModulosAtivos">0</strong>
-              </div>
-              <div class="dashboard-icone">🟢</div>
-            </div>
-            <small>Recursos atualmente habilitados.</small>
-          </article>
-
-          <article class="dashboard-card">
-            <div class="dashboard-card-topo">
-              <div>
-                <span>No menu</span>
-                <strong id="dashModulosMenu">0</strong>
-              </div>
-              <div class="dashboard-icone">🧭</div>
-            </div>
-            <small>Itens configurados para aparecer no sistema logado.</small>
-          </article>
-
-          <article class="dashboard-card">
-            <div class="dashboard-card-topo">
-              <div>
-                <span>Em desenvolvimento</span>
-                <strong id="dashModulosDesenvolvimento">0</strong>
-              </div>
-              <div class="dashboard-icone">🛠️</div>
-            </div>
-            <small>Funcionalidades ainda em construção.</small>
-          </article>
-
-          <article class="dashboard-card largo">
-            <div class="dashboard-card-topo">
-              <div>
-                <span>Central de Conhecimento</span>
-                <strong id="dashConhecimentoTotal">0</strong>
-              </div>
-              <div class="dashboard-icone">📚</div>
-            </div>
-            <small id="dashConhecimentoUltimo">Nenhum conteúdo carregado.</small>
-          </article>
-
-          <article class="dashboard-card largo">
-            <div class="dashboard-card-topo">
-              <div>
-                <span>Último acesso registrado</span>
-                <strong id="dashUltimoAcesso" style="font-size:19px;line-height:1.25">—</strong>
-              </div>
-              <div class="dashboard-icone">🕘</div>
-            </div>
-            <small id="dashUltimoUsuario">Nenhum acesso localizado.</small>
-          </article>
-        </section>
-
-
-        <section class="dashboard-duplo">
-          <article class="dashboard-bloco">
-            <div class="dashboard-bloco-cabecalho">
-              <div>
-                <h2>Saúde do Sistema</h2>
-                <p>Verificações executadas com dados reais da sessão e do Supabase.</p>
-              </div>
-              <button id="btnTestarSaude" class="btn" type="button">
-                Testar novamente
-              </button>
-            </div>
-
-            <div class="saude-grid">
-              <div id="saudeSessao" class="saude-item" data-status="carregando">
-                <div class="saude-indicador">•</div>
-                <div class="saude-conteudo">
-                  <strong>Sessão administrativa</strong>
-                  <span>Verificando autenticação...</span>
-                </div>
-              </div>
-
-              <div id="saudeSupabase" class="saude-item" data-status="carregando">
-                <div class="saude-indicador">•</div>
-                <div class="saude-conteudo">
-                  <strong>Supabase</strong>
-                  <span>Verificando comunicação...</span>
-                </div>
-              </div>
-
-              <div id="saudeUsuarios" class="saude-item" data-status="carregando">
-                <div class="saude-indicador">•</div>
-                <div class="saude-conteudo">
-                  <strong>Cadastro de usuários</strong>
-                  <span>Verificando consulta administrativa...</span>
-                </div>
-              </div>
-
-              <div id="saudeModulos" class="saude-item" data-status="carregando">
-                <div class="saude-indicador">•</div>
-                <div class="saude-conteudo">
-                  <strong>Módulos do SAR</strong>
-                  <span>Verificando estrutura cadastrada...</span>
-                </div>
-              </div>
-
-              <div id="saudeConhecimento" class="saude-item" data-status="carregando">
-                <div class="saude-indicador">•</div>
-                <div class="saude-conteudo">
-                  <strong>Central de Conhecimento</strong>
-                  <span>Verificando disponibilidade...</span>
-                </div>
-              </div>
-
-              <div id="saudeEstrutura" class="saude-item" data-status="carregando">
-                <div class="saude-indicador">•</div>
-                <div class="saude-conteudo">
-                  <strong>Integridade da estrutura</strong>
-                  <span>Analisando vínculos entre módulos...</span>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <article class="dashboard-bloco">
-            <div class="dashboard-bloco-cabecalho">
-              <div>
-                <h2>Ações Rápidas</h2>
-                <p>Atalhos para as tarefas administrativas mais usadas.</p>
-              </div>
-            </div>
-
-            <div class="acoes-rapidas-grid">
-              <button class="acao-rapida" type="button" data-acao-dashboard="aprovar-usuarios">
-                <span class="acao-rapida-icone">👤</span>
-                <span>
-                  <strong>Aprovar usuários</strong>
-                  <small>Abrir cadastros pendentes</small>
-                </span>
-              </button>
-
-              <button class="acao-rapida" type="button" data-acao-dashboard="novo-modulo">
-                <span class="acao-rapida-icone">📦</span>
-                <span>
-                  <strong>Novo módulo</strong>
-                  <small>Abrir cadastro de módulo</small>
-                </span>
-              </button>
-
-              <button class="acao-rapida" type="button" data-acao-dashboard="estrutura">
-                <span class="acao-rapida-icone">🌳</span>
-                <span>
-                  <strong>Organizar estrutura</strong>
-                  <small>Reordenar módulos e páginas</small>
-                </span>
-              </button>
-
-              <button class="acao-rapida" type="button" data-acao-dashboard="novo-conhecimento">
-                <span class="acao-rapida-icone">📚</span>
-                <span>
-                  <strong>Novo conteúdo</strong>
-                  <small>Adicionar conhecimento ao SAR</small>
-                </span>
-              </button>
-
-              <button class="acao-rapida" type="button" data-acao-dashboard="permissoes">
-                <span class="acao-rapida-icone">🔐</span>
-                <span>
-                  <strong>Permissões</strong>
-                  <small>Gerenciar acessos por usuário</small>
-                </span>
-              </button>
-
-              <button class="acao-rapida" type="button" data-acao-dashboard="logs">
-                <span class="acao-rapida-icone">📊</span>
-                <span>
-                  <strong>Logs</strong>
-                  <small>Consultar atividade registrada</small>
-                </span>
-              </button>
-
-              <button class="acao-rapida" type="button" data-acao-dashboard="configuracoes">
-                <span class="acao-rapida-icone">⚙️</span>
-                <span>
-                  <strong>Configurações</strong>
-                  <small>Abrir parâmetros gerais</small>
-                </span>
-              </button>
-
-              <button class="acao-rapida" type="button" data-acao-dashboard="sistema">
-                <span class="acao-rapida-icone">🏠</span>
-                <span>
-                  <strong>Ir para o sistema</strong>
-                  <small>Abrir o painel principal</small>
-                </span>
-              </button>
-            </div>
-          </article>
-        </section>
-
-        <section class="dashboard-secao">
-          <h2>Pendências administrativas</h2>
-          <div id="dashboardPendencias" class="dashboard-lista">
-            <div class="dashboard-vazio">Analisando pendências...</div>
-          </div>
-        </section>
-
-        <section class="dashboard-secao">
-          <h2>Últimos usuários cadastrados</h2>
-          <div id="dashboardUltimosUsuarios" class="dashboard-lista">
-            <div class="dashboard-vazio">Carregando usuários recentes...</div>
-          </div>
-        </section>
-      </section>
-
-      <section id="painel-usuarios" class="painel">
-        <header class="cabecalho">
-          <div>
-            <h1>Usuários</h1>
-            <p class="subtitulo">
-              Aprovação, bloqueio e definição do tipo de usuário.
-            </p>
-          </div>
-
-          <div class="acoes">
-            <button id="btnAtualizarUsuarios" class="btn" type="button">
-              Atualizar lista
-            </button>
-          </div>
-        </header>
-
-        <section class="pagina-ajuda">
-          <article class="pagina-ajuda-card">
-            <h2>O que esta página faz</h2>
-            <p>Gerencia quem pode entrar no SAR, o tipo de conta e os módulos liberados para cada usuário.</p>
-            <ul>
-              <li>Aprovar ou bloquear usuários</li><li>Alterar o tipo de conta</li><li>Liberar módulos e ferramentas</li>
-            </ul>
-          </article>
-          <aside class="pagina-ajuda-card">
-            <h2>Impacto no sistema</h2>
-            <div class="pagina-ajuda-meta">
-              <div><span>Área</span><strong>Login e controle de acesso</strong></div>
-              <div><span>Nível</span><strong>Administração</strong></div>
-              <div><span>Alterações</span><strong>Aplicadas no SAR</strong></div>
-            </div>
-          </aside>
-        </section>
-
-        <section class="resumo">
-          <div class="card"><span>Total</span><strong id="totalUsuarios">0</strong></div>
-          <div class="card"><span>Ativos</span><strong id="totalAtivos">0</strong></div>
-          <div class="card"><span>Pendentes</span><strong id="totalPendentes">0</strong></div>
-          <div class="card"><span>Administradores</span><strong id="totalMasters">0</strong></div>
-        </section>
-
-        <div id="estadoUsuarios" class="estado visivel">
-          Validando acesso administrativo...
-        </div>
-
-        <section class="tabela-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>E-mail</th>
-                <th>Tipo</th>
-                <th>Status</th>
-                <th>Cadastro</th>
-                <th>Último login</th>
-                <th>Aprovação</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody id="corpoUsuarios">
-              <tr><td class="vazio" colspan="8">Carregando usuários...</td></tr>
-            </tbody>
-          </table>
-        </section>
-      </section>
-
-      <section id="painel-site" class="painel">
-        <header class="cabecalho">
-          <div>
-            <h1>Conteúdo do site</h1>
-            <p class="subtitulo">
-              Edite os textos e links da página comercial do SAR.
-            </p>
-          </div>
-
-          <div class="acoes">
-            <button id="btnAtualizarSite" class="btn" type="button">
-              Atualizar conteúdo
-            </button>
-          </div>
-        </header>
-
-        <section class="pagina-ajuda">
-          <article class="pagina-ajuda-card">
-            <h2>O que esta página faz</h2>
-            <p>Centraliza os textos, links e conteúdos exibidos na página pública do SAR.</p>
-            <ul>
-              <li>Editar títulos e textos comerciais</li><li>Alterar links e ordem de exibição</li><li>Ativar ou ocultar conteúdos</li>
-            </ul>
-          </article>
-          <aside class="pagina-ajuda-card">
-            <h2>Impacto no sistema</h2>
-            <div class="pagina-ajuda-meta">
-              <div><span>Área</span><strong>Site público</strong></div>
-              <div><span>Nível</span><strong>Administração</strong></div>
-              <div><span>Alterações</span><strong>Aplicadas no SAR</strong></div>
-            </div>
-          </aside>
-        </section>
-
-        <div id="estadoSite" class="estado visivel">
-          Abra esta seção para carregar os conteúdos.
-        </div>
-
-        <div id="editorSite" class="editor-site"></div>
-      </section>
-
-      <section id="painel-modulos" class="painel">
-        <header class="cabecalho">
-          <div>
-            <h1>Estrutura do SAR</h1>
-            <p class="subtitulo">
-              Gestão central dos módulos, abas, ferramentas, rotas e publicação.
-            </p>
-          </div>
-
-          <div class="acoes">
-            <button id="btnAtualizarModulos" class="btn" type="button">
-              Atualizar
-            </button>
-            <button id="btnNovoModulo" class="btn primary" type="button">
-              + Novo módulo
-            </button>
-          </div>
-        </header>
-
-        <section class="pagina-ajuda">
-          <article class="pagina-ajuda-card">
-            <h2>O que esta página faz</h2>
-            <p>Cadastra e mantém os módulos, abas, ferramentas, rotas e regras de publicação do SAR.</p>
-            <ul>
-              <li>Criar e editar módulos</li><li>Definir rota, ícone e categoria</li><li>Controlar exibição no menu e no site</li>
-            </ul>
-          </article>
-          <aside class="pagina-ajuda-card">
-            <h2>Impacto no sistema</h2>
-            <div class="pagina-ajuda-meta">
-              <div><span>Área</span><strong>Estrutura funcional</strong></div>
-              <div><span>Nível</span><strong>Administração</strong></div>
-              <div><span>Alterações</span><strong>Aplicadas no SAR</strong></div>
-            </div>
-          </aside>
-        </section>
-
-        <section class="resumo">
-          <div class="card"><span>Total</span><strong id="totalModulos">0</strong></div>
-          <div class="card"><span>Ativos</span><strong id="totalModulosAtivos">0</strong></div>
-          <div class="card"><span>No menu</span><strong id="totalModulosMenu">0</strong></div>
-          <div class="card"><span>Em breve</span><strong id="totalModulosBreve">0</strong></div>
-        </section>
-
-        <div class="modulos-filtros">
-          <div class="campo">
-            <label for="pesquisaModulos">Pesquisar</label>
-            <input
-              id="pesquisaModulos"
-              type="search"
-              placeholder="Nome, código, categoria ou rota"
-            >
-          </div>
-
-          <div class="campo">
-            <label for="filtroStatusModulo">Status</label>
-            <select id="filtroStatusModulo">
-              <option value="">Todos</option>
-              <option value="ativo">Ativos</option>
-              <option value="inativo">Inativos</option>
-              <option value="em_breve">Em breve</option>
-            </select>
-          </div>
-        </div>
-
-        <div id="estadoModulos" class="estado">
-          Abra esta seção para carregar os módulos.
-        </div>
-
-        <section class="tabela-wrapper">
-          <table class="tabela-modulos">
-            <thead>
-              <tr>
-                <th>Estrutura</th>
-                <th>Código</th>
-                <th>Categoria</th>
-                <th>Rota</th>
-                <th>Ordem</th>
-                <th>Menu</th>
-                <th>Site</th>
-                <th>Status</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody id="corpoModulos">
-              <tr><td class="vazio" colspan="9">Carregando módulos...</td></tr>
-            </tbody>
-          </table>
-        </section>
-      </section>
-
-
-      <section id="painel-estrutura" class="painel">
-        <header class="cabecalho">
-          <div>
-            <h1>Estrutura do Sistema</h1>
-            <p class="subtitulo">
-              Organização visual da hierarquia Módulo → Aba → Subaba.
-            </p>
-          </div>
-
-          <div class="acoes">
-            <button id="btnRecarregarEstrutura" class="btn" type="button">
-              Recarregar
-            </button>
-          </div>
-        </header>
-
-        <section class="pagina-ajuda">
-          <article class="pagina-ajuda-card">
-            <h2>O que esta página faz</h2>
-            <p>
-              Permite reorganizar o menu do SAR sem editar SQL ou alterar o
-              sistema.html manualmente.
-            </p>
-            <ul>
-              <li>Mover itens para cima ou para baixo</li>
-              <li>Alterar o módulo pai</li>
-              <li>Transformar módulo em aba ou subaba</li>
-              <li>Salvar a nova ordem diretamente no banco</li>
-            </ul>
-          </article>
-
-          <aside class="pagina-ajuda-card">
-            <h2>Impacto no sistema</h2>
-            <div class="pagina-ajuda-meta">
-              <div><span>Área</span><strong>Menu logado</strong></div>
-              <div><span>Estrutura</span><strong>3 níveis</strong></div>
-              <div><span>Fonte</span><strong>sar_modulos</strong></div>
-            </div>
-          </aside>
-        </section>
-
-        <iframe
-          id="frameEstrutura"
-          class="estrutura-frame"
-          src="admin_organizador_estrutura.html"
-          title="Organizador visual da estrutura do SAR"
-        ></iframe>
-      </section>
-
-      <section id="painel-permissoes" class="painel">
-        <header class="cabecalho">
-          <div>
-            <h1>Permissões</h1>
-            <p class="subtitulo">Controle de acesso por usuário e módulo.</p>
-          </div>
-        </header>
-
-        <section class="pagina-ajuda">
-          <article class="pagina-ajuda-card">
-            <h2>O que esta página faz</h2>
-            <p>Área reservada para a visão consolidada das permissões de acesso por usuário e módulo.</p>
-            <ul>
-              <li>Consultar acessos</li><li>Revisar liberações</li><li>Auditar restrições</li>
-            </ul>
-          </article>
-          <aside class="pagina-ajuda-card">
-            <h2>Impacto no sistema</h2>
-            <div class="pagina-ajuda-meta">
-              <div><span>Área</span><strong>Segurança</strong></div>
-              <div><span>Nível</span><strong>Administração</strong></div>
-              <div><span>Alterações</span><strong>Aplicadas no SAR</strong></div>
-            </div>
-          </aside>
-        </section>
-        <div class="placeholder">Tela de permissões será implementada depois da gestão de usuários.</div>
-      </section>
-
-      <section id="painel-logs" class="painel">
-        <header class="cabecalho">
-          <div>
-            <h1>Logs</h1>
-            <p class="subtitulo">Auditoria dos acessos realizados na plataforma.</p>
-          </div>
-        </header>
-
-        <section class="pagina-ajuda">
-          <article class="pagina-ajuda-card">
-            <h2>O que esta página faz</h2>
-            <p>Reúne os registros de acesso e atividades administrativas para auditoria.</p>
-            <ul>
-              <li>Consultar logins</li><li>Identificar falhas de acesso</li><li>Acompanhar atividades</li>
-            </ul>
-          </article>
-          <aside class="pagina-ajuda-card">
-            <h2>Impacto no sistema</h2>
-            <div class="pagina-ajuda-meta">
-              <div><span>Área</span><strong>Auditoria</strong></div>
-              <div><span>Nível</span><strong>Administração</strong></div>
-              <div><span>Alterações</span><strong>Aplicadas no SAR</strong></div>
-            </div>
-          </aside>
-        </section>
-        <div class="placeholder">Tela de logs em desenvolvimento.</div>
-      </section>
-
-
-      <section id="painel-conhecimento" class="painel">
-        <header class="cabecalho">
-          <div>
-            <h1>Central de Conhecimento</h1>
-            <p class="subtitulo">
-              Documentação oficial, padrões e orientações internas do SAR.
-            </p>
-          </div>
-
-          <div class="acoes">
-            <button id="btnAtualizarConhecimento" class="btn" type="button">
-              Atualizar
-            </button>
-            <button id="btnNovoConhecimento" class="btn primary" type="button">
-              + Novo conteúdo
-            </button>
-          </div>
-        </header>
-
-        <section class="pagina-ajuda">
-          <article class="pagina-ajuda-card">
-            <h2>O que esta página faz</h2>
-            <p>Armazena a documentação interna, padrões e orientações oficiais de uso e desenvolvimento do SAR.</p>
-            <ul>
-              <li>Criar documentação</li><li>Editar procedimentos</li><li>Manter orientações centralizadas</li>
-            </ul>
-          </article>
-          <aside class="pagina-ajuda-card">
-            <h2>Impacto no sistema</h2>
-            <div class="pagina-ajuda-meta">
-              <div><span>Área</span><strong>Documentação</strong></div>
-              <div><span>Nível</span><strong>Administração</strong></div>
-              <div><span>Alterações</span><strong>Aplicadas no SAR</strong></div>
-            </div>
-          </aside>
-        </section>
-
-        <div id="estadoConhecimento" class="estado">
-          Abra esta seção para carregar os conteúdos.
-        </div>
-
-        <section id="editorConhecimento" class="editor-conhecimento">
-          <h2 id="tituloEditorConhecimento">Novo conteúdo</h2>
-
-          <div class="form-grid">
-            <div class="campo full">
-              <label for="conhecimentoTitulo">Título</label>
-              <input
-                id="conhecimentoTitulo"
-                type="text"
-                maxlength="180"
-                placeholder="Ex.: Padrão de Desenvolvimento do SAR"
-              >
-            </div>
-
-            <div class="campo full">
-              <label for="conhecimentoTexto">Texto</label>
-              <textarea
-                id="conhecimentoTexto"
-                placeholder="Digite o conteúdo..."
-              ></textarea>
-            </div>
-          </div>
-
-          <div class="linha-acoes">
-            <button id="btnCancelarConhecimento" class="btn" type="button">
-              Cancelar
-            </button>
-            <button id="btnSalvarConhecimento" class="btn primary" type="button">
-              Salvar conteúdo
-            </button>
-          </div>
-        </section>
-
-        <div id="listaConhecimento" class="conhecimento-lista">
-          <div class="placeholder">
-            Clique em “Atualizar” para carregar os conteúdos.
-          </div>
-        </div>
-      </section>
-
-      <section id="painel-configuracoes" class="painel">
-        <header class="cabecalho">
-          <div>
-            <h1>Configurações</h1>
-            <p class="subtitulo">Configurações gerais do SAR.</p>
-          </div>
-        </header>
-
-        <section class="pagina-ajuda">
-          <article class="pagina-ajuda-card">
-            <h2>O que esta página faz</h2>
-            <p>Concentrará parâmetros gerais da plataforma que não pertencem a um módulo específico.</p>
-            <ul>
-              <li>Ajustar parâmetros globais</li><li>Definir padrões administrativos</li><li>Centralizar preferências do sistema</li>
-            </ul>
-          </article>
-          <aside class="pagina-ajuda-card">
-            <h2>Impacto no sistema</h2>
-            <div class="pagina-ajuda-meta">
-              <div><span>Área</span><strong>Configuração geral</strong></div>
-              <div><span>Nível</span><strong>Administração</strong></div>
-              <div><span>Alterações</span><strong>Aplicadas no SAR</strong></div>
-            </div>
-          </aside>
-        </section>
-        <div class="placeholder">Configurações gerais em desenvolvimento.</div>
-      </section>
-    </section>
-  </main>
-
-
-  <div id="drawerModuloOverlay" class="drawer-overlay" aria-hidden="true">
-    <aside class="drawer drawer-modulo" role="dialog" aria-modal="true" aria-labelledby="drawerModuloTitulo">
-      <div class="drawer-topo">
-        <div>
-          <h2 id="drawerModuloTitulo">Novo módulo</h2>
-          <p>Cadastre ou edite a estrutura oficial do SAR.</p>
-        </div>
-        <button id="btnFecharDrawerModulo" class="drawer-fechar" type="button" aria-label="Fechar">×</button>
-      </div>
-
-      <div class="form-grid">
-        <div class="campo full">
-          <label for="moduloNome">Nome do módulo *</label>
-          <input id="moduloNome" type="text" maxlength="160">
-        </div>
-
-        <div class="campo full">
-          <label for="moduloCodigo">Código único *</label>
-          <input id="moduloCodigo" type="text" maxlength="160" placeholder="EXEMPLO_MODULO_FERRAMENTA">
-        </div>
-
-        <div class="campo">
-          <label for="moduloIcone">Ícone</label>
-          <input id="moduloIcone" type="text" maxlength="20" placeholder="📦">
-        </div>
-
-        <div class="campo">
-          <label for="moduloCor">Cor</label>
-          <input id="moduloCor" type="text" maxlength="50" placeholder="verde">
-        </div>
-
-        <div class="campo full">
-          <label for="moduloDescricao">Descrição</label>
-          <textarea id="moduloDescricao"></textarea>
-        </div>
-
-        <div class="campo">
-          <label for="moduloCategoria">Categoria</label>
-          <input id="moduloCategoria" type="text" maxlength="100">
-        </div>
-
-        <div class="campo">
-          <label for="moduloPai">Módulo pai</label>
-          <select id="moduloPai">
-            <option value="">Nenhum — módulo principal</option>
-          </select>
-        </div>
-
-        <div class="campo full">
-          <label for="moduloRota">Rota</label>
-          <input id="moduloRota" type="text" maxlength="500" placeholder="hidraulica/ferramenta.html">
-        </div>
-
-        <div class="campo">
-          <label for="moduloOrdemMenu">Ordem no menu</label>
-          <input id="moduloOrdemMenu" type="number" step="1" value="0">
-        </div>
-
-        <div class="campo">
-          <label for="moduloOrdem">Ordem geral</label>
-          <input id="moduloOrdem" type="number" step="1" value="0">
-        </div>
-
-        <div class="campo full">
-          <label for="moduloStatusDesenvolvimento">Status de desenvolvimento</label>
-          <select id="moduloStatusDesenvolvimento">
-            <option value="disponivel">Disponível</option>
-            <option value="em_desenvolvimento">Em desenvolvimento</option>
-            <option value="desativado">Desativado</option>
-          </select>
-        </div>
-      </div>
-
-      <section class="opcoes-modulo">
-        <label class="switch-row">
-          <span>
-            <strong>Módulo ativo</strong>
-            <small>Permite que o recurso seja utilizado pelo sistema.</small>
-          </span>
-          <input id="moduloAtivo" type="checkbox" checked>
-        </label>
-
-        <label class="switch-row">
-          <span>
-            <strong>Exibir no menu logado</strong>
-            <small>Mostra o recurso na navegação interna.</small>
-          </span>
-          <input id="moduloExibirMenu" type="checkbox" checked>
-        </label>
-
-        <label class="switch-row">
-          <span>
-            <strong>Exibir no site público</strong>
-            <small>Permite divulgar o recurso na página comercial.</small>
-          </span>
-          <input id="moduloExibirSite" type="checkbox">
-        </label>
-
-        <label class="switch-row">
-          <span>
-            <strong>Destaque no site</strong>
-            <small>Apresenta o recurso com maior evidência.</small>
-          </span>
-          <input id="moduloDestaqueSite" type="checkbox">
-        </label>
-
-        <label class="switch-row">
-          <span>
-            <strong>Em breve</strong>
-            <small>Identifica uma funcionalidade ainda não liberada.</small>
-          </span>
-          <input id="moduloEmBreve" type="checkbox">
-        </label>
-      </section>
-
-      <div id="estadoModuloEdicao" class="estado"></div>
-
-      <div class="drawer-acoes">
-        <button id="btnCancelarModulo" class="btn" type="button">Cancelar</button>
-        <button id="btnSalvarModulo" class="btn primary" type="button">Salvar módulo</button>
-      </div>
-    </aside>
-  </div>
-
-  <div id="drawerOverlay" class="drawer-overlay" aria-hidden="true">
-    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitulo">
-      <div class="drawer-topo">
-        <div>
-          <h2 id="drawerTitulo">Editar usuário</h2>
-          <p>Defina o tipo e o status de acesso à plataforma.</p>
-        </div>
-        <button id="btnFecharDrawer" class="drawer-fechar" type="button" aria-label="Fechar">×</button>
-      </div>
-
-      <div class="identidade">
-        <strong id="drawerNome">—</strong>
-        <span id="drawerEmail">—</span>
-      </div>
-
-      <div class="campo">
-        <label for="drawerTipo">Tipo de usuário</label>
-        <select id="drawerTipo">
-          <option value="teste">Teste</option>
-          <option value="cliente">Cliente</option>
-          <option value="funcionario">Funcionário</option>
-          <option value="gestor">Gestor</option>
-          <option value="master">Master</option>
-        </select>
-      </div>
-
-      <div class="switch-row">
-        <div>
-          <strong>Conta ativa</strong>
-          <small>Usuários inativos permanecem bloqueados no acesso.</small>
-        </div>
-        <input id="drawerAtivo" type="checkbox">
-      </div>
-
-      <section class="permissoes-bloco">
-        <div class="permissoes-cabecalho">
-          <div>
-            <h3>Permissões por módulo</h3>
-            <p>
-              Libere ou bloqueie cada módulo para o usuário.
-              Ao liberar, o sistema concede acesso completo ao módulo.
-            </p>
-          </div>
-        </div>
-
-        <div class="legenda-permissoes legenda-permissoes-simples">
-          <div>
-            <strong>Liberado</strong>
-            <span>
-              O usuário pode acessar e utilizar integralmente o módulo.
-              O sistema grava automaticamente visualizar, editar, excluir
-              e administrar como verdadeiros.
-            </span>
-          </div>
-
-          <div>
-            <strong>Bloqueado</strong>
-            <span>
-              O módulo não aparece para o usuário e nenhuma operação é permitida.
-              As quatro permissões são gravadas como falsas.
-            </span>
-          </div>
-        </div>
-
-        <div id="listaPermissoes" class="permissoes-lista">
-          <div class="permissoes-carregando">
-            Selecione um usuário para carregar as permissões.
-          </div>
-        </div>
-      </section>
-
-      <div id="estadoEdicao" class="estado"></div>
-
-      <div class="drawer-acoes">
-        <button id="btnCancelarEdicao" class="btn" type="button">Cancelar</button>
-        <button id="btnSalvarUsuario" class="btn primary" type="button">Salvar alterações</button>
-      </div>
-    </aside>
-  </div>
-
-  <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-
-    const SUPABASE_URL = "https://bjtxbpmrmhfvpmdsthxr.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM";
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true
-      }
-    });
-
-    let usuariosCache = [];
-    let usuarioEdicao = null;
-    let permissoesEdicao = [];
-
-    let modulosCache = [];
-    let moduloEdicaoId = null;
-
-    let conhecimentoCache = [];
-    let conhecimentoEdicaoId = null;
-
-    const elementos = {
-      botoesNav: document.querySelectorAll("[data-painel]"),
-      paineis: document.querySelectorAll(".painel"),
-      btnRecarregarEstrutura: document.getElementById("btnRecarregarEstrutura"),
-      frameEstrutura: document.getElementById("frameEstrutura"),
-
-      btnAtualizarDashboard: document.getElementById("btnAtualizarDashboard"),
-      estadoDashboard: document.getElementById("estadoDashboard"),
-      dashUsuariosTotal: document.getElementById("dashUsuariosTotal"),
-      dashUsuariosAtivos: document.getElementById("dashUsuariosAtivos"),
-      dashUsuariosPendentes: document.getElementById("dashUsuariosPendentes"),
-      dashAcessosHoje: document.getElementById("dashAcessosHoje"),
-      dashModulosTotal: document.getElementById("dashModulosTotal"),
-      dashModulosAtivos: document.getElementById("dashModulosAtivos"),
-      dashModulosMenu: document.getElementById("dashModulosMenu"),
-      dashModulosDesenvolvimento: document.getElementById("dashModulosDesenvolvimento"),
-      dashConhecimentoTotal: document.getElementById("dashConhecimentoTotal"),
-      dashConhecimentoUltimo: document.getElementById("dashConhecimentoUltimo"),
-      dashUltimoAcesso: document.getElementById("dashUltimoAcesso"),
-      dashUltimoUsuario: document.getElementById("dashUltimoUsuario"),
-      dashboardPendencias: document.getElementById("dashboardPendencias"),
-      dashboardUltimosUsuarios: document.getElementById("dashboardUltimosUsuarios"),
-
-      btnTestarSaude: document.getElementById("btnTestarSaude"),
-      saudeSessao: document.getElementById("saudeSessao"),
-      saudeSupabase: document.getElementById("saudeSupabase"),
-      saudeUsuarios: document.getElementById("saudeUsuarios"),
-      saudeModulos: document.getElementById("saudeModulos"),
-      saudeConhecimento: document.getElementById("saudeConhecimento"),
-      saudeEstrutura: document.getElementById("saudeEstrutura"),
-      acoesRapidas: document.querySelectorAll("[data-acao-dashboard]"),
-
-
-
-      btnAtualizarUsuarios: document.getElementById("btnAtualizarUsuarios"),
-      estadoUsuarios: document.getElementById("estadoUsuarios"),
-      corpoUsuarios: document.getElementById("corpoUsuarios"),
-      totalUsuarios: document.getElementById("totalUsuarios"),
-      totalAtivos: document.getElementById("totalAtivos"),
-      totalPendentes: document.getElementById("totalPendentes"),
-      totalMasters: document.getElementById("totalMasters"),
-
-      btnAtualizarSite: document.getElementById("btnAtualizarSite"),
-      estadoSite: document.getElementById("estadoSite"),
-      editorSite: document.getElementById("editorSite"),
-
-      btnAtualizarModulos: document.getElementById("btnAtualizarModulos"),
-      btnNovoModulo: document.getElementById("btnNovoModulo"),
-      estadoModulos: document.getElementById("estadoModulos"),
-      corpoModulos: document.getElementById("corpoModulos"),
-      pesquisaModulos: document.getElementById("pesquisaModulos"),
-      filtroStatusModulo: document.getElementById("filtroStatusModulo"),
-      totalModulos: document.getElementById("totalModulos"),
-      totalModulosAtivos: document.getElementById("totalModulosAtivos"),
-      totalModulosMenu: document.getElementById("totalModulosMenu"),
-      totalModulosBreve: document.getElementById("totalModulosBreve"),
-
-      drawerModuloOverlay: document.getElementById("drawerModuloOverlay"),
-      drawerModuloTitulo: document.getElementById("drawerModuloTitulo"),
-      moduloNome: document.getElementById("moduloNome"),
-      moduloCodigo: document.getElementById("moduloCodigo"),
-      moduloIcone: document.getElementById("moduloIcone"),
-      moduloCor: document.getElementById("moduloCor"),
-      moduloDescricao: document.getElementById("moduloDescricao"),
-      moduloCategoria: document.getElementById("moduloCategoria"),
-      moduloPai: document.getElementById("moduloPai"),
-      moduloRota: document.getElementById("moduloRota"),
-      moduloOrdemMenu: document.getElementById("moduloOrdemMenu"),
-      moduloOrdem: document.getElementById("moduloOrdem"),
-      moduloStatusDesenvolvimento: document.getElementById("moduloStatusDesenvolvimento"),
-      moduloAtivo: document.getElementById("moduloAtivo"),
-      moduloExibirMenu: document.getElementById("moduloExibirMenu"),
-      moduloExibirSite: document.getElementById("moduloExibirSite"),
-      moduloDestaqueSite: document.getElementById("moduloDestaqueSite"),
-      moduloEmBreve: document.getElementById("moduloEmBreve"),
-      estadoModuloEdicao: document.getElementById("estadoModuloEdicao"),
-      btnFecharDrawerModulo: document.getElementById("btnFecharDrawerModulo"),
-      btnCancelarModulo: document.getElementById("btnCancelarModulo"),
-      btnSalvarModulo: document.getElementById("btnSalvarModulo"),
-
-      btnAtualizarConhecimento: document.getElementById("btnAtualizarConhecimento"),
-      btnNovoConhecimento: document.getElementById("btnNovoConhecimento"),
-      estadoConhecimento: document.getElementById("estadoConhecimento"),
-      editorConhecimento: document.getElementById("editorConhecimento"),
-      tituloEditorConhecimento: document.getElementById("tituloEditorConhecimento"),
-      conhecimentoTitulo: document.getElementById("conhecimentoTitulo"),
-      conhecimentoTexto: document.getElementById("conhecimentoTexto"),
-      btnCancelarConhecimento: document.getElementById("btnCancelarConhecimento"),
-      btnSalvarConhecimento: document.getElementById("btnSalvarConhecimento"),
-      listaConhecimento: document.getElementById("listaConhecimento"),
-
-      drawerOverlay: document.getElementById("drawerOverlay"),
-      drawerNome: document.getElementById("drawerNome"),
-      drawerEmail: document.getElementById("drawerEmail"),
-      drawerTipo: document.getElementById("drawerTipo"),
-      drawerAtivo: document.getElementById("drawerAtivo"),
-      listaPermissoes: document.getElementById("listaPermissoes"),
-      estadoEdicao: document.getElementById("estadoEdicao"),
-      btnFecharDrawer: document.getElementById("btnFecharDrawer"),
-      btnCancelarEdicao: document.getElementById("btnCancelarEdicao"),
-      btnSalvarUsuario: document.getElementById("btnSalvarUsuario")
-    };
-
-    function escaparHtml(valor){
-      return String(valor ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
-
-    function formatarData(valor){
-      if(!valor) return "—";
-
-      const data = new Date(valor);
-
-      if(Number.isNaN(data.getTime())){
-        return "—";
-      }
-
-      return new Intl.DateTimeFormat("pt-BR", {
-        dateStyle:"short",
-        timeStyle:"short"
-      }).format(data);
-    }
-
-    function definirEstado(elemento, mensagem, erro = false){
-      elemento.textContent = mensagem;
-      elemento.classList.add("visivel");
-      elemento.classList.toggle("erro", erro);
-    }
-
-    function ocultarEstado(elemento){
-      elemento.classList.remove("visivel","erro");
-    }
-
-    async function validarSessao(){
-      const { data, error } = await supabase.auth.getSession();
-
-      if(error){
-        throw new Error(`Falha ao verificar sessão: ${error.message}`);
-      }
-
-      if(!data.session?.user){
-        window.top.location.replace("acesso.html");
-        return false;
-      }
-
-      return true;
-    }
-
-    function abrirPainel(nome){
-      elementos.botoesNav.forEach((botao) => {
-        botao.classList.toggle("ativo", botao.dataset.painel === nome);
-      });
-
-      elementos.paineis.forEach((painel) => {
-        painel.classList.toggle("ativo", painel.id === `painel-${nome}`);
-      });
-
-      if(nome === "usuarios"){
-        if(elementos.btnRecarregarEstrutura){
-      elementos.btnRecarregarEstrutura.addEventListener("click",() => {
-        if(elementos.frameEstrutura){
-          elementos.frameEstrutura.contentWindow?.location.reload();
-        }
-      });
-    }
-
-    carregarUsuarios();
-      }
-
-      if(nome === "site"){
-        carregarSite();
-      }
-
-      if(nome === "conhecimento"){
-        carregarConhecimento();
-      }
-
-      if(nome === "modulos"){
-        carregarModulos();
-      }
-
-      if(nome === "estrutura" && elementos.frameEstrutura){
-        elementos.frameEstrutura.contentWindow?.location.reload();
-      }
-    }
-
-    elementos.botoesNav.forEach((botao) => {
-      botao.addEventListener("click", () => abrirPainel(botao.dataset.painel));
-    });
-
-
-
-    function definirSaude(elemento,status,mensagem){
-      if(!elemento) return;
-
-      const indicador = elemento.querySelector(".saude-indicador");
-      const texto = elemento.querySelector(".saude-conteudo span");
-
-      elemento.dataset.status = status;
-
-      const simbolos = {
-        ok:"✓",
-        alerta:"!",
-        erro:"×",
-        carregando:"•"
-      };
-
-      if(indicador){
-        indicador.textContent = simbolos[status] || "•";
-      }
-
-      if(texto){
-        texto.textContent = mensagem;
-      }
-    }
-
-    function prepararSaudeCarregando(){
-      definirSaude(elementos.saudeSessao,"carregando","Verificando autenticação...");
-      definirSaude(elementos.saudeSupabase,"carregando","Verificando comunicação...");
-      definirSaude(elementos.saudeUsuarios,"carregando","Verificando consulta administrativa...");
-      definirSaude(elementos.saudeModulos,"carregando","Verificando estrutura cadastrada...");
-      definirSaude(elementos.saudeConhecimento,"carregando","Verificando disponibilidade...");
-      definirSaude(elementos.saudeEstrutura,"carregando","Analisando vínculos entre módulos...");
-    }
-
-    function avaliarIntegridadeEstrutura(modulos){
-      const ids = new Set(modulos.map((item) => String(item.id)));
-      const orfaos = modulos.filter((item) =>
-        item.modulo_pai &&
-        !ids.has(String(item.modulo_pai))
-      );
-
-      const codigosVazios = modulos.filter((item) =>
-        !String(item.codigo || "").trim()
-      );
-
-      const codigos = new Map();
-      modulos.forEach((item) => {
-        const codigo = String(item.codigo || "").trim();
-        if(!codigo) return;
-        codigos.set(codigo,(codigos.get(codigo) || 0) + 1);
-      });
-
-      const duplicados = [...codigos.values()]
-        .filter((quantidade) => quantidade > 1)
-        .length;
-
-      return {
-        orfaos:orfaos.length,
-        codigosVazios:codigosVazios.length,
-        duplicados
-      };
-    }
-
-    function atualizarSaudeSistema({
-      sessaoOk,
-      usuariosResposta,
-      modulosResposta,
-      conhecimentoResposta
-    }){
-      definirSaude(
-        elementos.saudeSessao,
-        sessaoOk ? "ok" : "erro",
-        sessaoOk ? "Administrador autenticado." : "Sessão não validada."
-      );
-
-      const usuariosOk = !usuariosResposta?.error;
-      const modulosOk = !modulosResposta?.error;
-      const conhecimentoOk = !conhecimentoResposta?.error;
-      const supabaseOk = usuariosOk || modulosOk || conhecimentoOk;
-
-      definirSaude(
-        elementos.saudeSupabase,
-        supabaseOk ? "ok" : "erro",
-        supabaseOk
-          ? "Comunicação com o Supabase confirmada."
-          : "Não foi possível consultar o Supabase."
-      );
-
-      definirSaude(
-        elementos.saudeUsuarios,
-        usuariosOk ? "ok" : "erro",
-        usuariosOk
-          ? `${(usuariosResposta.data || []).length} usuário(s) localizado(s).`
-          : `Falha: ${usuariosResposta?.error?.message || "consulta indisponível"}`
-      );
-
-      definirSaude(
-        elementos.saudeModulos,
-        modulosOk ? "ok" : "erro",
-        modulosOk
-          ? `${(modulosResposta.data || []).length} registro(s) carregado(s).`
-          : `Falha: ${modulosResposta?.error?.message || "consulta indisponível"}`
-      );
-
-      if(conhecimentoOk){
-        const total = (conhecimentoResposta.data || []).length;
-        definirSaude(
-          elementos.saudeConhecimento,
-          total ? "ok" : "alerta",
-          total
-            ? `${total} conteúdo(s) disponível(is).`
-            : "Conectada, porém ainda sem conteúdos."
-        );
-      }else{
-        definirSaude(
-          elementos.saudeConhecimento,
-          "erro",
-          `Falha: ${conhecimentoResposta?.error?.message || "consulta indisponível"}`
-        );
-      }
-
-      if(modulosOk){
-        const integridade = avaliarIntegridadeEstrutura(modulosResposta.data || []);
-        const totalProblemas =
-          integridade.orfaos +
-          integridade.codigosVazios +
-          integridade.duplicados;
-
-        definirSaude(
-          elementos.saudeEstrutura,
-          totalProblemas ? "alerta" : "ok",
-          totalProblemas
-            ? `${integridade.orfaos} órfão(s), ${integridade.codigosVazios} código(s) vazio(s) e ${integridade.duplicados} duplicidade(s).`
-            : "Nenhum vínculo órfão ou código duplicado identificado."
-        );
-      }else{
-        definirSaude(
-          elementos.saudeEstrutura,
-          "erro",
-          "A estrutura não pôde ser analisada."
-        );
-      }
-    }
-
-    function executarAcaoRapida(acao){
-      switch(acao){
-        case "aprovar-usuarios":
-          abrirPainel("usuarios");
-          break;
-
-        case "novo-modulo":
-          abrirPainel("modulos");
-          window.setTimeout(() => abrirEdicaoModulo(),80);
-          break;
-
-        case "estrutura":
-          abrirPainel("estrutura");
-          break;
-
-        case "novo-conhecimento":
-          abrirPainel("conhecimento");
-          window.setTimeout(() => abrirEditorConhecimento(),80);
-          break;
-
-        case "permissoes":
-          abrirPainel("permissoes");
-          break;
-
-        case "logs":
-          abrirPainel("logs");
-          break;
-
-        case "configuracoes":
-          abrirPainel("configuracoes");
-          break;
-
-        case "sistema":
-          window.location.href = "/sistema.html";
-          break;
-      }
-    }
-
-    function mesmaDataLocal(valor, referencia = new Date()){
-      if(!valor) return false;
-      const data = new Date(valor);
-      if(Number.isNaN(data.getTime())) return false;
-
-      return (
-        data.getFullYear() === referencia.getFullYear() &&
-        data.getMonth() === referencia.getMonth() &&
-        data.getDate() === referencia.getDate()
-      );
-    }
-
-    function renderizarDashboardPendencias(usuarios, modulos){
-      const pendencias = [];
-
-      const usuariosPendentes = usuarios.filter((item) => item.ativo !== true).length;
-      const modulosSemRota = modulos.filter((item) =>
-        item.ativo === true &&
-        !item.modulo_pai &&
-        !String(item.rota || "").trim()
-      ).length;
-      const ativosForaMenu = modulos.filter((item) =>
-        item.ativo === true &&
-        item.exibir_menu_logado !== true &&
-        String(item.status_desenvolvimento || "") !== "desativado"
-      ).length;
-      const emDesenvolvimento = modulos.filter((item) =>
-        String(item.status_desenvolvimento || "") === "em_desenvolvimento"
-      ).length;
-      const emBreve = modulos.filter((item) => item.em_breve === true).length;
-
-      if(usuariosPendentes){
-        pendencias.push({
-          titulo:`${usuariosPendentes} usuário(s) aguardando aprovação`,
-          texto:"Analise as contas pendentes e defina o acesso necessário.",
-          painel:"usuarios",
-          classe:"erro"
-        });
-      }
-
-      if(modulosSemRota){
-        pendencias.push({
-          titulo:`${modulosSemRota} módulo(s) principal(is) ativo(s) sem rota`,
-          texto:"Confira se estes itens são apenas agrupadores ou se falta definir uma página.",
-          painel:"modulos",
-          classe:""
-        });
-      }
-
-      if(ativosForaMenu){
-        pendencias.push({
-          titulo:`${ativosForaMenu} recurso(s) ativo(s) fora do menu`,
-          texto:"Verifique se a ocultação é intencional.",
-          painel:"modulos",
-          classe:""
-        });
-      }
-
-      if(emDesenvolvimento){
-        pendencias.push({
-          titulo:`${emDesenvolvimento} recurso(s) em desenvolvimento`,
-          texto:"Acompanhe o andamento antes da liberação ao usuário.",
-          painel:"modulos",
-          classe:""
-        });
-      }
-
-      if(emBreve){
-        pendencias.push({
-          titulo:`${emBreve} recurso(s) marcado(s) como “Em breve”`,
-          texto:"Esses itens podem aparecer como funcionalidades futuras.",
-          painel:"modulos",
-          classe:""
-        });
-      }
-
-      if(!pendencias.length){
-        elementos.dashboardPendencias.innerHTML = `
-          <article class="dashboard-item dashboard-alerta sucesso">
-            <div class="dashboard-item-conteudo">
-              <strong>Nenhuma pendência crítica identificada</strong>
-              <p>Os dados administrativos analisados não apresentam alertas.</p>
-            </div>
-          </article>
-        `;
-        return;
-      }
-
-      elementos.dashboardPendencias.innerHTML = pendencias.map((item) => `
-        <article class="dashboard-item dashboard-alerta ${item.classe}">
-          <div class="dashboard-item-conteudo">
-            <strong>${escaparHtml(item.titulo)}</strong>
-            <p>${escaparHtml(item.texto)}</p>
-          </div>
-          <button class="btn" type="button" data-dashboard-abrir="${item.painel}">
-            Abrir área
-          </button>
-        </article>
-      `).join("");
-
-      elementos.dashboardPendencias
-        .querySelectorAll("[data-dashboard-abrir]")
-        .forEach((botao) => {
-          botao.addEventListener("click",() => {
-            abrirPainel(botao.dataset.dashboardAbrir);
-          });
-        });
-    }
-
-    function renderizarUltimosUsuariosDashboard(usuarios){
-      const recentes = [...usuarios]
-        .sort((a,b) =>
-          new Date(b.created_at || 0).getTime() -
-          new Date(a.created_at || 0).getTime()
+-- ============================================================
+-- SAR CMS — FUNÇÕES ADMINISTRATIVAS
+-- PÁGINAS, MENU E SEÇÕES
+-- ============================================================
+
+
+-- ============================================================
+-- VALIDAÇÃO CENTRAL DE MASTER
+-- ============================================================
+
+create or replace function public.sar_admin_cms_validar_master()
+returns void
+language plpgsql
+security definer
+set search_path to ''
+as $function$
+begin
+
+    if not exists (
+        select 1
+        from public.sar_usuarios su
+        where su.user_id = auth.uid()
+          and su.ativo = true
+          and lower(trim(coalesce(su.tipo_usuario, ''))) = 'master'
+    ) then
+        raise exception 'Acesso administrativo não autorizado.';
+    end if;
+
+end;
+$function$;
+
+
+revoke all
+on function public.sar_admin_cms_validar_master()
+from public;
+
+grant execute
+on function public.sar_admin_cms_validar_master()
+to authenticated;
+
+
+
+-- ============================================================
+-- LISTAR PÁGINAS
+-- ============================================================
+
+create or replace function public.sar_admin_cms_listar_paginas()
+returns table (
+    id uuid,
+    slug text,
+    nome text,
+    titulo_seo text,
+    descricao_seo text,
+    arquivo text,
+    ordem integer,
+    ativo boolean,
+    criado_em timestamptz,
+    atualizado_em timestamptz
+)
+language plpgsql
+security definer
+set search_path to ''
+as $function$
+begin
+
+    perform public.sar_admin_cms_validar_master();
+
+    return query
+
+    select
+        p.id,
+        p.slug,
+        p.nome,
+        p.titulo_seo,
+        p.descricao_seo,
+        p.arquivo,
+        p.ordem,
+        p.ativo,
+        p.criado_em,
+        p.atualizado_em
+
+    from public.sar_site_paginas p
+
+    order by
+        p.ordem,
+        p.nome;
+
+end;
+$function$;
+
+
+
+-- ============================================================
+-- SALVAR PÁGINA
+-- ============================================================
+
+create or replace function public.sar_admin_cms_salvar_pagina(
+    p_id uuid default null,
+    p_slug text default null,
+    p_nome text default null,
+    p_titulo_seo text default null,
+    p_descricao_seo text default null,
+    p_arquivo text default 'index.html',
+    p_ordem integer default 0,
+    p_ativo boolean default true
+)
+returns uuid
+language plpgsql
+security definer
+set search_path to ''
+as $function$
+declare
+    v_id uuid;
+    v_slug text;
+begin
+
+    perform public.sar_admin_cms_validar_master();
+
+    v_slug := lower(trim(coalesce(p_slug, '')));
+
+    v_slug := regexp_replace(
+        translate(
+            v_slug,
+            'áàãâäéèêëíìîïóòõôöúùûüç',
+            'aaaaaeeeeiiiiooooouuuuc'
+        ),
+        '[^a-z0-9]+',
+        '-',
+        'g'
+    );
+
+    v_slug := trim(both '-' from v_slug);
+
+    if v_slug = '' then
+        raise exception 'Informe o identificador da página.';
+    end if;
+
+    if trim(coalesce(p_nome, '')) = '' then
+        raise exception 'Informe o nome da página.';
+    end if;
+
+    if p_id is null then
+
+        insert into public.sar_site_paginas (
+            slug,
+            nome,
+            titulo_seo,
+            descricao_seo,
+            arquivo,
+            ordem,
+            ativo
         )
-        .slice(0,5);
-
-      if(!recentes.length){
-        elementos.dashboardUltimosUsuarios.innerHTML =
-          '<div class="dashboard-vazio">Nenhum usuário cadastrado.</div>';
-        return;
-      }
-
-      elementos.dashboardUltimosUsuarios.innerHTML = recentes.map((usuario) => `
-        <article class="dashboard-item">
-          <div class="dashboard-item-conteudo">
-            <strong>${escaparHtml(usuario.nome || "Sem nome")}</strong>
-            <p>
-              ${escaparHtml(usuario.email || "—")} ·
-              Cadastro: ${formatarData(usuario.created_at)}
-            </p>
-          </div>
-          <span class="status ${usuario.ativo === true ? "ativo" : "pendente"}">
-            ${usuario.ativo === true ? "Ativo" : "Pendente"}
-          </span>
-        </article>
-      `).join("");
-    }
-
-    async function carregarDashboard(){
-      if(!elementos.btnAtualizarDashboard) return;
-
-      elementos.btnAtualizarDashboard.disabled = true;
-      if(elementos.btnTestarSaude) elementos.btnTestarSaude.disabled = true;
-      prepararSaudeCarregando();
-      definirEstado(elementos.estadoDashboard,"Atualizando visão administrativa...");
-
-      try{
-        if(!await validarSessao()) return;
-
-        const [
-          respostaUsuarios,
-          respostaModulos,
-          respostaConhecimento
-        ] = await Promise.all([
-          supabase.rpc("sar_admin_listar_usuarios"),
-          supabase.rpc("sar_admin_listar_modulos"),
-          supabase.rpc("sar_admin_listar_base_conhecimento")
-        ]);
-
-        atualizarSaudeSistema({
-          sessaoOk:true,
-          usuariosResposta:respostaUsuarios,
-          modulosResposta:respostaModulos,
-          conhecimentoResposta:respostaConhecimento
-        });
-
-        if(respostaUsuarios.error){
-          throw new Error(respostaUsuarios.error.message);
-        }
-
-        if(respostaModulos.error){
-          throw new Error(respostaModulos.error.message);
-        }
-
-        const usuarios = respostaUsuarios.data || [];
-        const modulos = respostaModulos.data || [];
-        const conhecimentos = respostaConhecimento.error
-          ? []
-          : (respostaConhecimento.data || []);
-
-        usuariosCache = usuarios;
-        modulosCache = modulos;
-        conhecimentoCache = conhecimentos;
-
-        const hoje = new Date();
-        const ativos = usuarios.filter((item) => item.ativo === true);
-        const pendentes = usuarios.filter((item) => item.ativo !== true);
-        const acessaramHoje = usuarios.filter((item) =>
-          mesmaDataLocal(item.ultimo_login,hoje)
-        );
-
-        const modulosAtivos = modulos.filter((item) => item.ativo === true);
-        const modulosMenu = modulos.filter((item) =>
-          item.exibir_menu_logado === true
-        );
-        const modulosDesenvolvimento = modulos.filter((item) =>
-          String(item.status_desenvolvimento || "") === "em_desenvolvimento"
-        );
-
-        elementos.dashUsuariosTotal.textContent = usuarios.length;
-        elementos.dashUsuariosAtivos.textContent = ativos.length;
-        elementos.dashUsuariosPendentes.textContent = pendentes.length;
-        elementos.dashAcessosHoje.textContent = acessaramHoje.length;
-        elementos.dashModulosTotal.textContent = modulos.length;
-        elementos.dashModulosAtivos.textContent = modulosAtivos.length;
-        elementos.dashModulosMenu.textContent = modulosMenu.length;
-        elementos.dashModulosDesenvolvimento.textContent =
-          modulosDesenvolvimento.length;
-        elementos.dashConhecimentoTotal.textContent = conhecimentos.length;
-
-        const conhecimentoMaisRecente = [...conhecimentos].sort((a,b) =>
-          new Date(b.atualizado_em || 0).getTime() -
-          new Date(a.atualizado_em || 0).getTime()
-        )[0];
-
-        elementos.dashConhecimentoUltimo.textContent = conhecimentoMaisRecente
-          ? `Última atualização: ${conhecimentoMaisRecente.titulo || "Sem título"} — ${formatarData(conhecimentoMaisRecente.atualizado_em)}`
-          : "Nenhum conteúdo cadastrado ou acesso indisponível.";
-
-        const ultimoUsuario = [...usuarios]
-          .filter((item) => item.ultimo_login)
-          .sort((a,b) =>
-            new Date(b.ultimo_login).getTime() -
-            new Date(a.ultimo_login).getTime()
-          )[0];
-
-        elementos.dashUltimoAcesso.textContent = ultimoUsuario
-          ? formatarData(ultimoUsuario.ultimo_login)
-          : "—";
-
-        elementos.dashUltimoUsuario.textContent = ultimoUsuario
-          ? `${ultimoUsuario.nome || "Sem nome"} · ${ultimoUsuario.email || "—"}`
-          : "Nenhum acesso localizado.";
-
-        renderizarDashboardPendencias(usuarios,modulos);
-        renderizarUltimosUsuariosDashboard(usuarios);
-        ocultarEstado(elementos.estadoDashboard);
-
-      }catch(error){
-        definirEstado(
-          elementos.estadoDashboard,
-          error instanceof Error ? error.message : String(error),
-          true
-        );
-
-        if(elementos.saudeSessao?.dataset.status === "carregando"){
-          definirSaude(elementos.saudeSessao,"erro","Não foi possível validar a sessão.");
-          definirSaude(elementos.saudeSupabase,"erro","Falha durante a atualização.");
-          definirSaude(elementos.saudeUsuarios,"erro","Consulta não concluída.");
-          definirSaude(elementos.saudeModulos,"erro","Consulta não concluída.");
-          definirSaude(elementos.saudeConhecimento,"erro","Consulta não concluída.");
-          definirSaude(elementos.saudeEstrutura,"erro","Análise não concluída.");
-        }
-      }finally{
-        elementos.btnAtualizarDashboard.disabled = false;
-        if(elementos.btnTestarSaude) elementos.btnTestarSaude.disabled = false;
-      }
-    }
-
-    function atualizarResumoUsuarios(usuarios){
-      elementos.totalUsuarios.textContent = usuarios.length;
-      elementos.totalAtivos.textContent = usuarios.filter((u) => u.ativo === true).length;
-      elementos.totalPendentes.textContent = usuarios.filter((u) => u.ativo !== true).length;
-      elementos.totalMasters.textContent = usuarios.filter(
-        (u) => String(u.tipo_usuario || "").toLowerCase() === "master"
-      ).length;
-    }
-
-    function renderizarUsuarios(usuarios){
-      atualizarResumoUsuarios(usuarios);
-
-      if(!usuarios.length){
-        elementos.corpoUsuarios.innerHTML =
-          '<tr><td class="vazio" colspan="8">Nenhum usuário cadastrado.</td></tr>';
-        return;
-      }
-
-      elementos.corpoUsuarios.innerHTML = usuarios.map((usuario) => {
-        const tipo = String(usuario.tipo_usuario || "teste").toLowerCase();
-        const ativo = usuario.ativo === true;
-
-        return `
-          <tr>
-            <td class="nome">${escaparHtml(usuario.nome || "Sem nome")}</td>
-            <td class="email">${escaparHtml(usuario.email || "—")}</td>
-            <td>
-              <span class="tipo ${tipo === "master" ? "master" : ""}">
-                ${escaparHtml(tipo)}
-              </span>
-            </td>
-            <td>
-              <span class="status ${ativo ? "ativo" : "pendente"}">
-                ${ativo ? "Ativo" : "Pendente"}
-              </span>
-            </td>
-            <td class="data">${formatarData(usuario.created_at)}</td>
-            <td class="data">${formatarData(usuario.ultimo_login)}</td>
-            <td class="data">${formatarData(usuario.aprovado_em)}</td>
-            <td>
-              <button
-                class="btn"
-                type="button"
-                data-editar-usuario="${usuario.id}"
-              >
-                Editar
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join("");
-
-      elementos.corpoUsuarios
-        .querySelectorAll("[data-editar-usuario]")
-        .forEach((botao) => {
-          botao.addEventListener("click", () => abrirEdicaoUsuario(botao.dataset.editarUsuario));
-        });
-    }
-
-    async function carregarUsuarios(){
-      elementos.btnAtualizarUsuarios.disabled = true;
-      definirEstado(elementos.estadoUsuarios,"Carregando usuários...");
-
-      try{
-        if(!await validarSessao()) return;
-
-        const { data, error } = await supabase.rpc("sar_admin_listar_usuarios");
-
-        if(error){
-          throw new Error(error.message || "Acesso administrativo não autorizado.");
-        }
-
-        usuariosCache = data || [];
-        renderizarUsuarios(usuariosCache);
-        ocultarEstado(elementos.estadoUsuarios);
-
-      }catch(error){
-        elementos.corpoUsuarios.innerHTML =
-          '<tr><td class="vazio" colspan="8">Não foi possível carregar os usuários.</td></tr>';
-
-        definirEstado(
-          elementos.estadoUsuarios,
-          error instanceof Error ? error.message : String(error),
-          true
-        );
-      }finally{
-        elementos.btnAtualizarUsuarios.disabled = false;
-      }
-    }
-
-    function normalizarPermissao(item){
-      return {
-        modulo_id:item.modulo_id,
-        modulo_pai:item.modulo_pai || null,
-        codigo:item.codigo,
-        modulo:item.modulo,
-        icone:item.icone,
-        ordem_menu:item.ordem_menu,
-        nivel:Number(item.nivel || 0),
-        visualizar:item.visualizar === true,
-        editar:item.editar === true,
-        excluir:item.excluir === true,
-        administrar:item.administrar === true
-      };
-    }
-
-    function permissaoEstaLiberada(permissao){
-      return (
-        permissao.visualizar === true &&
-        permissao.editar === true &&
-        permissao.excluir === true &&
-        permissao.administrar === true
-      );
-    }
-
-    function definirModuloLiberado(permissao, liberado){
-      permissao.visualizar = liberado;
-      permissao.editar = liberado;
-      permissao.excluir = liberado;
-      permissao.administrar = liberado;
-    }
-
-    function obterDescendentes(moduloId){
-      const encontrados = [];
-      const fila = [moduloId];
-
-      while(fila.length){
-        const paiAtual = fila.shift();
-
-        permissoesEdicao.forEach((item) => {
-          if(item.modulo_pai === paiAtual){
-            encontrados.push(item);
-            fila.push(item.modulo_id);
-          }
-        });
-      }
-
-      return encontrados;
-    }
-
-    function liberarItemEFilhos(permissao, liberado){
-      definirModuloLiberado(permissao,liberado);
-
-      obterDescendentes(permissao.modulo_id)
-        .forEach((filho) => definirModuloLiberado(filho,liberado));
-    }
-
-    function garantirPaisLiberados(permissao){
-      let paiId = permissao.modulo_pai;
-
-      while(paiId){
-        const pai = permissoesEdicao.find(
-          (item) => item.modulo_id === paiId
-        );
-
-        if(!pai){
-          break;
-        }
-
-        definirModuloLiberado(pai,true);
-        paiId = pai.modulo_pai;
-      }
-    }
-
-    function rotuloNivel(nivel){
-      if(nivel === 0) return "Módulo principal";
-      if(nivel === 1) return "Aba";
-      return "Ferramenta";
-    }
-
-    function renderizarPermissoes(){
-      if(!permissoesEdicao.length){
-        elementos.listaPermissoes.innerHTML =
-          '<div class="permissoes-carregando">Nenhum módulo ativo disponível.</div>';
-        return;
-      }
-
-      elementos.listaPermissoes.innerHTML = permissoesEdicao.map((item,index) => {
-        const liberado = permissaoEstaLiberada(item);
-        const nivel = Math.max(0,Number(item.nivel || 0));
-
-        return `
-          <article
-            class="permissao-card nivel-${Math.min(nivel,2)}"
-            data-indice-permissao="${index}"
-            style="--nivel:${nivel}"
-          >
-            <div class="permissao-modulo">
-              <div>
-                <strong>${escaparHtml(item.modulo || item.codigo)}</strong>
-                <small>${escaparHtml(item.codigo || "")}</small>
-
-                <span class="permissao-nivel">
-                  ${rotuloNivel(nivel)}
-                </span>
-              </div>
-
-              <div class="permissoes-grid">
-                <label class="permissao-check">
-                  <input
-                    type="checkbox"
-                    data-permissao-liberado
-                    ${liberado ? "checked" : ""}
-                  >
-                  Liberado
-                </label>
-              </div>
-            </div>
-          </article>
-        `;
-      }).join("");
-
-      elementos.listaPermissoes
-        .querySelectorAll("[data-permissao-liberado]")
-        .forEach((input) => {
-          input.addEventListener("change", () => {
-            const card = input.closest("[data-indice-permissao]");
-            const indice = Number(card.dataset.indicePermissao);
-            const permissao = permissoesEdicao[indice];
-            const liberado = input.checked;
-
-            /*
-              Ao liberar um filho, os pais são liberados.
-              Ao alterar um pai, todos os descendentes seguem a mesma opção.
-            */
-            liberarItemEFilhos(permissao,liberado);
-
-            if(liberado){
-              garantirPaisLiberados(permissao);
-            }
-
-            renderizarPermissoes();
-          });
-        });
-    }
-
-    async function carregarPermissoesUsuario(usuarioId){
-      elementos.listaPermissoes.innerHTML =
-        '<div class="permissoes-carregando">Carregando permissões...</div>';
-
-      const { data, error } = await supabase.rpc(
-        "sar_admin_listar_permissoes_usuario",
-        { p_usuario_id:usuarioId }
-      );
-
-      if(error){
-        throw new Error(error.message || "Não foi possível carregar as permissões.");
-      }
-
-      permissoesEdicao = (data || []).map(normalizarPermissao);
-      renderizarPermissoes();
-    }
-
-    async function abrirEdicaoUsuario(id){
-      usuarioEdicao = usuariosCache.find((usuario) => usuario.id === id) || null;
-
-      if(!usuarioEdicao){
-        return;
-      }
-
-      elementos.drawerNome.textContent = usuarioEdicao.nome || "Sem nome";
-      elementos.drawerEmail.textContent = usuarioEdicao.email || "—";
-      elementos.drawerTipo.value = String(usuarioEdicao.tipo_usuario || "teste").toLowerCase();
-      elementos.drawerAtivo.checked = usuarioEdicao.ativo === true;
-
-      permissoesEdicao = [];
-      ocultarEstado(elementos.estadoEdicao);
-      elementos.drawerOverlay.classList.add("aberto");
-      elementos.drawerOverlay.setAttribute("aria-hidden","false");
-
-      try{
-        await carregarPermissoesUsuario(usuarioEdicao.id);
-      }catch(error){
-        elementos.listaPermissoes.innerHTML =
-          '<div class="permissoes-carregando">Não foi possível carregar as permissões.</div>';
-
-        definirEstado(
-          elementos.estadoEdicao,
-          error instanceof Error ? error.message : String(error),
-          true
-        );
-      }
-    }
-
-    function fecharEdicaoUsuario(){
-      usuarioEdicao = null;
-      permissoesEdicao = [];
-      elementos.drawerOverlay.classList.remove("aberto");
-      elementos.drawerOverlay.setAttribute("aria-hidden","true");
-      ocultarEstado(elementos.estadoEdicao);
-    }
-
-    async function salvarPermissoesUsuario(usuarioId){
-      for(const permissao of permissoesEdicao){
-        const { error } = await supabase.rpc(
-          "sar_admin_salvar_permissao_usuario",
-          {
-            p_usuario_id:usuarioId,
-            p_modulo_id:permissao.modulo_id,
-            p_visualizar:permissao.visualizar,
-            p_editar:permissao.editar,
-            p_excluir:permissao.excluir,
-            p_administrar:permissao.administrar
-          }
-        );
-
-        if(error){
-          throw new Error(
-            `Falha ao salvar ${permissao.modulo}: ${error.message}`
-          );
-        }
-      }
-    }
-
-    async function salvarUsuario(){
-      if(!usuarioEdicao){
-        return;
-      }
-
-      elementos.btnSalvarUsuario.disabled = true;
-      elementos.btnSalvarUsuario.textContent = "Salvando...";
-      definirEstado(elementos.estadoEdicao,"Salvando usuário e permissões...");
-
-      try{
-        const { error } = await supabase.rpc(
-          "sar_admin_atualizar_usuario",
-          {
-            p_usuario_id:usuarioEdicao.id,
-            p_tipo_usuario:elementos.drawerTipo.value,
-            p_ativo:elementos.drawerAtivo.checked
-          }
-        );
-
-        if(error){
-          throw new Error(error.message || "Não foi possível atualizar o usuário.");
-        }
-
-        await salvarPermissoesUsuario(usuarioEdicao.id);
-
-        definirEstado(
-          elementos.estadoEdicao,
-          "Usuário e permissões atualizados com sucesso."
-        );
-
-        await carregarUsuarios();
-
-        setTimeout(() => {
-          fecharEdicaoUsuario();
-        },800);
-
-      }catch(error){
-        definirEstado(
-          elementos.estadoEdicao,
-          error instanceof Error ? error.message : String(error),
-          true
-        );
-      }finally{
-        elementos.btnSalvarUsuario.disabled = false;
-        elementos.btnSalvarUsuario.textContent = "Salvar alterações";
-      }
-    }
-
-
-    function normalizarCodigoModulo(valor){
-      return String(valor || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g,"")
-        .toUpperCase()
-        .replace(/[^A-Z0-9]+/g,"_")
-        .replace(/^_+|_+$/g,"");
-    }
-
-    function obterNivelModulo(item){
-      let nivel = 0;
-      let paiId = item?.modulo_pai || null;
-      const visitados = new Set();
-
-      while(paiId && !visitados.has(paiId)){
-        visitados.add(paiId);
-        const pai = modulosCache.find((modulo) => modulo.id === paiId);
-        if(!pai) break;
-        nivel += 1;
-        paiId = pai.modulo_pai || null;
-      }
-
-      return nivel;
-    }
-
-    function nomeModuloPai(item){
-      if(!item.modulo_pai) return "Módulo principal";
-      const pai = modulosCache.find((modulo) => modulo.id === item.modulo_pai);
-      return pai?.modulo || "Pai não encontrado";
-    }
-
-    function atualizarResumoModulos(){
-      elementos.totalModulos.textContent = modulosCache.length;
-      elementos.totalModulosAtivos.textContent =
-        modulosCache.filter((item) => item.ativo === true).length;
-      elementos.totalModulosMenu.textContent =
-        modulosCache.filter((item) => item.exibir_menu_logado === true).length;
-      elementos.totalModulosBreve.textContent =
-        modulosCache.filter((item) => item.em_breve === true).length;
-    }
-
-    function filtrarModulos(){
-      const termo = elementos.pesquisaModulos.value
-        .trim()
-        .toLocaleLowerCase("pt-BR");
-
-      const status = elementos.filtroStatusModulo.value;
-
-      const filtrados = modulosCache.filter((item) => {
-        const texto = [
-          item.modulo,
-          item.codigo,
-          item.categoria,
-          item.rota,
-          item.descricao
-        ].join(" ").toLocaleLowerCase("pt-BR");
-
-        const correspondeTermo = !termo || texto.includes(termo);
-
-        let correspondeStatus = true;
-
-        if(status === "ativo"){
-          correspondeStatus = item.ativo === true;
-        }else if(status === "inativo"){
-          correspondeStatus = item.ativo !== true;
-        }else if(status === "em_breve"){
-          correspondeStatus = item.em_breve === true;
-        }
-
-        return correspondeTermo && correspondeStatus;
-      });
-
-      renderizarModulos(filtrados);
-    }
-
-
-    function iconeVisualModulo(valor){
-      const original = String(valor || "").trim();
-
-      if(!original){
-        return "🧩";
-      }
-
-      const chave = original.toLocaleLowerCase("pt-BR");
-
-      const mapa = {
-        brain:"🧠",
-        clipboard:"📋",
-        repeat:"🔁",
-        droplet:"💧",
-        water:"💧",
-        calculator:"🧮",
-        wrench:"🔧",
-        settings:"⚙️",
-        gear:"⚙️",
-        printer:"🖨️",
-        cube:"🧊",
-        building:"🏢",
-        stairs:"🪜",
-        fire:"🔥",
-        flame:"🔥",
-        pump:"⚙️",
-        book:"📚",
-        database:"🗄️",
-        shield:"🛡️",
-        lock:"🔒",
-        chart:"📊",
-        home:"🏠",
-        project:"📐",
-        ruler:"📏",
-        pipe:"🔩",
-        conversion:"🔄"
-      };
-
-      if(mapa[chave]){
-        return mapa[chave];
-      }
-
-      /*
-       * Nomes simples vindos de bibliotecas de ícones, como "clipboard",
-       * não devem ser impressos como texto dentro da tabela.
-       */
-      if(/^[a-z0-9_-]+$/i.test(original)){
-        return "🧩";
-      }
-
-      return original;
-    }
-
-    function renderizarModulos(modulos){
-      if(!modulos.length){
-        elementos.corpoModulos.innerHTML =
-          '<tr><td class="vazio" colspan="9">Nenhum módulo encontrado.</td></tr>';
-        return;
-      }
-
-      elementos.corpoModulos.innerHTML = modulos.map((item) => {
-        const nivel = obterNivelModulo(item);
-        const statusClasse = item.ativo !== true
-          ? "inativo"
-          : String(item.status_desenvolvimento || "disponivel")
-              .replaceAll("_","-");
-
-        const statusTexto = item.ativo !== true
-          ? "Inativo"
-          : item.em_breve === true
-            ? "Em breve"
-            : String(item.status_desenvolvimento || "disponivel")
-                .replaceAll("_"," ");
-
-        return `
-          <tr>
-            <td>
-              <div class="estrutura-modulo" style="padding-left:${nivel * 22}px">
-                <span class="icone">${escaparHtml(iconeVisualModulo(item.icone))}</span>
-                <div>
-                  <strong>${escaparHtml(item.modulo || "Sem nome")}</strong>
-                  <small>${escaparHtml(nomeModuloPai(item))}</small>
-                </div>
-              </div>
-            </td>
-
-            <td class="codigo-modulo">${escaparHtml(item.codigo || "—")}</td>
-            <td>${escaparHtml(item.categoria || "—")}</td>
-
-            <td>
-              <div class="rota-modulo" title="${escaparHtml(item.rota || "")}">
-                ${escaparHtml(item.rota || "—")}
-              </div>
-            </td>
-
-            <td>${Number(item.ordem_menu || 0)}</td>
-
-            <td>
-              <span class="${item.exibir_menu_logado ? "badge-sim" : "badge-nao"}">
-                ${item.exibir_menu_logado ? "Sim" : "Não"}
-              </span>
-            </td>
-
-            <td>
-              <span class="${item.exibir_site_publico ? "badge-sim" : "badge-nao"}">
-                ${item.exibir_site_publico ? "Sim" : "Não"}
-              </span>
-            </td>
-
-            <td>
-              <span class="status-modulo ${statusClasse}">
-                ${escaparHtml(statusTexto)}
-              </span>
-            </td>
-
-            <td>
-              <button
-                class="btn"
-                type="button"
-                data-editar-modulo="${item.id}"
-              >
-                Editar
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join("");
-
-      elementos.corpoModulos
-        .querySelectorAll("[data-editar-modulo]")
-        .forEach((botao) => {
-          botao.addEventListener("click", () => {
-            abrirEdicaoModulo(botao.dataset.editarModulo);
-          });
-        });
-    }
-
-    function preencherModulosPai(moduloAtualId = null){
-      const opcoes = modulosCache
-        .filter((item) => item.id !== moduloAtualId)
-        .sort((a,b) =>
-          Number(a.ordem_menu || 0) - Number(b.ordem_menu || 0) ||
-          String(a.modulo || "").localeCompare(String(b.modulo || ""),"pt-BR")
-        );
-
-      elementos.moduloPai.innerHTML = `
-        <option value="">Nenhum — módulo principal</option>
-        ${opcoes.map((item) => `
-          <option value="${item.id}">
-            ${escaparHtml(item.icone || "")} ${escaparHtml(item.modulo || item.codigo)}
-          </option>
-        `).join("")}
-      `;
-    }
-
-    function limparFormularioModulo(){
-      elementos.moduloNome.value = "";
-      elementos.moduloCodigo.value = "";
-      elementos.moduloIcone.value = "";
-      elementos.moduloCor.value = "verde";
-      elementos.moduloDescricao.value = "";
-      elementos.moduloCategoria.value = "";
-      elementos.moduloPai.value = "";
-      elementos.moduloRota.value = "";
-      elementos.moduloOrdemMenu.value = "0";
-      elementos.moduloOrdem.value = "0";
-      elementos.moduloStatusDesenvolvimento.value = "disponivel";
-      elementos.moduloAtivo.checked = true;
-      elementos.moduloExibirMenu.checked = true;
-      elementos.moduloExibirSite.checked = false;
-      elementos.moduloDestaqueSite.checked = false;
-      elementos.moduloEmBreve.checked = false;
-    }
-
-    function abrirEdicaoModulo(id = null){
-      moduloEdicaoId = id || null;
-      delete elementos.moduloCodigo.dataset.editadoManual;
-      const item = id
-        ? modulosCache.find((modulo) => modulo.id === id)
-        : null;
-
-      preencherModulosPai(id);
-      ocultarEstado(elementos.estadoModuloEdicao);
-
-      if(item){
-        elementos.drawerModuloTitulo.textContent = "Editar módulo";
-        elementos.moduloNome.value = item.modulo || "";
-        elementos.moduloCodigo.value = item.codigo || "";
-        elementos.moduloIcone.value = item.icone || "";
-        elementos.moduloCor.value = item.cor || "verde";
-        elementos.moduloDescricao.value = item.descricao || "";
-        elementos.moduloCategoria.value = item.categoria || "";
-        elementos.moduloPai.value = item.modulo_pai || "";
-        elementos.moduloRota.value = item.rota || "";
-        elementos.moduloOrdemMenu.value = Number(item.ordem_menu || 0);
-        elementos.moduloOrdem.value = Number(item.ordem || 0);
-        elementos.moduloStatusDesenvolvimento.value =
-          item.status_desenvolvimento || "disponivel";
-        elementos.moduloAtivo.checked = item.ativo === true;
-        elementos.moduloExibirMenu.checked = item.exibir_menu_logado === true;
-        elementos.moduloExibirSite.checked = item.exibir_site_publico === true;
-        elementos.moduloDestaqueSite.checked = item.destaque_site === true;
-        elementos.moduloEmBreve.checked = item.em_breve === true;
-      }else{
-        elementos.drawerModuloTitulo.textContent = "Novo módulo";
-        limparFormularioModulo();
-        preencherModulosPai();
-      }
-
-      elementos.drawerModuloOverlay.classList.add("aberto");
-      elementos.drawerModuloOverlay.setAttribute("aria-hidden","false");
-      elementos.moduloNome.focus();
-    }
-
-    function fecharEdicaoModulo(){
-      moduloEdicaoId = null;
-      elementos.drawerModuloOverlay.classList.remove("aberto");
-      elementos.drawerModuloOverlay.setAttribute("aria-hidden","true");
-      ocultarEstado(elementos.estadoModuloEdicao);
-    }
-
-    async function carregarModulos(){
-      elementos.btnAtualizarModulos.disabled = true;
-      definirEstado(elementos.estadoModulos,"Carregando módulos...");
-
-      try{
-        if(!await validarSessao()) return;
-
-        const { data, error } = await supabase.rpc(
-          "sar_admin_listar_modulos"
-        );
-
-        if(error){
-          throw new Error(
-            error.message || "Não foi possível carregar os módulos."
-          );
-        }
-
-        modulosCache = data || [];
-        atualizarResumoModulos();
-        filtrarModulos();
-        ocultarEstado(elementos.estadoModulos);
-
-      }catch(error){
-        elementos.corpoModulos.innerHTML =
-          '<tr><td class="vazio" colspan="9">Não foi possível carregar os módulos.</td></tr>';
-
-        definirEstado(
-          elementos.estadoModulos,
-          error instanceof Error ? error.message : String(error),
-          true
-        );
-      }finally{
-        elementos.btnAtualizarModulos.disabled = false;
-      }
-    }
-
-    async function salvarModulo(){
-      const modulo = elementos.moduloNome.value.trim();
-      const codigo = normalizarCodigoModulo(elementos.moduloCodigo.value);
-
-      if(!modulo){
-        definirEstado(elementos.estadoModuloEdicao,"Informe o nome do módulo.",true);
-        elementos.moduloNome.focus();
-        return;
-      }
-
-      if(!codigo){
-        definirEstado(elementos.estadoModuloEdicao,"Informe o código único.",true);
-        elementos.moduloCodigo.focus();
-        return;
-      }
-
-      elementos.btnSalvarModulo.disabled = true;
-      elementos.btnSalvarModulo.textContent = "Salvando...";
-      definirEstado(elementos.estadoModuloEdicao,"Salvando módulo...");
-
-      try{
-        const { error } = await supabase.rpc(
-          "sar_admin_salvar_modulo",
-          {
-            p_id:moduloEdicaoId,
-            p_codigo:codigo,
-            p_modulo:modulo,
-            p_submodulo:null,
-            p_descricao:elementos.moduloDescricao.value.trim() || null,
-            p_icone:elementos.moduloIcone.value.trim() || null,
-            p_ordem:Number(elementos.moduloOrdem.value || 0),
-            p_ativo:elementos.moduloAtivo.checked,
-            p_rota:elementos.moduloRota.value.trim() || null,
-            p_exibir_site_publico:elementos.moduloExibirSite.checked,
-            p_exibir_menu_logado:elementos.moduloExibirMenu.checked,
-            p_destaque_site:elementos.moduloDestaqueSite.checked,
-            p_status_desenvolvimento:
-              elementos.moduloStatusDesenvolvimento.value,
-            p_categoria:elementos.moduloCategoria.value.trim() || null,
-            p_cor:elementos.moduloCor.value.trim() || "verde",
-            p_em_breve:elementos.moduloEmBreve.checked,
-            p_modulo_pai:elementos.moduloPai.value || null,
-            p_ordem_menu:Number(elementos.moduloOrdemMenu.value || 0)
-          }
-        );
-
-        if(error){
-          throw new Error(
-            error.message || "Não foi possível salvar o módulo."
-          );
-        }
-
-        definirEstado(
-          elementos.estadoModuloEdicao,
-          "Módulo salvo com sucesso."
-        );
-
-        await carregarModulos();
-
-        setTimeout(() => {
-          fecharEdicaoModulo();
-        },700);
-
-      }catch(error){
-        definirEstado(
-          elementos.estadoModuloEdicao,
-          error instanceof Error ? error.message : String(error),
-          true
-        );
-      }finally{
-        elementos.btnSalvarModulo.disabled = false;
-        elementos.btnSalvarModulo.textContent = "Salvar módulo";
-      }
-    }
-
-
-    function renderizarSite(conteudos){
-      if(!conteudos.length){
-        elementos.editorSite.innerHTML =
-          '<div class="placeholder">Nenhum conteúdo cadastrado.</div>';
-        return;
-      }
-
-      elementos.editorSite.innerHTML = conteudos.map((item) => `
-        <article class="conteudo-card" data-id="${item.id}">
-          <h3>${escaparHtml(item.chave)}</h3>
-          <small>Registro editável da página comercial</small>
-
-          <div class="form-grid">
-            <div class="campo full">
-              <label>Título</label>
-              <input data-campo="titulo" value="${escaparHtml(item.titulo || "")}">
-            </div>
-
-            <div class="campo full">
-              <label>Texto</label>
-              <textarea data-campo="texto">${escaparHtml(item.texto || "")}</textarea>
-            </div>
-
-            <div class="campo">
-              <label>Link</label>
-              <input data-campo="link" value="${escaparHtml(item.link || "")}">
-            </div>
-
-            <div class="campo">
-              <label>Ordem</label>
-              <input data-campo="ordem" type="number" value="${Number(item.ordem || 0)}">
-            </div>
-
-            <div class="campo">
-              <label>
-                <input data-campo="ativo" type="checkbox" ${item.ativo ? "checked" : ""}>
-                Conteúdo ativo
-              </label>
-            </div>
-          </div>
-
-          <div class="linha-acoes">
-            <button class="btn primary" type="button" data-salvar="${item.id}">
-              Salvar
-            </button>
-          </div>
-        </article>
-      `).join("");
-
-      elementos.editorSite.querySelectorAll("[data-salvar]").forEach((botao) => {
-        botao.addEventListener("click", () => salvarConteudoSite(botao.dataset.salvar));
-      });
-    }
-
-    async function carregarSite(){
-      elementos.btnAtualizarSite.disabled = true;
-      definirEstado(elementos.estadoSite,"Carregando conteúdo do site...");
-
-      try{
-        if(!await validarSessao()) return;
-
-        const { data, error } = await supabase.rpc("sar_admin_listar_site_conteudo");
-
-        if(error){
-          throw new Error(error.message || "Não foi possível carregar o conteúdo.");
-        }
-
-        renderizarSite(data || []);
-        ocultarEstado(elementos.estadoSite);
-
-      }catch(error){
-        elementos.editorSite.innerHTML =
-          '<div class="placeholder">Não foi possível carregar o conteúdo.</div>';
-
-        definirEstado(
-          elementos.estadoSite,
-          error instanceof Error ? error.message : String(error),
-          true
-        );
-      }finally{
-        elementos.btnAtualizarSite.disabled = false;
-      }
-    }
-
-    async function salvarConteudoSite(id){
-      const card = elementos.editorSite.querySelector(`[data-id="${id}"]`);
-
-      if(!card) return;
-
-      const botao = card.querySelector("[data-salvar]");
-      botao.disabled = true;
-      botao.textContent = "Salvando...";
-
-      try{
-        const titulo = card.querySelector('[data-campo="titulo"]').value.trim();
-        const texto = card.querySelector('[data-campo="texto"]').value.trim();
-        const link = card.querySelector('[data-campo="link"]').value.trim();
-        const ordem = Number(card.querySelector('[data-campo="ordem"]').value || 0);
-        const ativo = card.querySelector('[data-campo="ativo"]').checked;
-
-        const { error } = await supabase.rpc(
-          "sar_admin_atualizar_site_conteudo",
-          {
-            p_id:id,
-            p_titulo:titulo || null,
-            p_texto:texto || null,
-            p_link:link || null,
-            p_ordem:ordem,
-            p_ativo:ativo
-          }
-        );
-
-        if(error){
-          throw new Error(error.message || "Não foi possível salvar.");
-        }
-
-        definirEstado(elementos.estadoSite,"Conteúdo salvo com sucesso.");
-        setTimeout(() => ocultarEstado(elementos.estadoSite),2200);
-
-      }catch(error){
-        definirEstado(
-          elementos.estadoSite,
-          error instanceof Error ? error.message : String(error),
-          true
-        );
-      }finally{
-        botao.disabled = false;
-        botao.textContent = "Salvar";
-      }
-    }
-
-
-    function abrirEditorConhecimento(item = null){
-      conhecimentoEdicaoId = item?.id || null;
-
-      elementos.tituloEditorConhecimento.textContent =
-        conhecimentoEdicaoId ? "Editar conteúdo" : "Novo conteúdo";
-
-      elementos.conhecimentoTitulo.value = item?.titulo || "";
-      elementos.conhecimentoTexto.value = item?.conteudo || "";
-      elementos.editorConhecimento.classList.add("aberto");
-      elementos.conhecimentoTitulo.focus();
-    }
-
-    function fecharEditorConhecimento(){
-      conhecimentoEdicaoId = null;
-      elementos.conhecimentoTitulo.value = "";
-      elementos.conhecimentoTexto.value = "";
-      elementos.editorConhecimento.classList.remove("aberto");
-    }
-
-    function renderizarConhecimento(itens){
-      if(!itens.length){
-        elementos.listaConhecimento.innerHTML =
-          '<div class="placeholder">Nenhum conteúdo cadastrado.</div>';
-        return;
-      }
-
-      elementos.listaConhecimento.innerHTML = itens.map((item) => `
-        <article class="conhecimento-item">
-          <div class="conhecimento-item-topo">
-            <div>
-              <h3>${escaparHtml(item.titulo || "Sem título")}</h3>
-              <span class="conhecimento-meta">
-                Atualizado em ${formatarData(item.atualizado_em)}
-              </span>
-            </div>
-
-            <div class="conhecimento-acoes">
-              <button
-                class="btn"
-                type="button"
-                data-abrir-conhecimento="${item.id}"
-              >
-                Abrir
-              </button>
-
-              <button
-                class="btn"
-                type="button"
-                data-editar-conhecimento="${item.id}"
-              >
-                Editar
-              </button>
-
-              <button
-                class="btn danger"
-                type="button"
-                data-inativar-conhecimento="${item.id}"
-              >
-                Inativar
-              </button>
-            </div>
-          </div>
-
-          <div
-            class="conhecimento-conteudo"
-            data-conteudo-conhecimento="${item.id}"
-            hidden
-          >
-            ${escaparHtml(item.conteudo || "")}
-          </div>
-        </article>
-      `).join("");
-
-      elementos.listaConhecimento
-        .querySelectorAll("[data-abrir-conhecimento]")
-        .forEach((botao) => {
-          botao.addEventListener("click", () => {
-            const id = botao.dataset.abrirConhecimento;
-            const conteudoAtual = elementos.listaConhecimento.querySelector(
-              `[data-conteudo-conhecimento="${id}"]`
-            );
-
-            const estavaAberto = !conteudoAtual.hidden;
-
-            elementos.listaConhecimento
-              .querySelectorAll("[data-conteudo-conhecimento]")
-              .forEach((conteudo) => conteudo.hidden = true);
-
-            elementos.listaConhecimento
-              .querySelectorAll("[data-abrir-conhecimento]")
-              .forEach((outro) => outro.textContent = "Abrir");
-
-            if(!estavaAberto){
-              conteudoAtual.hidden = false;
-              botao.textContent = "Recolher";
-            }
-          });
-        });
-
-      elementos.listaConhecimento
-        .querySelectorAll("[data-editar-conhecimento]")
-        .forEach((botao) => {
-          botao.addEventListener("click", () => {
-            const item = conhecimentoCache.find(
-              (registro) => registro.id === botao.dataset.editarConhecimento
-            );
-
-            if(item){
-              abrirEditorConhecimento(item);
-            }
-          });
-        });
-
-      elementos.listaConhecimento
-        .querySelectorAll("[data-inativar-conhecimento]")
-        .forEach((botao) => {
-          botao.addEventListener("click", () => {
-            inativarConhecimento(botao.dataset.inativarConhecimento);
-          });
-        });
-    }
-
-    async function carregarConhecimento(){
-      elementos.btnAtualizarConhecimento.disabled = true;
-      definirEstado(
-        elementos.estadoConhecimento,
-        "Carregando conteúdos..."
-      );
-
-      try{
-        if(!await validarSessao()) return;
-
-        const { data, error } = await supabase.rpc(
-          "sar_admin_listar_base_conhecimento"
-        );
-
-        if(error){
-          throw new Error(
-            error.message ||
-            "Não foi possível carregar a Central de Conhecimento."
-          );
-        }
-
-        conhecimentoCache = data || [];
-        renderizarConhecimento(conhecimentoCache);
-        ocultarEstado(elementos.estadoConhecimento);
-
-      }catch(error){
-        elementos.listaConhecimento.innerHTML =
-          '<div class="placeholder">Não foi possível carregar os conteúdos.</div>';
-
-        definirEstado(
-          elementos.estadoConhecimento,
-          error instanceof Error ? error.message : String(error),
-          true
-        );
-      }finally{
-        elementos.btnAtualizarConhecimento.disabled = false;
-      }
-    }
-
-    async function salvarConhecimento(){
-      const titulo = elementos.conhecimentoTitulo.value.trim();
-      const conteudo = elementos.conhecimentoTexto.value.trim();
-
-      if(!titulo){
-        definirEstado(
-          elementos.estadoConhecimento,
-          "Informe o título.",
-          true
-        );
-        elementos.conhecimentoTitulo.focus();
-        return;
-      }
-
-      if(!conteudo){
-        definirEstado(
-          elementos.estadoConhecimento,
-          "Informe o texto.",
-          true
-        );
-        elementos.conhecimentoTexto.focus();
-        return;
-      }
-
-      elementos.btnSalvarConhecimento.disabled = true;
-      elementos.btnSalvarConhecimento.textContent = "Salvando...";
-
-      try{
-        const { error } = await supabase.rpc(
-          "sar_admin_salvar_base_conhecimento",
-          {
-            p_id: conhecimentoEdicaoId,
-            p_titulo: titulo,
-            p_conteudo: conteudo
-          }
-        );
-
-        if(error){
-          throw new Error(
-            error.message || "Não foi possível salvar o conteúdo."
-          );
-        }
-
-        fecharEditorConhecimento();
-
-        definirEstado(
-          elementos.estadoConhecimento,
-          "Conteúdo salvo com sucesso."
-        );
-
-        await carregarConhecimento();
-
-      }catch(error){
-        definirEstado(
-          elementos.estadoConhecimento,
-          error instanceof Error ? error.message : String(error),
-          true
-        );
-      }finally{
-        elementos.btnSalvarConhecimento.disabled = false;
-        elementos.btnSalvarConhecimento.textContent = "Salvar conteúdo";
-      }
-    }
-
-    async function inativarConhecimento(id){
-      const item = conhecimentoCache.find(
-        (registro) => registro.id === id
-      );
-
-      if(!item) return;
-
-      const confirmar = window.confirm(
-        `Inativar o conteúdo "${item.titulo}"?`
-      );
-
-      if(!confirmar) return;
-
-      try{
-        const { error } = await supabase.rpc(
-          "sar_admin_inativar_base_conhecimento",
-          {
-            p_id:id
-          }
-        );
-
-        if(error){
-          throw new Error(
-            error.message || "Não foi possível inativar o conteúdo."
-          );
-        }
-
-        definirEstado(
-          elementos.estadoConhecimento,
-          "Conteúdo inativado com sucesso."
-        );
-
-        await carregarConhecimento();
-
-      }catch(error){
-        definirEstado(
-          elementos.estadoConhecimento,
-          error instanceof Error ? error.message : String(error),
-          true
-        );
-      }
-    }
-
-    elementos.btnAtualizarDashboard.addEventListener("click",carregarDashboard);
-    elementos.btnTestarSaude.addEventListener("click",carregarDashboard);
-
-    elementos.acoesRapidas.forEach((botao) => {
-      botao.addEventListener("click",() => {
-        executarAcaoRapida(botao.dataset.acaoDashboard);
-      });
-    });
-    elementos.btnAtualizarModulos.addEventListener("click",carregarModulos);
-    elementos.btnNovoModulo.addEventListener("click",() => abrirEdicaoModulo());
-    elementos.pesquisaModulos.addEventListener("input",filtrarModulos);
-    elementos.filtroStatusModulo.addEventListener("change",filtrarModulos);
-    elementos.btnFecharDrawerModulo.addEventListener("click",fecharEdicaoModulo);
-    elementos.btnCancelarModulo.addEventListener("click",fecharEdicaoModulo);
-    elementos.btnSalvarModulo.addEventListener("click",salvarModulo);
-
-    elementos.moduloNome.addEventListener("input",() => {
-      if(!moduloEdicaoId && !elementos.moduloCodigo.dataset.editadoManual){
-        elementos.moduloCodigo.value =
-          normalizarCodigoModulo(elementos.moduloNome.value);
-      }
-    });
-
-    elementos.moduloCodigo.addEventListener("input",() => {
-      elementos.moduloCodigo.dataset.editadoManual = "true";
-      const inicio = elementos.moduloCodigo.selectionStart;
-      elementos.moduloCodigo.value =
-        normalizarCodigoModulo(elementos.moduloCodigo.value);
-      elementos.moduloCodigo.setSelectionRange(inicio,inicio);
-    });
-
-    elementos.drawerModuloOverlay.addEventListener("click",(event) => {
-      if(event.target === elementos.drawerModuloOverlay){
-        fecharEdicaoModulo();
-      }
-    });
-
-    elementos.btnAtualizarUsuarios.addEventListener("click",carregarUsuarios);
-    elementos.btnAtualizarSite.addEventListener("click",carregarSite);
-    elementos.btnAtualizarConhecimento.addEventListener("click",carregarConhecimento);
-    elementos.btnNovoConhecimento.addEventListener("click",() => abrirEditorConhecimento());
-    elementos.btnCancelarConhecimento.addEventListener("click",fecharEditorConhecimento);
-    elementos.btnSalvarConhecimento.addEventListener("click",salvarConhecimento);
-    elementos.btnFecharDrawer.addEventListener("click",fecharEdicaoUsuario);
-    elementos.btnCancelarEdicao.addEventListener("click",fecharEdicaoUsuario);
-    elementos.btnSalvarUsuario.addEventListener("click",salvarUsuario);
-
-    elementos.drawerOverlay.addEventListener("click",(event) => {
-      if(event.target === elementos.drawerOverlay){
-        fecharEdicaoUsuario();
-      }
-    });
-
-    if(elementos.btnRecarregarEstrutura){
-      elementos.btnRecarregarEstrutura.addEventListener("click",() => {
-        if(elementos.frameEstrutura){
-          elementos.frameEstrutura.contentWindow?.location.reload();
-        }
-      });
-    }
-    carregarDashboard();
-  </script>
-</body>
-</html>
+        values (
+            v_slug,
+            trim(p_nome),
+            nullif(trim(coalesce(p_titulo_seo, '')), ''),
+            nullif(trim(coalesce(p_descricao_seo, '')), ''),
+            coalesce(
+                nullif(trim(coalesce(p_arquivo, '')), ''),
+                v_slug || '.html'
+            ),
+            coalesce(p_ordem, 0),
+            coalesce(p_ativo, true)
+        )
+        returning id into v_id;
+
+    else
+
+        update public.sar_site_paginas
+        set
+            slug = v_slug,
+            nome = trim(p_nome),
+            titulo_seo =
+                nullif(trim(coalesce(p_titulo_seo, '')), ''),
+            descricao_seo =
+                nullif(trim(coalesce(p_descricao_seo, '')), ''),
+            arquivo = coalesce(
+                nullif(trim(coalesce(p_arquivo, '')), ''),
+                v_slug || '.html'
+            ),
+            ordem = coalesce(p_ordem, 0),
+            ativo = coalesce(p_ativo, true)
+
+        where id = p_id
+
+        returning id into v_id;
+
+        if v_id is null then
+            raise exception 'Página não encontrada.';
+        end if;
+
+    end if;
+
+    return v_id;
+
+end;
+$function$;
+
+
+
+-- ============================================================
+-- LISTAR MENU
+-- ============================================================
+
+create or replace function public.sar_admin_cms_listar_menu(
+    p_local_menu text default null
+)
+returns table (
+    id uuid,
+    local_menu text,
+    rotulo text,
+    link text,
+    pagina_id uuid,
+    pagina_nome text,
+    alvo text,
+    icone text,
+    destaque boolean,
+    ordem integer,
+    ativo boolean,
+    criado_em timestamptz,
+    atualizado_em timestamptz
+)
+language plpgsql
+security definer
+set search_path to ''
+as $function$
+begin
+
+    perform public.sar_admin_cms_validar_master();
+
+    return query
+
+    select
+        m.id,
+        m.local_menu,
+        m.rotulo,
+        m.link,
+        m.pagina_id,
+        p.nome,
+        m.alvo,
+        m.icone,
+        m.destaque,
+        m.ordem,
+        m.ativo,
+        m.criado_em,
+        m.atualizado_em
+
+    from public.sar_site_menu m
+
+    left join public.sar_site_paginas p
+        on p.id = m.pagina_id
+
+    where
+        nullif(trim(coalesce(p_local_menu, '')), '') is null
+        or m.local_menu = trim(p_local_menu)
+
+    order by
+        m.local_menu,
+        m.ordem,
+        m.rotulo;
+
+end;
+$function$;
+
+
+
+-- ============================================================
+-- SALVAR ITEM DO MENU
+-- ============================================================
+
+create or replace function public.sar_admin_cms_salvar_menu(
+    p_id uuid default null,
+    p_local_menu text default 'cabecalho',
+    p_rotulo text default null,
+    p_link text default null,
+    p_pagina_id uuid default null,
+    p_alvo text default '_self',
+    p_icone text default null,
+    p_destaque boolean default false,
+    p_ordem integer default 0,
+    p_ativo boolean default true
+)
+returns uuid
+language plpgsql
+security definer
+set search_path to ''
+as $function$
+declare
+    v_id uuid;
+    v_alvo text;
+begin
+
+    perform public.sar_admin_cms_validar_master();
+
+    if trim(coalesce(p_rotulo, '')) = '' then
+        raise exception 'Informe o nome do botão.';
+    end if;
+
+    if trim(coalesce(p_link, '')) = '' then
+        raise exception 'Informe o link do botão.';
+    end if;
+
+    v_alvo := case
+        when p_alvo = '_blank' then '_blank'
+        else '_self'
+    end;
+
+    if p_id is null then
+
+        insert into public.sar_site_menu (
+            local_menu,
+            rotulo,
+            link,
+            pagina_id,
+            alvo,
+            icone,
+            destaque,
+            ordem,
+            ativo
+        )
+        values (
+            coalesce(
+                nullif(trim(coalesce(p_local_menu, '')), ''),
+                'cabecalho'
+            ),
+            trim(p_rotulo),
+            trim(p_link),
+            p_pagina_id,
+            v_alvo,
+            nullif(trim(coalesce(p_icone, '')), ''),
+            coalesce(p_destaque, false),
+            coalesce(p_ordem, 0),
+            coalesce(p_ativo, true)
+        )
+        returning id into v_id;
+
+    else
+
+        update public.sar_site_menu
+        set
+            local_menu = coalesce(
+                nullif(trim(coalesce(p_local_menu, '')), ''),
+                'cabecalho'
+            ),
+            rotulo = trim(p_rotulo),
+            link = trim(p_link),
+            pagina_id = p_pagina_id,
+            alvo = v_alvo,
+            icone = nullif(trim(coalesce(p_icone, '')), ''),
+            destaque = coalesce(p_destaque, false),
+            ordem = coalesce(p_ordem, 0),
+            ativo = coalesce(p_ativo, true)
+
+        where id = p_id
+
+        returning id into v_id;
+
+        if v_id is null then
+            raise exception 'Item do menu não encontrado.';
+        end if;
+
+    end if;
+
+    return v_id;
+
+end;
+$function$;
+
+
+
+-- ============================================================
+-- EXCLUIR ITEM DO MENU
+-- ============================================================
+
+create or replace function public.sar_admin_cms_excluir_menu(
+    p_id uuid
+)
+returns void
+language plpgsql
+security definer
+set search_path to ''
+as $function$
+begin
+
+    perform public.sar_admin_cms_validar_master();
+
+    delete from public.sar_site_menu
+    where id = p_id;
+
+    if not found then
+        raise exception 'Item do menu não encontrado.';
+    end if;
+
+end;
+$function$;
+
+
+
+-- ============================================================
+-- LISTAR SEÇÕES
+-- ============================================================
+
+create or replace function public.sar_admin_cms_listar_secoes(
+    p_pagina_id uuid default null
+)
+returns table (
+    id uuid,
+    pagina_id uuid,
+    pagina_nome text,
+    chave text,
+    tipo text,
+    titulo text,
+    subtitulo text,
+    texto text,
+    dados jsonb,
+    ordem integer,
+    ativo boolean,
+    criado_em timestamptz,
+    atualizado_em timestamptz
+)
+language plpgsql
+security definer
+set search_path to ''
+as $function$
+begin
+
+    perform public.sar_admin_cms_validar_master();
+
+    return query
+
+    select
+        s.id,
+        s.pagina_id,
+        p.nome,
+        s.chave,
+        s.tipo,
+        s.titulo,
+        s.subtitulo,
+        s.texto,
+        s.dados,
+        s.ordem,
+        s.ativo,
+        s.criado_em,
+        s.atualizado_em
+
+    from public.sar_site_secoes s
+
+    inner join public.sar_site_paginas p
+        on p.id = s.pagina_id
+
+    where p_pagina_id is null
+       or s.pagina_id = p_pagina_id
+
+    order by
+        p.ordem,
+        s.ordem,
+        s.chave;
+
+end;
+$function$;
+
+
+
+-- ============================================================
+-- SALVAR SEÇÃO
+-- ============================================================
+
+create or replace function public.sar_admin_cms_salvar_secao(
+    p_id uuid default null,
+    p_pagina_id uuid default null,
+    p_chave text default null,
+    p_tipo text default 'conteudo',
+    p_titulo text default null,
+    p_subtitulo text default null,
+    p_texto text default null,
+    p_dados jsonb default '{}'::jsonb,
+    p_ordem integer default 0,
+    p_ativo boolean default true
+)
+returns uuid
+language plpgsql
+security definer
+set search_path to ''
+as $function$
+declare
+    v_id uuid;
+    v_chave text;
+begin
+
+    perform public.sar_admin_cms_validar_master();
+
+    if p_pagina_id is null then
+        raise exception 'Informe a página da seção.';
+    end if;
+
+    v_chave := upper(trim(coalesce(p_chave, '')));
+
+    v_chave := regexp_replace(
+        translate(
+            v_chave,
+            'ÁÀÃÂÄÉÈÊËÍÌÎÏÓÒÕÔÖÚÙÛÜÇ',
+            'AAAAAEEEEIIIIOOOOOUUUUC'
+        ),
+        '[^A-Z0-9]+',
+        '_',
+        'g'
+    );
+
+    v_chave := trim(both '_' from v_chave);
+
+    if v_chave = '' then
+        raise exception 'Informe a chave da seção.';
+    end if;
+
+    if p_id is null then
+
+        insert into public.sar_site_secoes (
+            pagina_id,
+            chave,
+            tipo,
+            titulo,
+            subtitulo,
+            texto,
+            dados,
+            ordem,
+            ativo
+        )
+        values (
+            p_pagina_id,
+            v_chave,
+            coalesce(
+                nullif(trim(coalesce(p_tipo, '')), ''),
+                'conteudo'
+            ),
+            nullif(trim(coalesce(p_titulo, '')), ''),
+            nullif(trim(coalesce(p_subtitulo, '')), ''),
+            nullif(trim(coalesce(p_texto, '')), ''),
+            coalesce(p_dados, '{}'::jsonb),
+            coalesce(p_ordem, 0),
+            coalesce(p_ativo, true)
+        )
+        returning id into v_id;
+
+    else
+
+        update public.sar_site_secoes
+        set
+            pagina_id = p_pagina_id,
+            chave = v_chave,
+            tipo = coalesce(
+                nullif(trim(coalesce(p_tipo, '')), ''),
+                'conteudo'
+            ),
+            titulo = nullif(trim(coalesce(p_titulo, '')), ''),
+            subtitulo = nullif(trim(coalesce(p_subtitulo, '')), ''),
+            texto = nullif(trim(coalesce(p_texto, '')), ''),
+            dados = coalesce(p_dados, '{}'::jsonb),
+            ordem = coalesce(p_ordem, 0),
+            ativo = coalesce(p_ativo, true)
+
+        where id = p_id
+
+        returning id into v_id;
+
+        if v_id is null then
+            raise exception 'Seção não encontrada.';
+        end if;
+
+    end if;
+
+    return v_id;
+
+end;
+$function$;
+
+
+
+-- ============================================================
+-- EXCLUIR SEÇÃO
+-- ============================================================
+
+create or replace function public.sar_admin_cms_excluir_secao(
+    p_id uuid
+)
+returns void
+language plpgsql
+security definer
+set search_path to ''
+as $function$
+begin
+
+    perform public.sar_admin_cms_validar_master();
+
+    delete from public.sar_site_secoes
+    where id = p_id;
+
+    if not found then
+        raise exception 'Seção não encontrada.';
+    end if;
+
+end;
+$function$;
+
+
+
+-- ============================================================
+-- PERMISSÕES
+-- ============================================================
+
+revoke all
+on function public.sar_admin_cms_listar_paginas()
+from public;
+
+revoke all
+on function public.sar_admin_cms_salvar_pagina(
+    uuid,
+    text,
+    text,
+    text,
+    text,
+    text,
+    integer,
+    boolean
+)
+from public;
+
+revoke all
+on function public.sar_admin_cms_listar_menu(text)
+from public;
+
+revoke all
+on function public.sar_admin_cms_salvar_menu(
+    uuid,
+    text,
+    text,
+    text,
+    uuid,
+    text,
+    text,
+    boolean,
+    integer,
+    boolean
+)
+from public;
+
+revoke all
+on function public.sar_admin_cms_excluir_menu(uuid)
+from public;
+
+revoke all
+on function public.sar_admin_cms_listar_secoes(uuid)
+from public;
+
+revoke all
+on function public.sar_admin_cms_salvar_secao(
+    uuid,
+    uuid,
+    text,
+    text,
+    text,
+    text,
+    text,
+    jsonb,
+    integer,
+    boolean
+)
+from public;
+
+revoke all
+on function public.sar_admin_cms_excluir_secao(uuid)
+from public;
+
+
+grant execute
+on function public.sar_admin_cms_listar_paginas()
+to authenticated;
+
+grant execute
+on function public.sar_admin_cms_salvar_pagina(
+    uuid,
+    text,
+    text,
+    text,
+    text,
+    text,
+    integer,
+    boolean
+)
+to authenticated;
+
+grant execute
+on function public.sar_admin_cms_listar_menu(text)
+to authenticated;
+
+grant execute
+on function public.sar_admin_cms_salvar_menu(
+    uuid,
+    text,
+    text,
+    text,
+    uuid,
+    text,
+    text,
+    boolean,
+    integer,
+    boolean
+)
+to authenticated;
+
+grant execute
+on function public.sar_admin_cms_excluir_menu(uuid)
+to authenticated;
+
+grant execute
+on function public.sar_admin_cms_listar_secoes(uuid)
+to authenticated;
+
+grant execute
+on function public.sar_admin_cms_salvar_secao(
+    uuid,
+    uuid,
+    text,
+    text,
+    text,
+    text,
+    text,
+    jsonb,
+    integer,
+    boolean
+)
+to authenticated;
+
+grant execute
+on function public.sar_admin_cms_excluir_secao(uuid)
+to authenticated;
