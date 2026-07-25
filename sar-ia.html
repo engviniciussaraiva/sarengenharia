@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta name="sar-recurso-codigo" content="SAR_IA">
+  <script src="/js/sar.page-guard.js"></script>
+
+  <title>SAR.IA | Assistente Inteligente</title>
+
+  <style>
+    :root{
+      --sar:#163f3a;
+      --sar-2:#215a52;
+      --sar-3:#2d7469;
+      --fundo:#eef3f2;
+      --painel:#ffffff;
+      --linha:#d7e1df;
+      --texto:#253a38;
+      --muted:#71817f;
+      --sucesso:#177245;
+      --alerta:#9a6200;
+      --erro:#ad2d2d;
+      --sombra:0 12px 34px rgba(20,55,51,.10);
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{
+      margin:0;
+      min-height:100%;
+      font-family:Inter,Segoe UI,Arial,sans-serif;
+      color:var(--texto);
+      background:
+        radial-gradient(circle at 80% 10%, rgba(45,116,105,.12), transparent 26%),
+        linear-gradient(180deg,#edf4f2 0%,#f8fbfa 100%);
+    }
+
+    button,input,textarea{font:inherit}
+
+    body{
+      display:flex;
+      flex-direction:column;
+    }
+
+    .topo{
+      position:sticky;
+      top:0;
+      z-index:20;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      min-height:70px;
+      padding:12px 24px;
+      color:white;
+      background:linear-gradient(135deg,#123a35,#1d554d);
+      box-shadow:0 4px 18px rgba(8,35,31,.18);
+    }
+
+    .marca{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .marca-icone{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:42px;
+      height:42px;
+      flex:0 0 42px;
+      border:1px solid rgba(255,255,255,.22);
+      border-radius:12px;
+      background:rgba(255,255,255,.09);
+      font-size:22px;
+    }
+
+    .marca h1{
+      margin:0;
+      font-size:20px;
+      letter-spacing:.2px;
+    }
+
+    .marca p{
+      margin:3px 0 0;
+      color:#cfe1de;
+      font-size:12px;
+    }
+
+    .topo-acoes{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .btn-topo{
+      padding:9px 12px;
+      border:1px solid rgba(255,255,255,.24);
+      border-radius:9px;
+      color:#fff;
+      background:rgba(255,255,255,.08);
+      cursor:pointer;
+    }
+
+    .btn-topo:hover{background:rgba(255,255,255,.15)}
+
+    .pagina{
+      width:min(1440px,100%);
+      margin:0 auto;
+      padding:20px;
+      flex:1;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:300px minmax(0,1fr);
+      gap:18px;
+      min-height:calc(100vh - 110px);
+    }
+
+    .lateral,
+    .chat{
+      border:1px solid var(--linha);
+      border-radius:16px;
+      background:rgba(255,255,255,.94);
+      box-shadow:var(--sombra);
+    }
+
+    .lateral{
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+
+    .lateral-cabecalho{
+      padding:18px;
+      border-bottom:1px solid var(--linha);
+    }
+
+    .lateral-cabecalho h2{
+      margin:0;
+      color:var(--sar);
+      font-size:17px;
+    }
+
+    .lateral-cabecalho p{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+    }
+
+    .btn-nova{
+      width:100%;
+      margin-top:14px;
+      padding:11px 14px;
+      border:0;
+      border-radius:10px;
+      color:#fff;
+      background:var(--sar-2);
+      cursor:pointer;
+      font-weight:700;
+    }
+
+    .btn-nova:hover{background:var(--sar-3)}
+
+    .lateral-conteudo{
+      padding:15px;
+      overflow:auto;
+    }
+
+    .secao-lateral{
+      margin-bottom:20px;
+    }
+
+    .secao-lateral h3{
+      margin:0 0 9px;
+      color:#566966;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.6px;
+    }
+
+    .sugestao{
+      width:100%;
+      margin-bottom:8px;
+      padding:11px;
+      border:1px solid var(--linha);
+      border-radius:9px;
+      color:#405552;
+      background:#f9fbfb;
+      text-align:left;
+      cursor:pointer;
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .sugestao:hover{
+      border-color:#9eb9b4;
+      background:#eef6f4;
+    }
+
+    .status-base{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      padding:11px;
+      border:1px solid #cfe5da;
+      border-radius:10px;
+      background:#f1faf5;
+    }
+
+    .status-base i{
+      width:10px;
+      height:10px;
+      flex:0 0 10px;
+      border-radius:50%;
+      background:var(--sucesso);
+      box-shadow:0 0 0 4px rgba(23,114,69,.10);
+    }
+
+    .status-base strong{
+      display:block;
+      font-size:12px;
+    }
+
+    .status-base span{
+      display:block;
+      margin-top:3px;
+      color:var(--muted);
+      font-size:11px;
+    }
+
+    .chat{
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+      overflow:hidden;
+    }
+
+    .chat-cabecalho{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      padding:18px 20px;
+      border-bottom:1px solid var(--linha);
+    }
+
+    .chat-cabecalho h2{
+      margin:0;
+      color:var(--sar);
+      font-size:18px;
+    }
+
+    .chat-cabecalho p{
+      margin:5px 0 0;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      padding:7px 10px;
+      border-radius:999px;
+      color:#235c50;
+      background:#e8f5f1;
+      font-size:11px;
+      font-weight:700;
+      white-space:nowrap;
+    }
+
+    .mensagens{
+      flex:1;
+      min-height:380px;
+      padding:22px;
+      overflow:auto;
+      scroll-behavior:smooth;
+    }
+
+    .boas-vindas{
+      max-width:720px;
+      margin:30px auto;
+      padding:28px;
+      border:1px solid var(--linha);
+      border-radius:16px;
+      background:linear-gradient(145deg,#fbfdfd,#f1f7f5);
+      text-align:center;
+    }
+
+    .boas-vindas .icone{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:58px;
+      height:58px;
+      margin:0 auto 14px;
+      border-radius:16px;
+      color:#fff;
+      background:linear-gradient(135deg,var(--sar-2),var(--sar-3));
+      font-size:28px;
+    }
+
+    .boas-vindas h3{
+      margin:0;
+      color:var(--sar);
+      font-size:22px;
+    }
+
+    .boas-vindas p{
+      margin:10px auto 0;
+      max-width:570px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.65;
+    }
+
+    .mensagem{
+      display:flex;
+      gap:11px;
+      max-width:880px;
+      margin:0 auto 16px;
+    }
+
+    .mensagem.usuario{
+      flex-direction:row-reverse;
+    }
+
+    .avatar{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:36px;
+      height:36px;
+      flex:0 0 36px;
+      border-radius:10px;
+      color:#fff;
+      background:var(--sar-2);
+      font-size:16px;
+    }
+
+    .usuario .avatar{
+      color:var(--sar);
+      background:#e7efed;
+    }
+
+    .bolha{
+      max-width:min(760px,82%);
+      padding:14px 16px;
+      border:1px solid var(--linha);
+      border-radius:14px;
+      background:#fff;
+      line-height:1.6;
+      font-size:14px;
+      white-space:pre-wrap;
+    }
+
+    .usuario .bolha{
+      border-color:#cfe0dc;
+      background:#eef6f4;
+    }
+
+    .fontes{
+      margin-top:12px;
+      padding-top:10px;
+      border-top:1px solid var(--linha);
+    }
+
+    .fontes strong{
+      display:block;
+      margin-bottom:6px;
+      color:#526663;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.45px;
+    }
+
+    .fonte{
+      display:block;
+      margin-top:5px;
+      color:var(--sar-2);
+      font-size:12px;
+    }
+
+    .digitando{
+      display:inline-flex;
+      gap:5px;
+      align-items:center;
+    }
+
+    .digitando i{
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:#6e817e;
+      animation:pulso 1.1s infinite;
+    }
+
+    .digitando i:nth-child(2){animation-delay:.15s}
+    .digitando i:nth-child(3){animation-delay:.3s}
+
+    @keyframes pulso{
+      0%,80%,100%{opacity:.3;transform:translateY(0)}
+      40%{opacity:1;transform:translateY(-3px)}
+    }
+
+    .compositor{
+      padding:15px;
+      border-top:1px solid var(--linha);
+      background:#fbfdfd;
+    }
+
+    .campo-pergunta{
+      display:flex;
+      align-items:flex-end;
+      gap:10px;
+      padding:10px;
+      border:1px solid #bccdca;
+      border-radius:14px;
+      background:#fff;
+      box-shadow:0 4px 14px rgba(20,55,51,.05);
+    }
+
+    .campo-pergunta:focus-within{
+      border-color:var(--sar-3);
+      box-shadow:0 0 0 3px rgba(45,116,105,.10);
+    }
+
+    textarea{
+      width:100%;
+      min-height:48px;
+      max-height:180px;
+      padding:8px 6px;
+      border:0;
+      outline:0;
+      resize:none;
+      color:var(--texto);
+      background:transparent;
+      line-height:1.45;
+    }
+
+    .btn-enviar{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:44px;
+      height:44px;
+      flex:0 0 44px;
+      border:0;
+      border-radius:11px;
+      color:#fff;
+      background:var(--sar-2);
+      cursor:pointer;
+      font-size:18px;
+    }
+
+    .btn-enviar:hover{background:var(--sar-3)}
+    .btn-enviar:disabled{opacity:.55;cursor:not-allowed}
+
+    .rodape-chat{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:8px;
+      color:var(--muted);
+      font-size:10px;
+      line-height:1.4;
+    }
+
+    .erro{
+      max-width:880px;
+      margin:0 auto 14px;
+      padding:11px 13px;
+      border:1px solid #efcaca;
+      border-radius:10px;
+      color:var(--erro);
+      background:#fff4f4;
+      font-size:12px;
+    }
+
+    @media(max-width:900px){
+      .layout{grid-template-columns:1fr}
+      .lateral{display:none}
+      .pagina{padding:10px}
+      .topo{padding:11px 14px}
+      .marca p{display:none}
+      .mensagens{padding:15px}
+      .bolha{max-width:88%}
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topo">
+    <div class="marca">
+      <div class="marca-icone">🤖</div>
+      <div>
+        <h1>SAR.IA</h1>
+        <p>Inteligência técnica conectada à base de conhecimento do SAR.</p>
+      </div>
+    </div>
+
+    <div class="topo-acoes">
+      <button class="btn-topo" id="btnLimpar" type="button">Limpar conversa</button>
+      <button class="btn-topo" id="btnVoltar" type="button">Voltar ao sistema</button>
+    </div>
+  </header>
+
+  <main class="pagina">
+    <div class="layout">
+      <aside class="lateral">
+        <div class="lateral-cabecalho">
+          <h2>Conversas</h2>
+          <p>Faça perguntas sobre engenharia, normas, certificação e os conteúdos cadastrados no SAR.</p>
+          <button class="btn-nova" id="btnNovaConversa" type="button">＋ Nova conversa</button>
+        </div>
+
+        <div class="lateral-conteudo">
+          <section class="secao-lateral">
+            <h3>Exemplos</h3>
+
+            <button class="sugestao" type="button">
+              Tenho um açougue. O que preciso para certificar?
+            </button>
+
+            <button class="sugestao" type="button">
+              Qual norma trata do afastamento entre tanques?
+            </button>
+
+            <button class="sugestao" type="button">
+              Quais documentos são necessários para renovar um AVCB?
+            </button>
+
+            <button class="sugestao" type="button">
+              Explique a diferença entre CLCB, PTS e Projeto Técnico.
+            </button>
+          </section>
+
+          <section class="secao-lateral">
+            <h3>Base consultada</h3>
+            <div class="status-base">
+              <i></i>
+              <div>
+                <strong>Central de Conhecimento</strong>
+                <span>Preparada para integração com o Supabase.</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </aside>
+
+      <section class="chat">
+        <header class="chat-cabecalho">
+          <div>
+            <h2>Converse com a SAR.IA</h2>
+            <p>As respostas serão fundamentadas nos conteúdos encontrados na base técnica.</p>
+          </div>
+          <span class="badge">● Playground inicial</span>
+        </header>
+
+        <div class="mensagens" id="mensagens">
+          <section class="boas-vindas" id="boasVindas">
+            <div class="icone">✦</div>
+            <h3>Como posso ajudar?</h3>
+            <p>
+              Pergunte sobre certificação, medidas de segurança, normas, sistemas hidráulicos,
+              parques de tanques, hidrantes, bombas, escadas e demais conteúdos existentes no SAR.
+            </p>
+          </section>
+        </div>
+
+        <footer class="compositor">
+          <form id="formPergunta">
+            <div class="campo-pergunta">
+              <textarea
+                id="pergunta"
+                placeholder="Pergunte qualquer coisa ao SAR..."
+                maxlength="4000"
+                required
+              ></textarea>
+
+              <button class="btn-enviar" id="btnEnviar" type="submit" title="Enviar">
+                ➤
+              </button>
+            </div>
+
+            <div class="rodape-chat">
+              <span>Enter envia · Shift + Enter cria nova linha</span>
+              <span>A SAR.IA pode solicitar dados adicionais quando necessário.</span>
+            </div>
+          </form>
+        </footer>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const CONFIG = {
+      // Trocar pelo endereço real do Railway quando o endpoint estiver pronto.
+      endpoint: "https://SEU-PROJETO.up.railway.app/api/sar-ia/perguntar",
+      modoDemonstracao: true
+    };
+
+    const elementos = {
+      mensagens: document.getElementById("mensagens"),
+      boasVindas: document.getElementById("boasVindas"),
+      formPergunta: document.getElementById("formPergunta"),
+      pergunta: document.getElementById("pergunta"),
+      btnEnviar: document.getElementById("btnEnviar"),
+      btnLimpar: document.getElementById("btnLimpar"),
+      btnNovaConversa: document.getElementById("btnNovaConversa"),
+      btnVoltar: document.getElementById("btnVoltar"),
+      sugestoes: document.querySelectorAll(".sugestao")
+    };
+
+    let historico = [];
+    let enviando = false;
+
+    function escaparHtml(texto){
+      return String(texto ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function rolarParaFinal(){
+      elementos.mensagens.scrollTop = elementos.mensagens.scrollHeight;
+    }
+
+    function adicionarMensagem(tipo,texto,fontes = []){
+      if(elementos.boasVindas){
+        elementos.boasVindas.remove();
+        elementos.boasVindas = null;
+      }
+
+      const artigo = document.createElement("article");
+      artigo.className = `mensagem ${tipo}`;
+
+      const avatar = document.createElement("div");
+      avatar.className = "avatar";
+      avatar.textContent = tipo === "usuario" ? "👤" : "✦";
+
+      const bolha = document.createElement("div");
+      bolha.className = "bolha";
+      bolha.innerHTML = escaparHtml(texto).replaceAll("\n","<br>");
+
+      if(Array.isArray(fontes) && fontes.length){
+        const blocoFontes = document.createElement("div");
+        blocoFontes.className = "fontes";
+        blocoFontes.innerHTML = `
+          <strong>Fontes consultadas</strong>
+          ${fontes.map(fonte =>
+            `<span class="fonte">• ${escaparHtml(
+              typeof fonte === "string" ? fonte : (fonte.titulo || fonte.nome || "Fonte")
+            )}</span>`
+          ).join("")}
+        `;
+        bolha.appendChild(blocoFontes);
+      }
+
+      artigo.appendChild(avatar);
+      artigo.appendChild(bolha);
+      elementos.mensagens.appendChild(artigo);
+      rolarParaFinal();
+
+      return artigo;
+    }
+
+    function adicionarDigitando(){
+      if(elementos.boasVindas){
+        elementos.boasVindas.remove();
+        elementos.boasVindas = null;
+      }
+
+      const artigo = document.createElement("article");
+      artigo.className = "mensagem";
+      artigo.id = "mensagemDigitando";
+      artigo.innerHTML = `
+        <div class="avatar">✦</div>
+        <div class="bolha">
+          <span class="digitando"><i></i><i></i><i></i></span>
+        </div>
+      `;
+
+      elementos.mensagens.appendChild(artigo);
+      rolarParaFinal();
+    }
+
+    function removerDigitando(){
+      document.getElementById("mensagemDigitando")?.remove();
+    }
+
+    function mostrarErro(mensagem){
+      const erro = document.createElement("div");
+      erro.className = "erro";
+      erro.textContent = mensagem;
+      elementos.mensagens.appendChild(erro);
+      rolarParaFinal();
+    }
+
+    function respostaDemonstracao(pergunta){
+      const texto = pergunta.toLowerCase();
+
+      if(texto.includes("açougue") || texto.includes("acougue")){
+        return {
+          resposta:
+`Para determinar exatamente o que será necessário para certificar o açougue, preciso identificar a cidade e o estado, a área total, o número de pavimentos, a altura da edificação, a existência de GLP e se há câmara fria.
+
+De forma preliminar, normalmente são avaliados extintores, sinalização de emergência, iluminação de emergência, saídas e rotas de fuga, instalações de GLP e possíveis riscos adicionais.
+
+A classificação definitiva entre CLCB, PTS ou Projeto Técnico depende dos dados da edificação e da regulamentação aplicável.`,
+          fontes:[
+            "Central de Conhecimento SAR — resposta demonstrativa",
+            "Base de classificação e ocupações — integração pendente"
+          ]
+        };
+      }
+
+      return {
+        resposta:
+`Esta é uma resposta demonstrativa da interface da SAR.IA.
+
+Quando o endpoint do Railway estiver conectado, a pergunta será pesquisada na Central de Conhecimento do SAR e enviada ao modelo de IA junto com os trechos encontrados.
+
+Pergunta recebida: "${pergunta}"`,
+        fontes:["Modo demonstração — backend ainda não conectado"]
+      };
+    }
+
+    async function consultarSarIA(pergunta){
+      if(CONFIG.modoDemonstracao){
+        await new Promise(resolve => setTimeout(resolve,900));
+        return respostaDemonstracao(pergunta);
+      }
+
+      const resposta = await fetch(CONFIG.endpoint,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          pergunta,
+          historico
+        })
+      });
+
+      if(!resposta.ok){
+        const detalhe = await resposta.text();
+        throw new Error(detalhe || `Erro HTTP ${resposta.status}`);
+      }
+
+      return await resposta.json();
+    }
+
+    async function enviarPergunta(pergunta){
+      const texto = String(pergunta || "").trim();
+      if(!texto || enviando) return;
+
+      enviando = true;
+      elementos.btnEnviar.disabled = true;
+      elementos.pergunta.value = "";
+      ajustarAlturaTextarea();
+
+      adicionarMensagem("usuario",texto);
+      historico.push({papel:"usuario",conteudo:texto});
+      adicionarDigitando();
+
+      try{
+        const resultado = await consultarSarIA(texto);
+        removerDigitando();
+
+        const resposta = resultado.resposta || resultado.mensagem ||
+          "Não foi possível gerar uma resposta.";
+
+        const fontes = resultado.fontes || [];
+        adicionarMensagem("assistente",resposta,fontes);
+        historico.push({papel:"assistente",conteudo:resposta});
+      }catch(error){
+        removerDigitando();
+        mostrarErro(
+          error instanceof Error
+            ? `Não foi possível consultar a SAR.IA: ${error.message}`
+            : "Não foi possível consultar a SAR.IA."
+        );
+      }finally{
+        enviando = false;
+        elementos.btnEnviar.disabled = false;
+        elementos.pergunta.focus();
+      }
+    }
+
+    function limparConversa(){
+      historico = [];
+      elementos.mensagens.innerHTML = `
+        <section class="boas-vindas" id="boasVindas">
+          <div class="icone">✦</div>
+          <h3>Como posso ajudar?</h3>
+          <p>
+            Pergunte sobre certificação, medidas de segurança, normas, sistemas hidráulicos,
+            parques de tanques, hidrantes, bombas, escadas e demais conteúdos existentes no SAR.
+          </p>
+        </section>
+      `;
+      elementos.boasVindas = document.getElementById("boasVindas");
+      elementos.pergunta.value = "";
+      ajustarAlturaTextarea();
+      elementos.pergunta.focus();
+    }
+
+    function ajustarAlturaTextarea(){
+      elementos.pergunta.style.height = "auto";
+      elementos.pergunta.style.height =
+        Math.min(elementos.pergunta.scrollHeight,180) + "px";
+    }
+
+    elementos.formPergunta.addEventListener("submit",(evento) => {
+      evento.preventDefault();
+      enviarPergunta(elementos.pergunta.value);
+    });
+
+    elementos.pergunta.addEventListener("keydown",(evento) => {
+      if(evento.key === "Enter" && !evento.shiftKey){
+        evento.preventDefault();
+        elementos.formPergunta.requestSubmit();
+      }
+    });
+
+    elementos.pergunta.addEventListener("input",ajustarAlturaTextarea);
+
+    elementos.sugestoes.forEach((botao) => {
+      botao.addEventListener("click",() => {
+        elementos.pergunta.value = botao.textContent.trim();
+        ajustarAlturaTextarea();
+        elementos.pergunta.focus();
+      });
+    });
+
+    elementos.btnLimpar.addEventListener("click",limparConversa);
+    elementos.btnNovaConversa.addEventListener("click",limparConversa);
+    elementos.btnVoltar.addEventListener("click",() => {
+      window.location.href = "/sistema.html";
+    });
+
+    elementos.pergunta.focus();
+  </script>
+</body>
+</html>
