@@ -544,3 +544,151 @@ nav a.destaque{
 .status-item[hidden]{
   display:none !important;
 }
+
+
+/* ============================================================
+   SAR CMS — FASE 1: BLOCOS DINÂMICOS
+   ============================================================ */
+
+.cms-cta,
+.cms-contato,
+.cms-footer{
+  margin-top:22px;
+  border:1px solid rgba(140,242,29,.20);
+  border-radius:18px;
+  background:rgba(5,22,12,.58);
+  box-shadow:inset 0 0 30px rgba(140,242,29,.035);
+}
+
+.cms-cta{
+  padding:30px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:28px;
+}
+
+.cms-cta h2,
+.cms-contato h2{
+  margin:0 0 9px;
+  color:#fff;
+  font-size:30px;
+  letter-spacing:-1px;
+}
+
+.cms-cta p,
+.cms-contato p{
+  max-width:760px;
+  color:#dbe5d8;
+  line-height:1.65;
+}
+
+.cms-contato{
+  padding:30px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:30px;
+}
+
+.cms-kicker{
+  display:block;
+  margin-bottom:8px;
+  color:var(--neon);
+  font-size:12px;
+  font-weight:850;
+  letter-spacing:.8px;
+  text-transform:uppercase;
+}
+
+.cms-contato-links{
+  display:grid;
+  gap:10px;
+  min-width:260px;
+}
+
+.cms-contato-links a{
+  padding:12px 14px;
+  border:1px solid rgba(140,242,29,.22);
+  border-radius:10px;
+  color:#fff;
+  background:rgba(0,0,0,.18);
+  text-decoration:none;
+}
+
+.cms-footer{
+  margin:22px 48px 34px;
+  padding:24px 28px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px 28px;
+  color:#dbe5d8;
+}
+
+.cms-footer strong{
+  display:block;
+  color:#fff;
+  font-size:18px;
+}
+
+.cms-footer span{
+  color:#b8c8b5;
+  font-size:12px;
+}
+
+.cms-footer > p{
+  text-align:right;
+  align-self:center;
+}
+
+.cms-footer-meta{
+  grid-column:1/-1;
+  padding-top:15px;
+  border-top:1px solid rgba(255,255,255,.08);
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+}
+
+.cms-redes{
+  display:flex;
+  gap:14px;
+}
+
+.cms-redes a{
+  color:var(--neon);
+  text-decoration:none;
+  font-size:12px;
+  font-weight:800;
+}
+
+[data-cms-bloco][hidden]{
+  display:none !important;
+}
+
+@media(max-width:800px){
+  .cms-cta,
+  .cms-contato{
+    grid-template-columns:1fr;
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .cms-contato-links{
+    width:100%;
+    min-width:0;
+  }
+
+  .cms-footer{
+    margin:22px 20px 28px;
+    grid-template-columns:1fr;
+  }
+
+  .cms-footer > p{
+    text-align:left;
+  }
+
+  .cms-footer-meta{
+    flex-direction:column;
+  }
+}
