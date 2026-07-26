@@ -4391,10 +4391,13 @@
         definirEstado(elementos.estadoSecaoCms,"Informe a página e o bloco.",true);
         return;
       }
+      const itemCodigo=elementos.cmsSecaoTipo.value.trim().toUpperCase();
+      const chaveGerada=`${bloco}_${itemCodigo || "PRINCIPAL"}`;
       const payload={
         pagina_id:paginaId,
         bloco,
-        item_codigo:elementos.cmsSecaoTipo.value.trim().toUpperCase()||null,
+        item_codigo:itemCodigo||null,
+        chave:chaveGerada,
         titulo:elementos.cmsSecaoTitulo.value.trim()||null,
         subtitulo:elementos.cmsSecaoSubtitulo.value.trim()||null,
         texto:elementos.cmsSecaoTexto.value.trim()||null,
