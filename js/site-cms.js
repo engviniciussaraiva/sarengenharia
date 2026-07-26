@@ -22,7 +22,31 @@ function renderHero(g){const badge=item(g,"BADGE"),titulo=item(g,"TITULO"),desc=
 function renderEcossistema(g,mods){const h=item(g,"CABECALHO"),nota=item(g,"NOTA"),rod=item(g,"RODAPE");document.getElementById("ecossistemaCabecalho").outerHTML=`<div class="showcase-head" id="ecossistemaCabecalho"><div class="showcase-brand"><div class="logo-mark"></div><div><strong>${esc(h?.titulo||"")}</strong><span>${esc(h?.subtitulo||"")}</span></div></div><div class="showcase-note">${esc(nota?.texto||nota?.titulo||"")}</div></div>`;document.getElementById("modulos").innerHTML=mods.map(m=>`<article class="module-card ${m.destaque_site?'featured':''}"><div class="module-icon">${esc(icon(m.icone))}</div><h3>${esc(m.modulo||m.codigo)}</h3><p>${esc(m.descricao||"")}</p>${m.em_breve?'<span class="module-tag">Em breve</span>':''}</article>`).join('');document.getElementById("ecossistemaRodape").outerHTML=`<div class="showcase-footer" id="ecossistemaRodape"><span>${esc(rod?.texto||rod?.titulo||"")}</span><span>${esc(rod?.subtitulo||"")}</span></div>`;}
 function renderBeneficios(g){document.getElementById("seguranca").innerHTML=sort(g).map(x=>`<div class="status-item"><div class="status-ico">${esc(icon(x.icone))}</div><div><strong>${esc(x.titulo||"")}</strong><span>${esc(x.texto||x.subtitulo||"")}</span></div></div>`).join('');}
 function renderCta(g){const x=item(g,"CTA_PRINCIPAL")||g[0];const el=document.getElementById("cta");if(!x){el.hidden=true;return}el.innerHTML=`<div class="cms-cta-conteudo"><h2>${esc(x.titulo||"")}</h2><p>${esc(x.texto||"")}</p></div>${linkHtml(x,"btn primary")}`;}
-function renderContato(g){const cab=item(g,"CABECALHO"),cards=sort(g.filter(x=>code(x.item_codigo)!=="CABECALHO"));const el=document.getElementById("contato");el.style.setProperty("--contato-colunas",String(Math.min(Math.max(cards.length,1),3)));el.innerHTML=`<div class="cms-contato-cabecalho"><span class="cms-kicker">${esc(cab?.subtitulo||"")}</span><h2>${esc(cab?.titulo||"")}</h2><p>${esc(cab?.texto||"")}</p></div><div class="cms-contato-grid">${cards.map(x=>`<article class="cms-contato-card"><div class="cms-contato-icone">${esc(icon(x.icone))}</div><h3>${esc(x.titulo||"")}</h3><p>${esc(x.texto||"")}</p>${linkHtml(x,"btn")}</article>`).join('')}</div>`;}
+function renderContato(g){
+  const cab=item(g,"CABECALHO");
+  const canais=sort(g.filter(x=>code(x.item_codigo)!=="CABECALHO"));
+  const el=document.getElementById("contato");
+
+  const cards=canais.map(x=>{
+    const href=txt(x.botao_link);
+    const alvo=x.botao_alvo==="_blank"?"_blank":"_self";
+    const conteudo=`<span class="cms-contato-icone">${esc(icon(x.icone))}</span><span class="cms-contato-info"><strong>${esc(x.titulo||x.botao_texto||"")}</strong>${txt(x.texto)?`<small>${esc(x.texto)}</small>`:""}</span>`;
+
+    return href
+      ? `<a class="cms-contato-canal" href="${esc(href)}" target="${alvo}" ${alvo==="_blank"?'rel="noopener noreferrer"':''}>${conteudo}</a>`
+      : `<div class="cms-contato-canal sem-link">${conteudo}</div>`;
+  }).join("");
+
+  el.innerHTML=`
+    <div class="cms-contato-cabecalho">
+      <span class="cms-kicker">${esc(cab?.subtitulo||"")}</span>
+      <h2>${esc(cab?.titulo||"")}</h2>
+      <p>${esc(cab?.texto||"")}</p>
+    </div>
+    <div class="cms-contato-canais" data-quantidade="${canais.length}">
+      ${cards}
+    </div>`;
+}
 function renderRodape(g){const x=item(g,"RODAPE")||g[0];const el=document.getElementById("rodape");if(!x){el.hidden=true;return}el.innerHTML=`<div class="cms-rodape-principal"><div class="logo"><div class="logo-mark"></div><div>${esc(x.titulo||"")}<small>${esc(x.subtitulo||"")}</small></div></div><p>${esc(x.texto||"")}</p></div><div class="cms-rodape-inferior"><span>${esc(x.botao_texto||"")}</span><span>${esc(x.botao_link||"")}</span></div>`;}
 async function iniciar(){try{const p=await pagina();if(!p)throw new Error("Página home não encontrada no CMS.");document.title=p.titulo_seo||document.title;const meta=document.querySelector('meta[name="description"]');if(meta)meta.content=p.descricao_seo||"";const [rows,menus,mods]=await Promise.all([conteudos(p.id),menu(),modulos()]);const g=grupos(rows);renderHeader(g.CABECALHO||[],menus);renderHero(g.HERO||[]);renderEcossistema(g.ECOSSISTEMA||[],mods);renderBeneficios(g.BENEFICIOS||[]);renderCta(g.CTA||[]);renderContato(g.CONTATO||[]);renderRodape(g.RODAPE||[]);}catch(e){console.error("SAR CMS:",e);document.body.innerHTML='<main class="page"><div class="cms-erro">Não foi possível carregar o site. Verifique o CMS e o Supabase.</div></main>';}}
 iniciar();
