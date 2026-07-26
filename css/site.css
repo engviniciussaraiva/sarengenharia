@@ -955,3 +955,29 @@ nav a.destaque{
     grid-template-columns:1fr;
   }
 }
+
+
+/* ============================================================
+   SAR — correções finais CMS / CTA / etiqueta Em breve
+   ============================================================ */
+.cms-cta-conteudo{
+  flex:1 1 auto;
+  min-width:0;
+  width:100%;
+}
+
+.cms-cta-conteudo p,
+.cms-cta p{
+  width:100%;
+  max-width:none;
+}
+
+.module-tag{
+  display:inline-flex;
+  align-items:center;
+  margin-top:auto;
+  color:var(--neon);
+  font-size:14px;
+  font-weight:800;
+  line-height:1.2;
+}
