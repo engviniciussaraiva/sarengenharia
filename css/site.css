@@ -692,3 +692,134 @@ nav a.destaque{
     flex-direction:column;
   }
 }
+
+
+/* ============================================================
+   SAR CMS — CONTATO CHAMATIVO
+   ============================================================ */
+
+.cms-contato{
+  padding:38px;
+  display:block;
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 85% 15%,rgba(140,242,29,.12),transparent 34%),
+    linear-gradient(145deg,rgba(5,28,14,.94),rgba(2,12,8,.90));
+}
+
+.cms-contato::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(140,242,29,.035) 1px,transparent 1px),
+    linear-gradient(0deg,rgba(140,242,29,.028) 1px,transparent 1px);
+  background-size:46px 46px;
+  mask-image:linear-gradient(to bottom right,rgba(0,0,0,.65),transparent 85%);
+}
+
+.cms-contato > *{
+  position:relative;
+  z-index:1;
+}
+
+.cms-contato-cabecalho{
+  max-width:850px;
+  margin-bottom:26px;
+}
+
+.cms-contato-cards{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+}
+
+.cms-contato-card{
+  min-height:185px;
+  padding:22px;
+  display:grid;
+  grid-template-columns:52px minmax(0,1fr);
+  gap:16px;
+  border:1px solid rgba(140,242,29,.22);
+  border-radius:15px;
+  background:rgba(0,0,0,.20);
+  box-shadow:inset 0 0 24px rgba(140,242,29,.025);
+  transition:.22s ease;
+}
+
+.cms-contato-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(140,242,29,.68);
+  background:rgba(11,143,69,.12);
+  box-shadow:0 0 26px rgba(140,242,29,.12);
+}
+
+.cms-contato-icone{
+  width:52px;
+  height:52px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(140,242,29,.28);
+  border-radius:14px;
+  color:var(--neon);
+  background:rgba(5,25,12,.72);
+  font-size:25px;
+  box-shadow:0 0 18px rgba(140,242,29,.09);
+}
+
+.cms-contato-card h3{
+  margin:1px 0 8px;
+  font-size:19px;
+}
+
+.cms-contato-card p{
+  min-height:48px;
+  margin:0 0 18px;
+  color:#cbd7c8;
+  font-size:13px;
+  line-height:1.55;
+}
+
+.cms-contato-acao{
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  color:var(--neon2);
+  font-size:13px;
+  font-weight:850;
+  text-decoration:none;
+}
+
+.cms-contato-acao:hover{
+  text-decoration:underline;
+}
+
+.cms-contato-vazio{
+  margin-top:18px;
+  color:#cbd7c8;
+}
+
+@media(max-width:1000px){
+  .cms-contato-cards{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:640px){
+  .cms-contato{
+    padding:26px 20px;
+  }
+
+  .cms-contato-card{
+    grid-template-columns:44px minmax(0,1fr);
+    padding:18px;
+  }
+
+  .cms-contato-icone{
+    width:44px;
+    height:44px;
+    font-size:21px;
+  }
+}
