@@ -856,3 +856,102 @@ nav a.destaque{
 .cms-rodape-inferior{display:flex;justify-content:space-between;gap:20px;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,.12)}
 .cms-erro{margin:80px auto;padding:24px;max-width:760px;border:1px solid rgba(255,255,255,.18);border-radius:12px;text-align:center}
 @media(max-width:850px){.cms-contato-grid{grid-template-columns:1fr}.cms-rodape-principal,.cms-rodape-inferior{flex-direction:column}}
+
+
+/* CONTATO COMPACTO — canais em sequência */
+.cms-contato-cabecalho{
+  max-width:900px;
+  margin-bottom:28px;
+}
+
+.cms-contato-cabecalho p{
+  max-width:880px;
+}
+
+.cms-contato-canais{
+  display:flex;
+  align-items:stretch;
+  gap:14px;
+  flex-wrap:wrap;
+}
+
+.cms-contato-canal{
+  flex:1 1 190px;
+  min-width:180px;
+  min-height:92px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:16px 18px;
+  border:1px solid rgba(140,242,29,.24);
+  border-radius:14px;
+  color:#fff;
+  background:rgba(0,0,0,.20);
+  text-decoration:none;
+  box-shadow:inset 0 0 22px rgba(140,242,29,.025);
+  transition:.22s ease;
+}
+
+.cms-contato-canal:hover{
+  transform:translateY(-3px);
+  border-color:rgba(140,242,29,.72);
+  background:rgba(11,143,69,.14);
+  box-shadow:0 0 24px rgba(140,242,29,.11);
+}
+
+.cms-contato-canal.sem-link{
+  cursor:default;
+}
+
+.cms-contato-canal.sem-link:hover{
+  transform:none;
+}
+
+.cms-contato-canal .cms-contato-icone{
+  width:48px;
+  height:48px;
+  flex:0 0 48px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(140,242,29,.30);
+  border-radius:13px;
+  color:var(--neon);
+  background:rgba(5,25,12,.75);
+  font-size:23px;
+  line-height:1;
+}
+
+.cms-contato-info{
+  min-width:0;
+  display:grid;
+  gap:5px;
+}
+
+.cms-contato-info strong{
+  color:#fff;
+  font-size:16px;
+  line-height:1.25;
+}
+
+.cms-contato-info small{
+  color:#cbd7c8;
+  font-size:12px;
+  line-height:1.4;
+}
+
+@media(max-width:760px){
+  .cms-contato-canais{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .cms-contato-canal{
+    min-width:0;
+  }
+}
+
+@media(max-width:520px){
+  .cms-contato-canais{
+    grid-template-columns:1fr;
+  }
+}
