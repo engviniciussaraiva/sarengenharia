@@ -1,315 +1,34 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-pagina="home">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta
-    id="metaDescription"
-    name="description"
-    content="SAR Engenharia — Sistema Avançado de Resposta."
-  />
-  <title id="pageTitle">SAR Engenharia | Sistema Avançado de Resposta</title>
-  <link href="/css/site.css" rel="stylesheet"/>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <title>SAR Engenharia</title>
+  <link rel="stylesheet" href="/css/site.css">
 </head>
-
 <body>
   <main class="page">
-
-    <header>
-      <div class="logo">
-        <div class="logo-mark"></div>
-        <div>
-          SAR Engenharia
-          <small>SISTEMA AVANÇADO DE RESPOSTA</small>
-        </div>
-      </div>
-
-      <nav aria-label="Navegação principal" id="menuPublico">
-        <a class="active" href="#inicio">Início</a>
-      </nav>
-
-      <a
-        class="btn primary"
-        href="/acesso.html"
-        id="btnAcessarPlataforma"
-      >
-        Acessar Plataforma →
-      </a>
-    </header>
-
+    <header id="cabecalhoSite" aria-label="Cabeçalho do site"></header>
     <section class="hero" id="inicio">
-      <div class="copy">
-        <div class="badge" id="heroBadge">
-          PLATAFORMA PROFISSIONAL PARA ENGENHARIA DE INCÊNDIO
-        </div>
-
-        <h1 id="heroTitulo">
-          SAR:
-          <span id="heroDestaque">onde a norma encontra a resposta.</span>
-        </h1>
-
-        <p class="lead" id="heroDescricao">
-          Uma plataforma desenvolvida para transformar normas técnicas,
-          cálculos hidráulicos, memoriais, projetos e inteligência de
-          engenharia em produtividade para profissionais da segurança
-          contra incêndio.
-        </p>
-
-        <div class="pilares">
-          <div class="pilar" data-pilar-indice="1">
-            <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 64 64">
-              <path d="M32 6l22 8v16c0 14-9 24-22 28C19 54 10 44 10 30V14l22-8z"></path>
-              <path d="M21 31l8 8 15-17"></path>
-            </svg>
-            <div id="pilarTitulo1">Baseado nas normas técnicas</div>
-          </div>
-
-          <div class="pilar" data-pilar-indice="2">
-            <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 64 64">
-              <path d="M24 10c-8 2-12 8-12 16 0 6 3 10 8 13v7c0 5 4 8 9 8h6"></path>
-              <path d="M40 10c8 2 12 8 12 16 0 6-3 10-8 13v7c0 5-4 8-9 8h-6"></path>
-              <path d="M32 12v42M22 25h20M21 37h22"></path>
-            </svg>
-            <div id="pilarTitulo2">Engenharia assistida por IA</div>
-          </div>
-
-          <div class="pilar" data-pilar-indice="3">
-            <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 64 64">
-              <path d="M8 48l14-14 10 9 20-25"></path>
-              <path d="M39 18h13v13"></path>
-            </svg>
-            <div id="pilarTitulo3">Plataforma em evolução contínua</div>
-          </div>
-        </div>
-
-        <div class="cta">
-          <a class="btn primary" href="#plataforma" id="btnConhecerSar">
-            Conhecer o SAR →
-          </a>
-          <a class="btn" href="/acesso.html" id="btnAcessarHero">
-            Acessar Plataforma
-          </a>
-        </div>
-      </div>
-
-      <section
-        class="module-showcase"
-        data-cms-bloco="ECOSSISTEMA_SAR"
-        id="plataforma"
-      >
-        <div class="showcase-head">
-          <div class="showcase-brand">
-            <div class="logo-mark"></div>
-            <div>
-              <strong id="plataformaTitulo">Ecossistema SAR</strong>
-              <span id="plataformaSubtitulo">
-                Plataforma modular para engenharia de incêndio
-              </span>
-            </div>
-          </div>
-
-          <div class="showcase-note" id="plataformaNota">
-            Representação dos recursos e módulos reais planejados para a plataforma.
-          </div>
-        </div>
-
+      <div class="copy" id="heroConteudo"></div>
+      <section class="module-showcase" id="plataforma" data-cms-bloco="ECOSSISTEMA">
+        <div id="ecossistemaCabecalho"></div>
         <div aria-hidden="true" class="circuit-layer">
           <svg preserveAspectRatio="none" viewBox="0 0 1000 560">
-            <path class="circuit-path strong" d="M500 280H370V140H250"></path>
-            <path class="circuit-path strong" d="M500 280H630V140H750"></path>
-            <path class="circuit-path strong" d="M500 280H260V280H120"></path>
-            <path class="circuit-path strong" d="M500 280H740V280H880"></path>
-            <path class="circuit-path strong" d="M500 280H370V430H250"></path>
-            <path class="circuit-path strong" d="M500 280H630V430H750"></path>
-            <path class="circuit-path" d="M500 280V80H500"></path>
-            <path class="circuit-path" d="M500 280V500H500"></path>
-            <path class="circuit-path" d="M150 90H290V120H420"></path>
-            <path class="circuit-path" d="M850 90H710V120H580"></path>
-            <path class="circuit-path" d="M145 470H300V445H420"></path>
-            <path class="circuit-path" d="M855 470H700V445H580"></path>
-
-            <circle class="circuit-dot" cx="500" cy="280" r="7"></circle>
-            <circle class="circuit-dot" cx="370" cy="140" r="4"></circle>
-            <circle class="circuit-dot" cx="630" cy="140" r="4"></circle>
-            <circle class="circuit-dot" cx="260" cy="280" r="4"></circle>
-            <circle class="circuit-dot" cx="740" cy="280" r="4"></circle>
-            <circle class="circuit-dot" cx="370" cy="430" r="4"></circle>
-            <circle class="circuit-dot" cx="630" cy="430" r="4"></circle>
+            <path class="circuit-path strong" d="M500 280H370V140H250"></path><path class="circuit-path strong" d="M500 280H630V140H750"></path><path class="circuit-path strong" d="M500 280H260V280H120"></path><path class="circuit-path strong" d="M500 280H740V280H880"></path><path class="circuit-path strong" d="M500 280H370V430H250"></path><path class="circuit-path strong" d="M500 280H630V430H750"></path><path class="circuit-path" d="M500 280V80H500"></path><path class="circuit-path" d="M500 280V500H500"></path><path class="circuit-path" d="M150 90H290V120H420"></path><path class="circuit-path" d="M850 90H710V120H580"></path><path class="circuit-path" d="M145 470H300V445H420"></path><path class="circuit-path" d="M855 470H700V445H580"></path>
+            <circle class="circuit-dot" cx="500" cy="280" r="7"></circle><circle class="circuit-dot" cx="370" cy="140" r="4"></circle><circle class="circuit-dot" cx="630" cy="140" r="4"></circle><circle class="circuit-dot" cx="260" cy="280" r="4"></circle><circle class="circuit-dot" cx="740" cy="280" r="4"></circle><circle class="circuit-dot" cx="370" cy="430" r="4"></circle><circle class="circuit-dot" cx="630" cy="430" r="4"></circle>
           </svg>
         </div>
-
-        <div class="modules-grid" id="modulos">
-          <article class="module-card">
-            <h3>Carregando módulos...</h3>
-            <p>Aguarde enquanto os módulos públicos são consultados.</p>
-          </article>
-        </div>
-
-        <div class="showcase-footer" id="plataformaRodape">
-          <span>
-            <strong>Plataforma modular:</strong>
-            cada usuário acessará apenas os recursos liberados.
-          </span>
-          <span>+ novos módulos em desenvolvimento</span>
-        </div>
+        <div class="modules-grid" id="modulos"></div>
+        <div id="ecossistemaRodape"></div>
       </section>
     </section>
-
-    <section
-      class="status"
-      data-cms-bloco="BENEFICIOS"
-      id="seguranca"
-    >
-      <div class="status-item" data-beneficio-indice="1">
-        <div class="status-ico">
-          <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 64 64">
-            <circle cx="32" cy="32" r="24"></circle>
-            <path d="M8 32h48M32 8c8 8 12 16 12 24s-4 16-12 24M32 8c-8 8-12 16-12 24s4 16 12 24"></path>
-          </svg>
-        </div>
-        <div>
-          <strong id="beneficioTitulo1">100% Online</strong>
-          <span id="beneficioTexto1">Acesse de qualquer lugar com segurança.</span>
-        </div>
-      </div>
-
-      <div class="status-item" data-beneficio-indice="2">
-        <div class="status-ico">
-          <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 64 64">
-            <rect height="26" rx="4" width="36" x="14" y="28"></rect>
-            <path d="M22 28V18a10 10 0 0 1 20 0v10"></path>
-          </svg>
-        </div>
-        <div>
-          <strong id="beneficioTitulo2">Acesso Seguro</strong>
-          <span id="beneficioTexto2">
-            Autenticação via Google e controle de permissões.
-          </span>
-        </div>
-      </div>
-
-      <div class="status-item" data-beneficio-indice="3">
-        <div class="status-ico">
-          <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 64 64">
-            <path d="M32 6l22 8v16c0 14-9 24-22 28C19 54 10 44 10 30V14l22-8z"></path>
-            <path d="M22 32l7 7 15-16"></path>
-          </svg>
-        </div>
-        <div>
-          <strong id="beneficioTitulo3">Dados Protegidos</strong>
-          <span id="beneficioTexto3">
-            Banco de dados seguro com políticas RLS.
-          </span>
-        </div>
-      </div>
-
-      <div class="status-item" data-beneficio-indice="4">
-        <div class="status-ico">
-          <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 64 64">
-            <path d="M20 42h24v10H20z"></path>
-            <path d="M32 12v28"></path>
-            <path d="M22 24l10-12 10 12"></path>
-          </svg>
-        </div>
-        <div>
-          <strong id="beneficioTitulo4">Backup Automático</strong>
-          <span id="beneficioTexto4">Seus dados sempre protegidos.</span>
-        </div>
-      </div>
-
-      <div class="status-item" data-beneficio-indice="5">
-        <div class="status-ico">
-          <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 64 64">
-            <path d="M50 20a22 22 0 0 0-38 9"></path>
-            <path d="M50 12v8h-8"></path>
-            <path d="M14 44a22 22 0 0 0 38-9"></path>
-            <path d="M14 52v-8h8"></path>
-          </svg>
-        </div>
-        <div>
-          <strong id="beneficioTitulo5">Atualizações Contínuas</strong>
-          <span id="beneficioTexto5">
-            Novas funcionalidades e normas sempre atualizadas.
-          </span>
-        </div>
-      </div>
-
-      <div class="status-item" data-beneficio-indice="6">
-        <div class="status-ico">
-          <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 64 64">
-            <path d="M16 36v-6a16 16 0 0 1 32 0v6"></path>
-            <rect height="16" rx="3" width="10" x="10" y="34"></rect>
-            <rect height="16" rx="3" width="10" x="44" y="34"></rect>
-          </svg>
-        </div>
-        <div>
-          <strong id="beneficioTitulo6">Suporte Técnico</strong>
-          <span id="beneficioTexto6">
-            Apoio especializado para profissionais de engenharia.
-          </span>
-        </div>
-      </div>
-    </section>
-
-    <section
-      class="cms-cta"
-      data-cms-bloco="CTA"
-      id="cta"
-    >
-      <div class="cms-cta-conteudo">
-        <h2 id="ctaTitulo">Pronto para transformar sua engenharia?</h2>
-        <p id="ctaTexto">
-          Acesse a plataforma SAR e utilize ferramentas desenvolvidas para
-          profissionais da segurança contra incêndio.
-        </p>
-      </div>
-
-      <a class="btn primary" href="/acesso.html" id="ctaBotao">
-        Acessar Plataforma
-      </a>
-    </section>
-
-    <section
-      class="cms-contato"
-      data-cms-bloco="CONTATO"
-      id="contato"
-    >
-      <div class="cms-contato-cabecalho">
-        <span class="cms-kicker" id="contatoSubtitulo">
-          Fale com a SAR Engenharia
-        </span>
-
-        <h2 id="contatoTitulo">Contato</h2>
-
-        <p id="contatoTexto">
-          Entre em contato para conhecer a plataforma, solicitar acesso ou
-          apresentar uma necessidade técnica.
-        </p>
-      </div>
-
-      <div class="cms-contato-cards" id="contatoCards"></div>
-
-      <p class="cms-contato-vazio" id="contatoSemCanais" hidden>
-        Os canais de atendimento serão disponibilizados em breve.
-      </p>
-    </section>
-
-    <footer class="cms-footer" data-cms-bloco="RODAPE" id="rodape">
-      <div class="cms-footer-principal">
-        <div>
-          <strong id="rodapeTitulo">SAR Engenharia</strong>
-          <span id="rodapeSubtitulo">Sistema Avançado de Resposta</span>
-        </div>
-        <p id="rodapeTexto">SAR: Onde a norma encontra a resposta.</p>
-      </div>
-      <div class="cms-footer-meta">
-        <span id="rodapeLinhaEsquerda">© 2026 SAR Engenharia</span>
-        <span id="rodapeLinhaDireita">Todos os direitos reservados</span>
-      </div>
-    </footer>
-
+    <section class="status" id="seguranca" data-cms-bloco="BENEFICIOS"></section>
+    <section class="cms-cta" id="cta" data-cms-bloco="CTA"></section>
+    <section class="cms-contato" id="contato" data-cms-bloco="CONTATO"></section>
+    <footer class="cms-rodape" id="rodape" data-cms-bloco="RODAPE"></footer>
   </main>
-
-  <script src="/js/site-cms.js" type="module"></script>
+  <script type="module" src="/js/site-cms.js"></script>
 </body>
 </html>
