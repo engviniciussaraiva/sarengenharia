@@ -1862,7 +1862,7 @@
             <ul>
               <li>Criar e configurar páginas</li>
               <li>Criar, renomear, ordenar, destacar ou ocultar botões do menu</li>
-              <li>Gerenciar seções e blocos de conteúdo</li>
+              <li>Gerenciar blocos e itens de conteúdo</li>
               <li>Acompanhar acessos e visitantes</li>
             </ul>
           </article>
@@ -1894,7 +1894,7 @@
           <div class="cms-resumo">
             <div class="card"><span>Páginas</span><strong id="cmsResumoPaginas">0</strong></div>
             <div class="card"><span>Itens no menu</span><strong id="cmsResumoMenu">0</strong></div>
-            <div class="card"><span>Seções</span><strong id="cmsResumoSecoes">0</strong></div>
+            <div class="card"><span>Itens de conteúdo</span><strong id="cmsResumoSecoes">0</strong></div>
             <div class="card"><span>Visualizações hoje</span><strong id="cmsResumoVisualizacoesHoje">0</strong></div>
           </div>
 
@@ -1944,7 +1944,7 @@
               <label for="cmsFiltroPaginaConteudo">Página</label>
               <select id="cmsFiltroPaginaConteudo"></select>
             </div>
-            <button id="btnNovaSecaoCms" class="btn primary" type="button">+ Nova seção</button>
+            <button id="btnNovaSecaoCms" class="btn primary" type="button">+ Novo item</button>
           </div>
           <div id="cmsListaSecoes" class="cms-lista"></div>
         </section>
@@ -2363,22 +2363,27 @@
   <div id="drawerSecaoCmsOverlay" class="drawer-overlay" aria-hidden="true">
     <aside class="drawer drawer-cms" role="dialog" aria-modal="true" aria-labelledby="drawerSecaoCmsTitulo">
       <div class="drawer-topo">
-        <div><h2 id="drawerSecaoCmsTitulo">Nova seção</h2><p>Cadastre textos e dados estruturados da seção.</p></div>
+        <div><h2 id="drawerSecaoCmsTitulo">Novo bloco</h2><p>Edite exatamente o conteúdo exibido no site público.</p></div>
         <button id="btnFecharSecaoCms" class="drawer-fechar" type="button">×</button>
       </div>
       <div class="form-grid">
         <div class="campo"><label for="cmsSecaoPagina">Página *</label><select id="cmsSecaoPagina"></select></div>
-        <div class="campo"><label for="cmsSecaoChave">Chave *</label><input id="cmsSecaoChave" type="text" placeholder="HERO"></div>
-        <div class="campo"><label for="cmsSecaoTipo">Tipo</label><select id="cmsSecaoTipo"><option value="conteudo">Conteúdo</option><option value="hero">Hero</option><option value="lista">Lista</option><option value="beneficios">Benefícios</option><option value="cta">Chamada</option><option value="rodape">Rodapé</option></select></div>
+        <div class="campo"><label for="cmsSecaoChave">Bloco *</label><select id="cmsSecaoChave"><option value="HERO">HERO</option><option value="CTA">CTA</option><option value="CONTATO">CONTATO</option><option value="RODAPE">RODAPE</option><option value="PILARES">PILARES</option><option value="BENEFICIOS">BENEFICIOS</option><option value="ECOSSISTEMA_SAR">ECOSSISTEMA_SAR</option></select></div>
+        <div class="campo"><label for="cmsSecaoTipo">Código do item</label><input id="cmsSecaoTipo" type="text" placeholder="CABECALHO, EMAIL, WHATSAPP..."></div>
         <div class="campo"><label for="cmsSecaoOrdem">Ordem</label><input id="cmsSecaoOrdem" type="number" value="0"></div>
         <div class="campo full"><label for="cmsSecaoTitulo">Título</label><input id="cmsSecaoTitulo" type="text"></div>
         <div class="campo full"><label for="cmsSecaoSubtitulo">Subtítulo</label><input id="cmsSecaoSubtitulo" type="text"></div>
         <div class="campo full"><label for="cmsSecaoTexto">Texto</label><textarea id="cmsSecaoTexto"></textarea></div>
-        <div class="campo full"><label for="cmsSecaoDados">Dados adicionais (JSON)</label><textarea id="cmsSecaoDados" class="cms-json">{}</textarea></div>
-        <div class="campo"><label><input id="cmsSecaoAtivo" type="checkbox" checked> Seção ativa</label></div>
+        <div class="campo"><label for="cmsSecaoIcone">Ícone</label><input id="cmsSecaoIcone" type="text" placeholder="email, whatsapp, 🌐..."></div>
+        <div class="campo"><label for="cmsSecaoImagem">Imagem / URL</label><input id="cmsSecaoImagem" type="text"></div>
+        <div class="campo"><label for="cmsSecaoBotaoTexto">Texto do botão</label><input id="cmsSecaoBotaoTexto" type="text"></div>
+        <div class="campo"><label for="cmsSecaoBotaoAlvo">Abertura</label><select id="cmsSecaoBotaoAlvo"><option value="_self">Mesma janela</option><option value="_blank">Nova janela</option></select></div>
+        <div class="campo full"><label for="cmsSecaoBotaoLink">Link do botão</label><input id="cmsSecaoBotaoLink" type="text" placeholder="mailto:, https://wa.me/..., /acesso.html"></div>
+        <div class="campo"><label><input id="cmsSecaoDestaque" type="checkbox"> Item em destaque</label></div>
+        <div class="campo"><label><input id="cmsSecaoAtivo" type="checkbox" checked> Item ativo no site</label></div>
       </div>
       <div id="estadoSecaoCms" class="estado"></div>
-      <div class="drawer-acoes"><button id="btnExcluirSecaoCms" class="btn danger" type="button" hidden>Excluir</button><button id="btnCancelarSecaoCms" class="btn" type="button">Cancelar</button><button id="btnSalvarSecaoCms" class="btn primary" type="button">Salvar seção</button></div>
+      <div class="drawer-acoes"><button id="btnExcluirSecaoCms" class="btn danger" type="button" hidden>Excluir</button><button id="btnCancelarSecaoCms" class="btn" type="button">Cancelar</button><button id="btnSalvarSecaoCms" class="btn primary" type="button">Salvar bloco</button></div>
     </aside>
   </div>
 
@@ -2725,7 +2730,12 @@
       cmsSecaoTitulo: document.getElementById("cmsSecaoTitulo"),
       cmsSecaoSubtitulo: document.getElementById("cmsSecaoSubtitulo"),
       cmsSecaoTexto: document.getElementById("cmsSecaoTexto"),
-      cmsSecaoDados: document.getElementById("cmsSecaoDados"),
+      cmsSecaoIcone: document.getElementById("cmsSecaoIcone"),
+      cmsSecaoImagem: document.getElementById("cmsSecaoImagem"),
+      cmsSecaoBotaoTexto: document.getElementById("cmsSecaoBotaoTexto"),
+      cmsSecaoBotaoLink: document.getElementById("cmsSecaoBotaoLink"),
+      cmsSecaoBotaoAlvo: document.getElementById("cmsSecaoBotaoAlvo"),
+      cmsSecaoDestaque: document.getElementById("cmsSecaoDestaque"),
       cmsSecaoAtivo: document.getElementById("cmsSecaoAtivo"),
       estadoSecaoCms: document.getElementById("estadoSecaoCms"),
       btnFecharSecaoCms: document.getElementById("btnFecharSecaoCms"),
@@ -4181,27 +4191,49 @@
 
     function renderizarSecoesCms(){
       const paginaId = elementos.cmsFiltroPaginaConteudo.value;
-      const itens = cmsSecoesCache.filter((item) => String(item.pagina_id) === String(paginaId));
+      const itens = cmsSecoesCache
+        .filter((item) => String(item.pagina_id) === String(paginaId))
+        .sort((a,b) => Number(a.ordem || 0) - Number(b.ordem || 0));
+
       if(!itens.length){
-        elementos.cmsListaSecoes.innerHTML = '<div class="placeholder">Nenhuma seção cadastrada para esta página.</div>';
+        elementos.cmsListaSecoes.innerHTML = '<div class="placeholder">Nenhum bloco cadastrado para esta página.</div>';
         return;
       }
+
       elementos.cmsListaSecoes.innerHTML = itens.map((item) => `
         <article class="cms-item">
           <div class="cms-item-principal">
-            <strong>${escaparHtml(item.titulo || item.chave)}</strong>
-            <p>${escaparHtml(item.chave)} · ${escaparHtml(item.tipo)}</p>
+            <strong>${escaparHtml(item.titulo || item.item_codigo || item.bloco)}</strong>
+            <p>${escaparHtml(item.bloco || "SEM BLOCO")} · ${escaparHtml(item.item_codigo || "ITEM PRINCIPAL")}</p>
             <div class="cms-item-meta">
-              <span class="cms-chip ${item.ativo ? "ativo" : "inativo"}">${item.ativo ? "Ativa" : "Inativa"}</span>
+              <span class="cms-chip ${item.ativo ? "ativo" : "inativo"}">${item.ativo ? "Ativo" : "Inativo"}</span>
+              ${item.destaque ? '<span class="cms-chip destaque">Destaque</span>' : ''}
               <span class="cms-chip">Ordem ${Number(item.ordem || 0)}</span>
             </div>
           </div>
-          <div class="cms-item-acoes"><button class="btn" type="button" data-cms-editar-secao="${item.id}">Editar</button></div>
+          <div class="cms-item-acoes">
+            <button class="btn" type="button" data-cms-alternar-secao="${item.id}">${item.ativo ? "Desativar" : "Ativar"}</button>
+            <button class="btn" type="button" data-cms-editar-secao="${item.id}">Editar</button>
+          </div>
         </article>
       `).join("");
+
       elementos.cmsListaSecoes.querySelectorAll("[data-cms-editar-secao]").forEach((botao) => {
         botao.addEventListener("click",() => abrirSecaoCms(botao.dataset.cmsEditarSecao));
       });
+      elementos.cmsListaSecoes.querySelectorAll("[data-cms-alternar-secao]").forEach((botao) => {
+        botao.addEventListener("click",() => alternarSecaoCms(botao.dataset.cmsAlternarSecao));
+      });
+    }
+
+    async function alternarSecaoCms(id){
+      const item = cmsSecoesCache.find((registro) => String(registro.id) === String(id));
+      if(!item) return;
+      definirEstado(elementos.estadoSite, item.ativo ? "Desativando item..." : "Ativando item...");
+      const { error } = await supabase.from("sar_site_conteudo").update({ativo: item.ativo !== true}).eq("id",id);
+      if(error){ definirEstado(elementos.estadoSite,error.message,true); return; }
+      await carregarCmsSite();
+      abrirAbaCms("conteudo");
     }
 
     function renderizarEstatisticasCms(resumo,diarias){
@@ -4239,7 +4271,7 @@
         const [paginasResp,menuResp,secoesResp,resumoResp,diariasResp] = await Promise.all([
           supabase.rpc("sar_admin_cms_listar_paginas"),
           supabase.rpc("sar_admin_cms_listar_menu",{p_local_menu:null}),
-          supabase.rpc("sar_admin_cms_listar_secoes",{p_pagina_id:null}),
+          supabase.from("sar_site_conteudo").select("*").order("ordem",{ascending:true}),
           supabase.rpc("sar_admin_resumo_acessos_site"),
           supabase.rpc("sar_admin_estatisticas_site",{p_dias:30})
         ]);
@@ -4326,38 +4358,78 @@
 
     function abrirSecaoCms(id = null){
       cmsSecaoEdicaoId=id;
-      const item=id?cmsSecoesCache.find((registro)=>registro.id===id):null;
-      elementos.drawerSecaoCmsTitulo.textContent=item?"Editar seção":"Nova seção";
+      const item=id?cmsSecoesCache.find((registro)=>String(registro.id)===String(id)):null;
+      elementos.drawerSecaoCmsTitulo.textContent=item?"Editar bloco":"Novo bloco";
       elementos.cmsSecaoPagina.innerHTML=opcoesPaginasCms(item?.pagina_id||elementos.cmsFiltroPaginaConteudo.value,false);
-      elementos.cmsSecaoChave.value=item?.chave||"";
-      elementos.cmsSecaoTipo.value=item?.tipo||"conteudo";
+      elementos.cmsSecaoChave.value=String(item?.bloco||"CONTATO").toUpperCase();
+      elementos.cmsSecaoTipo.value=item?.item_codigo||"";
       elementos.cmsSecaoOrdem.value=Number(item?.ordem||0);
       elementos.cmsSecaoTitulo.value=item?.titulo||"";
       elementos.cmsSecaoSubtitulo.value=item?.subtitulo||"";
       elementos.cmsSecaoTexto.value=item?.texto||"";
-      elementos.cmsSecaoDados.value=JSON.stringify(item?.dados||{},null,2);
+      elementos.cmsSecaoIcone.value=item?.icone||"";
+      elementos.cmsSecaoImagem.value=item?.imagem||"";
+      elementos.cmsSecaoBotaoTexto.value=item?.botao_texto||"";
+      elementos.cmsSecaoBotaoLink.value=item?.botao_link||"";
+      elementos.cmsSecaoBotaoAlvo.value=item?.botao_alvo||"_self";
+      elementos.cmsSecaoDestaque.checked=item?.destaque===true;
       elementos.cmsSecaoAtivo.checked=item?item.ativo===true:true;
       elementos.btnExcluirSecaoCms.hidden=!item;
       ocultarEstado(elementos.estadoSecaoCms);
       elementos.drawerSecaoCmsOverlay.classList.add("aberto");
+      elementos.drawerSecaoCmsOverlay.setAttribute("aria-hidden","false");
     }
-    function fecharSecaoCms(){elementos.drawerSecaoCmsOverlay.classList.remove("aberto");cmsSecaoEdicaoId=null;}
+    function fecharSecaoCms(){
+      elementos.drawerSecaoCmsOverlay.classList.remove("aberto");
+      elementos.drawerSecaoCmsOverlay.setAttribute("aria-hidden","true");
+      cmsSecaoEdicaoId=null;
+    }
     async function salvarSecaoCms(){
+      const paginaId=elementos.cmsSecaoPagina.value||null;
+      const bloco=elementos.cmsSecaoChave.value.trim().toUpperCase();
+      if(!paginaId || !bloco){
+        definirEstado(elementos.estadoSecaoCms,"Informe a página e o bloco.",true);
+        return;
+      }
+      const payload={
+        pagina_id:paginaId,
+        bloco,
+        item_codigo:elementos.cmsSecaoTipo.value.trim().toUpperCase()||null,
+        titulo:elementos.cmsSecaoTitulo.value.trim()||null,
+        subtitulo:elementos.cmsSecaoSubtitulo.value.trim()||null,
+        texto:elementos.cmsSecaoTexto.value.trim()||null,
+        icone:elementos.cmsSecaoIcone.value.trim()||null,
+        imagem:elementos.cmsSecaoImagem.value.trim()||null,
+        botao_texto:elementos.cmsSecaoBotaoTexto.value.trim()||null,
+        botao_link:elementos.cmsSecaoBotaoLink.value.trim()||null,
+        botao_alvo:elementos.cmsSecaoBotaoAlvo.value||"_self",
+        destaque:elementos.cmsSecaoDestaque.checked,
+        ordem:Number(elementos.cmsSecaoOrdem.value||0),
+        ativo:elementos.cmsSecaoAtivo.checked
+      };
       elementos.btnSalvarSecaoCms.disabled=true;
+      definirEstado(elementos.estadoSecaoCms,"Salvando bloco...");
       try{
-        let dados={};try{dados=JSON.parse(elementos.cmsSecaoDados.value||"{}")}catch{throw new Error("O campo Dados adicionais precisa conter JSON válido.")}
-        const {error}=await supabase.rpc("sar_admin_cms_salvar_secao",{
-          p_id:cmsSecaoEdicaoId,p_pagina_id:elementos.cmsSecaoPagina.value||null,p_chave:elementos.cmsSecaoChave.value,p_tipo:elementos.cmsSecaoTipo.value,p_titulo:elementos.cmsSecaoTitulo.value||null,p_subtitulo:elementos.cmsSecaoSubtitulo.value||null,p_texto:elementos.cmsSecaoTexto.value||null,p_dados:dados,p_ordem:Number(elementos.cmsSecaoOrdem.value||0),p_ativo:elementos.cmsSecaoAtivo.checked
-        });
-        if(error) throw new Error(error.message);
-        fecharSecaoCms();await carregarCmsSite();
-      }catch(error){definirEstado(elementos.estadoSecaoCms,error.message||String(error),true)}finally{elementos.btnSalvarSecaoCms.disabled=false;}
+        const resposta=cmsSecaoEdicaoId
+          ? await supabase.from("sar_site_conteudo").update(payload).eq("id",cmsSecaoEdicaoId)
+          : await supabase.from("sar_site_conteudo").insert(payload);
+        if(resposta.error) throw new Error(resposta.error.message);
+        fecharSecaoCms();
+        await carregarCmsSite();
+        abrirAbaCms("conteudo");
+      }catch(error){
+        definirEstado(elementos.estadoSecaoCms,error.message||String(error),true);
+      }finally{
+        elementos.btnSalvarSecaoCms.disabled=false;
+      }
     }
     async function excluirSecaoCms(){
-      if(!cmsSecaoEdicaoId||!confirm("Excluir esta seção?"))return;
-      const {error}=await supabase.rpc("sar_admin_cms_excluir_secao",{p_id:cmsSecaoEdicaoId});
+      if(!cmsSecaoEdicaoId||!confirm("Excluir este item do site?"))return;
+      const {error}=await supabase.from("sar_site_conteudo").delete().eq("id",cmsSecaoEdicaoId);
       if(error){definirEstado(elementos.estadoSecaoCms,error.message,true);return;}
-      fecharSecaoCms();await carregarCmsSite();
+      fecharSecaoCms();
+      await carregarCmsSite();
+      abrirAbaCms("conteudo");
     }
 
     function renderizarSite(conteudos){
