@@ -229,6 +229,111 @@ function renderizarContato(secao){
   aplicarLink("contatoWhatsapp", whatsapp ? "Falar pelo WhatsApp" : "", whatsapp ? `https://wa.me/${whatsapp}` : "", Boolean(whatsapp));
 }
 
+
+function normalizarBloco(valor){
+  return String(valor || "").trim().toUpperCase();
+}
+
+function obterItensBloco(conteudos, bloco){
+  const chave = normalizarBloco(bloco);
+  return (conteudos || [])
+    .filter(item => normalizarBloco(item.bloco) === chave && item.ativo !== false)
+    .sort((a,b) => Number(a.ordem || 0) - Number(b.ordem || 0));
+}
+
+function renderizarCtaConteudo(itens){
+  const item = itens?.[0];
+  if(!item) return false;
+
+  aplicarTexto("ctaTitulo", item.titulo);
+  aplicarTexto("ctaTexto", item.texto);
+
+  aplicarLink(
+    "ctaBotao",
+    item.botao_texto || "Acessar Plataforma",
+    item.botao_link || "/acesso.html",
+    item.ativo !== false
+  );
+
+  const botao = document.getElementById("ctaBotao");
+  if(botao){
+    botao.target = item.botao_alvo === "_blank" ? "_blank" : "_self";
+    if(botao.target === "_blank"){
+      botao.rel = "noopener noreferrer";
+    }else{
+      botao.removeAttribute("rel");
+    }
+  }
+
+  definirBlocoVisivel("CTA", true);
+  return true;
+}
+
+function linkDeContatoValido(item){
+  const link = String(item?.botao_link || "").trim();
+  if(!link || link === "#") return false;
+
+  // Evita publicar o número fictício usado durante a configuração.
+  if(/wa\.me\/55?0{8,}$/i.test(link)) return false;
+
+  return true;
+}
+
+function renderizarContatoConteudo(itens){
+  if(!Array.isArray(itens) || !itens.length) return false;
+
+  const cabecalho = itens.find(item =>
+    String(item.item_codigo || "").toUpperCase() === "CABECALHO"
+  ) || itens[0];
+
+  aplicarTexto("contatoTitulo", cabecalho.titulo || "Contato");
+  aplicarTexto("contatoSubtitulo", cabecalho.subtitulo || "Fale com a SAR Engenharia");
+  aplicarTexto("contatoTexto", cabecalho.texto || "");
+
+  const cards = document.getElementById("contatoCards");
+  if(!cards) return false;
+
+  const canais = itens.filter(item =>
+    String(item.item_codigo || "").toUpperCase() !== "CABECALHO" &&
+    linkDeContatoValido(item)
+  );
+
+  cards.innerHTML = canais.map(item => {
+    const alvo = item.botao_alvo === "_blank" ? "_blank" : "_self";
+    const rel = alvo === "_blank" ? ' rel="noopener noreferrer"' : "";
+
+    return `
+      <article class="cms-contato-card">
+        <div class="cms-contato-icone" aria-hidden="true">
+          ${escaparHtml(obterIcone(item.icone || "support"))}
+        </div>
+
+        <div class="cms-contato-card-conteudo">
+          <h3>${escaparHtml(item.titulo || "Contato")}</h3>
+          <p>${escaparHtml(item.texto || "")}</p>
+
+          <a
+            class="cms-contato-acao"
+            href="${escaparHtml(item.botao_link)}"
+            target="${alvo}"${rel}
+          >
+            ${escaparHtml(item.botao_texto || "Entrar em contato")}
+            <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  const aviso = document.getElementById("contatoSemCanais");
+  if(aviso){
+    aviso.hidden = canais.length > 0;
+  }
+
+  definirBlocoVisivel("CONTATO", true);
+  return true;
+}
+
 function renderizarRodape(secao){
   if(!secao) return;
 
@@ -318,7 +423,7 @@ async function carregarConteudo(){
   ] = await Promise.all([
     supabase.rpc("sar_site_publico_secoes", { p_slug:"home" }),
     supabase.from("sar_site_paginas")
-      .select("titulo_seo,descricao_seo")
+      .select("id,titulo_seo,descricao_seo")
       .eq("slug","home")
       .eq("ativo",true)
       .maybeSingle()
@@ -326,33 +431,79 @@ async function carregarConteudo(){
 
   if(!erroPagina && pagina){
     if(pagina.titulo_seo) document.title = pagina.titulo_seo;
+
     const meta = document.querySelector('meta[name="description"]');
     if(meta && pagina.descricao_seo){
       meta.setAttribute("content", pagina.descricao_seo);
     }
   }
 
-  if(erroSecoes){
-    console.error("SAR CMS — seções:", erroSecoes);
-    await carregarModulosPublicos();
-    return;
+  let conteudos = [];
+
+  if(pagina?.id){
+    const { data, error } = await supabase
+      .from("sar_site_conteudo")
+      .select(`
+        id,
+        pagina_id,
+        chave,
+        bloco,
+        item_codigo,
+        titulo,
+        subtitulo,
+        texto,
+        imagem,
+        icone,
+        botao_texto,
+        botao_link,
+        botao_alvo,
+        destaque,
+        ordem,
+        ativo
+      `)
+      .eq("pagina_id", pagina.id)
+      .eq("ativo", true)
+      .order("ordem", { ascending:true });
+
+    if(error){
+      console.error("SAR CMS — conteúdo estruturado:", error);
+    }else{
+      conteudos = data || [];
+    }
   }
 
-  const mapa = mapearSecoes(secoes);
+  const mapa = mapearSecoes(secoes || []);
 
+  // Blocos já existentes no motor antigo.
   renderizarHero(mapa.get("HERO"));
   renderizarPilares(mapa.get("PILARES"));
   renderizarEcossistema(mapa.get("ECOSSISTEMA_SAR"));
   renderizarBeneficios(mapa.get("BENEFICIOS"));
-  renderizarCta(mapa.get("CTA"));
-  renderizarContato(mapa.get("CONTATO"));
-  renderizarRodape(mapa.get("RODAPE"));
+
+  // CTA e Contato usam primeiro a nova tabela estruturada.
+  const ctaNovo = renderizarCtaConteudo(obterItensBloco(conteudos, "CTA"));
+  const contatoNovo = renderizarContatoConteudo(obterItensBloco(conteudos, "CONTATO"));
+
+  // Compatibilidade temporária com os registros antigos.
+  if(!ctaNovo){
+    renderizarCta(mapa.get("CTA"));
+    definirBlocoVisivel("CTA", mapa.has("CTA"));
+  }
+
+  if(!contatoNovo){
+    renderizarContato(mapa.get("CONTATO"));
+    definirBlocoVisivel("CONTATO", mapa.has("CONTATO"));
+  }
 
   definirBlocoVisivel("ECOSSISTEMA_SAR", mapa.has("ECOSSISTEMA_SAR"));
   definirBlocoVisivel("BENEFICIOS", mapa.has("BENEFICIOS"));
-  definirBlocoVisivel("CTA", mapa.has("CTA"));
-  definirBlocoVisivel("CONTATO", mapa.has("CONTATO"));
-  definirBlocoVisivel("RODAPE", mapa.has("RODAPE"));
+
+  // Rodapé permanece desativado nesta fase.
+  definirBlocoVisivel("RODAPE", false);
+
+  if(erroSecoes){
+    console.error("SAR CMS — seções:", erroSecoes);
+  }
 
   await carregarModulosPublicos(
     mapa.get("ECOSSISTEMA_SAR")?.dados || {}
