@@ -13,18 +13,19 @@
     .titulo-pagina{display:block;margin:0;color:var(--sar);font-family:"Segoe UI",Arial,sans-serif;font-size:26px;font-weight:700;line-height:1.2;text-align:left}
     #estado{padding:22px;border:1px solid var(--borda);border-radius:15px;background:#fff;color:var(--muted)}
     #estado.erro{border-color:#e8bcbc;background:#fff7f7;color:var(--erro)}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,300px);gap:14px;justify-content:start;align-items:start}
-    .card{position:relative;width:300px;height:142px;background:#fff;border:1px solid var(--borda);border-left:6px solid #a7b2ad;border-radius:12px;padding:15px 16px 13px;box-shadow:0 4px 14px #1232260a;overflow:hidden;display:flex;flex-direction:column;transition:.2s ease}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,250px);gap:12px;justify-content:start;align-items:start}
+    .card{position:relative;width:250px;height:124px;background:#fff;border:1px solid var(--borda);border-left:5px solid #a7b2ad;border-radius:8px;padding:14px 12px 12px 14px;box-shadow:0 3px 10px #12322608;overflow:hidden;display:grid;grid-template-columns:46px minmax(0,1fr);grid-template-rows:auto 1fr;column-gap:12px;color:inherit;text-decoration:none;transition:.2s ease}
     .card.abrivel{border-left-color:var(--verde3);background:linear-gradient(105deg,#f1fff7 0,#fff 43%)}
     .card.abrivel:hover{transform:translateY(-3px);box-shadow:0 13px 32px #13754320;border-color:#91d7ae;border-left-color:var(--verde3)}
-    .topo{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-    .icone{font-size:27px;line-height:1}.selo{flex:none;border-radius:999px;padding:5px 8px;font-size:9px;font-weight:900;letter-spacing:.07em;background:#eef1ef;color:#65716b}
+    .topo{display:contents}
+    .icone{grid-column:1;grid-row:1 / span 2;width:46px;height:46px;border-radius:9px;background:#edf6ef;display:grid;place-items:center;font-size:27px;line-height:1;margin-top:19px}
+    .selo{position:absolute;top:11px;right:11px;border-radius:999px;padding:5px 8px;font-size:9px;font-weight:900;letter-spacing:.05em;background:#eef1ef;color:#65716b}
     .abrivel .selo{background:var(--verde3);color:#fff;box-shadow:0 5px 14px #19a35b38}
-    .card h2{color:var(--verde);font-size:16px;line-height:1.15;margin:8px 0 4px}.card p{color:var(--muted);font-size:10.5px;line-height:1.28;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-    .rodape{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px}.versao{font-size:9.5px;color:#7c8882;font-weight:700}
-    .acao{border:0;border-radius:7px;padding:6px 9px;font:inherit;font-size:10px;font-weight:800;background:#e9eeeb;color:#6d7872;text-decoration:none;pointer-events:none}
-    .abrivel .acao{background:var(--verde2);color:#fff;pointer-events:auto}.abrivel .acao:hover{background:#0e713f}
-    @media(max-width:600px){main{padding:18px 14px 50px}.titulo-pagina{font-size:23px}.grid{grid-template-columns:minmax(0,300px)}.card{width:min(300px,100%)}.acao{text-align:center}}
+    .card h2{grid-column:2;grid-row:1;color:var(--verde);font-size:15px;line-height:1.15;margin:8px 62px 5px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .card p{grid-column:2;grid-row:2;color:var(--muted);font-size:11px;line-height:1.3;margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    .card.abrivel{cursor:pointer}
+    .card.abrivel:focus-visible{outline:3px solid #7cc99c;outline-offset:3px}
+    @media(max-width:600px){main{padding:18px 18px 50px}.titulo-pagina{font-size:26px}.grid{grid-template-columns:minmax(0,250px)}.card{width:min(250px,100%)}}
   </style>
 </head>
 <body>
@@ -48,8 +49,9 @@
 
     function criarCard(item) {
       const abrivel = item.pode_abrir === true;
-      const article = document.createElement('article');
+      const article = document.createElement(abrivel ? 'a' : 'article');
       article.className = `card${abrivel ? ' abrivel' : ''}`;
+      if (abrivel) article.href = texto(item.rota, '#');
 
       const topo = document.createElement('div'); topo.className = 'topo';
       const icone = document.createElement('span'); icone.className = 'icone'; icone.textContent = texto(item.icone, '🧯');
@@ -58,12 +60,7 @@
 
       const titulo = document.createElement('h2'); titulo.textContent = texto(item.titulo, 'Módulo SAR');
       const descricao = document.createElement('p'); descricao.textContent = texto(item.descricao, 'Ferramenta técnica do SAR Engenharia.');
-      const rodape = document.createElement('div'); rodape.className = 'rodape';
-      const versao = document.createElement('span'); versao.className = 'versao'; versao.textContent = item.versao ? `Versão ${item.versao}` : '';
-      const acao = document.createElement('a'); acao.className = 'acao'; acao.textContent = texto(item.texto_botao, abrivel ? 'Acessar módulo' : 'Em breve');
-      acao.href = abrivel ? texto(item.rota, '#') : '#';
-      if (!abrivel) acao.setAttribute('aria-disabled', 'true');
-      rodape.append(versao, acao); article.append(topo, titulo, descricao, rodape);
+      article.append(topo, titulo, descricao);
       return article;
     }
 
