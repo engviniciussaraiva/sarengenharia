@@ -6,9 +6,11 @@
   <title>Central de módulos independentes | SAR Engenharia</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root{--verde:#0c3b2e;--verde2:#12834c;--verde3:#19a35b;--fundo:#f4f7f5;--texto:#234e52;--muted:#66736d;--borda:#dce5e0;--branco:#fff;--erro:#a72e2e;--destaque:#75a92d}
+    :root{--verde:#0c3b2e;--verde2:#12834c;--verde3:#19a35b;--fundo:#f4f7f5;--texto:#234e52;--muted:#66736d;--borda:#dce5e0;--branco:#fff;--erro:#a72e2e;--destaque:#75a92d;--sar:#315858}
     *{box-sizing:border-box} body{margin:0;background:var(--fundo);color:var(--texto);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-    main{width:100%;margin:0;padding:24px 20px 70px}
+    main{width:100%;margin:0;padding:18px 20px 70px}
+    .cabecalho-pagina{display:block;width:100%;margin:0 0 14px;padding:0;text-align:left}
+    .titulo-pagina{display:block;margin:0;color:var(--sar);font-family:"Segoe UI",Arial,sans-serif;font-size:26px;font-weight:700;line-height:1.2;text-align:left}
     #estado{padding:22px;border:1px solid var(--borda);border-radius:15px;background:#fff;color:var(--muted)}
     #estado.erro{border-color:#e8bcbc;background:#fff7f7;color:var(--erro)}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,500px),1fr));gap:22px}
@@ -22,11 +24,14 @@
     .rodape{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:15px}.versao{font-size:12px;color:#7c8882;font-weight:700}
     .acao{border:0;border-radius:9px;padding:11px 17px;font:inherit;font-size:13px;font-weight:800;background:#e9eeeb;color:#6d7872;text-decoration:none;pointer-events:none}
     .abrivel .acao{background:var(--verde2);color:#fff;pointer-events:auto}.abrivel .acao:hover{background:#0e713f}
-    @media(max-width:600px){main{padding:22px 18px 50px}.card{padding:23px 21px}.rodape{align-items:flex-end}.acao{text-align:center}}
+    @media(max-width:600px){main{padding:18px 18px 50px}.titulo-pagina{font-size:26px}.card{padding:23px 21px}.rodape{align-items:flex-end}.acao{text-align:center}}
   </style>
 </head>
 <body>
   <main>
+    <header class="cabecalho-pagina" data-revisao="titulo-padrao-sar-v3">
+      <h1 class="titulo-pagina">Central de Módulos Independentes</h1>
+    </header>
     <div id="estado">Carregando módulos disponíveis…</div>
     <section id="cards" class="grid" hidden aria-live="polite"></section>
   </main>
