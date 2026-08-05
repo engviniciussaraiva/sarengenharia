@@ -6,14 +6,9 @@
   <title>Central de módulos independentes | SAR Engenharia</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root{--verde:#0c3b2e;--verde2:#12834c;--verde3:#19a35b;--fundo:#f4f7f5;--texto:#16211d;--muted:#66736d;--borda:#dce5e0;--branco:#fff;--erro:#a72e2e}
+    :root{--verde:#0c3b2e;--verde2:#12834c;--verde3:#19a35b;--fundo:#f4f7f5;--texto:#234e52;--muted:#66736d;--borda:#dce5e0;--branco:#fff;--erro:#a72e2e;--destaque:#75a92d}
     *{box-sizing:border-box} body{margin:0;background:var(--fundo);color:var(--texto);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-    header{height:72px;background:var(--verde);color:#fff;display:flex;align-items:center;padding:0 34px;box-shadow:0 2px 10px #092a211f}
-    .brand{font-weight:800;letter-spacing:.02em;font-size:21px}.brand small{display:block;font-size:10px;font-weight:600;letter-spacing:.17em;opacity:.72;margin-top:2px}
-    main{max-width:1260px;margin:0 auto;padding:48px 30px 70px}
-    .eyebrow{color:var(--verde2);font-size:12px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;margin-bottom:9px}
-    h1{font-family:Georgia,"Times New Roman",serif;color:var(--verde);font-size:clamp(31px,4vw,49px);line-height:1.05;margin:0}
-    .intro{max-width:760px;color:var(--muted);font-size:16px;line-height:1.6;margin:15px 0 35px}
+    main{width:100%;margin:0;padding:24px 20px 70px}
     #estado{padding:22px;border:1px solid var(--borda);border-radius:15px;background:#fff;color:var(--muted)}
     #estado.erro{border-color:#e8bcbc;background:#fff7f7;color:var(--erro)}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,500px),1fr));gap:22px}
@@ -27,15 +22,11 @@
     .rodape{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:15px}.versao{font-size:12px;color:#7c8882;font-weight:700}
     .acao{border:0;border-radius:9px;padding:11px 17px;font:inherit;font-size:13px;font-weight:800;background:#e9eeeb;color:#6d7872;text-decoration:none;pointer-events:none}
     .abrivel .acao{background:var(--verde2);color:#fff;pointer-events:auto}.abrivel .acao:hover{background:#0e713f}
-    @media(max-width:600px){header{padding:0 20px}main{padding:34px 18px}.card{padding:23px 21px}.rodape{align-items:flex-end}.acao{text-align:center}}
+    @media(max-width:600px){main{padding:22px 18px 50px}.card{padding:23px 21px}.rodape{align-items:flex-end}.acao{text-align:center}}
   </style>
 </head>
 <body>
-  <header><div class="brand">SAR Engenharia<small>ONDE A NORMA ENCONTRA A RESPOSTA</small></div></header>
   <main>
-    <div class="eyebrow">Módulos Incêndio</div>
-    <h1>Central de módulos independentes</h1>
-    <p class="intro">Ferramentas técnicas que podem ser utilizadas de forma independente. Os módulos disponíveis e suas rotas são carregados diretamente do cadastro administrativo do SAR.</p>
     <div id="estado">Carregando módulos disponíveis…</div>
     <section id="cards" class="grid" hidden aria-live="polite"></section>
   </main>
