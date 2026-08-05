@@ -13,19 +13,19 @@
     .titulo-pagina{display:block;margin:0;color:var(--sar);font-family:"Segoe UI",Arial,sans-serif;font-size:26px;font-weight:700;line-height:1.2;text-align:left}
     #estado{padding:22px;border:1px solid var(--borda);border-radius:15px;background:#fff;color:var(--muted)}
     #estado.erro{border-color:#e8bcbc;background:#fff7f7;color:var(--erro)}
-    .sar-mi-grid{display:grid;grid-template-columns:repeat(auto-fill,275px);gap:14px;justify-content:start;align-items:start}
-    .sar-mi-card{position:relative;width:275px;height:134px;background:#fff;border:1px solid var(--borda);border-left:5px solid #a7b2ad;border-radius:8px;padding:15px 13px 13px 15px;box-shadow:0 3px 10px #12322608;overflow:hidden;display:grid;grid-template-columns:52px minmax(0,1fr);grid-template-rows:auto 1fr;column-gap:14px;color:inherit;text-decoration:none;transition:.2s ease}
+    .sar-mi-grid{display:grid;grid-template-columns:repeat(auto-fill,305px);gap:14px;justify-content:start;align-items:start}
+    .sar-mi-card{position:relative;width:305px;height:146px;background:#fff;border:1px solid var(--borda);border-left:5px solid #a7b2ad;border-radius:8px;padding:15px 13px 13px 42px;box-shadow:0 3px 10px #12322608;overflow:hidden;display:grid;grid-template-columns:48px minmax(0,1fr);grid-template-rows:auto 1fr;column-gap:12px;color:inherit;text-decoration:none;transition:.2s ease}
     .sar-mi-card.sar-mi-abrivel{border-left-color:var(--verde3);background:linear-gradient(105deg,#f1fff7 0,#fff 43%)}
     .sar-mi-card.sar-mi-abrivel:hover{transform:translateY(-3px);box-shadow:0 13px 32px #13754320;border-color:#91d7ae;border-left-color:var(--verde3)}
     .sar-mi-topo{display:contents}
-    .sar-mi-icone{grid-column:1;grid-row:1 / span 2;width:48px;height:48px;border-radius:9px;background:#edf6ef;display:grid;place-items:center;font-size:28px;line-height:1;margin-top:20px}
-    .sar-mi-selo{position:absolute;top:12px;right:12px;display:inline-block;width:auto;height:auto;transform:none;writing-mode:horizontal-tb;border:0;border-radius:999px;padding:5px 9px;font-size:9px;line-height:1.2;font-weight:900;letter-spacing:.05em;background:#eef1ef;color:#65716b}
-    .sar-mi-abrivel .sar-mi-selo{background:var(--verde3);color:#fff;box-shadow:0 5px 14px #19a35b38}
-    .sar-mi-card h2{grid-column:2;grid-row:1;color:var(--verde);font-size:16px;line-height:1.15;margin:10px 72px 6px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sar-mi-icone{grid-column:1;grid-row:1 / span 2;width:44px;height:48px;border-radius:9px;background:#edf6ef;display:grid;place-items:center;font-size:28px;line-height:1;margin-top:20px}
+    .sar-mi-selo{position:absolute;left:8px;top:28px;width:23px;height:76px;display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);border:0;border-radius:7px;padding:7px 4px;font-size:9px;line-height:1;font-weight:900;letter-spacing:.04em;background:#eef1ef;color:#65716b}
+    .sar-mi-abrivel .sar-mi-selo{background:#d9efae;color:#315d1a;box-shadow:none}
+    .sar-mi-card h2{grid-column:2;grid-row:1;color:var(--verde);font-size:16px;line-height:1.15;margin:10px 0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .sar-mi-card p{grid-column:2;grid-row:2;color:var(--muted);font-size:11.5px;line-height:1.35;margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
     .sar-mi-card.sar-mi-abrivel{cursor:pointer}
     .sar-mi-card.sar-mi-abrivel:focus-visible{outline:3px solid #7cc99c;outline-offset:3px}
-    @media(max-width:600px){main{padding:18px 18px 50px}.titulo-pagina{font-size:26px}.sar-mi-grid{grid-template-columns:minmax(0,275px)}.sar-mi-card{width:min(275px,100%)}}
+    @media(max-width:600px){main{padding:18px 18px 50px}.titulo-pagina{font-size:26px}.sar-mi-grid{grid-template-columns:minmax(0,305px)}.sar-mi-card{width:min(305px,100%)}}
   </style>
 </head>
 <body>
