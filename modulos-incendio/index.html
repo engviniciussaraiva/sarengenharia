@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Central de módulos independentes | SAR Engenharia</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{--verde:#0c3b2e;--verde2:#12834c;--verde3:#19a35b;--fundo:#f4f7f5;--texto:#16211d;--muted:#66736d;--borda:#dce5e0;--branco:#fff;--erro:#a72e2e}
+    *{box-sizing:border-box} body{margin:0;background:var(--fundo);color:var(--texto);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+    header{height:72px;background:var(--verde);color:#fff;display:flex;align-items:center;padding:0 34px;box-shadow:0 2px 10px #092a211f}
+    .brand{font-weight:800;letter-spacing:.02em;font-size:21px}.brand small{display:block;font-size:10px;font-weight:600;letter-spacing:.17em;opacity:.72;margin-top:2px}
+    main{max-width:1260px;margin:0 auto;padding:48px 30px 70px}
+    .eyebrow{color:var(--verde2);font-size:12px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;margin-bottom:9px}
+    h1{font-family:Georgia,"Times New Roman",serif;color:var(--verde);font-size:clamp(31px,4vw,49px);line-height:1.05;margin:0}
+    .intro{max-width:760px;color:var(--muted);font-size:16px;line-height:1.6;margin:15px 0 35px}
+    #estado{padding:22px;border:1px solid var(--borda);border-radius:15px;background:#fff;color:var(--muted)}
+    #estado.erro{border-color:#e8bcbc;background:#fff7f7;color:var(--erro)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,500px),1fr));gap:22px}
+    .card{position:relative;min-height:218px;background:#fff;border:1px solid var(--borda);border-left:8px solid #a7b2ad;border-radius:16px;padding:27px 29px 24px;box-shadow:0 8px 24px #1232260a;overflow:hidden;display:flex;flex-direction:column;transition:.2s ease}
+    .card.abrivel{border-left-color:var(--verde3);background:linear-gradient(105deg,#f1fff7 0,#fff 43%)}
+    .card.abrivel:hover{transform:translateY(-3px);box-shadow:0 13px 32px #13754320;border-color:#91d7ae;border-left-color:var(--verde3)}
+    .topo{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+    .icone{font-size:35px;line-height:1}.selo{flex:none;border-radius:999px;padding:8px 13px;font-size:11px;font-weight:900;letter-spacing:.09em;background:#eef1ef;color:#65716b}
+    .abrivel .selo{background:var(--verde3);color:#fff;box-shadow:0 5px 14px #19a35b38}
+    .card h2{color:var(--verde);font-size:23px;margin:22px 0 8px}.card p{color:var(--muted);font-size:14px;line-height:1.55;margin:0 0 23px;max-width:620px}
+    .rodape{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:15px}.versao{font-size:12px;color:#7c8882;font-weight:700}
+    .acao{border:0;border-radius:9px;padding:11px 17px;font:inherit;font-size:13px;font-weight:800;background:#e9eeeb;color:#6d7872;text-decoration:none;pointer-events:none}
+    .abrivel .acao{background:var(--verde2);color:#fff;pointer-events:auto}.abrivel .acao:hover{background:#0e713f}
+    @media(max-width:600px){header{padding:0 20px}main{padding:34px 18px}.card{padding:23px 21px}.rodape{align-items:flex-end}.acao{text-align:center}}
+  </style>
+</head>
+<body>
+  <header><div class="brand">SAR Engenharia<small>ONDE A NORMA ENCONTRA A RESPOSTA</small></div></header>
+  <main>
+    <div class="eyebrow">Módulos Incêndio</div>
+    <h1>Central de módulos independentes</h1>
+    <p class="intro">Ferramentas técnicas que podem ser utilizadas de forma independente. Os módulos disponíveis e suas rotas são carregados diretamente do cadastro administrativo do SAR.</p>
+    <div id="estado">Carregando módulos disponíveis…</div>
+    <section id="cards" class="grid" hidden aria-live="polite"></section>
+  </main>
+  <script>
+    const SUPABASE_URL = 'https://bjtxbpmrmhfvpmdsthxr.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM';
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
+
+    const estado = document.querySelector('#estado');
+    const cards = document.querySelector('#cards');
+    const texto = (valor, padrao = '') => valor == null || valor === '' ? padrao : String(valor);
+
+    function criarCard(item) {
+      const abrivel = item.pode_abrir === true;
+      const article = document.createElement('article');
+      article.className = `card${abrivel ? ' abrivel' : ''}`;
+
+      const topo = document.createElement('div'); topo.className = 'topo';
+      const icone = document.createElement('span'); icone.className = 'icone'; icone.textContent = texto(item.icone, '🧯');
+      const selo = document.createElement('span'); selo.className = 'selo'; selo.textContent = texto(item.selo, abrivel ? 'DISPONÍVEL' : 'EM BREVE');
+      topo.append(icone, selo);
+
+      const titulo = document.createElement('h2'); titulo.textContent = texto(item.titulo, 'Módulo SAR');
+      const descricao = document.createElement('p'); descricao.textContent = texto(item.descricao, 'Ferramenta técnica do SAR Engenharia.');
+      const rodape = document.createElement('div'); rodape.className = 'rodape';
+      const versao = document.createElement('span'); versao.className = 'versao'; versao.textContent = item.versao ? `Versão ${item.versao}` : '';
+      const acao = document.createElement('a'); acao.className = 'acao'; acao.textContent = texto(item.texto_botao, abrivel ? 'Acessar módulo' : 'Em breve');
+      acao.href = abrivel ? texto(item.rota, '#') : '#';
+      if (!abrivel) acao.setAttribute('aria-disabled', 'true');
+      rodape.append(versao, acao); article.append(topo, titulo, descricao, rodape);
+      return article;
+    }
+
+    async function carregar() {
+      try {
+        const { data, error } = await db.from('vw_sar_modulos_incendio_catalogo').select('*').order('ordem_menu', { ascending: true });
+        if (error) throw error;
+        if (!data?.length) {
+          estado.textContent = 'Nenhum módulo está publicado nesta central no momento.';
+          return;
+        }
+        cards.replaceChildren(...data.map(criarCard));
+        estado.hidden = true; cards.hidden = false;
+      } catch (erro) {
+        console.error('Falha ao carregar catálogo:', erro);
+        estado.className = 'erro';
+        estado.textContent = `Não foi possível carregar os módulos. ${erro?.message || 'Verifique a conexão e tente novamente.'}`;
+      }
+    }
+    carregar();
+  </script>
+</body>
+</html>
