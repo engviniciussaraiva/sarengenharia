@@ -924,6 +924,85 @@
       border-top:1px solid var(--linha);
     }
 
+    /* Módulos: visão administrativa compacta */
+    #painel-modulos .cabecalho{
+      align-items:center;
+      margin-bottom:14px;
+      padding:18px 20px;
+      border:1px solid var(--linha);
+      border-radius:14px;
+      background:linear-gradient(135deg,#fff 0%,#f4f8f7 100%);
+    }
+
+    #painel-modulos .cabecalho h1{font-size:27px}
+    #painel-modulos .cabecalho .subtitulo{margin-top:4px}
+
+    #painel-modulos .modulos-ajuda{
+      margin-bottom:12px;
+      border:1px solid var(--linha);
+      border-radius:10px;
+      background:#fff;
+    }
+
+    #painel-modulos .modulos-ajuda summary{
+      padding:11px 14px;
+      color:var(--sar);
+      font-size:13px;
+      font-weight:700;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    #painel-modulos .modulos-ajuda-conteudo{
+      padding:0 14px 13px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.6;
+    }
+
+    #painel-modulos .resumo{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(120px,1fr));
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    #painel-modulos .resumo .card{
+      min-height:0;
+      padding:11px 14px;
+      border-radius:10px;
+      box-shadow:none;
+    }
+
+    #painel-modulos .resumo .card span{font-size:11px}
+    #painel-modulos .resumo .card strong{margin-top:2px;font-size:22px}
+
+    #painel-modulos .modulos-filtros{
+      grid-template-columns:minmax(280px,1fr) 200px;
+      align-items:end;
+      margin-bottom:12px;
+      padding:10px 12px;
+    }
+
+    .secao-formulario{
+      grid-column:1/-1;
+      margin:8px 0 0;
+      padding:12px 0 2px;
+      border-top:1px solid var(--linha);
+      color:var(--sar);
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    .ajuda-campo{
+      display:block;
+      margin-top:5px;
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.4;
+    }
+
 
     /* Ajustes da tabela de módulos */
     #painel-modulos{
@@ -983,6 +1062,7 @@
       .modulos-filtros{
         grid-template-columns:1fr;
       }
+      #painel-modulos .resumo{grid-template-columns:repeat(2,1fr)}
     }
 
     @media(max-width:900px){
@@ -2026,23 +2106,13 @@
           </div>
         </header>
 
-        <section class="pagina-ajuda">
-          <article class="pagina-ajuda-card">
-            <h2>O que esta página faz</h2>
-            <p>Cadastra e mantém os módulos, abas, ferramentas, rotas e regras de publicação do SAR.</p>
-            <ul>
-              <li>Criar e editar módulos</li><li>Definir rota, ícone e categoria</li><li>Controlar exibição no menu e no site</li>
-            </ul>
-          </article>
-          <aside class="pagina-ajuda-card">
-            <h2>Impacto no sistema</h2>
-            <div class="pagina-ajuda-meta">
-              <div><span>Área</span><strong>Estrutura funcional</strong></div>
-              <div><span>Nível</span><strong>Administração</strong></div>
-              <div><span>Alterações</span><strong>Aplicadas no SAR</strong></div>
-            </div>
-          </aside>
-        </section>
+        <details class="modulos-ajuda">
+          <summary>Como funciona esta área</summary>
+          <div class="modulos-ajuda-conteudo">
+            Cadastre e edite módulos, defina a hierarquia, a rota e onde cada item será exibido.
+            Alterações salvas aqui são aplicadas à estrutura do SAR.
+          </div>
+        </details>
 
         <section class="resumo">
           <div class="card"><span>Total</span><strong id="totalModulos">0</strong></div>
@@ -2454,9 +2524,39 @@
           <label for="moduloStatusDesenvolvimento">Status de desenvolvimento</label>
           <select id="moduloStatusDesenvolvimento">
             <option value="disponivel">Disponível</option>
+            <option value="beta">Beta</option>
             <option value="em_desenvolvimento">Em desenvolvimento</option>
+            <option value="em_evolucao">Em evolução</option>
+            <option value="em_breve">Em breve</option>
             <option value="desativado">Desativado</option>
           </select>
+        </div>
+
+        <div class="secao-formulario">Card na Central de módulos</div>
+
+        <div class="campo full">
+          <label for="moduloTituloCard">Título do card</label>
+          <input id="moduloTituloCard" type="text" maxlength="160" placeholder="Se vazio, usa o nome do módulo">
+        </div>
+
+        <div class="campo full">
+          <label for="moduloDescricaoCard">Descrição do card</label>
+          <textarea id="moduloDescricaoCard" placeholder="Resumo comercial exibido na capa"></textarea>
+        </div>
+
+        <div class="campo">
+          <label for="moduloSeloCard">Selo</label>
+          <input id="moduloSeloCard" type="text" maxlength="50" placeholder="DISPONÍVEL">
+        </div>
+
+        <div class="campo">
+          <label for="moduloVersao">Versão</label>
+          <input id="moduloVersao" type="text" maxlength="30" placeholder="V31">
+        </div>
+
+        <div class="campo full">
+          <label for="moduloTextoBotao">Texto do botão</label>
+          <input id="moduloTextoBotao" type="text" maxlength="80" value="Acessar módulo">
         </div>
       </div>
 
@@ -2499,6 +2599,22 @@
             <small>Identifica uma funcionalidade ainda não liberada.</small>
           </span>
           <input id="moduloEmBreve" type="checkbox">
+        </label>
+
+        <label class="switch-row">
+          <span>
+            <strong>Exibir como card</strong>
+            <small>Mostra este item na Central de módulos do módulo-pai.</small>
+          </span>
+          <input id="moduloExibirCatalogo" type="checkbox">
+        </label>
+
+        <label class="switch-row">
+          <span>
+            <strong>Comercializável</strong>
+            <small>Permite liberar ou vender este módulo individualmente.</small>
+          </span>
+          <input id="moduloComercializavel" type="checkbox">
         </label>
       </section>
 
@@ -2767,11 +2883,18 @@
       moduloOrdemMenu: document.getElementById("moduloOrdemMenu"),
       moduloOrdem: document.getElementById("moduloOrdem"),
       moduloStatusDesenvolvimento: document.getElementById("moduloStatusDesenvolvimento"),
+      moduloTituloCard: document.getElementById("moduloTituloCard"),
+      moduloDescricaoCard: document.getElementById("moduloDescricaoCard"),
+      moduloSeloCard: document.getElementById("moduloSeloCard"),
+      moduloVersao: document.getElementById("moduloVersao"),
+      moduloTextoBotao: document.getElementById("moduloTextoBotao"),
       moduloAtivo: document.getElementById("moduloAtivo"),
       moduloExibirMenu: document.getElementById("moduloExibirMenu"),
       moduloExibirSite: document.getElementById("moduloExibirSite"),
       moduloDestaqueSite: document.getElementById("moduloDestaqueSite"),
       moduloEmBreve: document.getElementById("moduloEmBreve"),
+      moduloExibirCatalogo: document.getElementById("moduloExibirCatalogo"),
+      moduloComercializavel: document.getElementById("moduloComercializavel"),
       estadoModuloEdicao: document.getElementById("estadoModuloEdicao"),
       btnFecharDrawerModulo: document.getElementById("btnFecharDrawerModulo"),
       btnCancelarModulo: document.getElementById("btnCancelarModulo"),
@@ -3940,11 +4063,18 @@
       elementos.moduloOrdemMenu.value = "0";
       elementos.moduloOrdem.value = "0";
       elementos.moduloStatusDesenvolvimento.value = "disponivel";
+      elementos.moduloTituloCard.value = "";
+      elementos.moduloDescricaoCard.value = "";
+      elementos.moduloSeloCard.value = "";
+      elementos.moduloVersao.value = "";
+      elementos.moduloTextoBotao.value = "Acessar módulo";
       elementos.moduloAtivo.checked = true;
       elementos.moduloExibirMenu.checked = true;
       elementos.moduloExibirSite.checked = false;
       elementos.moduloDestaqueSite.checked = false;
       elementos.moduloEmBreve.checked = false;
+      elementos.moduloExibirCatalogo.checked = false;
+      elementos.moduloComercializavel.checked = false;
     }
 
     function abrirEdicaoModulo(id = null){
@@ -3971,11 +4101,18 @@
         elementos.moduloOrdem.value = Number(item.ordem || 0);
         elementos.moduloStatusDesenvolvimento.value =
           item.status_desenvolvimento || "disponivel";
+        elementos.moduloTituloCard.value = item.titulo_card || "";
+        elementos.moduloDescricaoCard.value = item.descricao_card || "";
+        elementos.moduloSeloCard.value = item.selo_card || "";
+        elementos.moduloVersao.value = item.versao || "";
+        elementos.moduloTextoBotao.value = item.texto_botao || "Acessar módulo";
         elementos.moduloAtivo.checked = item.ativo === true;
         elementos.moduloExibirMenu.checked = item.exibir_menu_logado === true;
         elementos.moduloExibirSite.checked = item.exibir_site_publico === true;
         elementos.moduloDestaqueSite.checked = item.destaque_site === true;
         elementos.moduloEmBreve.checked = item.em_breve === true;
+        elementos.moduloExibirCatalogo.checked = item.exibir_catalogo === true;
+        elementos.moduloComercializavel.checked = item.comercializavel === true;
       }else{
         elementos.drawerModuloTitulo.textContent = "Novo módulo";
         limparFormularioModulo();
@@ -4079,6 +4216,26 @@
         if(error){
           throw new Error(
             error.message || "Não foi possível salvar o módulo."
+          );
+        }
+
+        const { error: erroCatalogo } = await supabase.rpc(
+          "sar_admin_salvar_catalogo_modulo",
+          {
+            p_codigo:codigo,
+            p_exibir_catalogo:elementos.moduloExibirCatalogo.checked,
+            p_titulo_card:elementos.moduloTituloCard.value.trim() || null,
+            p_descricao_card:elementos.moduloDescricaoCard.value.trim() || null,
+            p_selo_card:elementos.moduloSeloCard.value.trim() || null,
+            p_texto_botao:elementos.moduloTextoBotao.value.trim() || "Acessar módulo",
+            p_versao:elementos.moduloVersao.value.trim() || null,
+            p_comercializavel:elementos.moduloComercializavel.checked
+          }
+        );
+
+        if(erroCatalogo){
+          throw new Error(
+            erroCatalogo.message || "O módulo foi salvo, mas os dados do card não foram atualizados."
           );
         }
 
