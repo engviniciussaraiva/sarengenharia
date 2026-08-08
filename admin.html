@@ -2621,6 +2621,7 @@
       <div id="estadoModuloEdicao" class="estado"></div>
 
       <div class="drawer-acoes">
+        <button id="btnExcluirModulo" class="btn danger" type="button" hidden>Excluir módulo</button>
         <button id="btnCancelarModulo" class="btn" type="button">Cancelar</button>
         <button id="btnSalvarModulo" class="btn primary" type="button">Salvar módulo</button>
       </div>
@@ -2897,6 +2898,7 @@
       moduloComercializavel: document.getElementById("moduloComercializavel"),
       estadoModuloEdicao: document.getElementById("estadoModuloEdicao"),
       btnFecharDrawerModulo: document.getElementById("btnFecharDrawerModulo"),
+      btnExcluirModulo: document.getElementById("btnExcluirModulo"),
       btnCancelarModulo: document.getElementById("btnCancelarModulo"),
       btnSalvarModulo: document.getElementById("btnSalvarModulo"),
 
@@ -4089,6 +4091,7 @@
 
       if(item){
         elementos.drawerModuloTitulo.textContent = "Editar módulo";
+        elementos.btnExcluirModulo.hidden = false;
         elementos.moduloNome.value = item.modulo || "";
         elementos.moduloCodigo.value = item.codigo || "";
         elementos.moduloIcone.value = item.icone || "";
@@ -4115,6 +4118,7 @@
         elementos.moduloComercializavel.checked = item.comercializavel === true;
       }else{
         elementos.drawerModuloTitulo.textContent = "Novo módulo";
+        elementos.btnExcluirModulo.hidden = true;
         limparFormularioModulo();
         preencherModulosPai();
       }
@@ -4259,6 +4263,75 @@
       }finally{
         elementos.btnSalvarModulo.disabled = false;
         elementos.btnSalvarModulo.textContent = "Salvar módulo";
+      }
+    }
+
+    async function excluirModulo(){
+      if(!moduloEdicaoId) return;
+
+      const item = modulosCache.find(
+        (modulo) => modulo.id === moduloEdicaoId
+      );
+
+      if(!item) return;
+
+      const possuiFilhos = modulosCache.some(
+        (modulo) => modulo.modulo_pai === moduloEdicaoId
+      );
+
+      if(possuiFilhos){
+        definirEstado(
+          elementos.estadoModuloEdicao,
+          "Este módulo possui submódulos. Exclua ou mova os submódulos antes de continuar.",
+          true
+        );
+        return;
+      }
+
+      const confirmar = window.confirm(
+        `Excluir definitivamente o módulo "${item.modulo || item.codigo}"?\n\nEsta ação não poderá ser desfeita.`
+      );
+
+      if(!confirmar) return;
+
+      elementos.btnExcluirModulo.disabled = true;
+      elementos.btnExcluirModulo.textContent = "Excluindo...";
+      elementos.btnSalvarModulo.disabled = true;
+      definirEstado(elementos.estadoModuloEdicao,"Excluindo módulo...");
+
+      try{
+        const { data, error } = await supabase
+          .from("sar_modulos")
+          .delete()
+          .eq("id",moduloEdicaoId)
+          .select("id")
+          .maybeSingle();
+
+        if(error){
+          throw new Error(
+            error.message || "Não foi possível excluir o módulo."
+          );
+        }
+
+        if(!data){
+          throw new Error(
+            "O módulo não foi excluído. Verifique a permissão de exclusão no Supabase."
+          );
+        }
+
+        await carregarModulos();
+        fecharEdicaoModulo();
+
+      }catch(error){
+        definirEstado(
+          elementos.estadoModuloEdicao,
+          error instanceof Error ? error.message : String(error),
+          true
+        );
+      }finally{
+        elementos.btnExcluirModulo.disabled = false;
+        elementos.btnExcluirModulo.textContent = "Excluir módulo";
+        elementos.btnSalvarModulo.disabled = false;
       }
     }
 
@@ -5005,6 +5078,7 @@
     elementos.pesquisaModulos.addEventListener("input",filtrarModulos);
     elementos.filtroStatusModulo.addEventListener("change",filtrarModulos);
     elementos.btnFecharDrawerModulo.addEventListener("click",fecharEdicaoModulo);
+    elementos.btnExcluirModulo.addEventListener("click",excluirModulo);
     elementos.btnCancelarModulo.addEventListener("click",fecharEdicaoModulo);
     elementos.btnSalvarModulo.addEventListener("click",salvarModulo);
 
