@@ -4300,12 +4300,12 @@
       definirEstado(elementos.estadoModuloEdicao,"Excluindo módulo...");
 
       try{
-        const { data, error } = await supabase
-          .from("sar_modulos")
-          .delete()
-          .eq("id",moduloEdicaoId)
-          .select("id")
-          .maybeSingle();
+        const { data, error } = await supabase.rpc(
+          "sar_admin_excluir_modulo",
+          {
+            p_id:moduloEdicaoId
+          }
+        );
 
         if(error){
           throw new Error(
@@ -4313,14 +4313,12 @@
           );
         }
 
-        if(!data){
-          throw new Error(
-            "O módulo não foi excluído. Verifique a permissão de exclusão no Supabase."
-          );
-        }
-
         await carregarModulos();
         fecharEdicaoModulo();
+
+        alert(
+          data?.mensagem || "Módulo excluído com sucesso."
+        );
 
       }catch(error){
         definirEstado(
