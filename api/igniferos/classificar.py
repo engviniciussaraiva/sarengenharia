@@ -9,9 +9,9 @@ from urllib.request import Request, urlopen
 # usadas pelo cliente Supabase no navegador. As variáveis da Vercel continuam
 # tendo prioridade, mas estes valores evitam indisponibilidade quando o runtime
 # de uma implantação não recebe a configuração do projeto.
-SUPABASE_URL = os.environ.get(
-    "SUPABASE_URL",
-    "https://bjtxbpmrmhfvpmdsthxr.supabase.co",
+SUPABASE_URL = (
+    os.environ.get("SUPABASE_URL")
+    or "https://bjtxbpmrmhfvpmdsthxr.supabase.co"
 ).strip().rstrip("/")
 SUPABASE_ANON_KEY = (
     os.environ.get("SUPABASE_ANON_KEY")
