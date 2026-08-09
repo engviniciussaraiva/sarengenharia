@@ -19,6 +19,7 @@ SUPABASE_ANON_KEY = (
     or "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM"
 ).strip()
 CODIGO_MODULO = "PRODUTOS_IGNIFEROS"
+LIMITE_PRESSAO_VAPOR_MMHG = 2068.6
 
 
 def resposta_json(handler, status, payload):
@@ -136,7 +137,48 @@ class handler(BaseHTTPRequestHandler):
             dados = json.loads(self.rfile.read(tamanho).decode("utf-8"))
             ponto_fulgor = numero(dados.get("ponto_fulgor"), "ponto de fulgor", True)
             ponto_ebulicao = numero(dados.get("ponto_ebulicao"), "ponto de ebulição")
-            numero(dados.get("pressao_vapor"), "pressão de vapor")
+            pressao_vapor = numero(dados.get("pressao_vapor"), "pressão de vapor")
+            pressao_vapor_confirmada = dados.get("pressao_vapor_confirmada") is True
+
+            if ponto_fulgor < 37.8:
+                if pressao_vapor is not None and pressao_vapor >= LIMITE_PRESSAO_VAPOR_MMHG:
+                    resposta_json(self, 422, {
+                        "classificado": False,
+                        "erro": "pressao_vapor_fora_limite",
+                        "mensagem": (
+                            "Não classificado pela Tabela 1.1: a pressão de vapor "
+                            "deve ser inferior a 2.068,6 mmHg para líquidos Classe I."
+                        ),
+                    })
+                    return
+                if not pressao_vapor_confirmada:
+                    resposta_json(self, 422, {
+                        "classificado": False,
+                        "erro": "pressao_vapor_nao_confirmada",
+                        "mensagem": (
+                            "Confirme, conforme a FDS/FISPQ, que a pressão de vapor "
+                            "é inferior a 2.068,6 mmHg."
+                        ),
+                    })
+                    return
+
+            if ponto_fulgor < 22.8 and ponto_ebulicao is None:
+                resposta_json(self, 422, {
+                    "classificado": False,
+                    "erro": "ponto_ebulicao_obrigatorio",
+                    "mensagem": (
+                        "Informe o ponto de ebulição para distinguir as classes IA e IB."
+                    ),
+                })
+                return
+
+            # Dados que não participam da classe devem ser ignorados, mesmo que
+            # um cliente antigo ainda os envie.
+            if ponto_fulgor >= 37.8:
+                pressao_vapor = None
+                pressao_vapor_confirmada = False
+            if ponto_fulgor >= 22.8:
+                ponto_ebulicao = None
 
             # Valida o JWT diretamente no Supabase Auth.
             requisicao_supabase("/auth/v1/user", token)
