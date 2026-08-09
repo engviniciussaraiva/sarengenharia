@@ -5,8 +5,19 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
-SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "")
+# A URL e a publishable key não são segredos: são as mesmas credenciais públicas
+# usadas pelo cliente Supabase no navegador. As variáveis da Vercel continuam
+# tendo prioridade, mas estes valores evitam indisponibilidade quando o runtime
+# de uma implantação não recebe a configuração do projeto.
+SUPABASE_URL = os.environ.get(
+    "SUPABASE_URL",
+    "https://bjtxbpmrmhfvpmdsthxr.supabase.co",
+).strip().rstrip("/")
+SUPABASE_ANON_KEY = (
+    os.environ.get("SUPABASE_ANON_KEY")
+    or os.environ.get("SUPABASE_PUBLISHABLE_KEY")
+    or "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM"
+).strip()
 CODIGO_MODULO = "PRODUTOS_IGNIFEROS"
 
 
