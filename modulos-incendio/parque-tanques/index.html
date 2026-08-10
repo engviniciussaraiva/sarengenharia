@@ -15,10 +15,12 @@
       <h1>Dimensionamento de Tanques Estacionários</h1>
     </div>
     <div class="actions">
-      <span id="saveState" class="status">Salvo localmente</span>
+      <span id="studyCode" class="status">Estudo ainda não gravado</span>
       <button id="newStudy" class="ghost">Novo estudo</button>
-      <button id="importStudy" class="ghost">Abrir estudo</button>
-      <button id="exportStudy">Salvar estudo</button>
+      <button id="openStudy" class="ghost">Abrir estudo</button>
+      <button id="saveStudy">Salvar estudo</button>
+      <button id="importStudy" class="ghost">Importar JSON</button>
+      <button id="exportStudy" class="ghost">Exportar JSON</button>
       <input id="importFile" type="file" accept=".json" hidden>
     </div>
   </header>
@@ -281,6 +283,51 @@
       </section>
     </section>
   </main>
+  <dialog id="studyDialog" class="study-dialog">
+    <div class="study-dialog-head">
+      <div><small>MEUS ESTUDOS</small><h2>Abrir Tanques Estacionários</h2></div>
+      <button id="cancelStudyDialog" type="button" class="ghost">Cancelar</button>
+    </div>
+    <p id="studyDialogMessage" class="study-dialog-message">Carregando estudos...</p>
+    <div class="study-list-wrap">
+      <table class="study-list-table">
+        <thead><tr><th>Código</th><th>Nome do estudo</th><th>Status</th><th>Atualizado</th><th>Ações</th></tr></thead>
+        <tbody id="studyList"></tbody>
+      </table>
+    </div>
+  </dialog>
+  <style>
+    .study-dialog{width:min(980px,94vw);max-height:82vh;border:0;border-radius:14px;padding:0;box-shadow:0 24px 70px #10271e55;color:#243f34}
+    .study-dialog::backdrop{background:#10271e80}
+    .study-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid #d9e5df;background:#f4f8f6}
+    .study-dialog-head small{font-size:10px;font-weight:800;letter-spacing:.12em;color:#43836b}.study-dialog-head h2{margin:3px 0 0;color:#244d3e}
+    .study-dialog-message{margin:16px 20px;padding:10px 12px;border-left:4px solid #43836b;background:#edf7f2}.study-dialog-message.error{border-color:#b44646;background:#fff2f2;color:#8b3434}
+    .study-list-wrap{overflow:auto;max-height:58vh;padding:0 20px 20px}.study-list-table{min-width:760px}.study-list-table td:last-child{display:flex;gap:7px}.study-list-table .delete-study{background:#fff7f7;color:#a23d3d;border:1px solid #e0b7b7}
+  </style>
   <script src="./js/app.js"></script>
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+    const supabase=createClient("https://bjtxbpmrmhfvpmdsthxr.supabase.co","sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+    const api=window.SARTanques, dialog=document.querySelector('#studyDialog'), list=document.querySelector('#studyList'), message=document.querySelector('#studyDialogMessage'), code=document.querySelector('#studyCode');
+    let currentId=null,currentCode=null,busy=false,metaKey=null;
+    const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    const date=v=>new Date(v).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
+    function setCode(){code.textContent=currentCode?`${currentCode} · gravado no SAR`:'Estudo ainda não gravado'}
+    function remember(){if(metaKey)localStorage.setItem(metaKey,JSON.stringify({id:currentId,code:currentCode}))}
+    function clearCurrent(){currentId=null;currentCode=null;if(metaKey)localStorage.removeItem(metaKey);setCode()}
+    async function user(){const {data,error}=await supabase.auth.getUser();if(error||!data.user)throw new Error('Sua sessão expirou. Entre novamente no SAR.');return data.user}
+    function links(){const q=new URLSearchParams(location.search);return {projeto_id:q.get('projeto_id')||null,imovel_id:q.get('imovel_id')||null}}
+    async function saveStudy(){if(busy)return;busy=true;document.querySelector('#saveStudy').disabled=true;try{await user();const payload={nome_estudo:api.name()||'Novo estudo',dados_estudo:api.get(),versao_estrutura:1,versao_motor:'prototipo-local-v1'};let result;if(currentId)result=await supabase.from('sar_tec_tanques_estudos').update(payload).eq('id',currentId).select('id,codigo_estudo').single();else result=await supabase.from('sar_tec_tanques_estudos').insert({...payload,...links()}).select('id,codigo_estudo').single();if(result.error)throw result.error;currentId=result.data.id;currentCode=result.data.codigo_estudo;remember();setCode();alert(`Estudo ${currentCode} salvo com sucesso.`)}catch(e){alert(`Não foi possível salvar o estudo.\n${e.message||e}`)}finally{busy=false;document.querySelector('#saveStudy').disabled=false}}
+    async function loadList(){message.className='study-dialog-message';message.textContent='Carregando estudos...';list.innerHTML='';try{await user();const {data,error}=await supabase.from('sar_tec_tanques_estudos').select('id,codigo_estudo,nome_estudo,status,atualizado_em').neq('status','arquivado').order('atualizado_em',{ascending:false});if(error)throw error;if(!data.length){message.textContent='Você ainda não possui estudos gravados.';return}message.textContent=`${data.length} estudo(s) encontrado(s).`;list.innerHTML=data.map(x=>`<tr><td><b>${esc(x.codigo_estudo)}</b></td><td>${esc(x.nome_estudo)}</td><td>${esc(x.status.replace('_',' '))}</td><td>${date(x.atualizado_em)}</td><td><button data-open="${x.id}">Abrir</button><button class="delete-study" data-delete="${x.id}" data-code="${esc(x.codigo_estudo)}">Excluir</button></td></tr>`).join('')}catch(e){message.className='study-dialog-message error';message.textContent=e.message||String(e)}}
+    async function openStudy(id){const {data,error}=await supabase.from('sar_tec_tanques_estudos').select('id,codigo_estudo,dados_estudo').eq('id',id).single();if(error)throw error;api.set(data.dados_estudo);currentId=data.id;currentCode=data.codigo_estudo;remember();setCode();dialog.close()}
+    async function deleteStudy(id,studyCode){if(!confirm(`Excluir definitivamente o estudo ${studyCode}?`))return;const {error}=await supabase.from('sar_tec_tanques_estudos').delete().eq('id',id);if(error){alert(`Não foi possível excluir.\n${error.message}`);return}if(currentId===id)clearCurrent();await loadList()}
+    document.querySelector('#saveStudy').onclick=saveStudy;
+    document.querySelector('#newStudy').onclick=()=>{if(confirm('Criar novo estudo? Os dados não gravados serão substituídos.')){api.reset();clearCurrent()}};
+    document.querySelector('#openStudy').onclick=()=>{dialog.showModal();loadList()};document.querySelector('#cancelStudyDialog').onclick=()=>dialog.close();
+    dialog.addEventListener('cancel',e=>{e.preventDefault();dialog.close()});dialog.addEventListener('click',e=>{if(e.target===dialog)e.preventDefault()});
+    list.onclick=async e=>{const open=e.target.closest('[data-open]'),del=e.target.closest('[data-delete]');try{if(open)await openStudy(open.dataset.open);if(del)await deleteStudy(del.dataset.delete,del.dataset.code)}catch(err){message.className='study-dialog-message error';message.textContent=err.message||String(err)}};
+    window.addEventListener('sar-tanques-json-importado',clearCurrent);
+    (async()=>{try{const u=await user();metaKey=`sar.tanques.estudo.aberto.${u.id}`;const saved=JSON.parse(localStorage.getItem(metaKey)||'null');if(saved?.id){currentId=saved.id;currentCode=saved.code}}catch{}setCode()})();
+  </script>
 </body>
 </html>
