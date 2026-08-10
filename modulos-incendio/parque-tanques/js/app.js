@@ -644,8 +644,13 @@ $('#copyProductData').onclick=()=>{const source=state.tanks[0];state.tanks.slice
 $('#copyBaseData').onclick=()=>{const source=state.tanks[0];state.tanks.slice(1).forEach(t=>['baseShape','baseDiameter','baseHeight','baseVolume','baseVolumeManual'].forEach(k=>t[k]=source[k]));save();renderAll()};
 $('#copyPrimaryFoamData').onclick=()=>{const source=state.tanks[0];state.tanks.slice(1).forEach(t=>['foamApplicationType','foamRate','foamTime','lgePercent','equipmentModel','chamberCount','proportionerModel'].forEach(k=>t[k]=source[k]));save();renderAll()};
 $('#addBasin').onclick=()=>{const n=system.basins.length+1,b=newBasin({meta:{...state.meta,basin:`Bacia ${String(n).padStart(2,'0')}`,park:state.meta.park}});system.basins.push(b);activateBasin(b.id)};
-$('#newStudy').onclick=()=>{if(confirm('Criar novo estudo? O estudo local atual será substituído.')){const first=newBasin();system={version:31,id:uid(),activeBasinId:first.id,basins:[first],isolationRules:{}};state=first;bindStatic();save();renderAll()}};
 $('#exportStudy').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(system,null,2)],{type:'application/json'}));a.download=`sar-sistema-${state.meta.name.replace(/\W+/g,'-').toLowerCase()}.json`;a.click();URL.revokeObjectURL(a.href)};
-$('#importStudy').onclick=()=>$('#importFile').click();$('#importFile').onchange=async e=>{try{system=normalizeSystem(JSON.parse(await e.target.files[0].text()));state=system.basins.find(b=>b.id===system.activeBasinId)||system.basins[0];bindStatic();save();renderAll()}catch{alert('Arquivo JSON inválido.')}};
+$('#importStudy').onclick=()=>$('#importFile').click();$('#importFile').onchange=async e=>{try{system=normalizeSystem(JSON.parse(await e.target.files[0].text()));state=system.basins.find(b=>b.id===system.activeBasinId)||system.basins[0];bindStatic();save();renderAll();window.dispatchEvent(new CustomEvent('sar-tanques-json-importado'))}catch{alert('Arquivo JSON inválido.')}finally{e.target.value=''}};
 $$('[data-doc]').forEach(b=>b.onclick=()=>renderDocs(b.dataset.doc));
 bindStatic();if(!state.tanks.length)state.tanks=[tank()];renderAll();
+window.SARTanques={
+  get:()=>structuredClone(system),
+  name:()=>state?.meta?.name||'Novo estudo',
+  set:raw=>{system=normalizeSystem(raw);state=system.basins.find(b=>b.id===system.activeBasinId)||system.basins[0];selectedScenario=null;bindStatic();save();renderAll()},
+  reset:()=>{const first=newBasin();system={version:31,id:uid(),activeBasinId:first.id,basins:[first],isolationRules:{}};state=first;selectedScenario=null;bindStatic();save();renderAll()}
+};
