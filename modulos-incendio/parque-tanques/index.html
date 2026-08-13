@@ -327,7 +327,7 @@
     dialog.addEventListener('cancel',e=>{e.preventDefault();dialog.close()});dialog.addEventListener('click',e=>{if(e.target===dialog)e.preventDefault()});
     list.onclick=async e=>{const open=e.target.closest('[data-open]'),del=e.target.closest('[data-delete]');try{if(open)await openStudy(open.dataset.open);if(del)await deleteStudy(del.dataset.delete,del.dataset.code)}catch(err){message.className='study-dialog-message error';message.textContent=err.message||String(err)}};
     window.addEventListener('sar-tanques-json-importado',clearCurrent);
-    (async()=>{try{const u=await user();metaKey=`sar.tanques.estudo.aberto.${u.id}`;const saved=JSON.parse(localStorage.getItem(metaKey)||'null');if(saved?.id){currentId=saved.id;currentCode=saved.code}}catch{}setCode()})();
+    (async()=>{try{const u=await user();metaKey=`sar.tanques.estudo.aberto.${u.id}`;localStorage.removeItem(metaKey)}catch{}clearCurrent()})();
   </script>
 </body>
 </html>
