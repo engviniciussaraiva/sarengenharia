@@ -39,7 +39,7 @@ function prepareNumericInput(el,commit){
 }
 const STORAGE='sar.parque.tanques.mvp.v1';
 const SYSTEM_STORAGE='sar.parque.tanques.multibacia.v31';
-const defaults={meta:{name:'Tanques Estacionários — Teste',reference:'',responsible:'Vinicius Saraiva',park:'Parque 01',basin:'Bacia 01'},basin:{type:'around',width:0,length:0,area:0,areaManual:false,precipitation:0,recurrenceTime:0,rain:.15,freeboard:0,isolation:0,secondaryFoamRate:0,secondaryMinimumFlow:0,secondaryLineCount:1,secondaryFoamTime:0,secondaryLgePercent:3},tanks:[],distances:{}};
+const defaults={meta:{name:'Novo estudo',reference:'',responsible:'',park:'Parque 01',basin:'Bacia 01'},basin:{type:'around',width:0,length:0,area:0,areaManual:false,precipitation:0,recurrenceTime:0,rain:.15,freeboard:0,isolation:0,secondaryFoamRate:0,secondaryMinimumFlow:0,secondaryLineCount:1,secondaryFoamTime:0,secondaryLgePercent:3},tanks:[],distances:{}};
 let state,system,selectedScenario=null;
 function tank(i={}){return {id:uid(),tag:'TQ1',orientation:'vertical',installation:'apoiado',roofType:'fixo',diameter:0,height:0,length:0,usefulVolume:0,baseShape:'circular',baseDiameter:0,baseHeight:0,baseVolume:0,baseVolumeManual:false,product:'',family:'hidrocarboneto',flashPoint:0,boilingPoint:0,vaporPressure:0,liquidClass:'',foamApplicationType:'camera',foamRate:0,foamTime:0,foamArea:0,lgePercent:3,lgeReserveLiters:0,equipmentModel:'',chamberCount:0,proportionerModel:'',lineCount:0,lineFlow:200,lineTime:0,coolingMethod:'aspersao',coolingOwnRate:2,coolingNeighborRate:2,coolingNeighborRates:{},coolingTime:0,requiredPressure:0,...i}}
 function pairKey(a,b){return [a.id,b.id].sort().join('|')}
@@ -652,5 +652,15 @@ window.SARTanques={
   get:()=>structuredClone(system),
   name:()=>state?.meta?.name||'Novo estudo',
   set:raw=>{system=normalizeSystem(raw);state=system.basins.find(b=>b.id===system.activeBasinId)||system.basins[0];selectedScenario=null;bindStatic();save();renderAll()},
-  reset:()=>{const first=newBasin();system={version:31,id:uid(),activeBasinId:first.id,basins:[first],isolationRules:{}};state=first;selectedScenario=null;bindStatic();save();renderAll()}
+  reset:()=>{
+    localStorage.removeItem(SYSTEM_STORAGE);
+    localStorage.removeItem(STORAGE);
+    const first=newBasin();
+    system={version:31,id:uid(),activeBasinId:first.id,basins:[first],isolationRules:{}};
+    state=first;
+    selectedScenario=null;
+    bindStatic();
+    save();
+    renderAll();
+  }
 };
