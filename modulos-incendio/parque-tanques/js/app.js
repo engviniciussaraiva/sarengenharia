@@ -62,7 +62,6 @@ function normalizeState(raw){
 function newBasin(seed={}){
   const next=normalizeState({...structuredClone(defaults),...seed});
   next.id=seed.id||uid();
-  if(!next.tanks.length)next.tanks=[tank()];
   return next;
 }
 function normalizeSystem(raw){
@@ -312,7 +311,7 @@ function field(t,k,type='number',cls='required',extra=''){
   return `<input class="${cls}" data-id="${t.id}" data-key="${k}" type="${numeric?'text':type}" ${numeric?`inputmode="${integer?'numeric':'decimal'}" data-numeric="true" data-integer="${integer}"`:''} value="${value}" ${extra}>`
 }
 function renderTanks(){
-  $('#tankCount').value=state.tanks.length||1;
+  $('#tankCount').value=state.tanks.length;
   $('#tankTable').innerHTML=`<thead><tr><th>Tanque</th><th>Orientação</th><th>Instalação</th><th>Tipo de teto</th><th>Diâmetro (m)</th><th>Altura (m)</th><th>Comprimento (m)</th><th>Volume útil máximo (m³)</th><th>Área de projeção</th><th>Área do costado</th><th>Ações</th></tr></thead><tbody>`+state.tanks.map(t=>`<tr>
   <td>${field(t,'tag','text')}</td>
   <td><select class="required" data-id="${t.id}" data-key="orientation"><option value="vertical" ${t.orientation==='vertical'?'selected':''}>Vertical</option><option value="horizontal" ${t.orientation==='horizontal'?'selected':''}>Horizontal</option></select></td>
