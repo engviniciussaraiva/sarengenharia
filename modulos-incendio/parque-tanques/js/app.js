@@ -66,9 +66,9 @@ function newBasin(seed={}){
   return next;
 }
 function normalizeSystem(raw){
-  if(raw?.basins?.length){
+  if(Array.isArray(raw?.basins)){
     const next={version:31,id:raw.id||uid(),activeBasinId:raw.activeBasinId,basins:raw.basins.map(b=>newBasin(b)),isolationRules:{...(raw.isolationRules||{})}};
-    if(!next.basins.some(b=>b.id===next.activeBasinId))next.activeBasinId=next.basins[0].id;
+    if(!next.basins.some(b=>b.id===next.activeBasinId))next.activeBasinId=next.basins[0]?.id||null;
     return next;
   }
   if(raw&&typeof raw==='object'){
@@ -85,8 +85,7 @@ function loadSystem(){
    * A abertura direta do módulo deve começar como estudo livre e vazio.
    * Estudos gravados são recuperados exclusivamente pelo comando Abrir estudo.
    */
-  const first=newBasin();
-  return {version:31,id:uid(),activeBasinId:first.id,basins:[first],isolationRules:{}};
+  return {version:31,id:uid(),activeBasinId:null,basins:[],isolationRules:{}};
 }
 function activateBasin(id){
   const next=system.basins.find(b=>b.id===id);if(!next)return;
@@ -100,7 +99,7 @@ function save(renderManager=true){
   const status=$('#saveState');if(status){status.textContent='Salvo agora';setTimeout(()=>status.textContent='Salvo localmente',900)}
 }
 system=loadSystem();
-state=system.basins.find(b=>b.id===system.activeBasinId)||system.basins[0];
+state=system.basins.find(b=>b.id===system.activeBasinId)||system.basins[0]||newBasin();
 function classify(t){
   const pf=num(t.flashPoint), pe=num(t.boilingPoint);
   if(!t.product) return '—';
@@ -186,25 +185,35 @@ function cloneBasin(source){
 }
 function renderBasinManager(){
   const host=$('#basinManagerList');if(!host)return;
+  const hasBasins=system.basins.length>0;
+  $('#tabs').style.display=hasBasins?'':'none';
+  $$('.tab').forEach(el=>el.style.display=hasBasins?'':'none');
+  if(!hasBasins){
+    host.innerHTML='<div class="empty-basin-state"><b>Nenhuma bacia cadastrada.</b><span>Clique em “+ Adicionar bacia” para começar o estudo.</span></div>';
+    return;
+  }
   host.innerHTML=system.basins.map((b,index)=>`<article class="basin-chip ${b.id===system.activeBasinId?'active':''}" data-open-basin="${b.id}">
     <b>${b.meta.basin||`Bacia ${index+1}`}</b>
     <small>${b.tanks.length} tanque(s) · ${b.meta.park||'Sem parque'}</small>
     <div class="basin-chip-actions">
       <button type="button" title="Copiar esta bacia" data-copy-basin="${b.id}">Copiar</button>
-      <button type="button" class="danger-action" title="${system.basins.length>1?'Excluir esta bacia':'Adicione outra bacia antes de excluir esta'}" data-delete-basin="${b.id}" ${system.basins.length>1?'':'disabled'}>Excluir</button>
+      <button type="button" class="danger-action" title="Excluir esta bacia" data-delete-basin="${b.id}">Excluir</button>
     </div>
   </article>`).join('');
   $$('[data-open-basin]').forEach(el=>el.onclick=e=>{if(e.target.closest('button'))return;activateBasin(el.dataset.openBasin)});
   $$('[data-copy-basin]').forEach(el=>el.onclick=e=>{e.stopPropagation();const source=system.basins.find(b=>b.id===el.dataset.copyBasin);if(!source)return;const copy=cloneBasin(source);system.basins.push(copy);activateBasin(copy.id)});
   $$('[data-delete-basin]').forEach(el=>el.onclick=e=>{
     e.stopPropagation();
-    if(el.disabled)return;
     const target=system.basins.find(b=>b.id===el.dataset.deleteBasin);
     if(!target||!confirm(`Excluir ${target.meta.basin||'esta bacia'} e todos os seus tanques, cálculos e cenários?\n\nEsta ação não pode ser desfeita.`))return;
     system.basins=system.basins.filter(b=>b.id!==target.id);
     system.isolationRules=Object.fromEntries(Object.entries(system.isolationRules).filter(([key])=>!key.split('|').includes(target.id)));
     const next=system.basins.find(b=>b.id===system.activeBasinId)||system.basins[0];
-    activateBasin(next.id);
+    if(next)activateBasin(next.id);
+    else{
+      system.activeBasinId=null;state=newBasin();selectedScenario=null;
+      save(false);renderBasinManager();
+    }
   });
 }
 function renderBasinIsolation(){
@@ -646,17 +655,16 @@ $('#addBasin').onclick=()=>{const n=system.basins.length+1,b=newBasin({meta:{...
 $('#exportStudy').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(system,null,2)],{type:'application/json'}));a.download=`sar-sistema-${state.meta.name.replace(/\W+/g,'-').toLowerCase()}.json`;a.click();URL.revokeObjectURL(a.href)};
 $('#importStudy').onclick=()=>$('#importFile').click();$('#importFile').onchange=async e=>{try{system=normalizeSystem(JSON.parse(await e.target.files[0].text()));state=system.basins.find(b=>b.id===system.activeBasinId)||system.basins[0];bindStatic();save();renderAll();window.dispatchEvent(new CustomEvent('sar-tanques-json-importado'))}catch{alert('Arquivo JSON inválido.')}finally{e.target.value=''}};
 $$('[data-doc]').forEach(b=>b.onclick=()=>renderDocs(b.dataset.doc));
-bindStatic();if(!state.tanks.length)state.tanks=[tank()];renderAll();
+bindStatic();renderAll();
 window.SARTanques={
   get:()=>structuredClone(system),
   name:()=>state?.meta?.name||'Novo estudo',
-  set:raw=>{system=normalizeSystem(raw);state=system.basins.find(b=>b.id===system.activeBasinId)||system.basins[0];selectedScenario=null;bindStatic();save();renderAll()},
+  set:raw=>{system=normalizeSystem(raw);state=system.basins.find(b=>b.id===system.activeBasinId)||system.basins[0]||newBasin();selectedScenario=null;bindStatic();save();renderAll()},
   reset:()=>{
     localStorage.removeItem(SYSTEM_STORAGE);
     localStorage.removeItem(STORAGE);
-    const first=newBasin();
-    system={version:31,id:uid(),activeBasinId:first.id,basins:[first],isolationRules:{}};
-    state=first;
+    system={version:31,id:uid(),activeBasinId:null,basins:[],isolationRules:{}};
+    state=newBasin();
     selectedScenario=null;
     bindStatic();
     save();
