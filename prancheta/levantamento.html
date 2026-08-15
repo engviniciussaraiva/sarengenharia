@@ -1,0 +1,74 @@
+<nav class="module-strip" aria-label="Ferramentas da Prancheta">
+  <button class="module-btn active" data-view="visao" type="button">
+    <span class="module-status"></span>
+    <span class="module-icon">▦</span>
+    <span class="module-label">Visão Geral</span>
+  </button>
+
+  <button class="module-btn" data-view="desenho" type="button">
+    <span class="module-status"></span>
+    <span class="module-icon">📐</span>
+    <span class="module-label">Desenho</span>
+  </button>
+
+  <button class="module-btn" data-view="arquitetura" type="button">
+    <span class="module-status"></span>
+    <span class="module-icon">🏠</span>
+    <span class="module-label">Arquitetura</span>
+  </button>
+
+  <button class="module-btn" data-view="incendio" type="button">
+    <span class="module-status"></span>
+    <span class="module-icon">🔥</span>
+    <span class="module-label">Símbolos de Incêndio</span>
+  </button>
+
+  <button class="module-btn" data-view="camadas" type="button">
+    <span class="module-status"></span>
+    <span class="module-icon">▱</span>
+    <span class="module-label">Camadas</span>
+  </button>
+
+  <button class="module-btn" data-view="propriedades" type="button">
+    <span class="module-status"></span>
+    <span class="module-icon">⚙️</span>
+    <span class="module-label">Propriedades</span>
+  </button>
+
+  <button class="module-btn" data-view="importar" type="button">
+    <span class="module-status"></span>
+    <span class="module-icon">📥</span>
+    <span class="module-label">Importar</span>
+  </button>
+
+  <button class="module-btn" data-view="exportar" type="button">
+    <span class="module-status"></span>
+    <span class="module-icon">📤</span>
+    <span class="module-label">Exportar</span>
+  </button>
+</nav>
+
+<section class="workspace" id="workspace">
+  <div class="empty">
+    <div class="empty-mark">📐</div>
+
+    <h2>Comece criando ou abrindo um desenho</h2>
+
+    <p>
+      Use o painel recolhível à direita para acessar
+      <strong>Meus Desenhos</strong>. Quando um desenho for aberto,
+      todas as paredes, aberturas, símbolos e configurações serão
+      mantidos dentro do mesmo arquivo da Prancheta.
+    </p>
+
+    <button
+      class="primary"
+      type="button"
+      onclick="solicitarAcao('novo')"
+    >
+      Criar novo desenho
+    </button>
+
+    <div class="notice" id="notice"></div>
+  </div>
+</section>
