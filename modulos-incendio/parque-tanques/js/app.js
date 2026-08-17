@@ -48,8 +48,8 @@ function prepareOptionalNumericInput(el,commit){
 const STORAGE='sar.parque.tanques.mvp.v1';
 const SYSTEM_STORAGE='sar.parque.tanques.multibacia.v31';
 const defaults={meta:{name:'',reference:'',responsible:'',park:'',basin:''},basin:{type:'around',width:0,length:0,area:0,areaManual:false,precipitation:0,recurrenceTime:0,rain:0,freeboard:0,isolation:0,secondaryFoamRate:0,secondaryMinimumFlow:0,secondaryLineCount:1,secondaryFoamTime:0,secondaryLgePercent:3},tanks:[],distances:{}};
-let state,system,selectedScenario=null,productCatalog=[];
-function tank(i={}){return {id:uid(),tag:'TQ1',orientation:'vertical',installation:'apoiado',roofType:'fixo',diameter:0,height:0,length:0,usefulVolume:0,baseShape:'circular',baseDiameter:0,baseHeight:0,baseVolume:0,baseVolumeManual:false,productId:null,product:'',productScientificName:'',productSource:'',flashPoint:null,boilingPoint:null,vaporPressure:null,vaporPressureConfirmed:false,liquidClass:'',miscibilityWater:'',foamGroup:'',classificationRuleVersion:'',storageTemperature:25,storageTemperatureAssumed:true,foamApplicationType:'camera',foamRate:0,foamTime:0,foamArea:0,lgePercent:3,lgeReserveLiters:0,equipmentModel:'',chamberCount:0,proportionerModel:'',lineCount:0,lineFlow:200,lineTime:0,coolingMethod:'aspersao',coolingOwnRate:2,coolingNeighborRate:2,coolingNeighborRates:{},coolingTime:0,requiredPressure:0,...i}}
+let state,system,selectedScenario=null,productCatalog=[],thermalClassifier=null;
+function tank(i={}){return {id:uid(),tag:'TQ1',orientation:'vertical',installation:'apoiado',roofType:'fixo',diameter:0,height:0,length:0,usefulVolume:0,baseShape:'circular',baseDiameter:0,baseHeight:0,baseVolume:0,baseVolumeManual:false,productId:null,product:'',productScientificName:'',productSource:'',flashPoint:null,boilingPoint:null,vaporPressure:null,vaporPressureConfirmed:false,liquidClass:'',miscibilityWater:'',foamGroup:'',classificationRuleVersion:'',storageTemperature:25,storageTemperatureAssumed:true,scenarioClass:'',thermalMessages:[],thermalRuleVersion:'',thermalPending:false,thermalError:'',foamApplicationType:'camera',foamRate:0,foamTime:0,foamArea:0,lgePercent:3,lgeReserveLiters:0,equipmentModel:'',chamberCount:0,proportionerModel:'',lineCount:0,lineFlow:200,lineTime:0,coolingMethod:'aspersao',coolingOwnRate:2,coolingNeighborRate:2,coolingNeighborRates:{},coolingTime:0,requiredPressure:0,...i}}
 function pairKey(a,b){return [a.id,b.id].sort().join('|')}
 function coordinateShellDistance(a,b){return Math.max(0,Math.hypot(num(a.x)-num(b.x),num(a.y)-num(b.y))-(num(a.diameter)+num(b.diameter))/2)}
 function normalizeState(raw){
@@ -113,15 +113,26 @@ function classify(t){
 function normativeThermalAssessment(t){
   if(!t.productId)return {adoptedClass:t.liquidClass||'',level:'muted',label:'Selecione o produto',messages:[]};
   if(t.storageTemperatureAssumed)return {adoptedClass:t.liquidClass||'',level:'ok',label:'Classe original mantida',messages:[]};
-  const temperature=parseNumber(t.storageTemperature),flashPoint=parseNumber(t.flashPoint),original=String(t.liquidClass||'').toUpperCase().replace(/\s/g,'');
-  if(temperature===null)return {adoptedClass:t.liquidClass||'',level:'bad',label:'Informar temperatura',messages:['Temperatura máxima de armazenamento não informada.']};
-  const messages=[],atOrAboveFlash=flashPoint!==null&&temperature>=flashPoint;
-  let adoptedClass=t.liquidClass||'';
-  if(atOrAboveFlash){adoptedClass='I';messages.push(`Temperatura adotada (${fmt(temperature)} °C) igual ou superior ao ponto de fulgor (${fmt(flashPoint)} °C): aplicar requisitos de líquido Classe I.`)}
-  else if(original==='IIIB'&&temperature>=60){adoptedClass='IIIA';messages.push('Líquido Classe IIIB aquecido a 60 °C ou mais: aplicar requisitos de Classe IIIA.')}
-  if(temperature>=100)messages.push('Produto armazenado a 100 °C ou mais: condição crítica; verificar a vedação normativa ao sistema fixo de aplicação de espuma e a proteção por linhas manuais/canhões-monitores.');
-  const critical=temperature>=100||atOrAboveFlash;
-  return {adoptedClass,level:critical?'bad':messages.length?'muted':'ok',label:critical?'Condição crítica':messages.length?'Revisar premissa':'Condição normal',messages};
+  if(t.thermalPending)return {adoptedClass:t.scenarioClass||t.liquidClass||'',level:'muted',label:'Calculando',messages:['Reclassificação em processamento pela Vercel.']};
+  if(t.thermalError)return {adoptedClass:t.liquidClass||'',level:'bad',label:'Falha na classificação',messages:[t.thermalError]};
+  return {adoptedClass:t.scenarioClass||t.liquidClass||'',level:'ok',label:'Classificado',messages:Array.isArray(t.thermalMessages)?t.thermalMessages:[]};
+}
+async function reclassifyTankTemperature(target){
+  if(!target?.productId||target.storageTemperatureAssumed)return;
+  target.thermalPending=true;target.thermalError='';save(false);renderTanks();
+  try{
+    if(typeof thermalClassifier!=='function')throw new Error('O classificador térmico da Vercel não foi inicializado.');
+    const result=await thermalClassifier({produto_id:target.productId,temperatura_considerada_c:target.storageTemperature});
+    target.scenarioClass=result.classe_cenario||target.liquidClass||'';
+    target.thermalMessages=Array.isArray(result.avisos)?result.avisos:[];
+    target.thermalRuleVersion=result.versao_regra||'';
+  }catch(error){
+    target.scenarioClass=target.liquidClass||'';target.thermalMessages=[];
+    target.thermalError=error instanceof Error?error.message:String(error);
+    alert(`Não foi possível reclassificar ${target.tag}.\n${target.thermalError}`);
+  }finally{
+    target.thermalPending=false;save(false);renderTanks();renderResults();
+  }
 }
 const escapeText=v=>String(v??'').replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll("'",'&#39;').replaceAll('<','&lt;').replaceAll('>','&gt;');
 const miscibilityLabel=v=>({nao_miscivel:'Não miscível',miscivel:'Miscível',parcialmente_miscivel:'Parcialmente miscível',nao_identificado:'Não identificado'}[v]||'—');
@@ -334,7 +345,7 @@ function selectProductForTank(tankId,productId){
   const target=state.tanks.find(t=>t.id===tankId);if(!target)return;
   const product=productCatalog.find(p=>String(p.id)===String(productId));
   if(!product){
-    Object.assign(target,{productId:null,product:'',productScientificName:'',productSource:'',flashPoint:null,boilingPoint:null,vaporPressure:null,vaporPressureConfirmed:false,liquidClass:'',miscibilityWater:'',foamGroup:'',classificationRuleVersion:'',storageTemperature:25,storageTemperatureAssumed:true});
+    Object.assign(target,{productId:null,product:'',productScientificName:'',productSource:'',flashPoint:null,boilingPoint:null,vaporPressure:null,vaporPressureConfirmed:false,liquidClass:'',miscibilityWater:'',foamGroup:'',classificationRuleVersion:'',storageTemperature:25,storageTemperatureAssumed:true,scenarioClass:'',thermalMessages:[],thermalRuleVersion:'',thermalPending:false,thermalError:''});
   }else{
     Object.assign(target,{
       productId:product.id,
@@ -350,7 +361,9 @@ function selectProductForTank(tankId,productId){
       foamGroup:product.grupo_espuma||'pendente',
       classificationRuleVersion:product.versao_regra_classificacao||'',
       storageTemperature:25,
-      storageTemperatureAssumed:true
+      storageTemperatureAssumed:true,
+      scenarioClass:product.classe_calculada||product.classe||'',
+      thermalMessages:[],thermalRuleVersion:'',thermalPending:false,thermalError:''
     });
   }
   save();renderAll();
@@ -388,7 +401,9 @@ function renderTanks(){
   $$('[data-product-tank]').forEach(el=>el.onchange=()=>selectProductForTank(el.dataset.productTank,el.value));
   $$('[data-storage-temperature]').forEach(el=>prepareOptionalNumericInput(el,value=>{
     const target=state.tanks.find(t=>t.id===el.dataset.storageTemperature);if(!target)return;
-    target.storageTemperature=value;target.storageTemperatureAssumed=false;save();renderTanks();renderResults();
+    target.storageTemperature=value;target.storageTemperatureAssumed=false;
+    target.scenarioClass='';target.thermalMessages=[];target.thermalRuleVersion='';target.thermalError='';
+    save(false);renderTanks();renderResults();reclassifyTankTemperature(target);
   }));
   $('#baseTable').innerHTML=`<thead><tr><th>Tanque</th><th>Formato da base</th><th>Diâmetro (m)</th><th>Altura (m)</th><th>Volume calculado (m³)</th><th>Volume adotado (m³)</th></tr></thead><tbody>`+state.tanks.map(t=>{const calculated=Math.PI*num(t.baseDiameter)**2/4*num(t.baseHeight);return `<tr><td><b>${t.tag}</b></td><td><select class="required" data-id="${t.id}" data-key="baseShape"><option value="circular" ${t.baseShape==='circular'?'selected':''}>Circular</option><option value="outro" ${t.baseShape==='outro'?'selected':''}>Outro formato</option></select></td><td>${t.baseShape==='circular'?field(t,'baseDiameter'):'<span class="muted">Informe o volume</span>'}</td><td>${t.baseShape==='circular'?field(t,'baseHeight'):'<span class="muted">Não se aplica</span>'}</td><td class="calc">${t.baseShape==='circular'?fmt(calculated)+' m³':'—'}</td><td>${field(t,'baseVolume','number','required','data-base-volume')}</td></tr>`}).join('')+'</tbody>';
   bindTableInputs($('#baseTable'));
@@ -728,6 +743,7 @@ window.SARTanques={
   name:()=>state?.meta?.name||'Novo estudo',
   set:raw=>{system=normalizeSystem(raw);state=system.basins.find(b=>b.id===system.activeBasinId)||system.basins[0]||newBasin();selectedScenario=null;bindStatic();save();renderAll()},
   setProducts:products=>{productCatalog=Array.isArray(products)?products:[];renderTanks()},
+  setThermalClassifier:classifier=>{thermalClassifier=typeof classifier==='function'?classifier:null},
   reset:()=>{
     localStorage.removeItem(SYSTEM_STORAGE);
     localStorage.removeItem(STORAGE);
