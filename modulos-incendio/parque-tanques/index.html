@@ -90,7 +90,7 @@
         </details>
 
         <details class="step-card" open>
-          <summary><span>3</span><div><b>Produto armazenado</b><small>Os dados serão vinculados ao futuro banco de produtos</small></div></summary>
+          <summary><span>3</span><div><b>Produto armazenado</b><small>Selecione o produto na Biblioteca Técnica e informe a condição de armazenamento no tanque</small></div></summary>
           <div class="step-body">
             <div class="table-wrap"><table id="productTable"></table></div>
             <div id="sameProductPrompt" class="copy-prompt" hidden>
@@ -316,6 +316,13 @@
     function remember(){if(metaKey)localStorage.setItem(metaKey,JSON.stringify({id:currentId,code:currentCode}))}
     function clearCurrent(){currentId=null;currentCode=null;if(metaKey)localStorage.removeItem(metaKey);setCode()}
     async function user(){const {data,error}=await supabase.auth.getUser();if(error||!data.user)throw new Error('Sua sessão expirou. Entre novamente no SAR.');return data.user}
+    async function loadProducts(){
+      await user();
+      const fields='id,nome_comercial,nome_cientifico,ponto_fulgor,ponto_ebulicao,pressao_vapor,pressao_vapor_confirmada,miscibilidade_agua,grupo_espuma,fonte_referencia,classe,classe_calculada,versao_regra_classificacao,origem,usuario_id';
+      const {data,error}=await supabase.from('sar_tec_igniferos_produtos').select(fields).order('nome_comercial',{ascending:true});
+      if(error)throw new Error(`Não foi possível carregar a Biblioteca Técnica: ${error.message}`);
+      api.setProducts(data||[]);
+    }
     function links(){const q=new URLSearchParams(location.search);return {projeto_id:q.get('projeto_id')||null,imovel_id:q.get('imovel_id')||null}}
     async function saveStudy(){if(busy)return;busy=true;document.querySelector('#saveStudy').disabled=true;try{await user();const payload={nome_estudo:api.name()||'Novo estudo',dados_estudo:api.get(),versao_estrutura:1,versao_motor:'prototipo-local-v1'};let result;if(currentId)result=await supabase.from('sar_tec_tanques_estudos').update(payload).eq('id',currentId).select('id,codigo_estudo').single();else result=await supabase.from('sar_tec_tanques_estudos').insert({...payload,...links()}).select('id,codigo_estudo').single();if(result.error)throw result.error;currentId=result.data.id;currentCode=result.data.codigo_estudo;remember();setCode();alert(`Estudo ${currentCode} salvo com sucesso.`)}catch(e){alert(`Não foi possível salvar o estudo.\n${e.message||e}`)}finally{busy=false;document.querySelector('#saveStudy').disabled=false}}
     async function loadList(){message.className='study-dialog-message';message.textContent='Carregando estudos...';list.innerHTML='';try{await user();const {data,error}=await supabase.from('sar_tec_tanques_estudos').select('id,codigo_estudo,nome_estudo,status,atualizado_em').neq('status','arquivado').order('atualizado_em',{ascending:false});if(error)throw error;if(!data.length){message.textContent='Você ainda não possui estudos gravados.';return}message.textContent=`${data.length} estudo(s) encontrado(s).`;list.innerHTML=data.map(x=>`<tr><td><b>${esc(x.codigo_estudo)}</b></td><td>${esc(x.nome_estudo)}</td><td>${esc(x.status.replace('_',' '))}</td><td>${date(x.atualizado_em)}</td><td><button data-open="${x.id}">Abrir</button><button class="delete-study" data-delete="${x.id}" data-code="${esc(x.codigo_estudo)}">Excluir</button></td></tr>`).join('')}catch(e){message.className='study-dialog-message error';message.textContent=e.message||String(e)}}
@@ -327,7 +334,7 @@
     dialog.addEventListener('cancel',e=>{e.preventDefault();dialog.close()});dialog.addEventListener('click',e=>{if(e.target===dialog)e.preventDefault()});
     list.onclick=async e=>{const open=e.target.closest('[data-open]'),del=e.target.closest('[data-delete]');try{if(open)await openStudy(open.dataset.open);if(del)await deleteStudy(del.dataset.delete,del.dataset.code)}catch(err){message.className='study-dialog-message error';message.textContent=err.message||String(err)}};
     window.addEventListener('sar-tanques-json-importado',clearCurrent);
-    (async()=>{try{const u=await user();metaKey=`sar.tanques.estudo.aberto.${u.id}`;localStorage.removeItem(metaKey)}catch{}clearCurrent()})();
+    (async()=>{try{const u=await user();metaKey=`sar.tanques.estudo.aberto.${u.id}`;localStorage.removeItem(metaKey);await loadProducts()}catch(error){console.error(error);alert(error.message||String(error))}clearCurrent()})();
   </script>
 </body>
 </html>
