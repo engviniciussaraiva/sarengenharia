@@ -13,7 +13,7 @@ const fmt=(v,d=2)=>(parseNumber(v)??0).toLocaleString('pt-BR',{minimumFractionDi
 const INTEGER_KEYS=new Set(['chamberCount','lineCount']);
 const NUMERIC_TANK_KEYS=new Set([
   'diameter','height','length','usefulVolume','baseDiameter','baseHeight','baseVolume',
-  'flashPoint','boilingPoint','vaporPressure','foamRate','foamTime','foamArea','lgePercent',
+  'foamRate','foamTime','foamArea','lgePercent',
   'lgeReserveLiters','chamberCount','lineCount','lineFlow','lineTime','coolingOwnRate',
   'coolingNeighborRate','coolingTime','requiredPressure'
 ]);
@@ -37,11 +37,19 @@ function prepareNumericInput(el,commit){
   };
   el.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();el.blur()}};
 }
+function prepareOptionalNumericInput(el,commit){
+  el.type='text';el.inputMode='decimal';el.autocomplete='off';
+  if(el.value!=='')el.value=inputNumberValue(el.value);
+  el.onfocus=()=>{if(el.value!=='')el.value=String(num(el.value)).replace('.',',');el.select()};
+  el.oninput=()=>{el.value=el.value.replace(/[^0-9,.-]/g,'')};
+  el.onblur=()=>{const parsed=parseNumber(el.value);el.value=parsed===null?'':inputNumberValue(parsed);commit?.(parsed)};
+  el.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();el.blur()}};
+}
 const STORAGE='sar.parque.tanques.mvp.v1';
 const SYSTEM_STORAGE='sar.parque.tanques.multibacia.v31';
 const defaults={meta:{name:'',reference:'',responsible:'',park:'',basin:''},basin:{type:'around',width:0,length:0,area:0,areaManual:false,precipitation:0,recurrenceTime:0,rain:0,freeboard:0,isolation:0,secondaryFoamRate:0,secondaryMinimumFlow:0,secondaryLineCount:1,secondaryFoamTime:0,secondaryLgePercent:3},tanks:[],distances:{}};
-let state,system,selectedScenario=null;
-function tank(i={}){return {id:uid(),tag:'TQ1',orientation:'vertical',installation:'apoiado',roofType:'fixo',diameter:0,height:0,length:0,usefulVolume:0,baseShape:'circular',baseDiameter:0,baseHeight:0,baseVolume:0,baseVolumeManual:false,product:'',family:'hidrocarboneto',flashPoint:0,boilingPoint:0,vaporPressure:0,liquidClass:'',foamApplicationType:'camera',foamRate:0,foamTime:0,foamArea:0,lgePercent:3,lgeReserveLiters:0,equipmentModel:'',chamberCount:0,proportionerModel:'',lineCount:0,lineFlow:200,lineTime:0,coolingMethod:'aspersao',coolingOwnRate:2,coolingNeighborRate:2,coolingNeighborRates:{},coolingTime:0,requiredPressure:0,...i}}
+let state,system,selectedScenario=null,productCatalog=[];
+function tank(i={}){return {id:uid(),tag:'TQ1',orientation:'vertical',installation:'apoiado',roofType:'fixo',diameter:0,height:0,length:0,usefulVolume:0,baseShape:'circular',baseDiameter:0,baseHeight:0,baseVolume:0,baseVolumeManual:false,productId:null,product:'',productScientificName:'',productSource:'',flashPoint:null,boilingPoint:null,vaporPressure:null,vaporPressureConfirmed:false,liquidClass:'',miscibilityWater:'',foamGroup:'',classificationRuleVersion:'',storageTemperature:25,storageTemperatureAssumed:true,isLubricatingOil:false,foamApplicationType:'camera',foamRate:0,foamTime:0,foamArea:0,lgePercent:3,lgeReserveLiters:0,equipmentModel:'',chamberCount:0,proportionerModel:'',lineCount:0,lineFlow:200,lineTime:0,coolingMethod:'aspersao',coolingOwnRate:2,coolingNeighborRate:2,coolingNeighborRates:{},coolingTime:0,requiredPressure:0,...i}}
 function pairKey(a,b){return [a.id,b.id].sort().join('|')}
 function coordinateShellDistance(a,b){return Math.max(0,Math.hypot(num(a.x)-num(b.x),num(a.y)-num(b.y))-(num(a.diameter)+num(b.diameter))/2)}
 function normalizeState(raw){
@@ -100,13 +108,29 @@ function save(renderManager=true){
 system=loadSystem();
 state=system.basins.find(b=>b.id===system.activeBasinId)||system.basins[0]||newBasin();
 function classify(t){
-  const pf=num(t.flashPoint), pe=num(t.boilingPoint);
-  if(!t.product) return '—';
-  if(pf<23) return pe<35?'IA':'IB';
-  if(pf<60) return 'IC';
-  if(pf<93) return 'IIIA';
-  return 'IIIB';
+  return t.liquidClass||'—';
 }
+function normativeThermalAssessment(t){
+  if(!t.productId)return {adoptedClass:t.liquidClass||'',level:'muted',label:'Selecione o produto',messages:[]};
+  const temperature=parseNumber(t.storageTemperature),flashPoint=parseNumber(t.flashPoint),original=String(t.liquidClass||'').toUpperCase().replace(/\s/g,'');
+  if(temperature===null)return {adoptedClass:t.liquidClass||'',level:'bad',label:'Informar temperatura',messages:['Temperatura máxima de armazenamento não informada.']};
+  const messages=[],atOrAboveFlash=flashPoint!==null&&temperature>=flashPoint;
+  let adoptedClass=t.liquidClass||'';
+  if(atOrAboveFlash){adoptedClass='I';messages.push(`Temperatura adotada (${fmt(temperature)} °C) igual ou superior ao ponto de fulgor (${fmt(flashPoint)} °C): aplicar requisitos de líquido Classe I.`)}
+  else if(original==='IIIB'&&temperature>=60){adoptedClass='IIIA';messages.push('Líquido Classe IIIB aquecido a 60 °C ou mais: aplicar requisitos de Classe IIIA.')}
+  if(t.isLubricatingOil&&flashPoint!==null&&temperature>=.65*flashPoint&&temperature<=93){
+    if(adoptedClass!=='I')adoptedClass='IIIA';
+    messages.push(`Óleo lubrificante aquecido a pelo menos 65% do ponto de fulgor (${fmt(.65*flashPoint)} °C), sem exceder 93 °C: aplicar requisitos de Classe IIIA.`);
+  }
+  if(temperature>=100)messages.push('Produto armazenado a 100 °C ou mais: condição crítica; verificar a vedação normativa ao sistema fixo de aplicação de espuma e a proteção por linhas manuais/canhões-monitores.');
+  if(t.storageTemperatureAssumed)messages.push('Temperatura de 25 °C adotada inicialmente pelo sistema; confirmar ou alterar conforme a temperatura máxima prevista no tanque.');
+  const critical=temperature>=100||atOrAboveFlash;
+  return {adoptedClass,level:critical?'bad':messages.length?'muted':'ok',label:critical?'Condição crítica':messages.length?'Revisar premissa':'Condição normal',messages};
+}
+const escapeText=v=>String(v??'').replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll("'",'&#39;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+const miscibilityLabel=v=>({nao_miscivel:'Não miscível',miscivel:'Miscível',parcialmente_miscivel:'Parcialmente miscível',nao_identificado:'Não identificado'}[v]||'—');
+const foamGroupLabel=v=>({hidrocarbonetos_nao_misciveis:'Hidrocarbonetos / não miscíveis',solventes_polares:'Solventes polares / miscíveis',pendente:'Pendente'}[v]||'—');
+const technicalValue=(value,unit='')=>value===null||value===undefined||value===''?'—':`${fmt(value)}${unit}`;
 function projection(t){return t.orientation==='vertical'?Math.PI*num(t.diameter)**2/4:num(t.length)*num(t.diameter)}
 function shellArea(t){return t.orientation==='vertical'?Math.PI*num(t.diameter)*num(t.height):projection(t)}
 function roofArea(t){return Math.PI*num(t.diameter)**2/4}
@@ -310,6 +334,32 @@ function field(t,k,type='number',cls='required',extra=''){
   const value=numeric?inputNumberValue(t[k],integer):String(t[k]??'').replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
   return `<input class="${cls}" data-id="${t.id}" data-key="${k}" type="${numeric?'text':type}" ${numeric?`inputmode="${integer?'numeric':'decimal'}" data-numeric="true" data-integer="${integer}"`:''} value="${value}" ${extra}>`
 }
+function selectProductForTank(tankId,productId){
+  const target=state.tanks.find(t=>t.id===tankId);if(!target)return;
+  const product=productCatalog.find(p=>String(p.id)===String(productId));
+  if(!product){
+    Object.assign(target,{productId:null,product:'',productScientificName:'',productSource:'',flashPoint:null,boilingPoint:null,vaporPressure:null,vaporPressureConfirmed:false,liquidClass:'',miscibilityWater:'',foamGroup:'',classificationRuleVersion:'',storageTemperature:25,storageTemperatureAssumed:true,isLubricatingOil:false});
+  }else{
+    Object.assign(target,{
+      productId:product.id,
+      product:product.nome_comercial||'',
+      productScientificName:product.nome_cientifico||'',
+      productSource:product.fonte_referencia||'',
+      flashPoint:product.ponto_fulgor,
+      boilingPoint:product.ponto_ebulicao,
+      vaporPressure:product.pressao_vapor,
+      vaporPressureConfirmed:product.pressao_vapor_confirmada===true,
+      liquidClass:product.classe_calculada||product.classe||'',
+      miscibilityWater:product.miscibilidade_agua||'',
+      foamGroup:product.grupo_espuma||'pendente',
+      classificationRuleVersion:product.versao_regra_classificacao||'',
+      storageTemperature:25,
+      storageTemperatureAssumed:true,
+      isLubricatingOil:false
+    });
+  }
+  save();renderAll();
+}
 function renderTanks(){
   $('#tankCount').value=state.tanks.length;
   $('#tankTable').innerHTML=`<thead><tr><th>Tanque</th><th>Orientação</th><th>Instalação</th><th>Tipo de teto</th><th>Diâmetro (m)</th><th>Altura (m)</th><th>Comprimento (m)</th><th>Volume útil máximo (m³)</th><th>Área de projeção</th><th>Área do costado</th><th>Ações</th></tr></thead><tbody>`+state.tanks.map(t=>`<tr>
@@ -322,8 +372,33 @@ function renderTanks(){
   <td><button type="button" class="danger-action tank-delete" data-delete-tank="${t.id}" title="Excluir ${t.tag||'tanque'}">Excluir</button></td></tr>`).join('')+'</tbody>';
   bindTableInputs($('#tankTable'));
   $$('[data-delete-tank]').forEach(el=>el.onclick=()=>deleteTank(el.dataset.deleteTank));
-  $('#productTable').innerHTML=`<thead><tr><th>Tanque</th><th>Produto</th><th>PF (°C)</th><th>PE (°C)</th><th>PV</th><th>Família</th><th>Classe</th></tr></thead><tbody>`+state.tanks.map(t=>{const classI=/^I[ABC]$/.test(classify(t));return `<tr><td><b>${t.tag}</b></td><td>${field(t,'product','text')}</td><td>${field(t,'flashPoint','number','normative')}</td><td>${classI?field(t,'boilingPoint','number','normative'):'<span class="muted">Não se aplica</span>'}</td><td>${classI?field(t,'vaporPressure','number','normative'):'<span class="muted">Não se aplica</span>'}</td><td><select class="normative" data-id="${t.id}" data-key="family"><option value="hidrocarboneto" ${t.family==='hidrocarboneto'?'selected':''}>Hidrocarboneto</option><option value="solvente polar" ${t.family==='solvente polar'?'selected':''}>Solvente polar</option></select></td><td class="calc">${classify(t)}</td></tr>`}).join('')+'</tbody>';
-  bindTableInputs($('#productTable'));
+  $('#productTable').innerHTML=`<thead><tr><th>Tanque</th><th>Produto da Biblioteca Técnica</th><th>Fonte</th><th>PF (°C)</th><th>PE (°C)</th><th>PV (mmHg)</th><th>Classe original</th><th>Miscibilidade</th><th>Grupo para espuma</th><th>Temperatura máxima adotada (°C)</th><th>Óleo lubrificante?</th><th>Classe no cenário</th><th>Situação normativa</th></tr></thead><tbody>`+state.tanks.map(t=>{
+    const found=productCatalog.some(p=>String(p.id)===String(t.productId));
+    const legacy=t.product&&!found?`<option value="${escapeText(t.productId||'legacy')}" selected>${escapeText(t.product)} — registro do estudo</option>`:'';
+    const options=productCatalog.map(p=>`<option value="${p.id}" ${String(p.id)===String(t.productId)?'selected':''}>${escapeText(p.nome_comercial)}${p.classe?` — Classe ${escapeText(p.classe)}`:''}</option>`).join('');
+    const temperature=t.storageTemperature===null||t.storageTemperature===undefined?'':inputNumberValue(t.storageTemperature);
+    const thermal=normativeThermalAssessment(t);
+    const status=!t.productId?'<span class="muted">Selecione o produto</span>':t.foamGroup==='pendente'?'<span class="bad">Grupo de espuma pendente</span>':`<span class="${thermal.level}" title="${escapeText(thermal.messages.join(' '))}">${thermal.label}</span>`;
+    return `<tr><td><b>${escapeText(t.tag)}</b></td>
+      <td><select class="required" data-product-tank="${t.id}"><option value="">Selecione</option>${legacy}${options}</select></td>
+      <td class="calc" title="${escapeText(t.productSource)}">${escapeText(t.productSource)||'—'}</td>
+      <td class="calc">${technicalValue(t.flashPoint)}</td>
+      <td class="calc">${technicalValue(t.boilingPoint)}</td>
+      <td class="calc">${technicalValue(t.vaporPressure)}</td>
+      <td class="calc"><b>${escapeText(classify(t))}</b></td>
+      <td class="calc">${escapeText(miscibilityLabel(t.miscibilityWater))}</td>
+      <td class="calc">${escapeText(foamGroupLabel(t.foamGroup))}</td>
+      <td>${t.productId?`<input class="required" type="text" inputmode="decimal" data-storage-temperature="${t.id}" value="${temperature}" title="Valor inicial de 25 °C. Altere para a temperatura máxima prevista no tanque."><small class="temperature-helper">${t.storageTemperatureAssumed?'Premissa inicial — revisar':'Informada pelo usuário'}</small>`:'<span class="muted">Selecione o produto</span>'}</td>
+      <td>${t.productId?`<label class="inline-check"><input type="checkbox" data-lubricating-oil="${t.id}" ${t.isLubricatingOil?'checked':''}> Sim</label>`:'—'}</td>
+      <td class="calc"><b>${escapeText(thermal.adoptedClass||'—')}</b></td>
+      <td>${status}</td></tr>`
+  }).join('')+'</tbody>';
+  $$('[data-product-tank]').forEach(el=>el.onchange=()=>selectProductForTank(el.dataset.productTank,el.value));
+  $$('[data-storage-temperature]').forEach(el=>prepareOptionalNumericInput(el,value=>{
+    const target=state.tanks.find(t=>t.id===el.dataset.storageTemperature);if(!target)return;
+    target.storageTemperature=value;target.storageTemperatureAssumed=false;save();renderTanks();renderResults();
+  }));
+  $$('[data-lubricating-oil]').forEach(el=>el.onchange=()=>{const target=state.tanks.find(t=>t.id===el.dataset.lubricatingOil);if(!target)return;target.isLubricatingOil=el.checked;save();renderTanks();renderResults()});
   $('#baseTable').innerHTML=`<thead><tr><th>Tanque</th><th>Formato da base</th><th>Diâmetro (m)</th><th>Altura (m)</th><th>Volume calculado (m³)</th><th>Volume adotado (m³)</th></tr></thead><tbody>`+state.tanks.map(t=>{const calculated=Math.PI*num(t.baseDiameter)**2/4*num(t.baseHeight);return `<tr><td><b>${t.tag}</b></td><td><select class="required" data-id="${t.id}" data-key="baseShape"><option value="circular" ${t.baseShape==='circular'?'selected':''}>Circular</option><option value="outro" ${t.baseShape==='outro'?'selected':''}>Outro formato</option></select></td><td>${t.baseShape==='circular'?field(t,'baseDiameter'):'<span class="muted">Informe o volume</span>'}</td><td>${t.baseShape==='circular'?field(t,'baseHeight'):'<span class="muted">Não se aplica</span>'}</td><td class="calc">${t.baseShape==='circular'?fmt(calculated)+' m³':'—'}</td><td>${field(t,'baseVolume','number','required','data-base-volume')}</td></tr>`}).join('')+'</tbody>';
   bindTableInputs($('#baseTable'));
   $('#sameTankPrompt').hidden=state.tanks.length<2||!num(state.tanks[0]?.diameter);
@@ -599,10 +674,12 @@ function scenarioComparisonTable(ss){
 }
 function renderBasin(){const b=basinCalc();$('#basinMetrics').innerHTML=metric('Área interna',`${fmt(b.area)} m²`)+metric('Área útil efetiva',`${fmt(b.usefulArea)} m²`,`desconto: ${fmt(b.occupied)} m²`)+metric('Volume geométrico exigido',`${fmt(b.required)} m³`)+metric('Altura mínima do dique',`${fmt(b.finalHeight)} m`,'valor mínimo calculado');$('#basinMemory').innerHTML=`<h3>Memória resumida</h3><p>Maior volume útil: <b>${fmt(b.largest)} m³</b></p><p>Maior cenário de combate: <b>${fmt(b.combat)} m³</b>; parcela de 50%: <b>${fmt(.5*b.combat)} m³</b></p><p>Bases: <b>${fmt(b.bases)} m³</b></p><p>Altura hidráulica: ${fmt(b.required)} ÷ ${fmt(b.usefulArea)} = <b>${fmt(b.hydraulicHeight)} m</b></p><p>Altura mínima: ${fmt(b.hydraulicHeight)} + precipitação ${fmt(state.basin.rain)} + borda livre ${fmt(state.basin.freeboard)} = <b>${fmt(b.finalHeight)} m</b></p>`;renderBasinFields()}
 function renderDocs(type){
-  const c=critical(),b=basinCalc(),date=new Date().toLocaleDateString('pt-BR'), rows=state.tanks.map(t=>`<tr><td>${t.tag}</td><td>${t.orientation}</td><td>${fmt(t.diameter)}</td><td>${fmt(t.usefulVolume)}</td><td>${t.product||'—'}</td><td>${classify(t)}</td></tr>`).join('');
+  const c=critical(),b=basinCalc(),date=new Date().toLocaleDateString('pt-BR'), rows=state.tanks.map(t=>{const thermal=normativeThermalAssessment(t);return `<tr><td>${t.tag}</td><td>${t.orientation}</td><td>${fmt(t.diameter)}</td><td>${fmt(t.usefulVolume)}</td><td>${t.product||'—'}</td><td>${classify(t)}</td><td>${fmt(t.storageTemperature)} °C${t.storageTemperatureAssumed?' (premissa inicial)':''}</td><td>${thermal.adoptedClass||'—'}</td></tr>`}).join('');
+  const thermalNotes=state.tanks.flatMap(t=>normativeThermalAssessment(t).messages.map(message=>`<li><b>${escapeText(t.tag)}:</b> ${escapeText(message)}</li>`)).join('')||'<li>Nenhuma alteração normativa decorrente da temperatura adotada.</li>';
   const base=`<div class="doc-header"><p>SAR — SISTEMA AVANÇADO DE RESPOSTA</p><h1>${type==='memory'?'MEMÓRIA DE CÁLCULO':'MEMORIAL DESCRITIVO'}</h1><p>${state.meta.name} · ${state.meta.reference||'Sem referência'} · ${date}</p></div>`;
-  if(type==='memory')$('#documentPreview').innerHTML=base+`<section><h2>1. Identificação</h2><p>Parque: ${state.meta.park}. Bacia: ${state.meta.basin}. Responsável técnico: ${state.meta.responsible}.</p></section><section><h2>2. Tanques</h2><table><tr><th>ID</th><th>Tipo</th><th>Diâmetro (m)</th><th>Volume útil (m³)</th><th>Produto</th><th>Classe</th></tr>${rows}</table></section><section><h2>3. Cenários de incêndio</h2><p>Foram calculados ${c.ss.length} cenários direcionais, considerando cada tanque em chamas e seus vizinhos normativos.</p><p>Reserva crítica: <b>${fmt(c.water.totalVolume)} m³ (${c.water.fire.tag})</b>. Vazão crítica: <b>${fmt(c.flow.totalFlow)} L/min (${c.flow.fire.tag})</b>. LGE crítico: <b>${fmt(c.lge.lgeVolume)} m³ (${c.lge.fire.tag})</b>.</p></section><section><h2>4. Bacia</h2><p>Área útil: ${fmt(b.usefulArea)} m². Volume exigido: ${fmt(b.required)} m³. Altura hidráulica: ${fmt(b.hydraulicHeight)} m. Altura mínima calculada do dique: ${fmt(b.finalHeight)} m.</p></section><section><h2>5. Base normativa</h2><p>IT 25/2025 do CBPMESP, Partes 1, 2 e 3. Documento preliminar gerado pelo motor MVP; taxas e tempos informados devem ser validados pelo responsável técnico.</p></section><div class="signature">_________________________________<br>${state.meta.responsible}<br>Responsável técnico</div>`;
-  else $('#documentPreview').innerHTML=base+`<section><h2>1. Objeto</h2><p>Este memorial descreve os sistemas de proteção contra incêndio previstos para o ${state.meta.park}, composto por ${state.tanks.length} tanque(s) na ${state.meta.basin}.</p></section><section><h2>2. Instalação</h2><table><tr><th>ID</th><th>Tipo</th><th>Diâmetro (m)</th><th>Volume útil (m³)</th><th>Produto</th><th>Classe</th></tr>${rows}</table></section><section><h2>3. Sistemas</h2><p>Os cenários contemplam proteção por solução de espuma no tanque em chamas, linhas suplementares quando indicadas, resfriamento do tanque em chamas e resfriamento dos tanques vizinhos. A operação simultânea governa a seleção de vazão e pressão; os tempos individuais governam as reservas.</p></section><section><h2>4. Bacia de contenção</h2><p>A bacia possui área interna de ${fmt(b.area)} m² e área útil efetiva de ${fmt(b.usefulArea)} m². A altura mínima calculada do dique é ${fmt(b.finalHeight)} m, incluídas as parcelas informadas para precipitação e borda livre.</p></section><section><h2>5. Operação e validação</h2><p>Equipamentos, desempenho hidráulico, compatibilidade do LGE e catálogos deverão integrar o projeto técnico final. Este documento deve ser revisado e assinado pelo responsável técnico.</p></section><div class="signature">_________________________________<br>${state.meta.responsible}<br>Responsável técnico</div>`;
+  const tankTable=`<table><tr><th>ID</th><th>Tipo</th><th>Diâmetro (m)</th><th>Volume útil (m³)</th><th>Produto</th><th>Classe original</th><th>Temperatura máxima</th><th>Classe no cenário</th></tr>${rows}</table>`;
+  if(type==='memory')$('#documentPreview').innerHTML=base+`<section><h2>1. Identificação</h2><p>Parque: ${state.meta.park}. Bacia: ${state.meta.basin}. Responsável técnico: ${state.meta.responsible}.</p></section><section><h2>2. Tanques e condição térmica</h2>${tankTable}<ul>${thermalNotes}</ul></section><section><h2>3. Cenários de incêndio</h2><p>Foram calculados ${c.ss.length} cenários direcionais, considerando cada tanque em chamas e seus vizinhos normativos.</p><p>Reserva crítica: <b>${fmt(c.water.totalVolume)} m³ (${c.water.fire.tag})</b>. Vazão crítica: <b>${fmt(c.flow.totalFlow)} L/min (${c.flow.fire.tag})</b>. LGE crítico: <b>${fmt(c.lge.lgeVolume)} m³ (${c.lge.fire.tag})</b>.</p></section><section><h2>4. Bacia</h2><p>Área útil: ${fmt(b.usefulArea)} m². Volume exigido: ${fmt(b.required)} m³. Altura hidráulica: ${fmt(b.hydraulicHeight)} m. Altura mínima calculada do dique: ${fmt(b.finalHeight)} m.</p></section><section><h2>5. Base normativa</h2><p>IT 25/2025 do CBPMESP, Partes 1, 2 e 3. Documento preliminar gerado pelo motor MVP; taxas, tempos e premissas informadas devem ser validados pelo responsável técnico.</p></section><div class="signature">_________________________________<br>${state.meta.responsible}<br>Responsável técnico</div>`;
+  else $('#documentPreview').innerHTML=base+`<section><h2>1. Objeto</h2><p>Este memorial descreve os sistemas de proteção contra incêndio previstos para o ${state.meta.park}, composto por ${state.tanks.length} tanque(s) na ${state.meta.basin}.</p></section><section><h2>2. Instalação e condição térmica</h2>${tankTable}<ul>${thermalNotes}</ul></section><section><h2>3. Sistemas</h2><p>Os cenários contemplam proteção por solução de espuma no tanque em chamas, linhas suplementares quando indicadas, resfriamento do tanque em chamas e resfriamento dos tanques vizinhos. A operação simultânea governa a seleção de vazão e pressão; os tempos individuais governam as reservas.</p></section><section><h2>4. Bacia de contenção</h2><p>A bacia possui área interna de ${fmt(b.area)} m² e área útil efetiva de ${fmt(b.usefulArea)} m². A altura mínima calculada do dique é ${fmt(b.finalHeight)} m, incluídas as parcelas informadas para precipitação e borda livre.</p></section><section><h2>5. Operação e validação</h2><p>Equipamentos, desempenho hidráulico, compatibilidade do LGE, temperatura máxima prevista e catálogos deverão integrar o projeto técnico final. Este documento deve ser revisado e assinado pelo responsável técnico.</p></section><div class="signature">_________________________________<br>${state.meta.responsible}<br>Responsável técnico</div>`;
 }
 function validationIssues(){
   const sections=new Set();
@@ -647,7 +724,7 @@ $('#tabs').onclick=e=>{const b=e.target.closest('button[data-tab]');if(!b)return
 $('#applyTankCount').onclick=()=>setCount($('#tankCount').value);$('#fireTank').onchange=renderDistances;$('#recalculate').onclick=renderAll;
 $('#openPrecipitationModule').onclick=()=>alert('O módulo de precipitação por localidade e tempo de recorrência será desenvolvido e conectado a este campo.');
 $('#copyTankData').onclick=()=>{const source=state.tanks[0];state.tanks.slice(1).forEach(t=>['orientation','installation','roofType','diameter','height','length','usefulVolume'].forEach(k=>t[k]=source[k]));save();renderAll()};
-$('#copyProductData').onclick=()=>{const source=state.tanks[0];state.tanks.slice(1).forEach(t=>['product','family','flashPoint','boilingPoint','vaporPressure'].forEach(k=>t[k]=source[k]));save();renderAll()};
+$('#copyProductData').onclick=()=>{const source=state.tanks[0];state.tanks.slice(1).forEach(t=>['productId','product','productScientificName','productSource','flashPoint','boilingPoint','vaporPressure','vaporPressureConfirmed','liquidClass','miscibilityWater','foamGroup','classificationRuleVersion'].forEach(k=>t[k]=source[k]));save();renderAll()};
 $('#copyBaseData').onclick=()=>{const source=state.tanks[0];state.tanks.slice(1).forEach(t=>['baseShape','baseDiameter','baseHeight','baseVolume','baseVolumeManual'].forEach(k=>t[k]=source[k]));save();renderAll()};
 $('#copyPrimaryFoamData').onclick=()=>{const source=state.tanks[0];state.tanks.slice(1).forEach(t=>['foamApplicationType','foamRate','foamTime','lgePercent','equipmentModel','chamberCount','proportionerModel'].forEach(k=>t[k]=source[k]));save();renderAll()};
 $('#addBasin').onclick=()=>{const n=system.basins.length+1,b=newBasin({meta:{...state.meta,basin:`Bacia ${String(n).padStart(2,'0')}`,park:state.meta.park}});system.basins.push(b);activateBasin(b.id)};
@@ -659,6 +736,7 @@ window.SARTanques={
   get:()=>structuredClone(system),
   name:()=>state?.meta?.name||'Novo estudo',
   set:raw=>{system=normalizeSystem(raw);state=system.basins.find(b=>b.id===system.activeBasinId)||system.basins[0]||newBasin();selectedScenario=null;bindStatic();save();renderAll()},
+  setProducts:products=>{productCatalog=Array.isArray(products)?products:[];renderTanks()},
   reset:()=>{
     localStorage.removeItem(SYSTEM_STORAGE);
     localStorage.removeItem(STORAGE);
@@ -670,3 +748,4 @@ window.SARTanques={
     renderAll();
   }
 };
+window.addEventListener('sar-tanques-produtos-carregados',event=>window.SARTanques.setProducts(event.detail||[]));
