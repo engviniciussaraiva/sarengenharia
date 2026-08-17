@@ -7,6 +7,8 @@ from http.server import BaseHTTPRequestHandler
 
 
 RULE_VERSION = "IT25-2025-P3-TERMICA-V1"
+DEFAULT_SUPABASE_URL = "https://bjtxbpmrmhfvpmdsthxr.supabase.co"
+DEFAULT_SUPABASE_KEY = "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM"
 
 
 def request_json(url, headers):
@@ -33,10 +35,8 @@ class handler(BaseHTTPRequestHandler):
         self.wfile.write(payload)
 
     def do_POST(self):
-        supabase_url = os.environ.get("SUPABASE_URL", "").rstrip("/")
-        supabase_key = os.environ.get("SUPABASE_ANON_KEY", "")
-        if not supabase_url or not supabase_key:
-            return self.send_json(500, {"classificado": False, "mensagem": "Configuração do servidor incompleta."})
+        supabase_url = os.environ.get("SUPABASE_URL", DEFAULT_SUPABASE_URL).strip().rstrip("/")
+        supabase_key = os.environ.get("SUPABASE_ANON_KEY", DEFAULT_SUPABASE_KEY).strip()
 
         authorization = self.headers.get("Authorization", "")
         if not authorization.startswith("Bearer "):
@@ -107,4 +107,3 @@ class handler(BaseHTTPRequestHandler):
             "avisos": warnings,
             "versao_regra": RULE_VERSION,
         })
-
