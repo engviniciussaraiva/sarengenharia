@@ -47,14 +47,14 @@ function prepareOptionalNumericInput(el,commit){
 }
 const STORAGE='sar.parque.tanques.mvp.v1';
 const SYSTEM_STORAGE='sar.parque.tanques.multibacia.v31';
-const defaults={meta:{name:'',reference:'',responsible:'',park:'',basin:''},basin:{type:'around',width:0,length:0,area:0,areaManual:false,precipitation:0,recurrenceTime:0,rain:0,freeboard:0,isolation:0,secondaryFoamRate:0,secondaryMinimumFlow:0,secondaryLineCount:1,secondaryFoamTime:0,secondaryLgePercent:3},tanks:[],distances:{}};
-let state,system,selectedScenario=null,productCatalog=[],thermalClassifier=null;
+const defaults={meta:{name:'',reference:'',responsible:'',park:'',basin:''},basin:{type:'around',width:0,length:0,area:0,areaManual:false,precipitation:0,recurrenceTime:0,rain:0,freeboard:0,isolation:0,secondaryFoamRate:0,secondaryMinimumFlow:0,secondaryLineCount:1,secondaryFoamTime:0,secondaryLgePercent:3},tanks:[],distances:{},neighborAnalysis:{}};
+let state,system,selectedScenario=null,productCatalog=[],thermalClassifier=null,distanceAnalyzer=null;
 function tank(i={}){return {id:uid(),tag:'TQ1',orientation:'vertical',installation:'apoiado',roofType:'fixo',diameter:0,height:0,length:0,usefulVolume:0,baseShape:'circular',baseDiameter:0,baseHeight:0,baseVolume:0,baseVolumeManual:false,productId:null,product:'',productScientificName:'',productSource:'',flashPoint:null,boilingPoint:null,vaporPressure:null,vaporPressureConfirmed:false,liquidClass:'',miscibilityWater:'',foamGroup:'',classificationRuleVersion:'',storageTemperature:25,storageTemperatureAssumed:true,scenarioClass:'',thermalMessages:[],thermalRuleVersion:'',thermalPending:false,thermalError:'',foamApplicationType:'camera',foamRate:0,foamTime:0,foamArea:0,lgePercent:3,lgeReserveLiters:0,equipmentModel:'',chamberCount:0,proportionerModel:'',lineCount:0,lineFlow:200,lineTime:0,coolingMethod:'aspersao',coolingOwnRate:2,coolingNeighborRate:2,coolingNeighborRates:{},coolingTime:0,requiredPressure:0,...i}}
 function pairKey(a,b){return [a.id,b.id].sort().join('|')}
 function coordinateShellDistance(a,b){return Math.max(0,Math.hypot(num(a.x)-num(b.x),num(a.y)-num(b.y))-(num(a.diameter)+num(b.diameter))/2)}
 function normalizeState(raw){
   const next={...structuredClone(defaults),...(raw||{})};
-  next.meta={...defaults.meta,...(raw?.meta||{})};next.basin={...defaults.basin,...(raw?.basin||{})};next.tanks=(raw?.tanks||[]).map(item=>tank(item));next.distances={...(raw?.distances||{})};
+  next.meta={...defaults.meta,...(raw?.meta||{})};next.basin={...defaults.basin,...(raw?.basin||{})};next.tanks=(raw?.tanks||[]).map(item=>tank(item));next.distances={...(raw?.distances||{})};next.neighborAnalysis={...(raw?.neighborAnalysis||{})};
   Object.keys(defaults.basin).forEach(key=>{
     if(typeof defaults.basin[key]==='number')next.basin[key]=num(next.basin[key]);
   });
@@ -166,11 +166,21 @@ function secondaryFoam(){
 function shellDistance(a,b){return num(state.distances?.[pairKey(a,b)])}
 function neighbor(fire,other){
   if(fire.id===other.id)return false;
-  if(state.distances?.[pairKey(fire,other)]===undefined)return false;
-  if(fire.orientation==='horizontal') return false;
-  return shellDistance(fire,other)<Math.max(1.5*num(fire.diameter),15);
+  return state.neighborAnalysis?.[fire.id]?.[other.id]?.resultado==='vizinho';
 }
 function neighbors(fire){return state.tanks.filter(t=>neighbor(fire,t))}
+async function analyzeAllNeighbors(){
+  if(typeof distanceAnalyzer!=='function'||state.tanks.length<2)return;
+  try{
+    const result=await distanceAnalyzer({
+      tanques:state.tanks.map(t=>({id:t.id,tag:t.tag,orientacao:t.orientation,diametro_m:t.diameter})),
+      distancias:Object.entries(state.distances||{}).map(([key,value])=>{const [tanque_a_id,tanque_b_id]=key.split('|');return {tanque_a_id,tanque_b_id,distancia_costado_costado_m:value}})
+    });
+    state.neighborAnalysis={};
+    (result.analises||[]).forEach(item=>{if(!state.neighborAnalysis[item.tanque_em_chamas_id])state.neighborAnalysis[item.tanque_em_chamas_id]={};state.neighborAnalysis[item.tanque_em_chamas_id][item.tanque_analisado_id]=item});
+    save(false);renderDistances();renderResults();validate();
+  }catch(error){alert(`Não foi possível analisar a vizinhança.\n${error instanceof Error?error.message:String(error)}`)}
+}
 function scenario(fire){
   const ns=neighbors(fire),neighborStorage=ns.reduce((s,t)=>s+num(t.usefulVolume),0),totalRiskVolume=num(fire.usefulVolume)+neighborStorage;
   const ownCooling=fireCoolingArea(fire)*num(fire.coolingOwnRate);
@@ -319,12 +329,13 @@ function bindStatic(){
   const map={studyName:['meta','name'],studyReference:['meta','reference'],responsible:['meta','responsible'],parkName:['meta','park'],basinName:['meta','basin'],basinType:['basin','type'],basinWidth:['basin','width'],basinLength:['basin','length'],precipitation:['basin','precipitation'],recurrenceTime:['basin','recurrenceTime'],rainHeight:['basin','rain'],freeboard:['basin','freeboard'],basinIsolation:['basin','isolation']};
   Object.entries(map).forEach(([id,path])=>{const el=$('#'+id);if(!el)return;const numeric=el.type==='number'||el.dataset.numeric==='true';el.value=state[path[0]][path[1]]??'';if(numeric)prepareNumericInput(el,value=>{state[path[0]][path[1]]=value;save();renderBasinFields();renderResults()});else el.oninput=()=>{state[path[0]][path[1]]=el.value;save();renderBasinFields();renderResults()}})
 }
-function setCount(n){n=Math.max(1,Math.min(100,num(n)));while(state.tanks.length<n)state.tanks.push(tank({tag:`TQ${state.tanks.length+1}`}));state.tanks=state.tanks.slice(0,n);const ids=new Set(state.tanks.map(t=>t.id));state.distances=Object.fromEntries(Object.entries(state.distances||{}).filter(([k])=>k.split('|').every(id=>ids.has(id))));save();renderAll()}
+function setCount(n){n=Math.max(1,Math.min(100,num(n)));while(state.tanks.length<n)state.tanks.push(tank({tag:`TQ${state.tanks.length+1}`}));state.tanks=state.tanks.slice(0,n);const ids=new Set(state.tanks.map(t=>t.id));state.distances=Object.fromEntries(Object.entries(state.distances||{}).filter(([k])=>k.split('|').every(id=>ids.has(id))));state.neighborAnalysis={};save();renderAll()}
 function deleteTank(id){
   const target=state.tanks.find(t=>t.id===id);if(!target)return;
   if(state.tanks.length===1){alert('A bacia precisa manter pelo menos um tanque. Para remover toda a bacia, use Excluir no gerenciador de bacias.');return}
   if(!confirm(`Excluir o tanque ${target.tag||'selecionado'} da ${state.meta.basin||'bacia'}?\n\nAs distâncias, vínculos de vizinhança e cenários deste tanque também serão removidos.`))return;
   state.tanks=state.tanks.filter(t=>t.id!==id);
+  state.neighborAnalysis={};
   state.distances=Object.fromEntries(Object.entries(state.distances||{}).filter(([key])=>!key.split('|').includes(id)));
   state.tanks.forEach(t=>{
     if(!t.coolingNeighborRates)return;
@@ -413,7 +424,7 @@ function renderTanks(){
   renderFireSelect();renderBasinFields();
 }
 function bindTableInputs(root){root.querySelectorAll('[data-id]').forEach(el=>{
-  const commit=value=>{const t=state.tanks.find(x=>x.id===el.dataset.id);t[el.dataset.key]=el.dataset.numeric==='true'?num(value):value;if(el.hasAttribute('data-base-volume'))t.baseVolumeManual=true;if(['baseDiameter','baseHeight'].includes(el.dataset.key)&&!t.baseVolumeManual)t.baseVolume=Math.PI*num(t.baseDiameter)**2/4*num(t.baseHeight);save();renderAll()};
+  const commit=value=>{const t=state.tanks.find(x=>x.id===el.dataset.id);t[el.dataset.key]=el.dataset.numeric==='true'?num(value):value;if(el.hasAttribute('data-base-volume'))t.baseVolumeManual=true;if(['baseDiameter','baseHeight'].includes(el.dataset.key)&&!t.baseVolumeManual)t.baseVolume=Math.PI*num(t.baseDiameter)**2/4*num(t.baseHeight);if(['diameter','orientation'].includes(el.dataset.key))state.neighborAnalysis={};save();renderAll()};
   if(el.dataset.numeric==='true')prepareNumericInput(el,commit);else el.onchange=()=>commit(el.value);
 })}
 function renderBasinFields(){
@@ -429,15 +440,15 @@ function renderDistanceInputMatrix(){
     if(j<i)return `<td class="calc distance-mirror">${value===undefined?'—':fmt(value)} m</td>`;
     return `<td><input class="required distance-input" type="text" inputmode="decimal" data-numeric="true" data-distance-key="${key}" value="${inputNumberValue(value)}" placeholder="0,00 m"></td>`;
   }).join('')}</tr>`).join('')+'</tbody>';
-  $$('[data-distance-key]').forEach(el=>prepareNumericInput(el,value=>{state.distances[el.dataset.distanceKey]=value;save();renderDistances();renderResults();validate()}));
+  $$('[data-distance-key]').forEach(el=>prepareNumericInput(el,value=>{state.distances[el.dataset.distanceKey]=value;state.neighborAnalysis={};save(false);renderDistances();renderResults();validate();analyzeAllNeighbors()}));
 }
 function renderDistances(){
   const fire=state.tanks.find(t=>t.id===$('#fireTank').value)||state.tanks[0];if(!fire)return;
   renderDistanceInputMatrix();
-  const ns=neighbors(fire),others=state.tanks.filter(t=>t.id!==fire.id),diameterReference=1.5*num(fire.diameter),isolationLimit=fire.orientation==='vertical'?Math.max(diameterReference,15):15;
+  const ns=neighbors(fire);
   $('#neighborSummary').textContent=`${ns.length} vizinho(s) de ${Math.max(0,state.tanks.length-1)}`;
-  $('#distanceTable').innerHTML='<thead><tr><th>Tanque analisado</th><th>Costado–costado informado</th><th>Referência pelo diâmetro</th><th>Limite adotado</th><th>Vizinho?</th><th>Justificativa</th></tr></thead><tbody>'+state.tanks.filter(t=>t.id!==fire.id).map(t=>{const diameterReference=1.5*num(fire.diameter),limit=fire.orientation==='vertical'?Math.max(diameterReference,15):15;const key=pairKey(fire,t),has=state.distances?.[key]!==undefined,yes=neighbor(fire,t);return `<tr><td>${t.tag}</td><td>${has?fmt(shellDistance(fire,t))+' m':'Não informado'}</td><td><span class="diameter-reference">1,5 × ${fmt(fire.diameter)} m = <b>${fmt(diameterReference)} m</b></span></td><td><b>${fmt(limit)} m</b></td><td class="${fire.orientation==='horizontal'||!has?'muted':yes?'ok':'bad'}">${fire.orientation==='horizontal'?'PENDENTE':!has?'INFORMAR':yes?'SIM':'NÃO'}</td><td>${fire.orientation==='horizontal'?'Tanque horizontal exige a distância direcional entre o dique e o costado adjacente.':!has?'Preencha a matriz de distâncias.':`distância costado ${yes?'menor':'maior/igual'} ao limite`}</td></tr>`}).join('')+'</tbody>';
-  $('#matrixTable').innerHTML='<thead><tr><th>Em chamas ↓ / Analisado →</th>'+state.tanks.map(t=>`<th>${t.tag}</th>`).join('')+'<th>Total</th></tr></thead><tbody>'+state.tanks.map(f=>`<tr><th>${f.tag}</th>${state.tanks.map(t=>`<td class="${f.id===t.id?'muted':neighbor(f,t)?'ok':'bad'}">${f.id===t.id?'—':neighbor(f,t)?'SIM':'NÃO'}</td>`).join('')}<td><b>${neighbors(f).length}</b></td></tr>`).join('')+'</tbody>';
+  $('#distanceTable').innerHTML='<thead><tr><th>Tanque analisado</th><th>Distância informada</th><th>Referência calculada</th><th>Limite adotado</th><th>Vizinho?</th><th>Justificativa</th></tr></thead><tbody>'+state.tanks.filter(t=>t.id!==fire.id).map(t=>{const key=pairKey(fire,t),has=state.distances?.[key]!==undefined,item=state.neighborAnalysis?.[fire.id]?.[t.id],yes=item?.resultado==='vizinho',pending=!item||item.resultado==='pendente';return `<tr><td>${t.tag}</td><td>${has?fmt(shellDistance(fire,t))+' m':'Não informado'}</td><td>${item?.referencia_calculada_m===null||item?.referencia_calculada_m===undefined?'—':fmt(item.referencia_calculada_m)+' m'}</td><td>${item?.limite_adotado_m===null||item?.limite_adotado_m===undefined?'—':`<b>${fmt(item.limite_adotado_m)} m</b>`}</td><td class="${pending?'muted':yes?'ok':'bad'}">${pending?'PENDENTE':yes?'SIM':'NÃO'}</td><td>${escapeText(item?.justificativa||(!has?'Informe a distância para executar a análise.':'Análise aguardando o motor normativo.'))}</td></tr>`}).join('')+'</tbody>';
+  $('#matrixTable').innerHTML='<thead><tr><th>Em chamas ↓ / Analisado →</th>'+state.tanks.map(t=>`<th>${t.tag}</th>`).join('')+'<th>Total</th></tr></thead><tbody>'+state.tanks.map(f=>`<tr><th>${f.tag}</th>${state.tanks.map(t=>{const item=state.neighborAnalysis?.[f.id]?.[t.id],pending=f.id!==t.id&&(!item||item.resultado==='pendente');return `<td class="${f.id===t.id||pending?'muted':neighbor(f,t)?'ok':'bad'}">${f.id===t.id?'—':pending?'PENDENTE':neighbor(f,t)?'SIM':'NÃO'}</td>`}).join('')}<td><b>${neighbors(f).length}</b></td></tr>`).join('')+'</tbody>';
 }
 function renderProtection(){
   const table=$('#primaryFoamTable');if(!table)return;
@@ -727,7 +738,7 @@ document.addEventListener('keydown',e=>{
 function validate(){renderScenarioReview()}
 function renderAll(){renderTanks();renderDistances();renderProtection();renderResults();renderBasinFields();renderBasinManager();validate();applySequentialTabOrder()}
 $('#tabs').onclick=e=>{const b=e.target.closest('button[data-tab]');if(!b)return;$$('#tabs button').forEach(x=>x.classList.toggle('active',x===b));$$('.tab').forEach(x=>x.classList.toggle('active',x.id===`tab-${b.dataset.tab}`));if(b.dataset.tab==='distancias')renderDistances();if(b.dataset.tab==='espuma')renderProtection();if(b.dataset.tab==='resfriamento')renderScenarioDetail();if(b.dataset.tab==='cenarios')renderCombinedScenarios();if(b.dataset.tab==='bacia')renderBasin();if(b.dataset.tab==='isolamento')renderBasinIsolation();if(b.dataset.tab==='consolidado')renderGlobalConsolidation();applySequentialTabOrder()}
-$('#applyTankCount').onclick=()=>setCount($('#tankCount').value);$('#fireTank').onchange=renderDistances;$('#recalculate').onclick=renderAll;
+$('#applyTankCount').onclick=()=>setCount($('#tankCount').value);$('#fireTank').onchange=renderDistances;$('#recalculate').onclick=analyzeAllNeighbors;
 $('#openPrecipitationModule').onclick=()=>alert('O módulo de precipitação por localidade e tempo de recorrência será desenvolvido e conectado a este campo.');
 $('#copyTankData').onclick=()=>{const source=state.tanks[0];state.tanks.slice(1).forEach(t=>['orientation','installation','roofType','diameter','height','length','usefulVolume'].forEach(k=>t[k]=source[k]));save();renderAll()};
 $('#copyProductData').onclick=()=>{const source=state.tanks[0];state.tanks.slice(1).forEach(t=>['productId','product','productScientificName','productSource','flashPoint','boilingPoint','vaporPressure','vaporPressureConfirmed','liquidClass','miscibilityWater','foamGroup','classificationRuleVersion'].forEach(k=>t[k]=source[k]));save();renderAll()};
@@ -744,6 +755,7 @@ window.SARTanques={
   set:raw=>{system=normalizeSystem(raw);state=system.basins.find(b=>b.id===system.activeBasinId)||system.basins[0]||newBasin();selectedScenario=null;bindStatic();save();renderAll()},
   setProducts:products=>{productCatalog=Array.isArray(products)?products:[];renderTanks()},
   setThermalClassifier:classifier=>{thermalClassifier=typeof classifier==='function'?classifier:null},
+  setDistanceAnalyzer:analyzer=>{distanceAnalyzer=typeof analyzer==='function'?analyzer:null},
   reset:()=>{
     localStorage.removeItem(SYSTEM_STORAGE);
     localStorage.removeItem(STORAGE);
