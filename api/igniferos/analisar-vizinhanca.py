@@ -5,7 +5,7 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler
 
 
-RULE_VERSION = "IT25-2025-P3-26.1-V1"
+RULE_VERSION = "IT25-2025-P3-26.1-SAR-HORIZONTAL-V2"
 DEFAULT_SUPABASE_URL = "https://bjtxbpmrmhfvpmdsthxr.supabase.co"
 DEFAULT_SUPABASE_KEY = "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM"
 
@@ -86,7 +86,8 @@ class handler(BaseHTTPRequestHandler):
                     "justificativa": "",
                 }
                 if orientation == "horizontal":
-                    base["justificativa"] = "Tanque horizontal exige a distância do dique de contenção do tanque em chamas ao costado do tanque adjacente."
+                    base["resultado"] = "cenario_bacia"
+                    base["justificativa"] = "Regra SAR: tanque horizontal em chamas gera aplicação de espuma em toda a bacia, sem resfriamento e sem análise de tanques vizinhos."
                 elif orientation != "vertical" or diameter <= 0:
                     base["justificativa"] = "Informe orientação e diâmetro válido do tanque em chamas."
                 elif distance is None:
@@ -110,4 +111,3 @@ class handler(BaseHTTPRequestHandler):
             "analises": analyses,
             "versao_regra": RULE_VERSION,
         })
-
