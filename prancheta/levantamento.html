@@ -10,7 +10,7 @@
 
   <meta
     name="sar-recurso-codigo"
-    content="PRANCHETA"
+    content="PRANCHETA_LEVANTAMENTO"
   >
 
   <title>Prancheta | SAR</title>
@@ -62,9 +62,7 @@
       margin: 0 auto;
     }
 
-    /* =========================================================
-       CABEÇALHO
-    ========================================================= */
+    /* CABEÇALHO */
 
     .project-head {
       display: flex;
@@ -105,9 +103,7 @@
       white-space: nowrap;
     }
 
-    /* =========================================================
-       CARDS SUPERIORES
-    ========================================================= */
+    /* CARDS SUPERIORES */
 
     .module-strip {
       display: flex;
@@ -175,9 +171,7 @@
       background: #b8e986;
     }
 
-    /* =========================================================
-       ÁREA PRINCIPAL
-    ========================================================= */
+    /* ÁREA PRINCIPAL */
 
     .workspace {
       min-height: 440px;
@@ -245,9 +239,7 @@
       font-size: 14px;
     }
 
-    /* =========================================================
-       PRANCHETA
-    ========================================================= */
+    /* PRANCHETA */
 
     .drawing-layout {
       display: grid;
@@ -259,7 +251,7 @@
       background: #eef3f0;
     }
 
-    /* Barra esquerda */
+    /* BARRA ESQUERDA */
 
     .drawing-toolbar {
       display: flex;
@@ -324,7 +316,7 @@
       line-height: 1.1;
     }
 
-    /* Centro */
+    /* ÁREA CENTRAL */
 
     .drawing-center {
       display: flex;
@@ -377,7 +369,7 @@
       white-space: nowrap;
     }
 
-    /* Área de desenho */
+    /* ÁREA DE DESENHO */
 
     .drawing-stage {
       position: relative;
@@ -424,7 +416,7 @@
       font-size: 16px;
     }
 
-    /* Painel direito */
+    /* PAINEL DIREITO */
 
     .drawing-sidebar {
       padding: 14px;
@@ -483,9 +475,7 @@
       color: #fff;
     }
 
-    /* =========================================================
-       RESPONSIVIDADE
-    ========================================================= */
+    /* RESPONSIVIDADE */
 
     @media (max-width: 950px) {
       .drawing-layout {
@@ -562,7 +552,6 @@
       class="module-strip"
       aria-label="Ferramentas da Prancheta"
     >
-
       <button
         class="module-btn active"
         data-view="visao"
@@ -642,12 +631,9 @@
         <span class="module-icon">📤</span>
         <span class="module-label">Exportar</span>
       </button>
-
     </nav>
 
-    <section class="workspace" id="workspace">
-      <!-- Conteúdo inicial inserido pelo JavaScript -->
-    </section>
+    <section class="workspace" id="workspace"></section>
 
   </main>
 
@@ -917,11 +903,15 @@
       document
         .querySelectorAll(".module-btn")
         .forEach(item => {
-          item.classList.toggle("active", item === botao);
+          item.classList.toggle(
+            "active",
+            item === botao
+          );
         });
 
       const view = botao.dataset.view;
-      const workspace = document.getElementById("workspace");
+      const workspace =
+        document.getElementById("workspace");
 
       workspace.classList.toggle(
         "drawing-mode",
@@ -939,7 +929,8 @@
         return;
       }
 
-      workspace.innerHTML = montarTelaTemporaria(view);
+      workspace.innerHTML =
+        montarTelaTemporaria(view);
     }
 
     function ativarComandosDaPrancheta() {
@@ -947,7 +938,8 @@
         .querySelectorAll("[data-tool]")
         .forEach(botao => {
           botao.addEventListener("click", () => {
-            ferramentaAtual = botao.dataset.tool;
+            ferramentaAtual =
+              botao.dataset.tool;
 
             document
               .querySelectorAll("[data-tool]")
@@ -1138,7 +1130,8 @@
       event => {
         if (
           event.origin !== window.location.origin ||
-          event.data?.tipo !== "sar:prancheta-acao"
+          event.data?.tipo !==
+            "sar:prancheta-acao"
         ) {
           return;
         }
