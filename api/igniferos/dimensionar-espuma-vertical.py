@@ -62,6 +62,8 @@ def calculate(data):
     inertized = data.get("inertizado") is True
     api620 = data.get("api_620") is True
     seal_width = number(data.get("largura_coroa_m"))
+    product_name = str(data.get("produto_armazenado") or "Não informado")
+    requested_method = str(data.get("tipo_aplicacao_adotado") or "").lower()
     messages = []
 
     if str(data.get("orientacao") or "").lower() != "vertical":
@@ -108,6 +110,22 @@ def calculate(data):
                 rate = 6.5
                 duration = {"I": 65, "IA": 65, "IB": 65, "II": 50, "IIIA": 30}.get(adopted_class, 65)
 
+    minimum_method = method
+    if not floating and requested_method in {"camera", "monitor", "manual"}:
+        ranks = {"manual": 1, "monitor": 2, "camera": 3}
+        if ranks[requested_method] >= ranks.get(minimum_method, 1):
+            method = requested_method
+            if polar:
+                rate = 6.9 if method == "camera" else 16
+                duration = 55 if method == "camera" else 65
+            else:
+                rate = 4.1 if method == "camera" else 6.5
+                duration = ({"I": 55, "IA": 55, "IB": 55, "II": 30, "IIIA": 20}.get(adopted_class, 55) if method == "camera" else {"I": 65, "IA": 65, "IB": 65, "II": 50, "IIIA": 30}.get(adopted_class, 65))
+            if method != minimum_method:
+                messages.append(f"Método mínimo indicado: {minimum_method}. Método adotado pelo projetista: {method}.")
+        else:
+            messages.append(f"A opção {requested_method} é inferior ao método mínimo exigido ({minimum_method}) e não foi adotada.")
+
     if api620 and method == "camera":
         method = "monitor" if diameter > 9 else "manual"
         rate = 16 if polar else 6.5
@@ -134,7 +152,7 @@ def calculate(data):
         "volume_solucao_l": round(solution_volume, 6), "dosagem_lge_percentual": lge_percent,
         "lge_combate_l": round(combat_lge, 6), "lge_reserva_l": round(combat_lge, 6),
         "lge_total_l": round(2 * combat_lge, 6), "quantidade_camaras": chamber_count,
-        "avisos": messages, "motivo": "Dimensionamento mínimo conforme IT 25/2025, Parte 3."
+        "avisos": messages, "motivo": f"Diâmetro: {diameter:g} m · Altura: {height:g} m · Produto armazenado: {product_name}"
     }
 
 
