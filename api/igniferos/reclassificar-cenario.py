@@ -35,8 +35,8 @@ class handler(BaseHTTPRequestHandler):
         self.wfile.write(payload)
 
     def do_POST(self):
-        supabase_url = os.environ.get("SUPABASE_URL", DEFAULT_SUPABASE_URL).strip().rstrip("/")
-        supabase_key = os.environ.get("SUPABASE_ANON_KEY", DEFAULT_SUPABASE_KEY).strip()
+        supabase_url = (os.environ.get("SUPABASE_URL") or DEFAULT_SUPABASE_URL).strip().rstrip("/")
+        supabase_key = (os.environ.get("SUPABASE_ANON_KEY") or DEFAULT_SUPABASE_KEY).strip()
 
         authorization = self.headers.get("Authorization", "")
         if not authorization.startswith("Bearer "):
