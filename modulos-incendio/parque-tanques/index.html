@@ -332,6 +332,14 @@
       if(!response.ok||!result.analisado)throw new Error(result.mensagem||`Falha no motor de vizinhança (${response.status}).`);
       return result;
     });
+    api.setVerticalFoamEngine(async payload=>{
+      const {data:{session},error}=await supabase.auth.getSession();
+      if(error||!session?.access_token)throw new Error('Sua sessão expirou. Entre novamente no SAR.');
+      const response=await fetch('/api/igniferos/dimensionar-espuma-vertical',{method:'POST',headers:{'Authorization':`Bearer ${session.access_token}`,'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      let result={};try{result=await response.json()}catch{}
+      if(!response.ok||!result.dimensionado)throw new Error(result.mensagem||`Falha no motor de espuma vertical (${response.status}).`);
+      return result;
+    });
     async function loadProducts(){
       await user();
       const fields='id,nome_comercial,nome_cientifico,ponto_fulgor,ponto_ebulicao,pressao_vapor,pressao_vapor_confirmada,miscibilidade_agua,grupo_espuma,fonte_referencia,classe,classe_calculada,versao_regra_classificacao,origem,usuario_id';
