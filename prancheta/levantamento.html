@@ -10,7 +10,7 @@
 
   <meta
     name="sar-recurso-codigo"
-    content="PRANCHETA_LEVANTAMENTO"
+    content="PRANCHETA"
   >
 
   <title>Prancheta | SAR</title>
@@ -20,11 +20,14 @@
   <style>
     :root {
       --sar: #315858;
+      --sar-dark: #274b4b;
       --sar-light: #7cb342;
       --ink: #263b3b;
       --muted: #6e7d7d;
       --line: #dfe6e3;
       --bg: #f4f7f5;
+      --white: #ffffff;
+      --danger: #a34141;
     }
 
     * {
@@ -44,14 +47,24 @@
       padding: 18px;
     }
 
-    button {
+    button,
+    input,
+    select {
       font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
     }
 
     .shell {
       max-width: 1500px;
       margin: 0 auto;
     }
+
+    /* =========================================================
+       CABEÇALHO
+    ========================================================= */
 
     .project-head {
       display: flex;
@@ -91,6 +104,10 @@
       font-size: 13px;
       white-space: nowrap;
     }
+
+    /* =========================================================
+       CARDS SUPERIORES
+    ========================================================= */
 
     .module-strip {
       display: flex;
@@ -158,6 +175,10 @@
       background: #b8e986;
     }
 
+    /* =========================================================
+       ÁREA PRINCIPAL
+    ========================================================= */
+
     .workspace {
       min-height: 440px;
       padding: 28px;
@@ -165,6 +186,10 @@
       border-radius: 12px;
       background: #fff;
       box-shadow: 0 4px 16px rgba(31, 65, 57, 0.05);
+    }
+
+    .workspace.drawing-mode {
+      padding: 12px;
     }
 
     .empty {
@@ -207,7 +232,7 @@
     }
 
     .primary:hover {
-      background: #274b4b;
+      background: var(--sar-dark);
     }
 
     .notice {
@@ -218,6 +243,258 @@
       background: #f4f8ec;
       color: #4f682f;
       font-size: 14px;
+    }
+
+    /* =========================================================
+       PRANCHETA
+    ========================================================= */
+
+    .drawing-layout {
+      display: grid;
+      grid-template-columns: 74px minmax(500px, 1fr) 250px;
+      min-height: 620px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #eef3f0;
+    }
+
+    /* Barra esquerda */
+
+    .drawing-toolbar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      padding: 12px 8px;
+      border-right: 1px solid var(--line);
+      background: var(--sar);
+    }
+
+    .tool-title {
+      margin-bottom: 4px;
+      color: #dce9e5;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .tool-divider {
+      width: 36px;
+      height: 1px;
+      margin: 4px 0;
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .tool-btn {
+      width: 48px;
+      min-height: 46px;
+      padding: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      cursor: pointer;
+      transition: 0.18s;
+    }
+
+    .tool-btn:hover {
+      background: rgba(255, 255, 255, 0.17);
+    }
+
+    .tool-btn.active {
+      border-color: #b8e986;
+      background: #fff;
+      color: var(--sar);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.14);
+    }
+
+    .tool-btn span {
+      display: block;
+      font-size: 19px;
+      line-height: 1;
+    }
+
+    .tool-btn small {
+      display: block;
+      margin-top: 4px;
+      font-size: 8px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    /* Centro */
+
+    .drawing-center {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+    }
+
+    .drawing-topbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 50px;
+      padding: 8px 12px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .top-action {
+      padding: 7px 10px;
+      border: 1px solid #d7e2dc;
+      border-radius: 7px;
+      background: #fff;
+      color: var(--sar);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: 0.18s;
+    }
+
+    .top-action:hover {
+      border-color: #9eb9aa;
+      background: #f4f8f5;
+    }
+
+    .top-action.danger {
+      color: var(--danger);
+    }
+
+    .top-action.danger:hover {
+      border-color: #dfb6b6;
+      background: #fff4f4;
+    }
+
+    .zoom-indicator {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    /* Área de desenho */
+
+    .drawing-stage {
+      position: relative;
+      flex: 1;
+      min-height: 570px;
+      overflow: hidden;
+      background-color: #fff;
+      background-image:
+        linear-gradient(#dfe8e3 1px, transparent 1px),
+        linear-gradient(90deg, #dfe8e3 1px, transparent 1px),
+        linear-gradient(#c7d6cf 1px, transparent 1px),
+        linear-gradient(90deg, #c7d6cf 1px, transparent 1px);
+      background-size:
+        10px 10px,
+        10px 10px,
+        50px 50px,
+        50px 50px;
+      cursor: default;
+    }
+
+    .drawing-stage.grid-hidden {
+      background-image: none;
+    }
+
+    .stage-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: min(420px, 80%);
+      padding: 18px;
+      transform: translate(-50%, -50%);
+      border: 1px dashed #abc0b5;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--muted);
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .stage-message strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--sar);
+      font-size: 16px;
+    }
+
+    /* Painel direito */
+
+    .drawing-sidebar {
+      padding: 14px;
+      overflow-y: auto;
+      border-left: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .panel-title {
+      margin: 0 0 12px;
+      color: var(--sar);
+      font-size: 15px;
+    }
+
+    .panel-block {
+      margin-bottom: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8faf9;
+    }
+
+    .panel-block h3 {
+      margin: 0 0 8px;
+      color: var(--sar);
+      font-size: 12px;
+    }
+
+    .panel-block p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .wall-widths {
+      display: flex;
+      gap: 5px;
+    }
+
+    .width-btn {
+      flex: 1;
+      padding: 6px 3px;
+      border: 1px solid #d5dfdb;
+      border-radius: 6px;
+      background: #fff;
+      color: var(--sar);
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .width-btn.active {
+      border-color: var(--sar);
+      background: var(--sar);
+      color: #fff;
+    }
+
+    /* =========================================================
+       RESPONSIVIDADE
+    ========================================================= */
+
+    @media (max-width: 950px) {
+      .drawing-layout {
+        grid-template-columns: 66px minmax(420px, 1fr);
+      }
+
+      .drawing-sidebar {
+        display: none;
+      }
     }
 
     @media (max-width: 760px) {
@@ -238,9 +515,25 @@
         padding: 18px;
       }
 
+      .workspace.drawing-mode {
+        padding: 6px;
+      }
+
       .module-btn {
         min-width: 100px;
         height: 86px;
+      }
+
+      .drawing-layout {
+        grid-template-columns: 58px minmax(360px, 1fr);
+      }
+
+      .drawing-toolbar {
+        padding: 10px 5px;
+      }
+
+      .tool-btn {
+        width: 45px;
       }
     }
   </style>
@@ -353,30 +646,7 @@
     </nav>
 
     <section class="workspace" id="workspace">
-      <div class="empty">
-
-        <div class="empty-mark">📐</div>
-
-        <h2>Comece criando ou abrindo um desenho</h2>
-
-        <p>
-          Use o painel recolhível à direita para acessar
-          <strong>Meus Desenhos</strong>. Quando um desenho for
-          aberto, suas paredes, portas, janelas, símbolos e
-          configurações permanecerão vinculados ao mesmo trabalho.
-        </p>
-
-        <button
-          class="primary"
-          type="button"
-          onclick="solicitarAcao('novo')"
-        >
-          Criar novo desenho
-        </button>
-
-        <div class="notice" id="notice"></div>
-
-      </div>
+      <!-- Conteúdo inicial inserido pelo JavaScript -->
     </section>
 
   </main>
@@ -404,6 +674,245 @@
       exportar: "📤"
     };
 
+    let ferramentaAtual = "select";
+    let espessuraParede = 0.15;
+    let gradeVisivel = true;
+    let snapAtivo = true;
+    let zoomAtual = 100;
+
+    function montarVisaoGeral() {
+      return `
+        <div class="empty">
+          <div class="empty-mark">📐</div>
+
+          <h2>Comece criando ou abrindo um desenho</h2>
+
+          <p>
+            Use o painel recolhível à direita para acessar
+            <strong>Meus Desenhos</strong>. Quando um desenho for
+            aberto, suas paredes, portas, janelas, símbolos e
+            configurações permanecerão vinculados ao mesmo trabalho.
+          </p>
+
+          <button
+            class="primary"
+            type="button"
+            onclick="solicitarAcao('novo')"
+          >
+            Criar novo desenho
+          </button>
+
+          <div class="notice" id="notice"></div>
+        </div>
+      `;
+    }
+
+    function montarTelaDesenho() {
+      return `
+        <div class="drawing-layout">
+
+          <aside class="drawing-toolbar">
+
+            <div class="tool-title">Ferramentas</div>
+
+            <button
+              class="tool-btn ${ferramentaAtual === "select" ? "active" : ""}"
+              data-tool="select"
+              type="button"
+              title="Selecionar elemento"
+            >
+              <span>➤</span>
+              <small>Selecionar</small>
+            </button>
+
+            <button
+              class="tool-btn ${ferramentaAtual === "wall" ? "active" : ""}"
+              data-tool="wall"
+              type="button"
+              title="Desenhar parede"
+            >
+              <span>▭</span>
+              <small>Parede</small>
+            </button>
+
+            <div class="tool-divider"></div>
+
+            <button
+              class="tool-btn ${gradeVisivel ? "active" : ""}"
+              id="gridButton"
+              type="button"
+              title="Mostrar ou ocultar grade"
+            >
+              <span>▦</span>
+              <small>Grade</small>
+            </button>
+
+            <button
+              class="tool-btn ${snapAtivo ? "active" : ""}"
+              id="snapButton"
+              type="button"
+              title="Ativar ou desativar encaixe"
+            >
+              <span>🧲</span>
+              <small>Snap</small>
+            </button>
+
+            <div class="tool-divider"></div>
+
+            <button
+              class="tool-btn"
+              id="zoomInButton"
+              type="button"
+              title="Aumentar zoom"
+            >
+              <span>＋</span>
+              <small>Zoom</small>
+            </button>
+
+            <button
+              class="tool-btn"
+              id="zoomOutButton"
+              type="button"
+              title="Diminuir zoom"
+            >
+              <span>−</span>
+              <small>Zoom</small>
+            </button>
+
+          </aside>
+
+          <div class="drawing-center">
+
+            <div class="drawing-topbar">
+
+              <button
+                class="top-action"
+                type="button"
+                onclick="mostrarAvisoDesenho('O histórico de alterações será ativado na próxima etapa.')"
+              >
+                ↶ Desfazer
+              </button>
+
+              <button
+                class="top-action"
+                type="button"
+                onclick="mostrarAvisoDesenho('O comando Refazer será ativado junto com o histórico.')"
+              >
+                ↷ Refazer
+              </button>
+
+              <button
+                class="top-action danger"
+                type="button"
+                onclick="mostrarAvisoDesenho('A prancheta ainda está vazia.')"
+              >
+                🗑 Limpar
+              </button>
+
+              <button
+                class="top-action"
+                type="button"
+                onclick="solicitarAcao('salvar')"
+              >
+                💾 Salvar
+              </button>
+
+              <div class="zoom-indicator" id="zoomIndicator">
+                Zoom: ${zoomAtual}%
+              </div>
+
+            </div>
+
+            <div
+              class="drawing-stage ${gradeVisivel ? "" : "grid-hidden"}"
+              id="drawingStage"
+            >
+              <div class="stage-message" id="stageMessage">
+                <strong>Prancheta vazia</strong>
+                Selecione a ferramenta Parede para iniciar o desenho.
+              </div>
+            </div>
+
+          </div>
+
+          <aside class="drawing-sidebar">
+
+            <h2 class="panel-title">Propriedades</h2>
+
+            <div class="panel-block">
+              <h3>Elemento selecionado</h3>
+              <p>Nenhum elemento selecionado.</p>
+            </div>
+
+            <div class="panel-block">
+              <h3>Espessura da parede</h3>
+
+              <div class="wall-widths">
+
+                <button
+                  class="width-btn ${espessuraParede === 0.10 ? "active" : ""}"
+                  data-width="0.10"
+                  type="button"
+                >
+                  10 cm
+                </button>
+
+                <button
+                  class="width-btn ${espessuraParede === 0.15 ? "active" : ""}"
+                  data-width="0.15"
+                  type="button"
+                >
+                  15 cm
+                </button>
+
+                <button
+                  class="width-btn ${espessuraParede === 0.20 ? "active" : ""}"
+                  data-width="0.20"
+                  type="button"
+                >
+                  20 cm
+                </button>
+
+              </div>
+            </div>
+
+            <div class="panel-block">
+              <h3>Camada atual</h3>
+              <p>ARQ_PAREDES</p>
+            </div>
+
+            <div class="panel-block">
+              <h3>Orientação</h3>
+              <p>
+                O comprimento e o ângulo serão informados ao inserir
+                uma parede.
+              </p>
+            </div>
+
+          </aside>
+
+        </div>
+      `;
+    }
+
+    function montarTelaTemporaria(view) {
+      const nome = nomes[view] || "Ferramenta";
+      const icone = icones[view] || "🧩";
+
+      return `
+        <div class="empty">
+          <div class="empty-mark">${icone}</div>
+
+          <h2>${nome}</h2>
+
+          <p>
+            O espaço desta ferramenta já está preparado.
+            A funcionalidade será montada nas próximas etapas.
+          </p>
+        </div>
+      `;
+    }
+
     function selecionarModulo(botao) {
       document
         .querySelectorAll(".module-btn")
@@ -412,18 +921,180 @@
         });
 
       const view = botao.dataset.view;
-      const nome = nomes[view] || "Ferramenta";
-      const icone = icones[view] || "🧩";
+      const workspace = document.getElementById("workspace");
 
-      document.getElementById("workspace").innerHTML = `
-        <div class="empty">
-          <div class="empty-mark">${icone}</div>
-          <h2>${nome}</h2>
-          <p>
-            O espaço desta ferramenta já está preparado.
-            A funcionalidade será montada na próxima etapa.
-          </p>
-        </div>
+      workspace.classList.toggle(
+        "drawing-mode",
+        view === "desenho"
+      );
+
+      if (view === "visao") {
+        workspace.innerHTML = montarVisaoGeral();
+        return;
+      }
+
+      if (view === "desenho") {
+        workspace.innerHTML = montarTelaDesenho();
+        ativarComandosDaPrancheta();
+        return;
+      }
+
+      workspace.innerHTML = montarTelaTemporaria(view);
+    }
+
+    function ativarComandosDaPrancheta() {
+      document
+        .querySelectorAll("[data-tool]")
+        .forEach(botao => {
+          botao.addEventListener("click", () => {
+            ferramentaAtual = botao.dataset.tool;
+
+            document
+              .querySelectorAll("[data-tool]")
+              .forEach(item => {
+                item.classList.toggle(
+                  "active",
+                  item === botao
+                );
+              });
+
+            atualizarMensagemDaPrancheta();
+          });
+        });
+
+      document
+        .querySelectorAll("[data-width]")
+        .forEach(botao => {
+          botao.addEventListener("click", () => {
+            espessuraParede =
+              Number(botao.dataset.width);
+
+            document
+              .querySelectorAll("[data-width]")
+              .forEach(item => {
+                item.classList.toggle(
+                  "active",
+                  item === botao
+                );
+              });
+          });
+        });
+
+      const gridButton =
+        document.getElementById("gridButton");
+
+      const snapButton =
+        document.getElementById("snapButton");
+
+      const zoomInButton =
+        document.getElementById("zoomInButton");
+
+      const zoomOutButton =
+        document.getElementById("zoomOutButton");
+
+      if (gridButton) {
+        gridButton.addEventListener("click", () => {
+          gradeVisivel = !gradeVisivel;
+
+          gridButton.classList.toggle(
+            "active",
+            gradeVisivel
+          );
+
+          document
+            .getElementById("drawingStage")
+            ?.classList.toggle(
+              "grid-hidden",
+              !gradeVisivel
+            );
+        });
+      }
+
+      if (snapButton) {
+        snapButton.addEventListener("click", () => {
+          snapAtivo = !snapAtivo;
+
+          snapButton.classList.toggle(
+            "active",
+            snapAtivo
+          );
+        });
+      }
+
+      if (zoomInButton) {
+        zoomInButton.addEventListener("click", () => {
+          zoomAtual = Math.min(
+            zoomAtual + 10,
+            400
+          );
+
+          atualizarZoom();
+        });
+      }
+
+      if (zoomOutButton) {
+        zoomOutButton.addEventListener("click", () => {
+          zoomAtual = Math.max(
+            zoomAtual - 10,
+            30
+          );
+
+          atualizarZoom();
+        });
+      }
+    }
+
+    function atualizarMensagemDaPrancheta() {
+      const mensagem =
+        document.getElementById("stageMessage");
+
+      const stage =
+        document.getElementById("drawingStage");
+
+      if (!mensagem || !stage) {
+        return;
+      }
+
+      if (ferramentaAtual === "wall") {
+        mensagem.innerHTML = `
+          <strong>Ferramenta Parede selecionada</strong>
+          No próximo passo, o primeiro clique definirá o início
+          da parede e abrirá a configuração de comprimento e ângulo.
+        `;
+
+        stage.style.cursor = "crosshair";
+        return;
+      }
+
+      mensagem.innerHTML = `
+        <strong>Prancheta vazia</strong>
+        Selecione a ferramenta Parede para iniciar o desenho.
+      `;
+
+      stage.style.cursor = "default";
+    }
+
+    function atualizarZoom() {
+      const indicador =
+        document.getElementById("zoomIndicator");
+
+      if (indicador) {
+        indicador.textContent =
+          `Zoom: ${zoomAtual}%`;
+      }
+    }
+
+    function mostrarAvisoDesenho(texto) {
+      const mensagem =
+        document.getElementById("stageMessage");
+
+      if (!mensagem) {
+        return;
+      }
+
+      mensagem.innerHTML = `
+        <strong>Aviso</strong>
+        ${texto}
       `;
     }
 
@@ -436,13 +1107,20 @@
         window.location.origin
       );
 
-      const aviso = document.getElementById("notice");
+      const aviso =
+        document.getElementById("notice");
 
       if (aviso) {
         aviso.textContent =
           "O cadastro do desenho será ligado ao banco na próxima etapa.";
 
         aviso.style.display = "block";
+      }
+
+      if (acao === "salvar") {
+        mostrarAvisoDesenho(
+          "O salvamento será conectado ao banco após validarmos a área de desenho."
+        );
       }
     }
 
@@ -455,16 +1133,22 @@
         );
       });
 
-    window.addEventListener("message", event => {
-      if (
-        event.origin !== window.location.origin ||
-        event.data?.tipo !== "sar:prancheta-acao"
-      ) {
-        return;
-      }
+    window.addEventListener(
+      "message",
+      event => {
+        if (
+          event.origin !== window.location.origin ||
+          event.data?.tipo !== "sar:prancheta-acao"
+        ) {
+          return;
+        }
 
-      solicitarAcao(event.data.acao);
-    });
+        solicitarAcao(event.data.acao);
+      }
+    );
+
+    document.getElementById("workspace").innerHTML =
+      montarVisaoGeral();
   </script>
 </body>
 </html>
