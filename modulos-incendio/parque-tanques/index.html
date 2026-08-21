@@ -139,7 +139,7 @@
         </div>
         <div class="module-intro">
           <span class="module-intro-icon">↔</span>
-          <div><b>Como preencher</b><p>Cada par é digitado uma única vez e o sistema espelha o valor automaticamente. Para tanque vertical, é vizinho quando a distância é menor que <b>máx(1,5 × diâmetro do tanque em chamas; 15 m)</b>.</p></div>
+          <div><b>Como preencher</b><p>Cada par é digitado uma única vez e o sistema espelha o valor automaticamente. O motor normativo da Vercel determina o limite e a condição de vizinhança para cada direção analisada.</p></div>
         </div>
         <div class="card module-card">
           <div class="card-heading">
@@ -322,6 +322,14 @@
       const response=await fetch('/api/igniferos/reclassificar-cenario',{method:'POST',headers:{'Authorization':`Bearer ${session.access_token}`,'Content-Type':'application/json'},body:JSON.stringify(payload)});
       let result={};try{result=await response.json()}catch{}
       if(!response.ok||!result.classificado)throw new Error(result.mensagem||'Não foi possível aplicar as regras de temperatura.');
+      return result;
+    });
+    api.setDistanceAnalyzer(async payload=>{
+      const {data:{session},error}=await supabase.auth.getSession();
+      if(error||!session?.access_token)throw new Error('Sua sessão expirou. Entre novamente no SAR.');
+      const response=await fetch('/api/igniferos/analisar-vizinhanca',{method:'POST',headers:{'Authorization':`Bearer ${session.access_token}`,'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      let result={};try{result=await response.json()}catch{}
+      if(!response.ok||!result.analisado)throw new Error(result.mensagem||`Falha no motor de vizinhança (${response.status}).`);
       return result;
     });
     async function loadProducts(){
