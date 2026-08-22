@@ -7,7 +7,7 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler
 
 
-RULE_VERSION = "MOTOR-ESPUMA-VERTICAL-BANCO-V2"
+RULE_VERSION = "MOTOR-ESPUMA-VERTICAL-BANCO-V3"
 NORM_VERSION = "IT25-2025-P3"
 DEFAULT_SUPABASE_URL = "https://bjtxbpmrmhfvpmdsthxr.supabase.co"
 DEFAULT_SUPABASE_KEY = "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM"
@@ -119,9 +119,9 @@ def calculate(data, rules):
         diameter_ok = exemption.get("diametro_max_m") is None or diameter <= number(exemption.get("diametro_max_m"))
         temperature_ok = exemption.get("temperatura_max_c") is None or temperature <= number(exemption.get("temperatura_max_c"))
         if volume_ok and diameter_ok and temperature_ok:
-            return {"dimensionado": True, "exigido": False, "aplicavel": True, "motivo": exemption["motivo"], "referencia": exemption.get("referencia"), "versao_norma": NORM_VERSION, "versao_regra": RULE_VERSION}
+            return {"dimensionado": True, "exigido": False, "aplicavel": True, "tipo_aplicacao": "isento", "tipo_aplicacao_minimo": "isento", "classe_adotada": liquid_class, "motivo": exemption["motivo"], "referencia": exemption.get("referencia"), "versao_norma": NORM_VERSION, "versao_regra": RULE_VERSION}
     if inertized and roof == "fixo":
-        return {"dimensionado": True, "exigido": False, "aplicavel": True, "motivo": "Tanque de teto fixo com sistema de inertização: sistema de espuma dispensado.", "versao_regra": RULE_VERSION}
+        return {"dimensionado": True, "exigido": False, "aplicavel": True, "tipo_aplicacao": "isento", "tipo_aplicacao_minimo": "isento", "classe_adotada": liquid_class, "motivo": "Tanque de teto fixo com sistema de inertização: sistema de espuma dispensado.", "versao_regra": RULE_VERSION}
 
     adopted_class = "IIIA" if liquid_class == "IIIB" else liquid_class
     floating = roof in {"flutuante", "flutuante_externo", "interno_flutuante"}
@@ -173,7 +173,7 @@ def calculate(data, rules):
     return {
         "dimensionado": True, "aplicavel": True, "exigido": True, "versao_regra": RULE_VERSION,
         "classe_adotada": adopted_class, "familia_espuma": "solvente_polar" if polar else "hidrocarboneto",
-        "tipo_aplicacao": method, "area_aplicacao_m2": round(area, 6), "taxa_normativa_lpm_m2": rate,
+        "tipo_aplicacao": method, "tipo_aplicacao_minimo": minimum_adopted_method, "area_aplicacao_m2": round(area, 6), "taxa_normativa_lpm_m2": rate,
         "majoracao_vento_percentual": wind, "taxa_adotada_lpm_m2": majorated_rate,
         "tempo_minimo_min": duration, "vazao_solucao_lpm": round(solution_flow, 6),
         "volume_solucao_l": round(solution_volume, 6), "dosagem_lge_percentual": lge_percent,
