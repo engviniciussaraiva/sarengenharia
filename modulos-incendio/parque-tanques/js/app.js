@@ -211,6 +211,13 @@ async function analyzeCoolingScenario(fire){
   finally{fire.coolingPending=false;save(false);renderScenarioDetail();renderResults()}
 }
 function analyzeAllCooling(){state.tanks.forEach(analyzeCoolingScenario)}
+function coolingMethodLabel(value){return ({manual:'Linha manual',linha:'Linha manual',monitor:'Canhão-monitor',aspersao:'Aspersão'}[value]||'—')}
+function coolingMinimumLabel(value){return ({manual_ou_monitor:'Linha manual ou canhão-monitor',monitor:'Canhão-monitor',aspersao:'Aspersão',isento:'Isento'}[value]||'—')}
+function coolingMethodOptions(tank){
+  const minimum=tank.coolingNormative?.sistema_minimo;
+  const values=minimum==='aspersao'?['aspersao']:minimum==='monitor'?['monitor','aspersao']:['manual','monitor','aspersao'];
+  return values.map(value=>`<option value="${value}" ${tank.coolingMethod===value||(value==='manual'&&tank.coolingMethod==='linha')?'selected':''}>${coolingMethodLabel(value)}</option>`).join('');
+}
 function scenario(fire){
   const basinFire=fire.orientation==='horizontal';
   const ns=basinFire?[]:neighbors(fire),neighborStorage=ns.reduce((s,t)=>s+num(t.usefulVolume),0);
@@ -574,12 +581,16 @@ function renderResults(){
 function renderScenarioDetail(){
   const host=$('#coolingScenarios');if(!host)return;
   const requirements=$('#coolingRequirements');
-  if(requirements)requirements.innerHTML=`<thead><tr><th>Tanque</th><th>Altura (m)</th><th>Diâmetro (m)</th><th>Produto</th><th>Classe</th><th>Sistema de resfriamento previsto</th></tr></thead><tbody>${state.tanks.map(t=>`<tr><td><b>${t.tag}</b></td><td>${fmt(t.height)}</td><td>${fmt(t.diameter)}</td><td>${t.product||'—'}</td><td><b>${classify(t)}</b></td><td>${t.orientation==='horizontal'?'Cenário de bacia — sem resfriamento':t.coolingNormative?.isento?'Isento':({monitor:'Canhão-monitor',linha:'Linha manual',manual:'Linha manual',aspersao:'Aspersão'}[t.coolingMethod]||'—')}</td></tr>`).join('')}</tbody>`;
+  if(requirements)requirements.innerHTML=`<thead><tr><th>Tanque</th><th>Altura (m)</th><th>Diâmetro (m)</th><th>Produto</th><th>Classe</th><th>Sistema mínimo normativo</th><th>Sistema adotado</th></tr></thead><tbody>${state.tanks.map(t=>`<tr><td><b>${t.tag}</b></td><td>${fmt(t.height)}</td><td>${fmt(t.diameter)}</td><td>${t.product||'—'}</td><td><b>${classify(t)}</b></td><td>${t.orientation==='horizontal'?'Cenário de bacia — sem resfriamento':t.coolingPending?'Calculando...':t.coolingNormative?.isento?'Isento':coolingMinimumLabel(t.coolingNormative?.sistema_minimo)}</td><td>${t.orientation==='horizontal'||t.coolingNormative?.isento?'—':`<select class="normative" data-cooling-id="${t.id}" data-cooling-key="coolingMethod" aria-label="Sistema de resfriamento adotado para ${escapeText(t.tag)}">${coolingMethodOptions(t)}</select><small class="cell-hint">Somente opção equivalente ou superior</small>`}</td></tr>`).join('')}</tbody>`;
   host.innerHTML=scenarios().map((s,index)=>{
     const fire=s.fire,others=state.tanks.filter(t=>t.id!==fire.id),time=num(fire.coolingTime);
     if(s.basinFire)return `<details class="step-card cooling-scenario" ${index===0?'open':''}>
       <summary><span>${index+1}</span><div><b>Cenário — ${fire.tag} horizontal em chamas</b><small>Espuma em toda a bacia · sem resfriamento</small></div></summary>
       <div class="step-body"><div class="callout warning"><b>Regra SAR — cenário de bacia:</b> aplicar espuma em toda a bacia de contenção. Não prever resfriamento do tanque em chamas nem dos demais tanques. O dimensionamento de vazão, tempo, RTI e LGE será concluído pelo motor de espuma da bacia.</div></div>
+    </details>`;
+    if(fire.coolingNormative?.isento)return `<details class="step-card cooling-scenario" ${index===0?'open':''}>
+      <summary><span>${index+1}</span><div><b>Cenário — ${fire.tag} em chamas</b><small>Isento de resfriamento</small></div></summary>
+      <div class="step-body"><div class="callout"><b>Resultado do motor normativo:</b> ${escapeText(fire.coolingNormative.motivo||'Cenário isento conforme Tabela 3.1.')} Vazão e reserva de resfriamento iguais a zero.</div></div>
     </details>`;
     const roofRule='somente costado';
     const reservoir=s.coolingFlow*time/1000;
@@ -588,10 +599,10 @@ function renderScenarioDetail(){
       <summary><span>${index+1}</span><div><b>Cenário — ${fire.tag} em chamas</b><small>${fire.coolingPending?'Calculando no motor...':fire.coolingError?`Falha: ${escapeText(fire.coolingError)}`:`${s.ns.length} tanque(s) vizinho(s) considerado(s)`}</small></div></summary>
       <div class="step-body">
         <div class="cooling-controls">
-          <label>Tipo de resfriamento<select class="normative" data-cooling-id="${fire.id}" data-cooling-key="coolingMethod"><option value="manual" ${fire.coolingMethod==='manual'||fire.coolingMethod==='linha'?'selected':''}>Linha manual</option><option value="monitor" ${fire.coolingMethod==='monitor'?'selected':''}>Canhão-monitor</option><option value="aspersao" ${fire.coolingMethod==='aspersao'?'selected':''}>Aspersão</option></select></label>
+          <label>Sistema adotado<select class="normative" data-cooling-id="${fire.id}" data-cooling-key="coolingMethod">${coolingMethodOptions(fire)}</select><small>Mínimo normativo: ${coolingMinimumLabel(cooling?.sistema_minimo)}</small></label>
           <label>Taxa — tanque em chamas (L/min/m²)<span class="calc"><b>${fmt(cooling?.tanque_em_chamas?.taxa_lpm_m2??fire.coolingOwnRate)}</b></span></label>
         </div>
-        <p class="cooling-area-note"><b>Regra corrigida:</b> ${fire.tag} em chamas recebe resfriamento somente no costado. Nos tanques vizinhos, teto fixo recebe teto + costado e teto flutuante recebe somente costado. Taxas temporariamente editáveis até a conexão com o banco normativo.</p>
+        <p class="cooling-area-note"><b>Critério:</b> ${fire.tag} em chamas recebe resfriamento somente no costado. Nos tanques vizinhos, teto fixo recebe teto + costado e teto flutuante recebe somente costado. O sistema adotado pode ser equivalente ou superior ao mínimo calculado pelo motor normativo.</p>
         <div class="cooling-layout">
           <div class="table-wrap cooling-table-wrap"><table class="cooling-table"><thead><tr><th>Parâmetro</th><th>${fire.tag} em chamas</th>${others.map(t=>`<th>${t.tag}</th>`).join('')}</tr></thead><tbody>
             <tr><th>Distância ao tanque em chamas (m)</th><td class="muted">—</td>${others.map(t=>`<td>${state.distances?.[pairKey(fire,t)]===undefined?'<span class="bad">Não informada</span>':fmt(shellDistance(fire,t))}</td>`).join('')}</tr>
@@ -612,10 +623,6 @@ function renderScenarioDetail(){
           </aside>
         </div>
       </div>
-    </details>`;
-    if(fire.coolingNormative?.isento)return `<details class="step-card cooling-scenario" ${index===0?'open':''}>
-      <summary><span>${index+1}</span><div><b>Cenário — ${fire.tag} em chamas</b><small>Isento de resfriamento</small></div></summary>
-      <div class="step-body"><div class="callout"><b>Resultado do motor normativo:</b> ${escapeText(fire.coolingNormative.motivo||'Cenário isento conforme Tabela 3.1.')} Vazão e reserva de resfriamento iguais a zero.</div></div>
     </details>`;
   }).join('')||'<div class="callout warning">Cadastre pelo menos um tanque para gerar os cenários.</div>';
   $$('[data-cooling-id]').forEach(el=>{
