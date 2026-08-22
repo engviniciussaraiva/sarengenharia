@@ -161,7 +161,7 @@ async function analyzeVerticalFoam(target){
   target.foamPending=true;target.foamError='';renderProtection();
   try{
     const totalIIIA=state.tanks.filter(t=>(t.scenarioClass||t.liquidClass)==='IIIA').reduce((sum,t)=>sum+num(t.usefulVolume),0);
-    const result=await verticalFoamEngine({orientacao:target.orientation,diametro_m:target.diameter,altura_m:target.height,tipo_teto:target.roofType,classe_original:target.liquidClass,classe_cenario:target.scenarioClass||target.liquidClass,grupo_espuma:target.foamGroup,produto_armazenado:target.product,temperatura_c:target.storageTemperature,dosagem_lge_percentual:target.lgePercent,volume_total_classe_iiia_m3:totalIIIA,inertizado:target.inertized===true||target.inertized==='true',api_620:target.api620===true||target.api620==='true',largura_coroa_m:target.sealWidth,tipo_aplicacao_adotado:target.foamApplicationUserSelected?target.foamApplicationType:null});
+    const result=await verticalFoamEngine({orientacao:target.orientation,diametro_m:target.diameter,altura_m:target.height,maior_diametro_vertical_m:Math.max(0,...state.tanks.filter(t=>t.orientation==='vertical').map(t=>num(t.diameter))),tipo_teto:target.roofType,classe_original:target.liquidClass,classe_cenario:target.scenarioClass||target.liquidClass,grupo_espuma:target.foamGroup,produto_armazenado:target.product,temperatura_c:target.storageTemperature,dosagem_lge_percentual:target.lgePercent,volume_total_classe_iiia_m3:totalIIIA,inertizado:target.inertized===true||target.inertized==='true',api_620:target.api620===true||target.api620==='true',largura_coroa_m:target.sealWidth,tipo_aplicacao_adotado:target.foamApplicationUserSelected?target.foamApplicationType:null});
     target.foamNormative=result;
     if(result.exigido){target.foamApplicationType=result.tipo_aplicacao;target.foamRate=num(result.taxa_normativa_lpm_m2);target.foamTime=num(result.tempo_minimo_min);target.foamArea=num(result.area_aplicacao_m2);target.chamberCount=num(result.quantidade_camaras)}
   }catch(error){target.foamNormative=null;target.foamError=error instanceof Error?error.message:String(error)}
@@ -170,9 +170,8 @@ async function analyzeVerticalFoam(target){
 function analyzeAllVerticalFoam(){state.tanks.filter(t=>t.orientation==='vertical').forEach(analyzeVerticalFoam)}
 function secondaryFoam(){
   const largestDiameter=Math.max(0,...state.tanks.filter(t=>t.orientation==='vertical').map(t=>num(t.diameter)));
-  const lineCount=largestDiameter>36?3:largestDiameter>20?2:1;
-  const duration=largestDiameter>28.5?30:largestDiameter>10.5?20:10;
-  const flowPerLine=200;
+  const normative=state.tanks.find(t=>t.orientation==='vertical'&&t.foamNormative?.linhas_suplementares)?.foamNormative?.linhas_suplementares;
+  const lineCount=num(normative?.quantidade),duration=num(normative?.tempo_minimo_min),flowPerLine=num(normative?.vazao_por_linha_lpm);
   const solutionFlow=lineCount*flowPerLine;
   const combatLge=solutionFlow*duration*num(state.basin.secondaryLgePercent)/100;
   const reserveLge=combatLge;
