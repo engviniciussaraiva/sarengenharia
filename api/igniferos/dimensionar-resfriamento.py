@@ -6,7 +6,7 @@ import urllib.parse
 import urllib.request
 from http.server import BaseHTTPRequestHandler
 
-RULE_VERSION="MOTOR-RESFRIAMENTO-BANCO-V2"
+RULE_VERSION="MOTOR-RESFRIAMENTO-BANCO-V3"
 NORM_VERSION="IT25-2025-P3"
 DEFAULT_SUPABASE_URL="https://bjtxbpmrmhfvpmdsthxr.supabase.co"
 DEFAULT_SUPABASE_KEY="sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM"
@@ -96,13 +96,18 @@ def calculate(data,rules):
         else:
             include_roof=tank.get("tipo_teto") in {"fixo","interno_flutuante"}
             base_area=shell_area(tank)+(roof_area(tank) if include_roof else 0);area_note="teto + costado" if include_roof else "somente costado"
-        if method=="aspersao":
+        # Cada tanque conserva o sistema de proteção adotado para ele. Quando
+        # aparece como vizinho, sua própria escolha define a regra de cálculo.
+        # A Tabela 3.4 é exclusiva para canhões-monitores e linhas manuais.
+        neighbor_method=str(tank.get("metodo_adotado") or "monitor")
+        if neighbor_method not in {"manual","linha","monitor","aspersao"}:neighbor_method="monitor"
+        if neighbor_method=="aspersao":
             applied_area=base_area;rate=parameter(rules,"taxa_vizinho_por_aspersao");reference="Tabela 3.3"
         else:
             factor=parameter(rules,"fator_area_ate_2_vizinhos" if count<=2 else "fator_area_mais_2_vizinhos")
             applied_area=base_area*factor;rate_row=neighbor_rate(rules["rates"],number(tank.get("distancia_m")));rate=number(rate_row["taxa_lpm_m2"]);reference=rate_row["referencia"]
         flow=applied_area*rate;neighbor_flow+=flow
-        details.append({"tanque_id":tank.get("id"),"tag":tank.get("tag"),"area_base_m2":round(base_area,6),"area_aplicacao_m2":round(applied_area,6),"taxa_lpm_m2":rate,"vazao_lpm":round(flow,6),"criterio_area":area_note,"referencia":reference})
+        details.append({"tanque_id":tank.get("id"),"tag":tank.get("tag"),"metodo_adotado":neighbor_method,"area_base_m2":round(base_area,6),"area_aplicacao_m2":round(applied_area,6),"taxa_lpm_m2":rate,"vazao_lpm":round(flow,6),"criterio_area":area_note,"referencia":reference})
     duration=time_rule(rules["times"],risk_volume);minutes=number(duration["tempo_horas"])*60;total_flow=own_flow+neighbor_flow
     return {"dimensionado":True,"isento":False,"sistema_minimo":minimum,"metodo_adotado":method,"tanque_em_chamas":{"area_m2":round(own_area,6),"taxa_lpm_m2":own_rate,"vazao_lpm":round(own_flow,6)},"vizinhos":details,"vazao_vizinhos_lpm":round(neighbor_flow,6),"vazao_total_lpm":round(total_flow,6),"tempo_horas":number(duration["tempo_horas"]),"tempo_minutos":minutes,"volume_resfriamento_m3":round(total_flow*minutes/1000,6),"avisos":warnings,"referencia_sistema":system["referencia"],"referencia_tempo":duration["referencia"],"versao_regra":RULE_VERSION,"versao_norma":NORM_VERSION}
 
