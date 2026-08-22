@@ -1,364 +1,123 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="sar-recurso-codigo" content="MODULO_INCENDIO">
-  <title>SAR | Tanques Estacionários</title>
-  <script src="/js/sar.page-guard.js"></script>
-  <link rel="stylesheet" href="./css/styles.css">
-</head>
-<body>
-  <header class="topbar">
-    <div>
-      <small>SAR — Onde a norma encontra a resposta — V31</small>
-      <h1>Dimensionamento de Tanques Estacionários</h1>
-    </div>
-    <div class="actions">
-      <span id="studyCode" class="status">Estudo ainda não gravado</span>
-      <button id="newStudy" class="ghost">Novo estudo</button>
-      <button id="openStudy" class="ghost">Abrir estudo</button>
-      <button id="saveStudy">Salvar estudo</button>
-      <button id="importStudy" class="ghost">Importar JSON</button>
-      <button id="exportStudy" class="ghost">Exportar JSON</button>
-      <input id="importFile" type="file" accept=".json" hidden>
-    </div>
-  </header>
+import json
+import math
+import os
+import urllib.error
+import urllib.parse
+import urllib.request
+from http.server import BaseHTTPRequestHandler
 
-  <main class="shell">
-    <section class="workspace">
-      <div class="study-card study-strip">
-        <label>Referência / Cliente<input id="studyName" value="Tanques Estacionários — Teste"></label>
-        <label>Referência / Projeto<input id="studyReference" placeholder="Ex.: PT 000000/0000"></label>
-      </div>
-      <div class="data-origin-legend" aria-label="Legenda da origem dos dados">
-        <strong>Origem dos dados</strong>
-        <span><i class="legend-user"></i> Usuário informa</span>
-        <span><i class="legend-bank"></i> Banco normativo / banco técnico</span>
-        <span><i class="legend-calc"></i> Cálculo automático</span>
-        <span><i class="legend-result"></i> Total ou resultado final</span>
-        <span><i class="legend-critical"></i> Condição crítica</span>
-      </div>
-      <section class="system-manager">
-        <div class="system-manager-heading">
-          <div>
-            <span class="eyebrow">SISTEMA DE PROTEÇÃO</span>
-            <h2>Bacias atendidas pelo mesmo sistema</h2>
-            <p>Abra uma bacia para preencher as etapas 1 a 7. Cada bacia mantém tanques, cálculos e memorial próprios.</p>
-          </div>
-          <button id="addBasin" type="button">+ Adicionar bacia</button>
-        </div>
-        <div id="basinManagerList" class="basin-manager-list"></div>
-      </section>
-      <nav id="tabs" class="top-tabs" aria-label="Etapas do dimensionamento">
-        <button data-tab="cadastro" class="active"><span class="tab-icon" aria-hidden="true">📝</span><span>Cadastro</span></button>
-        <button data-tab="distancias"><span class="tab-icon" aria-hidden="true">📏</span><span>Distâncias e vizinhança</span></button>
-        <button data-tab="espuma"><span class="tab-icon" aria-hidden="true">🫧</span><span>Espuma</span></button>
-        <button data-tab="resfriamento"><span class="tab-icon" aria-hidden="true">💧</span><span>Resfriamento</span></button>
-        <button data-tab="cenarios"><span class="tab-icon" aria-hidden="true">🔥</span><span>Cenários</span></button>
-        <button data-tab="bacia"><span class="tab-icon" aria-hidden="true">🧱</span><span>Bacia de contenção</span></button>
-        <button data-tab="documentos"><span class="tab-icon" aria-hidden="true">📄</span><span>Memória e memorial</span></button>
-        <button data-tab="isolamento" class="global-tab"><span class="tab-icon" aria-hidden="true">🛡️</span><span>Isolamento entre bacias</span></button>
-        <button data-tab="consolidado" class="global-tab"><span class="tab-icon" aria-hidden="true">📊</span><span>Consolidação global</span></button>
-      </nav>
+RULE_VERSION="MOTOR-RESFRIAMENTO-BANCO-V1"
+NORM_VERSION="IT25-2025-P3"
+DEFAULT_SUPABASE_URL="https://bjtxbpmrmhfvpmdsthxr.supabase.co"
+DEFAULT_SUPABASE_KEY="sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM"
 
-      <section class="content">
-      <section class="tab active" id="tab-cadastro">
-        <div class="section-title">
-          <div><span>MENU 1</span><h2>Cadastro do tanque e da bacia</h2></div>
-        </div>
-        <details class="step-card" open>
-          <summary><span>1</span><div><b>Identificação</b><small>Dados do parque, da bacia e quantidade de tanques</small></div></summary>
-          <div class="step-body grid grid-3">
-            <label>Identificação do parque<input id="parkName" value="Parque 01"></label>
-            <label>Identificação da bacia<input id="basinName" value="Bacia 01"></label>
-            <label>Quantidade de tanques na bacia
-              <span class="inline-control"><input id="tankCount" type="number" min="1" max="100" value="1"><button id="applyTankCount">Gerar tanques</button></span>
-            </label>
-          </div>
-        </details>
+def number(value,default=0.0):
+    try:return float(value)
+    except (TypeError,ValueError):return default
 
-        <details class="step-card" open>
-          <summary><span>2</span><div><b>Dados dos tanques</b><small>Geometria, instalação e volume útil máximo</small></div></summary>
-          <div class="step-body">
-            <div class="table-wrap"><table id="tankTable"></table></div>
-            <div id="sameTankPrompt" class="copy-prompt" hidden>
-              <span>Os demais tanques possuem as mesmas dimensões e características do primeiro?</span>
-              <button id="copyTankData">Sim, copiar para os demais</button>
-            </div>
-          </div>
-        </details>
+def request_status(url,headers):
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url,headers=headers),timeout=15) as response:return response.status
+    except urllib.error.HTTPError as error:return error.code
 
-        <details class="step-card" open>
-          <summary><span>3</span><div><b>Produto armazenado</b><small>Selecione o produto na Biblioteca Técnica e informe a condição de armazenamento no tanque</small></div></summary>
-          <div class="step-body">
-            <div class="table-wrap"><table id="productTable"></table></div>
-            <div id="sameProductPrompt" class="copy-prompt" hidden>
-              <span>Todos os tanques armazenam o mesmo produto?</span>
-              <button id="copyProductData">Sim, copiar para os demais</button>
-            </div>
-          </div>
-        </details>
+def request_json(url,headers):
+    with urllib.request.urlopen(urllib.request.Request(url,headers=headers),timeout=15) as response:return json.loads(response.read().decode("utf-8"))
 
-        <details class="step-card" open>
-          <summary><span>4</span><div><b>Dados da bacia</b><small>Geometria da contenção, altura de precipitação e bases de concreto</small></div></summary>
-          <div class="step-body">
-            <div class="grid basin-primary-grid">
-              <label>Tipo de contenção<select id="basinType"><option value="around">Bacia em torno dos tanques</option><option value="isolated">Bacia isolada</option></select></label>
-              <label>Largura interna da bacia (m)<input id="basinWidth" type="number" min="0" step=".01" data-numeric="true"></label>
-              <label>Comprimento interno da bacia (m)<input id="basinLength" type="number" min="0" step=".01" data-numeric="true"></label>
-              <label>Área interna calculada (m²)<output id="basinAreaOutput" class="output-field">0,00 m²</output></label>
-            </div>
-            <div class="grid basin-secondary-grid">
-              <label>Borda livre (m)<input id="freeboard" type="number" min="0" step=".01" value="0" data-numeric="true"></label>
-              <label>Altura adicional de precipitação (m)<input id="rainHeight" class="normative" type="number" min="0" step=".001" value=".15" data-numeric="true" title="Futuramente preenchido pelo banco de precipitação"></label>
-              <div class="future-module-action">
-                <span>Cálculo da altura de precipitação</span>
-                <button id="openPrecipitationModule" type="button" class="ghost">Calcular pela localidade</button>
-                <small>Futuro módulo vinculado ao banco de precipitação e tempo de recorrência.</small>
-              </div>
-            </div>
-            <div class="grid basin-isolation-grid">
-              <label id="basinIsolationField">Distância até a bacia isolada (m)<input id="basinIsolation" type="number" min="0" step=".01" value="0" data-numeric="true"></label>
-            </div>
-            <h3>Bases de concreto dos tanques</h3>
-            <p class="muted">O volume calculado é automático. O volume adotado pode ser alterado para representar bases de outro formato.</p>
-            <div class="table-wrap"><table id="baseTable"></table></div>
-            <div id="sameBasePrompt" class="copy-prompt" hidden>
-              <span>Todos os tanques possuem a mesma base de concreto?</span>
-              <button id="copyBaseData">Sim, usar a mesma base para todos</button>
-            </div>
-          </div>
-        </details>
-      </section>
+def load_rules(url,key):
+    headers={"apikey":key,"Authorization":f"Bearer {key}"}
+    tables={"systems":"sar_norm_resfriamento_sistemas","times":"sar_norm_resfriamento_tempos","rates":"sar_norm_resfriamento_taxas_vizinhos","parameters":"sar_norm_resfriamento_parametros"}
+    query=urllib.parse.urlencode({"versao_norma":f"eq.{NORM_VERSION}","ativo":"eq.true","select":"*"})
+    return {name:request_json(f"{url}/rest/v1/{table}?{query}",headers) for name,table in tables.items()}
 
-      <section class="tab" id="tab-distancias">
-        <div class="section-title">
-          <div><span>MÓDULO 2</span><h2>Distâncias e vizinhança</h2><p>Informe as distâncias livres entre os costados e confira os vizinhos de cada cenário.</p></div>
-          <button id="recalculate">Recalcular vizinhança</button>
-        </div>
-        <div class="module-intro">
-          <span class="module-intro-icon">↔</span>
-          <div><b>Como preencher</b><p>Cada par é digitado uma única vez e o sistema espelha o valor automaticamente. O motor normativo da Vercel determina o limite e a condição de vizinhança para cada direção analisada.</p></div>
-        </div>
-        <div class="card module-card">
-          <div class="card-heading">
-            <div><span class="eyebrow">ENTRADA</span><h3>Distâncias livres entre costados</h3><p>Preencha somente as células azuis.</p></div>
-            <span class="legend"><i></i> Campo de entrada</span>
-          </div>
-          <div class="table-wrap"><table id="distanceInputMatrix"></table></div>
-        </div>
-        <div class="card module-card">
-          <div class="card-heading">
-            <div><span class="eyebrow">ANÁLISE DIRECIONAL</span><h3>Vizinhança por tanque em chamas</h3><p>Selecione o tanque para conferir o limite aplicado e a justificativa.</p></div>
-            <div class="fire-selector"><label>Tanque em chamas<select id="fireTank"></select></label><span id="neighborSummary" class="pill"></span></div>
-          </div>
-          <div class="table-wrap"><table id="distanceTable"></table></div>
-        </div>
-        <div class="card module-card">
-          <div class="card-heading"><div><span class="eyebrow">RESUMO</span><h3>Matriz de vizinhança direcional</h3><p>As linhas representam o tanque em chamas; as colunas, os tanques analisados.</p></div></div>
-          <div class="table-wrap"><table id="matrixTable"></table></div>
-        </div>
-      </section>
+def normalize_class(value):
+    value=str(value or "").upper().replace("CLASSE","").replace("-","").replace(" ","")
+    return {"1":"I","1A":"I","1B":"I","IA":"I","IB":"I","2":"II","3A":"IIIA","3B":"IIIB"}.get(value,value)
 
-      <section class="tab" id="tab-espuma">
-        <div class="section-title"><div><span>MÓDULO 3</span><h2>Espuma primária e secundária</h2><p>Dimensionamento exclusivo dos sistemas de espuma e do consumo de LGE.</p></div></div>
-        <div class="module-intro">
-          <span class="module-intro-icon">◉</span>
-          <div><b>Espuma separada do resfriamento</b><p>Esta tela considera somente solução de espuma, equipamentos de aplicação e LGE. A demanda de água para resfriamento pertence ao Módulo 4.</p></div>
-        </div>
-        <details class="step-card foam-panel" open>
-          <summary><span>1</span><div><b>Espuma primária</b><small>Proteção principal individual de cada tanque — Tabela 4</small></div></summary>
-          <div class="step-body">
-            <div class="card-heading">
-              <div><span class="eyebrow">TABELA 4</span><h3>Dimensionamento da espuma primária</h3></div>
-              <span class="legend"><i></i> Campo de entrada</span>
-            </div>
-            <div class="table-wrap foam-table-wrap"><table id="primaryFoamTable" class="foam-table"></table></div>
-            <div id="samePrimaryFoamPrompt" class="copy-prompt" hidden>
-              <div><b>Os demais tanques possuem o mesmo sistema de espuma primária?</b><small>Os dados do primeiro tanque serão copiados, mantendo a identificação de cada tanque.</small></div>
-              <button id="copyPrimaryFoamData" type="button">Sim, copiar para todos</button>
-            </div>
-            <div class="table-notes">
-              <p><b>Majoração pelo vento:</b> 20% para aplicação por linhas manuais ou canhões-monitores em áreas abertas.</p>
-              <p><b>Taxa majorada:</b> taxa de aplicação × 1,20, quando aplicável.</p>
-              <p><b>Reserva de LGE:</b> calculada automaticamente igual ao combate. O total é sempre combate × 2.</p>
-            </div>
-            <div class="metrics foam-metrics" id="foamPrimaryMetrics"></div>
-          </div>
-        </details>
-        <details class="step-card secondary-foam foam-panel">
-          <summary><span>2</span><div><b>Espuma secundária</b><small>Linhas suplementares dimensionadas por bacia</small></div></summary>
-          <div class="step-body">
-            <div class="card-heading">
-              <div><span class="eyebrow">APLICAÇÃO SECUNDÁRIA</span><h3>Linhas suplementares da bacia</h3><p>A vazão, a quantidade de linhas e o tempo são definidos pelo diâmetro do maior tanque, conforme as Tabelas 3.9 e 3.10 da IT 25/2025 Parte 3.</p></div>
-              <span class="legend"><i></i> Campo de entrada</span>
-            </div>
-            <div class="table-wrap foam-table-wrap"><table id="secondaryFoamTable" class="foam-table secondary-foam-table"></table></div>
-            <div class="table-notes">
-              <p><b>Vazão por linha:</b> 200 L/min.</p>
-              <p><b>Quantidade de linhas:</b> 1, 2 ou 3, conforme o diâmetro do maior tanque.</p>
-              <p><b>Tempo:</b> 10, 20 ou 30 minutos, conforme o diâmetro do maior tanque.</p>
-              <p><b>Reserva e total:</b> reserva igual ao combate; total sempre combate × 2.</p>
-            </div>
-            <div class="metrics foam-metrics" id="foamSecondaryMetrics"></div>
-          </div>
-        </details>
-      </section>
+def parameter(rules,code):
+    row=next((x for x in rules["parameters"] if x.get("codigo")==code),None)
+    if not row:raise ValueError(f"Parâmetro normativo ausente: {code}.")
+    return number(row.get("valor_numerico"))
 
-      <section class="tab" id="tab-resfriamento">
-        <div class="section-title"><div><span>MÓDULO 4</span><h2>Resfriamento</h2><p>Um cenário completo para cada tanque em chamas.</p></div></div>
-        <div class="module-intro">
-          <div class="module-intro-icon">♨</div>
-          <div><b>Cenários automáticos de resfriamento</b><p>O tanque em chamas recebe resfriamento no costado. Nos vizinhos, teto fixo considera teto + costado e teto flutuante considera somente costado.</p></div>
-        </div>
-        <div class="card module-card cooling-requirements-card">
-          <div class="card-heading"><div><span class="eyebrow">RESUMO DOS TANQUES</span><h3>Dados para definição do sistema de resfriamento</h3><p>Confira geometria, classe do produto e sistema previsto antes de analisar os cenários.</p></div></div>
-          <div class="table-wrap"><table id="coolingRequirements"></table></div>
-        </div>
-        <div id="coolingScenarios"></div>
-      </section>
+def system_rule(rows,liquid_class,height,volume):
+    for row in rows:
+        if row.get("classe_produto")!=liquid_class:continue
+        if row.get("altura_min_inclusiva_m") is not None and height<number(row["altura_min_inclusiva_m"]):continue
+        if row.get("altura_max_exclusiva_m") is not None and height>=number(row["altura_max_exclusiva_m"]):continue
+        if row.get("volume_min_exclusivo_m3") is not None and volume<=number(row["volume_min_exclusivo_m3"]):continue
+        if row.get("volume_max_inclusivo_m3") is not None and volume>number(row["volume_max_inclusivo_m3"]):continue
+        return row
+    raise ValueError("Não existe regra ativa de sistema de resfriamento para este tanque.")
 
-      <section class="tab" id="tab-cenarios">
-        <div class="section-title"><div><span>MÓDULO 5</span><h2>Cenários de incêndio</h2><p>Consolidação e validação de cada hipótese de tanque em chamas.</p></div></div>
-        <div class="module-intro">
-          <div class="module-intro-icon">▦</div>
-          <div><b>Planilha consolidada de cenários</b><p>Os resumos detalhados permanecem acima e, ao final, uma tabela permite comparar as vazões e reservas de todos os cenários.</p></div>
-        </div>
-        <div id="scenarioReviewNote" class="scenario-review-note"></div>
-        <div id="combinedScenarios"></div>
-      </section>
+def time_rule(rows,volume):
+    for row in rows:
+        if row.get("volume_min_inclusivo_m3") is not None and volume<number(row["volume_min_inclusivo_m3"]):continue
+        if row.get("volume_max_exclusivo_m3") is not None and volume>=number(row["volume_max_exclusivo_m3"]):continue
+        return row
+    raise ValueError("Não existe tempo de combate ativo para este volume de risco.")
 
-      <section class="tab" id="tab-bacia">
-        <div class="section-title"><div><span>MÓDULO 6</span><h2>Bacia de contenção</h2><p>Validação da capacidade e determinação da altura mínima necessária do dique.</p></div></div>
-        <div class="formula">V exigido = maior volume útil + 50% × (água de resfriamento + solução de espuma) + volumes das bases</div>
-        <div class="metrics" id="basinMetrics"></div>
-        <div class="card" id="basinMemory"></div>
-      </section>
+def neighbor_rate(rows,distance):
+    for row in rows:
+        if row.get("distancia_min_exclusiva_m") is not None and distance<=number(row["distancia_min_exclusiva_m"]):continue
+        if row.get("distancia_max_inclusiva_m") is not None and distance>number(row["distancia_max_inclusiva_m"]):continue
+        return row
+    raise ValueError("Não existe taxa ativa para a distância informada.")
 
-      <section class="tab" id="tab-documentos">
-        <div class="section-title"><div><span>MÓDULO 7</span><h2>Memória de cálculo e memorial</h2><p>Documentos técnicos separados, gerados a partir do mesmo estudo validado.</p></div></div>
-        <div class="card">
-          <h3>Identificação do responsável técnico</h3>
-          <div class="grid grid-3">
-            <label>Responsável técnico<input id="responsible" value="Vinicius Saraiva"></label>
-          </div>
-        </div>
-        <div class="doc-actions">
-          <button data-doc="memory">Gerar Memória de Cálculo</button>
-          <button data-doc="memorial">Gerar Memorial Descritivo</button>
-          <button onclick="window.print()" class="ghost">Imprimir / salvar em PDF</button>
-        </div>
-        <article id="documentPreview" class="document">
-          <h2>Selecione um documento para gerar</h2>
-          <p>Os documentos usam os dados e resultados do estudo atual.</p>
-        </article>
-      </section>
+def shell_area(tank):
+    d=number(tank.get("diametro_m"));h=number(tank.get("altura_m"));length=number(tank.get("comprimento_m"))
+    return math.pi*d*h if tank.get("orientacao")=="vertical" else length*d
 
-      <section class="tab" id="tab-isolamento">
-        <div class="section-title"><div><span>MÓDULO 8</span><h2>Análise de isolamento entre bacias</h2><p>Compare cada par de bacias atendido pelo sistema comum.</p></div></div>
-        <div class="module-intro">
-          <span class="module-intro-icon">↔</span>
-          <div><b>Regra automática</b><p>Se a distância existente atender à distância exigida, os cenários não são somados. Se não atender, o par segue para composição simultânea.</p></div>
-        </div>
-        <div class="card module-card">
-          <div class="card-heading"><div><span class="eyebrow">ENTRADA E ANÁLISE</span><h3>Matriz de isolamento</h3><p>As distâncias exigidas aparecem em laranja porque serão vinculadas ao banco normativo.</p></div></div>
-          <div class="table-wrap"><table id="basinIsolationMatrix"></table></div>
-        </div>
-        <div id="basinIsolationSummary"></div>
-      </section>
+def roof_area(tank):return math.pi*number(tank.get("diametro_m"))**2/4
 
-      <section class="tab" id="tab-consolidado">
-        <div class="section-title"><div><span>MÓDULO 9</span><h2>Consolidação global do sistema</h2><p>Comparação de todos os cenários e critérios governantes.</p></div></div>
-        <div id="globalCriticalMetrics" class="metrics"></div>
-        <div class="card module-card">
-          <div class="card-heading"><div><span class="eyebrow">TODAS AS BACIAS</span><h3>Comparativo dos cenários por bacia</h3><p>As mesmas tabelas-resumo da Aba 5, sem recalcular ou alterar os resultados individuais.</p></div></div>
-          <div id="globalScenarioTable" class="global-basin-comparisons"></div>
-        </div>
-        <div class="card module-card">
-          <div class="card-heading"><div><span class="eyebrow">SIMULTANEIDADE</span><h3>Combinações determinadas pelo isolamento</h3><p>A soma técnica será fechada após a identificação dos tanques externos realmente expostos.</p></div></div>
-          <div id="combinedBasinScenarios"></div>
-        </div>
-      </section>
-      </section>
-    </section>
-  </main>
-  <dialog id="studyDialog" class="study-dialog">
-    <div class="study-dialog-head">
-      <div><small>MEUS ESTUDOS</small><h2>Abrir Tanques Estacionários</h2></div>
-      <button id="cancelStudyDialog" type="button" class="ghost">Cancelar</button>
-    </div>
-    <p id="studyDialogMessage" class="study-dialog-message">Carregando estudos...</p>
-    <div class="study-list-wrap">
-      <table class="study-list-table">
-        <thead><tr><th>Código</th><th>Nome do estudo</th><th>Status</th><th>Atualizado</th><th>Ações</th></tr></thead>
-        <tbody id="studyList"></tbody>
-      </table>
-    </div>
-  </dialog>
-  <style>
-    .study-dialog{width:min(980px,94vw);max-height:82vh;border:0;border-radius:14px;padding:0;box-shadow:0 24px 70px #10271e55;color:#243f34}
-    .study-dialog::backdrop{background:#10271e80}
-    .study-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid #d9e5df;background:#f4f8f6}
-    .study-dialog-head small{font-size:10px;font-weight:800;letter-spacing:.12em;color:#43836b}.study-dialog-head h2{margin:3px 0 0;color:#244d3e}
-    .study-dialog-message{margin:16px 20px;padding:10px 12px;border-left:4px solid #43836b;background:#edf7f2}.study-dialog-message.error{border-color:#b44646;background:#fff2f2;color:#8b3434}
-    .study-list-wrap{overflow:auto;max-height:58vh;padding:0 20px 20px}.study-list-table{min-width:760px}.study-list-table td:last-child{display:flex;gap:7px}.study-list-table .delete-study{background:#fff7f7;color:#a23d3d;border:1px solid #e0b7b7}
-  </style>
-  <script src="./js/app.js"></script>
-  <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-    const supabase=createClient("https://bjtxbpmrmhfvpmdsthxr.supabase.co","sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-    const api=window.SARTanques, dialog=document.querySelector('#studyDialog'), list=document.querySelector('#studyList'), message=document.querySelector('#studyDialogMessage'), code=document.querySelector('#studyCode');
-    let currentId=null,currentCode=null,busy=false,metaKey=null;
-    const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-    const date=v=>new Date(v).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
-    function setCode(){code.textContent=currentCode?`${currentCode} · gravado no SAR`:'Estudo ainda não gravado'}
-    function remember(){if(metaKey)localStorage.setItem(metaKey,JSON.stringify({id:currentId,code:currentCode}))}
-    function clearCurrent(){currentId=null;currentCode=null;if(metaKey)localStorage.removeItem(metaKey);setCode()}
-    async function user(){const {data,error}=await supabase.auth.getUser();if(error||!data.user)throw new Error('Sua sessão expirou. Entre novamente no SAR.');return data.user}
-    api.setThermalClassifier(async payload=>{
-      const {data:{session},error}=await supabase.auth.getSession();
-      if(error||!session?.access_token)throw new Error('Sua sessão expirou. Entre novamente no SAR.');
-      const response=await fetch('/api/igniferos/reclassificar-cenario',{method:'POST',headers:{'Authorization':`Bearer ${session.access_token}`,'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      let result={};try{result=await response.json()}catch{}
-      if(!response.ok||!result.classificado)throw new Error(result.mensagem||'Não foi possível aplicar as regras de temperatura.');
-      return result;
-    });
-    api.setDistanceAnalyzer(async payload=>{
-      const {data:{session},error}=await supabase.auth.getSession();
-      if(error||!session?.access_token)throw new Error('Sua sessão expirou. Entre novamente no SAR.');
-      const response=await fetch('/api/igniferos/analisar-vizinhanca',{method:'POST',headers:{'Authorization':`Bearer ${session.access_token}`,'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      let result={};try{result=await response.json()}catch{}
-      if(!response.ok||!result.analisado)throw new Error(result.mensagem||`Falha no motor de vizinhança (${response.status}).`);
-      return result;
-    });
-    api.setVerticalFoamEngine(async payload=>{
-      const {data:{session},error}=await supabase.auth.getSession();
-      if(error||!session?.access_token)throw new Error('Sua sessão expirou. Entre novamente no SAR.');
-      const response=await fetch('/api/igniferos/dimensionar-espuma-vertical',{method:'POST',headers:{'Authorization':`Bearer ${session.access_token}`,'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      let result={};try{result=await response.json()}catch{}
-      if(!response.ok||!result.dimensionado)throw new Error(result.mensagem||`Falha no motor de espuma vertical (${response.status}).`);
-      return result;
-    });
-    async function loadProducts(){
-      await user();
-      const fields='id,nome_comercial,nome_cientifico,ponto_fulgor,ponto_ebulicao,pressao_vapor,pressao_vapor_confirmada,miscibilidade_agua,grupo_espuma,fonte_referencia,classe,classe_calculada,versao_regra_classificacao,origem,usuario_id';
-      const {data,error}=await supabase.from('sar_tec_igniferos_produtos').select(fields).order('nome_comercial',{ascending:true});
-      if(error)throw new Error(`Não foi possível carregar a Biblioteca Técnica: ${error.message}`);
-      api.setProducts(data||[]);
-    }
-    function links(){const q=new URLSearchParams(location.search);return {projeto_id:q.get('projeto_id')||null,imovel_id:q.get('imovel_id')||null}}
-    async function saveStudy(){if(busy)return;busy=true;document.querySelector('#saveStudy').disabled=true;try{await user();const payload={nome_estudo:api.name()||'Novo estudo',dados_estudo:api.get(),versao_estrutura:1,versao_motor:'prototipo-local-v1'};let result;if(currentId)result=await supabase.from('sar_tec_tanques_estudos').update(payload).eq('id',currentId).select('id,codigo_estudo').single();else result=await supabase.from('sar_tec_tanques_estudos').insert({...payload,...links()}).select('id,codigo_estudo').single();if(result.error)throw result.error;currentId=result.data.id;currentCode=result.data.codigo_estudo;remember();setCode();alert(`Estudo ${currentCode} salvo com sucesso.`)}catch(e){alert(`Não foi possível salvar o estudo.\n${e.message||e}`)}finally{busy=false;document.querySelector('#saveStudy').disabled=false}}
-    async function loadList(){message.className='study-dialog-message';message.textContent='Carregando estudos...';list.innerHTML='';try{await user();const {data,error}=await supabase.from('sar_tec_tanques_estudos').select('id,codigo_estudo,nome_estudo,status,atualizado_em').neq('status','arquivado').order('atualizado_em',{ascending:false});if(error)throw error;if(!data.length){message.textContent='Você ainda não possui estudos gravados.';return}message.textContent=`${data.length} estudo(s) encontrado(s).`;list.innerHTML=data.map(x=>`<tr><td><b>${esc(x.codigo_estudo)}</b></td><td>${esc(x.nome_estudo)}</td><td>${esc(x.status.replace('_',' '))}</td><td>${date(x.atualizado_em)}</td><td><button data-open="${x.id}">Abrir</button><button class="delete-study" data-delete="${x.id}" data-code="${esc(x.codigo_estudo)}">Excluir</button></td></tr>`).join('')}catch(e){message.className='study-dialog-message error';message.textContent=e.message||String(e)}}
-    async function openStudy(id){const {data,error}=await supabase.from('sar_tec_tanques_estudos').select('id,codigo_estudo,dados_estudo').eq('id',id).single();if(error)throw error;api.set(data.dados_estudo);currentId=data.id;currentCode=data.codigo_estudo;remember();setCode();dialog.close()}
-    async function deleteStudy(id,studyCode){if(!confirm(`Excluir definitivamente o estudo ${studyCode}?`))return;const {error}=await supabase.from('sar_tec_tanques_estudos').delete().eq('id',id);if(error){alert(`Não foi possível excluir.\n${error.message}`);return}if(currentId===id)clearCurrent();await loadList()}
-    document.querySelector('#saveStudy').onclick=saveStudy;
-    document.querySelector('#newStudy').onclick=()=>{if(confirm('Criar novo estudo? Os dados não gravados serão substituídos.')){api.reset();clearCurrent()}};
-    document.querySelector('#openStudy').onclick=()=>{dialog.showModal();loadList()};document.querySelector('#cancelStudyDialog').onclick=()=>dialog.close();
-    dialog.addEventListener('cancel',e=>{e.preventDefault();dialog.close()});dialog.addEventListener('click',e=>{if(e.target===dialog)e.preventDefault()});
-    list.onclick=async e=>{const open=e.target.closest('[data-open]'),del=e.target.closest('[data-delete]');try{if(open)await openStudy(open.dataset.open);if(del)await deleteStudy(del.dataset.delete,del.dataset.code)}catch(err){message.className='study-dialog-message error';message.textContent=err.message||String(err)}};
-    window.addEventListener('sar-tanques-json-importado',clearCurrent);
-    (async()=>{try{const u=await user();metaKey=`sar.tanques.estudo.aberto.${u.id}`;localStorage.removeItem(metaKey);await loadProducts()}catch(error){console.error(error);alert(error.message||String(error))}clearCurrent()})();
-  </script>
-</body>
-</html>
+def calculate(data,rules):
+    fire=data.get("tanque_em_chamas") or {};neighbors=data.get("vizinhos") or []
+    if fire.get("orientacao")=="horizontal":
+        return {"dimensionado":True,"cenario_bacia":True,"vazao_total_lpm":0,"volume_resfriamento_m3":0,"motivo":"Regra SAR: tanque horizontal em chamas recebe espuma em toda a bacia, sem resfriamento.","versao_regra":RULE_VERSION,"versao_norma":NORM_VERSION}
+    if fire.get("orientacao")!="vertical":raise ValueError("Orientação do tanque em chamas inválida.")
+    height=number(fire.get("altura_m"));risk_volume=number(data.get("volume_risco_m3"));tank_volume=number(fire.get("capacidade_m3"))
+    if risk_volume<20:
+        return {"dimensionado":True,"isento":True,"vazao_total_lpm":0,"volume_resfriamento_m3":0,"motivo":"Volume do risco inferior a 20 m³.","versao_regra":RULE_VERSION,"versao_norma":NORM_VERSION}
+    liquid_class=normalize_class(fire.get("classe_cenario"))
+    method_volume=risk_volume if tank_volume<20 else tank_volume
+    if liquid_class=="IIIA":method_volume=max(method_volume,number(data.get("volume_total_classe_iiia_m3")))
+    selected=str(fire.get("metodo_adotado") or "")
+    system=system_rule(rules["systems"],liquid_class,height,method_volume)
+    minimum=system["sistema_minimo"]
+    if minimum=="isento":
+        return {"dimensionado":True,"isento":True,"vazao_total_lpm":0,"volume_resfriamento_m3":0,"motivo":"Cenário isento conforme Tabela 3.1.","referencia":system["referencia"],"versao_regra":RULE_VERSION,"versao_norma":NORM_VERSION}
+    allowed={"manual_ou_monitor":{"manual","monitor","aspersao"},"monitor":{"monitor","aspersao"},"aspersao":{"aspersao","monitor"}}[minimum]
+    method=selected if selected in allowed else ("monitor" if minimum=="manual_ou_monitor" else minimum)
+    warnings=[]
+    if minimum=="aspersao" and method=="monitor":warnings.append("A substituição de aspersores por canhões-monitores exige comprovação de desempenho para resfriar todo o costado.")
+    own_area=shell_area(fire);own_rate=parameter(rules,"taxa_tanque_vertical_em_chamas");own_flow=own_area*own_rate
+    count=len(neighbors);details=[];neighbor_flow=0
+    for tank in neighbors:
+        if tank.get("orientacao")=="horizontal":base_area=number(tank.get("comprimento_m"))*number(tank.get("diametro_m"));area_note="projeção horizontal"
+        else:
+            include_roof=tank.get("tipo_teto") in {"fixo","interno_flutuante"}
+            base_area=shell_area(tank)+(roof_area(tank) if include_roof else 0);area_note="teto + costado" if include_roof else "somente costado"
+        if method=="aspersao":
+            applied_area=base_area;rate=parameter(rules,"taxa_vizinho_por_aspersao");reference="Tabela 3.3"
+        else:
+            factor=parameter(rules,"fator_area_ate_2_vizinhos" if count<=2 else "fator_area_mais_2_vizinhos")
+            applied_area=base_area*factor;rate_row=neighbor_rate(rules["rates"],number(tank.get("distancia_m")));rate=number(rate_row["taxa_lpm_m2"]);reference=rate_row["referencia"]
+        flow=applied_area*rate;neighbor_flow+=flow
+        details.append({"tanque_id":tank.get("id"),"tag":tank.get("tag"),"area_base_m2":round(base_area,6),"area_aplicacao_m2":round(applied_area,6),"taxa_lpm_m2":rate,"vazao_lpm":round(flow,6),"criterio_area":area_note,"referencia":reference})
+    duration=time_rule(rules["times"],risk_volume);minutes=number(duration["tempo_horas"])*60;total_flow=own_flow+neighbor_flow
+    return {"dimensionado":True,"isento":False,"sistema_minimo":minimum,"metodo_adotado":method,"tanque_em_chamas":{"area_m2":round(own_area,6),"taxa_lpm_m2":own_rate,"vazao_lpm":round(own_flow,6)},"vizinhos":details,"vazao_vizinhos_lpm":round(neighbor_flow,6),"vazao_total_lpm":round(total_flow,6),"tempo_horas":number(duration["tempo_horas"]),"tempo_minutos":minutes,"volume_resfriamento_m3":round(total_flow*minutes/1000,6),"avisos":warnings,"referencia_sistema":system["referencia"],"referencia_tempo":duration["referencia"],"versao_regra":RULE_VERSION,"versao_norma":NORM_VERSION}
+
+class handler(BaseHTTPRequestHandler):
+    def send_json(self,status,body):
+        payload=json.dumps(body,ensure_ascii=False).encode("utf-8");self.send_response(status);self.send_header("Content-Type","application/json; charset=utf-8");self.send_header("Cache-Control","no-store");self.send_header("Content-Length",str(len(payload)));self.end_headers();self.wfile.write(payload)
+    def do_POST(self):
+        authorization=self.headers.get("Authorization","")
+        if not authorization.startswith("Bearer "):return self.send_json(401,{"dimensionado":False,"mensagem":"Sessão não informada."})
+        url=(os.environ.get("SUPABASE_URL") or DEFAULT_SUPABASE_URL).strip().rstrip("/");anon=(os.environ.get("SUPABASE_ANON_KEY") or DEFAULT_SUPABASE_KEY).strip()
+        if request_status(f"{url}/auth/v1/user",{"apikey":anon,"Authorization":authorization})!=200:return self.send_json(401,{"dimensionado":False,"mensagem":"Sessão inválida ou expirada."})
+        service=(os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or "").strip()
+        if not service:return self.send_json(500,{"dimensionado":False,"mensagem":"SUPABASE_SERVICE_ROLE_KEY não configurada."})
+        try:
+            length=int(self.headers.get("Content-Length","0"));data=json.loads(self.rfile.read(length).decode("utf-8"));rules=load_rules(url,service)
+            if any(not rows for rows in rules.values()):raise ValueError("Banco normativo de resfriamento incompleto.")
+            return self.send_json(200,calculate(data,rules))
+        except urllib.error.HTTPError as error:return self.send_json(502,{"dimensionado":False,"mensagem":f"Falha ao consultar banco normativo ({error.code})."})
+        except (ValueError,TypeError,json.JSONDecodeError) as error:return self.send_json(400,{"dimensionado":False,"mensagem":str(error)})
