@@ -6,7 +6,7 @@ import urllib.parse
 import urllib.request
 from http.server import BaseHTTPRequestHandler
 
-RULE_VERSION="MOTOR-RESFRIAMENTO-BANCO-V1"
+RULE_VERSION="MOTOR-RESFRIAMENTO-BANCO-V2"
 NORM_VERSION="IT25-2025-P3"
 DEFAULT_SUPABASE_URL="https://bjtxbpmrmhfvpmdsthxr.supabase.co"
 DEFAULT_SUPABASE_KEY="sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM"
@@ -84,10 +84,11 @@ def calculate(data,rules):
     minimum=system["sistema_minimo"]
     if minimum=="isento":
         return {"dimensionado":True,"isento":True,"vazao_total_lpm":0,"volume_resfriamento_m3":0,"motivo":"Cenário isento conforme Tabela 3.1.","referencia":system["referencia"],"versao_regra":RULE_VERSION,"versao_norma":NORM_VERSION}
-    allowed={"manual_ou_monitor":{"manual","monitor","aspersao"},"monitor":{"monitor","aspersao"},"aspersao":{"aspersao","monitor"}}[minimum]
+    # O usuário pode adotar uma solução equivalente ou superior ao mínimo
+    # normativo, mas nunca reduzir o nível de proteção calculado pelo motor.
+    allowed={"manual_ou_monitor":{"manual","monitor","aspersao"},"monitor":{"monitor","aspersao"},"aspersao":{"aspersao"}}[minimum]
     method=selected if selected in allowed else ("monitor" if minimum=="manual_ou_monitor" else minimum)
     warnings=[]
-    if minimum=="aspersao" and method=="monitor":warnings.append("A substituição de aspersores por canhões-monitores exige comprovação de desempenho para resfriar todo o costado.")
     own_area=shell_area(fire);own_rate=parameter(rules,"taxa_tanque_vertical_em_chamas");own_flow=own_area*own_rate
     count=len(neighbors);details=[];neighbor_flow=0
     for tank in neighbors:
