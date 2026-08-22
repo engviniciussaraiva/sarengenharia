@@ -207,7 +207,7 @@ async function analyzeCoolingScenario(fire){
   const requestToken=(coolingRequestTokens.get(fire.id)||0)+1;coolingRequestTokens.set(fire.id,requestToken);
   const ns=fire.orientation==='horizontal'?[]:neighbors(fire);fire.coolingPending=true;fire.coolingError='';renderScenarioDetail();
   try{
-    const result=await coolingEngine({tanque_em_chamas:{id:fire.id,tag:fire.tag,orientacao:fire.orientation,diametro_m:fire.diameter,altura_m:fire.height,comprimento_m:fire.length,capacidade_m3:fire.usefulVolume,tipo_teto:fire.roofType,classe_cenario:fire.scenarioClass||fire.liquidClass,metodo_adotado:fire.coolingMethodUserSelected?fire.coolingMethod:null},volume_risco_m3:num(fire.usefulVolume)+ns.reduce((s,t)=>s+num(t.usefulVolume),0),volume_total_classe_iiia_m3:state.tanks.filter(t=>(t.scenarioClass||t.liquidClass)==='IIIA').reduce((sum,t)=>sum+num(t.usefulVolume),0),vizinhos:ns.map(t=>({id:t.id,tag:t.tag,orientacao:t.orientation,diametro_m:t.diameter,altura_m:t.height,comprimento_m:t.length,tipo_teto:t.roofType,distancia_m:shellDistance(fire,t)}))});
+    const result=await coolingEngine({tanque_em_chamas:{id:fire.id,tag:fire.tag,orientacao:fire.orientation,diametro_m:fire.diameter,altura_m:fire.height,comprimento_m:fire.length,capacidade_m3:fire.usefulVolume,tipo_teto:fire.roofType,classe_cenario:fire.scenarioClass||fire.liquidClass,metodo_adotado:fire.coolingMethodUserSelected?fire.coolingMethod:null},volume_risco_m3:num(fire.usefulVolume)+ns.reduce((s,t)=>s+num(t.usefulVolume),0),volume_total_classe_iiia_m3:state.tanks.filter(t=>(t.scenarioClass||t.liquidClass)==='IIIA').reduce((sum,t)=>sum+num(t.usefulVolume),0),vizinhos:ns.map(t=>({id:t.id,tag:t.tag,orientacao:t.orientation,diametro_m:t.diameter,altura_m:t.height,comprimento_m:t.length,tipo_teto:t.roofType,distancia_m:shellDistance(fire,t),metodo_adotado:t.coolingMethod||'monitor'}))});
     if(coolingRequestTokens.get(fire.id)!==requestToken)return;
     fire.coolingNormative=result;fire.coolingTime=num(result.tempo_minutos);if(result.metodo_adotado)fire.coolingMethod=result.metodo_adotado;
   }catch(error){if(coolingRequestTokens.get(fire.id)===requestToken){fire.coolingNormative=null;fire.coolingError=error instanceof Error?error.message:String(error)}}
@@ -605,6 +605,7 @@ function renderScenarioDetail(){
         <div class="cooling-layout">
           <div class="table-wrap cooling-table-wrap"><table class="cooling-table"><thead><tr><th>Parâmetro</th><th>${fire.tag} em chamas</th>${others.map(t=>`<th>${t.tag}</th>`).join('')}</tr></thead><tbody>
             <tr><th>Distância ao tanque em chamas (m)</th><td class="muted">—</td>${others.map(t=>`<td>${state.distances?.[pairKey(fire,t)]===undefined?'<span class="bad">Não informada</span>':fmt(shellDistance(fire,t))}</td>`).join('')}</tr>
+            <tr><th>Sistema adotado</th><td>${coolingMethodLabel(fire.coolingMethod)}</td>${others.map(t=>`<td>${details[t.id]?coolingMethodLabel(details[t.id].metodo_adotado):'—'}</td>`).join('')}</tr>
             <tr><th>Tipo de teto</th><td>${fire.roofType}</td>${others.map(t=>`<td>${t.roofType}</td>`).join('')}</tr>
             <tr><th>Área de aplicação (m²)</th><td>${fmt(cooling?.tanque_em_chamas?.area_m2??fireCoolingArea(fire))}<small class="cell-hint">${roofRule}</small></td>${others.map(t=>`<td>${details[t.id]?`${fmt(details[t.id].area_aplicacao_m2)}<small class="cell-hint">${escapeText(details[t.id].criterio_area)}</small>`:'—'}</td>`).join('')}</tr>
             <tr><th>Taxa de aplicação (L/min/m²)</th><td>${fmt(cooling?.tanque_em_chamas?.taxa_lpm_m2??fire.coolingOwnRate)}</td>${others.map(t=>`<td>${details[t.id]?fmt(details[t.id].taxa_lpm_m2):'—'}</td>`).join('')}</tr>
@@ -629,7 +630,7 @@ function renderScenarioDetail(){
     const fire=state.tanks.find(t=>t.id===el.dataset.coolingId);if(!fire)return;
     fire[el.dataset.coolingKey]=el.tagName==='SELECT'?value:num(value);
     if(el.dataset.coolingKey==='coolingMethod')fire.coolingMethodUserSelected=true;
-    save();renderScenarioDetail();renderResults();analyzeCoolingScenario(fire);
+    save();renderScenarioDetail();renderResults();analyzeAllCooling();
     };
     if(el.dataset.numeric==='true')prepareNumericInput(el,commit);else el.onchange=()=>commit(el.value);
   });
