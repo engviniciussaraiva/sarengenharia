@@ -175,6 +175,7 @@
               <span class="legend"><i></i> Campo de entrada</span>
             </div>
             <div class="table-wrap foam-table-wrap"><table id="primaryFoamTable" class="foam-table"></table></div>
+            <div id="foamPrimaryDetails"></div>
             <div id="samePrimaryFoamPrompt" class="copy-prompt" hidden>
               <div><b>Os demais tanques possuem o mesmo sistema de espuma primária?</b><small>Os dados do primeiro tanque serão copiados, mantendo a identificação de cada tanque.</small></div>
               <button id="copyPrimaryFoamData" type="button">Sim, copiar para todos</button>
@@ -202,6 +203,11 @@
               <p><b>Reserva e total:</b> reserva igual ao combate; total sempre combate × 2.</p>
             </div>
             <div class="metrics foam-metrics" id="foamSecondaryMetrics"></div>
+            <div class="card-heading basin-foam-heading">
+              <div><span class="eyebrow">ESPUMA EM TODA A BACIA</span><h3>Aplicação sobre a área útil da bacia</h3><p>Alternativas por câmara/aplicadores fixos ou por canhões-monitores/linhas manuais, conforme as Tabelas 3.6 e 3.7.</p></div>
+            </div>
+            <div class="table-wrap foam-table-wrap"><table id="basinFoamTable" class="foam-table"></table></div>
+            <div class="metrics foam-metrics" id="basinFoamMetrics"></div>
           </div>
         </details>
       </section>
@@ -338,6 +344,14 @@
       const response=await fetch('/api/igniferos/dimensionar-espuma-vertical',{method:'POST',headers:{'Authorization':`Bearer ${session.access_token}`,'Content-Type':'application/json'},body:JSON.stringify(payload)});
       let result={};try{result=await response.json()}catch{}
       if(!response.ok||!result.dimensionado)throw new Error(result.mensagem||`Falha no motor de espuma vertical (${response.status}).`);
+      return result;
+    });
+    api.setBasinFoamEngine(async payload=>{
+      const {data:{session},error}=await supabase.auth.getSession();
+      if(error||!session?.access_token)throw new Error('Sua sessão expirou. Entre novamente no SAR.');
+      const response=await fetch('/api/igniferos/dimensionar-espuma-bacia',{method:'POST',headers:{'Authorization':`Bearer ${session.access_token}`,'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      let result={};try{result=await response.json()}catch{}
+      if(!response.ok||!result.dimensionado)throw new Error(result.mensagem||`Falha no motor de espuma da bacia (${response.status}).`);
       return result;
     });
     api.setCoolingEngine(async payload=>{
