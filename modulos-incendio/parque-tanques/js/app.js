@@ -139,6 +139,11 @@ const escapeText=v=>String(v??'').replaceAll('&','&amp;').replaceAll('"','&quot;
 const miscibilityLabel=v=>({nao_miscivel:'Não miscível',miscivel:'Miscível',parcialmente_miscivel:'Parcialmente miscível',nao_identificado:'Não identificado'}[v]||'—');
 const foamGroupLabel=v=>({hidrocarbonetos_nao_misciveis:'Hidrocarbonetos / não miscíveis',solventes_polares:'Solventes polares / miscíveis',pendente:'Pendente'}[v]||'—');
 const technicalValue=(value,unit='')=>value===null||value===undefined||value===''?'—':`${fmt(value)}${unit}`;
+function tankTotalVolume(t){
+  const diameter=num(t.diameter);
+  const axialDimension=t.orientation==='horizontal'?num(t.length):num(t.height);
+  return Math.PI*diameter*diameter/4*axialDimension;
+}
 function projection(t){return t.orientation==='vertical'?Math.PI*num(t.diameter)**2/4:num(t.length)*num(t.diameter)}
 function shellArea(t){return t.orientation==='vertical'?Math.PI*num(t.diameter)*num(t.height):projection(t)}
 function roofArea(t){return Math.PI*num(t.diameter)**2/4}
@@ -403,17 +408,17 @@ function selectProductForTank(tankId,productId){
 }
 function renderTanks(){
   $('#tankCount').value=state.tanks.length;
-  $('#tankTable').innerHTML=`<thead><tr><th>Tanque</th><th>Orientação</th><th>Instalação</th><th>Tipo de teto</th><th>Diâmetro (m)</th><th>Altura (m)</th><th>Comprimento (m)</th><th>Volume útil máximo (m³)</th><th>Largura da coroa (m)</th><th>Inertizado</th><th>API 620 / sem solda fragilizada</th><th>Área de projeção</th><th>Área do costado</th><th>Ações</th></tr></thead><tbody>`+state.tanks.map(t=>`<tr>
+  $('#tankTable').innerHTML=`<thead><tr><th>Tanque</th><th>Orientação</th><th>Instalação</th><th>Tipo de teto</th><th>Diâmetro (m)</th><th>Altura (m)</th><th>Comprimento (m)</th><th>Volume total calculado (m³)</th><th>Largura da coroa (m)</th><th>Inertizado</th><th>API 620 / sem solda fragilizada</th><th>Área de projeção</th><th>Área do costado</th><th>Ações</th></tr></thead><tbody>`+state.tanks.map(t=>{t.usefulVolume=tankTotalVolume(t);return `<tr>
   <td>${field(t,'tag','text')}</td>
   <td><select class="required" data-id="${t.id}" data-key="orientation"><option value="vertical" ${t.orientation==='vertical'?'selected':''}>Vertical</option><option value="horizontal" ${t.orientation==='horizontal'?'selected':''}>Horizontal</option></select></td>
   <td><select class="required" data-id="${t.id}" data-key="installation"><option value="apoiado" ${t.installation==='apoiado'?'selected':''}>Apoiado</option><option value="elevado" ${t.installation==='elevado'?'selected':''}>Elevado</option></select></td>
   <td><select class="required" data-id="${t.id}" data-key="roofType"><option value="fixo" ${t.roofType==='fixo'?'selected':''}>Fixo</option><option value="interno_flutuante" ${t.roofType==='interno_flutuante'?'selected':''}>Fixo com teto interno flutuante</option><option value="flutuante_externo" ${['flutuante','flutuante_externo'].includes(t.roofType)?'selected':''}>Flutuante externo</option></select></td>
-  <td>${field(t,'diameter')}</td><td>${field(t,'height')}</td><td>${t.orientation==='horizontal'?field(t,'length'):'<span class="muted">Não se aplica</span>'}</td><td>${field(t,'usefulVolume')}</td>
+  <td>${field(t,'diameter')}</td><td>${field(t,'height')}</td><td>${t.orientation==='horizontal'?field(t,'length'):'<span class="muted">Não se aplica</span>'}</td><td class="calc"><b>${fmt(t.usefulVolume)} m³</b></td>
   <td>${t.orientation==='vertical'&&t.roofType!=='fixo'?field(t,'sealWidth','number','required','placeholder="Ex.: 0,60"'):'<span class="muted">Não se aplica</span>'}</td>
   <td>${t.orientation==='vertical'?`<select class="required" data-id="${t.id}" data-key="inertized"><option value="false" ${t.inertized!==true&&t.inertized!=='true'?'selected':''}>Não</option><option value="true" ${t.inertized===true||t.inertized==='true'?'selected':''}>Sim</option></select>`:'<span class="muted">Não se aplica</span>'}</td>
   <td>${t.orientation==='vertical'?`<select class="required" data-id="${t.id}" data-key="api620"><option value="false" ${t.api620!==true&&t.api620!=='true'?'selected':''}>Não</option><option value="true" ${t.api620===true||t.api620==='true'?'selected':''}>Sim</option></select>`:'<span class="muted">Não se aplica</span>'}</td>
   <td class="calc">${fmt(projection(t))} m²</td><td class="calc">${fmt(shellArea(t))} m²</td>
-  <td><button type="button" class="danger-action tank-delete" data-delete-tank="${t.id}" title="Excluir ${t.tag||'tanque'}">Excluir</button></td></tr>`).join('')+'</tbody>';
+  <td><button type="button" class="danger-action tank-delete" data-delete-tank="${t.id}" title="Excluir ${t.tag||'tanque'}">Excluir</button></td></tr>`}).join('')+'</tbody>';
   bindTableInputs($('#tankTable'));
   $$('[data-delete-tank]').forEach(el=>el.onclick=()=>deleteTank(el.dataset.deleteTank));
   $('#productTable').innerHTML=`<thead><tr><th>Tanque</th><th>Produto da Biblioteca Técnica</th><th>Fonte</th><th>PF (°C)</th><th>PE (°C)</th><th>PV (mmHg)</th><th>Classe original</th><th>Miscibilidade</th><th>Grupo para espuma</th><th>Temperatura considerada (°C)</th><th>Classe no cenário</th></tr></thead><tbody>`+state.tanks.map(t=>{
@@ -449,7 +454,7 @@ function renderTanks(){
   renderFireSelect();renderBasinFields();
 }
 function bindTableInputs(root){root.querySelectorAll('[data-id]').forEach(el=>{
-  const commit=value=>{const t=state.tanks.find(x=>x.id===el.dataset.id);t[el.dataset.key]=el.dataset.numeric==='true'?num(value):value;if(el.dataset.key==='foamApplicationType')t.foamApplicationUserSelected=true;if(el.hasAttribute('data-base-volume'))t.baseVolumeManual=true;if(['baseDiameter','baseHeight'].includes(el.dataset.key)&&!t.baseVolumeManual)t.baseVolume=Math.PI*num(t.baseDiameter)**2/4*num(t.baseHeight);if(['diameter','orientation'].includes(el.dataset.key))state.neighborAnalysis={};if(['diameter','height','orientation','roofType','lgePercent','sealWidth','inertized','api620','foamApplicationType'].includes(el.dataset.key))t.foamNormative=null;save();renderAll();if(['diameter','height','orientation','roofType','lgePercent','sealWidth','inertized','api620','foamApplicationType'].includes(el.dataset.key))analyzeVerticalFoam(t)};
+  const commit=value=>{const t=state.tanks.find(x=>x.id===el.dataset.id);t[el.dataset.key]=el.dataset.numeric==='true'?num(value):value;if(['diameter','height','length','orientation'].includes(el.dataset.key))t.usefulVolume=tankTotalVolume(t);if(el.dataset.key==='foamApplicationType')t.foamApplicationUserSelected=true;if(el.hasAttribute('data-base-volume'))t.baseVolumeManual=true;if(['baseDiameter','baseHeight'].includes(el.dataset.key)&&!t.baseVolumeManual)t.baseVolume=Math.PI*num(t.baseDiameter)**2/4*num(t.baseHeight);if(['diameter','orientation'].includes(el.dataset.key))state.neighborAnalysis={};if(['diameter','height','orientation','roofType','lgePercent','sealWidth','inertized','api620','foamApplicationType'].includes(el.dataset.key))t.foamNormative=null;save();renderAll();if(['diameter','height','orientation','roofType','lgePercent','sealWidth','inertized','api620','foamApplicationType'].includes(el.dataset.key))analyzeVerticalFoam(t)};
   if(el.dataset.numeric==='true')prepareNumericInput(el,commit);else el.onchange=()=>commit(el.value);
 })}
 function renderBasinFields(){
