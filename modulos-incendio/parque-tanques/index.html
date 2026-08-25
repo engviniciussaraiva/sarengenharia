@@ -168,10 +168,10 @@
           <div><b>Espuma separada do resfriamento</b><p>Esta tela considera somente solução de espuma, equipamentos de aplicação e LGE. A demanda de água para resfriamento pertence ao Módulo 4.</p></div>
         </div>
         <details class="step-card foam-panel" open>
-          <summary><span>1</span><div><b>Espuma primária</b><small>Proteção principal individual de cada tanque — Tabela 4</small></div></summary>
+          <summary><span>1</span><div><b>Espuma primária</b><small>Resumo da proteção principal individual de cada tanque</small></div></summary>
           <div class="step-body">
             <div class="card-heading">
-              <div><span class="eyebrow">TABELA 4</span><h3>Dimensionamento da espuma primária</h3></div>
+              <div><span class="eyebrow">TABELA RESUMO ESPUMA PRIMÁRIA</span><h3>Resumo da espuma primária por tanque</h3></div>
               <span class="legend"><i></i> Campo de entrada</span>
             </div>
             <div class="table-wrap foam-table-wrap"><table id="primaryFoamTable" class="foam-table"></table></div>
@@ -219,7 +219,7 @@
           <div><b>Cenários automáticos de resfriamento</b><p>O tanque em chamas recebe resfriamento no costado. Nos vizinhos, teto fixo considera teto + costado e teto flutuante considera somente costado.</p></div>
         </div>
         <div class="card module-card cooling-requirements-card">
-          <div class="card-heading"><div><span class="eyebrow">PROTEÇÃO POR TANQUE</span><h3>Definição do sistema de resfriamento</h3><p>Selecione aqui o sistema adotado para cada tanque. Esta tabela direciona o recálculo de todos os cenários apresentados abaixo.</p></div></div>
+          <div class="card-heading"><div><span class="eyebrow">RESUMO RESFRIAMENTO</span><h3>Definição do sistema de resfriamento</h3><p>Selecione aqui o sistema adotado para cada tanque. Esta tabela direciona o recálculo de todos os cenários apresentados abaixo.</p></div></div>
           <div class="table-wrap"><table id="coolingRequirements"></table></div>
         </div>
         <div id="coolingScenarios"></div>
@@ -303,6 +303,13 @@
     </div>
   </dialog>
   <style>
+    #primaryFoamTable{min-width:1050px;table-layout:fixed}
+    #primaryFoamTable th,#primaryFoamTable td{padding:9px 10px;font-size:12px;vertical-align:middle}
+    #primaryFoamTable th:nth-child(1){width:7%}#primaryFoamTable th:nth-child(2),#primaryFoamTable th:nth-child(3){width:9%}
+    #primaryFoamTable th:nth-child(4){width:12%}#primaryFoamTable th:nth-child(5){width:18%}#primaryFoamTable th:nth-child(6){width:16%}
+    #primaryFoamTable th:nth-child(7){width:20%}#primaryFoamTable th:nth-child(8){width:9%}
+    #primaryFoamTable select,#primaryFoamTable input{width:100%;min-width:0}
+    .scenario-maximum,.scenario-maximum b{color:#c62828!important;font-weight:900!important}
     .study-dialog{width:min(980px,94vw);max-height:82vh;border:0;border-radius:14px;padding:0;box-shadow:0 24px 70px #10271e55;color:#243f34}
     .study-dialog::backdrop{background:#10271e80}
     .study-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid #d9e5df;background:#f4f8f6}
