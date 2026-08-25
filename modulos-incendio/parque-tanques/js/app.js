@@ -747,6 +747,11 @@ function renderCombinedScenarios(){
   renderScenarioReview();
 }
 function scenarioComparisonTable(ss){
+  const foamTotal=s=>s.basinFire?num(s.basinApplication?.totalLge):num(s.primary?.totalLge)+num(s.secondary?.totalLge);
+  const maxTotalFlow=Math.max(0,...ss.map(s=>num(s.totalFlow)));
+  const maxFoamTotal=Math.max(0,...ss.map(foamTotal));
+  const maxRtiTotal=Math.max(0,...ss.map(s=>num(s.totalVolume)));
+  const maximum=(value,max)=>max>0&&Math.abs(num(value)-max)<0.000001?' scenario-maximum':'';
   return `<div class="table-wrap scenario-comparison-wrap"><table class="scenario-comparison-table">
     <thead><tr>
       <th>Cenário</th>
@@ -761,7 +766,7 @@ function scenarioComparisonTable(ss){
       <th>RTI total</th>
     </tr></thead>
     <tbody>${ss.map((s,index)=>{
-      if(s.basinFire)return `<tr><td><span class="scenario-number">${index+1}</span><b>${s.fire.tag} horizontal em chamas</b></td><td colspan="2">Não se aplica</td><td>${fmt(s.foamMain)} L/min</td><td>—</td><td class="scenario-highlight"><b>${fmt(s.totalFlow)} L/min</b></td><td>${fmt(s.basinApplication.totalLge)} L</td><td>—</td><td class="scenario-highlight"><b>${fmt(s.basinApplication.totalLge)} L</b></td><td class="scenario-highlight"><b>${fmt(s.totalVolume)} m³</b></td></tr>`;
+      if(s.basinFire)return `<tr><td><span class="scenario-number">${index+1}</span><b>${s.fire.tag} horizontal em chamas</b></td><td colspan="2">Não se aplica</td><td>${fmt(s.foamMain)} L/min</td><td>—</td><td class="scenario-highlight${maximum(s.totalFlow,maxTotalFlow)}"><b>${fmt(s.totalFlow)} L/min</b></td><td>${fmt(s.basinApplication.totalLge)} L</td><td>—</td><td class="scenario-highlight${maximum(s.basinApplication.totalLge,maxFoamTotal)}"><b>${fmt(s.basinApplication.totalLge)} L</b></td><td class="scenario-highlight${maximum(s.totalVolume,maxRtiTotal)}"><b>${fmt(s.totalVolume)} m³</b></td></tr>`;
       const primaryFoamVolumeL=s.primary.totalLge;
       const secondaryFoamVolumeL=s.secondary.totalLge;
       const totalFoamVolumeL=primaryFoamVolumeL+secondaryFoamVolumeL;
@@ -771,11 +776,11 @@ function scenarioComparisonTable(ss){
       <td>${fmt(s.neighborCooling)} L/min</td>
       <td>${fmt(s.foamMain)} L/min</td>
       <td>${fmt(s.foamLines)} L/min</td>
-      <td class="scenario-highlight"><b>${fmt(s.ownCooling+s.neighborCooling+s.foamMain+s.foamLines)} L/min</b></td>
+      <td class="scenario-highlight${maximum(s.totalFlow,maxTotalFlow)}"><b>${fmt(s.totalFlow)} L/min</b></td>
       <td>${fmt(primaryFoamVolumeL)} L</td>
       <td>${fmt(secondaryFoamVolumeL)} L</td>
-      <td class="scenario-highlight"><b>${fmt(totalFoamVolumeL)} L</b></td>
-      <td class="scenario-highlight"><b>${fmt(s.totalVolume)} m³</b></td>
+      <td class="scenario-highlight${maximum(totalFoamVolumeL,maxFoamTotal)}"><b>${fmt(totalFoamVolumeL)} L</b></td>
+      <td class="scenario-highlight${maximum(s.totalVolume,maxRtiTotal)}"><b>${fmt(s.totalVolume)} m³</b></td>
     </tr>`;
     }).join('')}</tbody>
   </table></div>`;
