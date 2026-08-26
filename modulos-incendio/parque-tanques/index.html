@@ -57,6 +57,8 @@
         <button data-tab="resfriamento"><span class="tab-icon" aria-hidden="true">💧</span><span>Resfriamento</span></button>
         <button data-tab="cenarios"><span class="tab-icon" aria-hidden="true">🔥</span><span>Cenários</span></button>
         <button data-tab="bacia"><span class="tab-icon" aria-hidden="true">🧱</span><span>Bacia de contenção</span></button>
+        <button data-tab="equipamentos"><span class="tab-icon" aria-hidden="true">⚙️</span><span>Definição dos equipamentos</span></button>
+        <button data-tab="hidraulica"><span class="tab-icon" aria-hidden="true">📐</span><span>Dimensionamento hidráulico</span></button>
         <button data-tab="documentos"><span class="tab-icon" aria-hidden="true">📄</span><span>Memória e memorial</span></button>
         <button data-tab="isolamento" class="global-tab"><span class="tab-icon" aria-hidden="true">🛡️</span><span>Isolamento entre bacias</span></button>
         <button data-tab="consolidado" class="global-tab"><span class="tab-icon" aria-hidden="true">📊</span><span>Consolidação global</span></button>
@@ -234,8 +236,96 @@
         <div class="card" id="basinMemory"></div>
       </section>
 
+      <section class="tab" id="tab-equipamentos">
+        <div class="section-title">
+          <div><span>MÓDULO 7</span><h2>Definição dos equipamentos de proteção</h2><p>Seleção dos equipamentos reais que serão especificados e instalados para atendimento das demandas normativas.</p></div>
+        </div>
+        <div class="module-intro">
+          <span class="module-intro-icon">⚙</span>
+          <div><b>Da exigência normativa para a solução de projeto</b><p>As vazões mínimas já determinadas nas etapas anteriores serão usadas como referência. Nesta etapa serão definidos quantidade, fabricante, modelo, fator K, vazão nominal e pressão mínima dos equipamentos adotados.</p></div>
+        </div>
+
+        <details class="step-card" open>
+          <summary><span>1</span><div><b>Equipamentos de espuma primária</b><small>Câmaras, aplicadores, canhões-monitores e linhas manuais por tanque</small></div></summary>
+          <div class="step-body">
+            <div class="card-heading"><div><span class="eyebrow">PROTEÇÃO DO TANQUE</span><h3>Seleção dos equipamentos de aplicação de espuma</h3><p>Um conjunto para cada tanque, conforme o tipo de aplicação adotado na etapa normativa.</p></div></div>
+            <div class="table-wrap"><table id="primaryFoamEquipmentTable"><thead><tr><th>Tanque</th><th>Demanda normativa</th><th>Tipo adotado</th><th>Fabricante</th><th>Modelo</th><th>Quantidade</th><th>Fator K / vazão nominal</th><th>Pressão mínima</th><th>Situação</th></tr></thead><tbody><tr><td colspan="9" class="muted">Os tanques e as demandas normativas serão carregados automaticamente após a integração desta etapa.</td></tr></tbody></table></div>
+          </div>
+        </details>
+
+        <details class="step-card">
+          <summary><span>2</span><div><b>Equipamentos de espuma secundária</b><small>Proteção suplementar ou aplicação sobre a área útil da bacia</small></div></summary>
+          <div class="step-body">
+            <div class="card-heading"><div><span class="eyebrow">PROTEÇÃO DA BACIA</span><h3>Seleção dos equipamentos de espuma secundária</h3><p>Definição dos equipamentos correspondentes à alternativa adotada para cada bacia.</p></div></div>
+            <div class="table-wrap"><table id="secondaryFoamEquipmentTable"><thead><tr><th>Bacia</th><th>Demanda normativa</th><th>Solução adotada</th><th>Fabricante</th><th>Modelo</th><th>Quantidade</th><th>Vazão unitária</th><th>Pressão mínima</th><th>Situação</th></tr></thead><tbody><tr><td colspan="9" class="muted">A solução selecionada na aba Espuma será utilizada como premissa para a especificação.</td></tr></tbody></table></div>
+          </div>
+        </details>
+
+        <details class="step-card">
+          <summary><span>3</span><div><b>Equipamentos de resfriamento</b><small>Aspersores, canhões-monitores e linhas manuais por tanque</small></div></summary>
+          <div class="step-body">
+            <div class="card-heading"><div><span class="eyebrow">RESFRIAMENTO</span><h3>Seleção dos equipamentos de aplicação de água</h3><p>O arranjo deverá atender tanto ao tanque em chamas quanto à sua participação como tanque vizinho nos cenários aplicáveis.</p></div></div>
+            <div class="table-wrap"><table id="coolingEquipmentTable"><thead><tr><th>Tanque</th><th>Sistema adotado</th><th>Área protegida</th><th>Fabricante</th><th>Modelo</th><th>Quantidade</th><th>Fator K / vazão nominal</th><th>Pressão mínima</th><th>Situação</th></tr></thead><tbody><tr><td colspan="9" class="muted">Os sistemas adotados na aba Resfriamento serão carregados automaticamente nesta tabela.</td></tr></tbody></table></div>
+          </div>
+        </details>
+
+        <details class="step-card">
+          <summary><span>4</span><div><b>Equipamentos gerais do sistema</b><small>Proporcionamento, armazenamento de LGE, controle e alimentação</small></div></summary>
+          <div class="step-body">
+            <div class="card-heading"><div><span class="eyebrow">EQUIPAMENTOS COMPLEMENTARES</span><h3>Componentes gerais da instalação</h3><p>Consolidação dos equipamentos que atendem uma ou mais bacias e cenários.</p></div></div>
+            <div class="table-wrap"><table id="generalEquipmentTable"><thead><tr><th>Grupo</th><th>Equipamento</th><th>Fabricante</th><th>Modelo</th><th>Quantidade</th><th>Capacidade / faixa operacional</th><th>Observações</th></tr></thead><tbody><tr><td colspan="7" class="muted">Proporcionadores, reservatórios de LGE, válvulas, bombas e demais componentes serão definidos nesta etapa.</td></tr></tbody></table></div>
+          </div>
+        </details>
+      </section>
+
+      <section class="tab" id="tab-hidraulica">
+        <div class="section-title">
+          <div><span>MÓDULO 8</span><h2>Dimensionamento hidráulico</h2><p>Cálculo da vazão e da pressão requeridas pelo arranjo real de equipamentos em cada cenário de operação.</p></div>
+        </div>
+        <div class="module-intro">
+          <span class="module-intro-icon">√</span>
+          <div><b>Verificação hidráulica do sistema adotado</b><p>O motor utilizará os equipamentos selecionados, suas características hidráulicas e os dados da rede para determinar a demanda real do projeto e compará-la ao mínimo normativo.</p></div>
+        </div>
+
+        <details class="step-card" open>
+          <summary><span>1</span><div><b>Dados e arranjo da rede</b><small>Trechos, materiais, diâmetros, comprimentos, cotas e singularidades</small></div></summary>
+          <div class="step-body">
+            <div class="card-heading"><div><span class="eyebrow">ENTRADA HIDRÁULICA</span><h3>Características da rede de alimentação</h3><p>Dados geométricos e construtivos necessários para o cálculo das perdas de carga.</p></div></div>
+            <div class="table-wrap"><table id="hydraulicNetworkTable"><thead><tr><th>Trecho</th><th>Origem</th><th>Destino</th><th>Material</th><th>Diâmetro</th><th>Comprimento</th><th>Cota inicial</th><th>Cota final</th><th>Singularidades</th></tr></thead><tbody><tr><td colspan="9" class="muted">A modelagem dos trechos da rede será definida após a validação dos equipamentos.</td></tr></tbody></table></div>
+          </div>
+        </details>
+
+        <details class="step-card">
+          <summary><span>2</span><div><b>Cálculo dos equipamentos</b><small>Vazão pelo fator K, pressão operacional e equipamento hidraulicamente mais desfavorável</small></div></summary>
+          <div class="step-body">
+            <div class="formula">Q = K × √P</div>
+            <div class="table-wrap"><table id="hydraulicEquipmentCalculationTable"><thead><tr><th>Equipamento</th><th>Referência protegida</th><th>Quantidade em operação</th><th>Fator K</th><th>Pressão calculada</th><th>Vazão unitária</th><th>Vazão total</th><th>Condição hidráulica</th></tr></thead><tbody><tr><td colspan="8" class="muted">Os cálculos serão realizados a partir dos equipamentos definidos no Módulo 7.</td></tr></tbody></table></div>
+          </div>
+        </details>
+
+        <details class="step-card">
+          <summary><span>3</span><div><b>Verificação do atendimento</b><small>Comparação entre a demanda normativa mínima e o desempenho do sistema projetado</small></div></summary>
+          <div class="step-body">
+            <div class="table-wrap"><table id="hydraulicComplianceTable"><thead><tr><th>Cenário</th><th>Critério</th><th>Mínimo normativo</th><th>Resultado hidráulico</th><th>Valor adotado</th><th>Situação</th></tr></thead><tbody><tr><td colspan="6" class="muted">Cada critério será classificado como Atende, Não atende ou Pendente de dimensionamento.</td></tr></tbody></table></div>
+          </div>
+        </details>
+
+        <details class="step-card">
+          <summary><span>4</span><div><b>Demanda final de projeto</b><small>Cenários governantes para vazão, pressão, reserva de água e consumo de LGE</small></div></summary>
+          <div class="step-body">
+            <div class="card-heading"><div><span class="eyebrow">RESULTADO FINAL</span><h3>Parâmetros hidráulicos adotados no projeto</h3><p>Os maiores resultados poderão pertencer a cenários diferentes e serão apresentados separadamente.</p></div></div>
+            <div class="metrics" id="finalHydraulicDemandMetrics">
+              <article><small>Vazão final de projeto</small><b>—</b><span>Pendente de dimensionamento</span></article>
+              <article><small>Pressão requerida</small><b>—</b><span>Pendente de dimensionamento</span></article>
+              <article><small>Reserva de incêndio</small><b>—</b><span>Pendente de dimensionamento</span></article>
+              <article><small>Quantidade total de LGE</small><b>—</b><span>Pendente de dimensionamento</span></article>
+            </div>
+          </div>
+        </details>
+      </section>
+
       <section class="tab" id="tab-documentos">
-        <div class="section-title"><div><span>MÓDULO 7</span><h2>Memória de cálculo e memorial</h2><p>Documentos técnicos separados, gerados a partir do mesmo estudo validado.</p></div></div>
+        <div class="section-title"><div><span>MÓDULO 9</span><h2>Memória de cálculo e memorial</h2><p>Documentos técnicos separados, gerados a partir do mesmo estudo validado.</p></div></div>
         <div class="card">
           <h3>Identificação do responsável técnico</h3>
           <div class="grid grid-3">
@@ -254,7 +344,7 @@
       </section>
 
       <section class="tab" id="tab-isolamento">
-        <div class="section-title"><div><span>MÓDULO 8</span><h2>Análise de isolamento entre bacias</h2><p>Compare cada par de bacias atendido pelo sistema comum.</p></div></div>
+        <div class="section-title"><div><span>MÓDULO 10</span><h2>Análise de isolamento entre bacias</h2><p>Compare cada par de bacias atendido pelo sistema comum.</p></div></div>
         <div class="module-intro">
           <span class="module-intro-icon">↔</span>
           <div><b>Regra automática</b><p>Se a distância existente atender à distância exigida, os cenários não são somados. Se não atender, o par segue para composição simultânea.</p></div>
@@ -267,7 +357,7 @@
       </section>
 
       <section class="tab" id="tab-consolidado">
-        <div class="section-title"><div><span>MÓDULO 9</span><h2>Consolidação global do sistema</h2><p>Comparação de todos os cenários e critérios governantes.</p></div></div>
+        <div class="section-title"><div><span>MÓDULO 11</span><h2>Consolidação global do sistema</h2><p>Comparação de todos os cenários e critérios governantes.</p></div></div>
         <div id="globalCriticalMetrics" class="metrics"></div>
         <div class="card module-card">
           <div class="card-heading"><div><span class="eyebrow">TODAS AS BACIAS</span><h3>Comparativo dos cenários por bacia</h3><p>As mesmas tabelas-resumo da Aba 5, sem recalcular ou alterar os resultados individuais.</p></div></div>
