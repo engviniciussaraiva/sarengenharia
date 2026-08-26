@@ -147,6 +147,14 @@
             <span class="legend"><i></i> Campo de entrada</span>
           </div>
           <div class="table-wrap"><table id="distanceInputMatrix"></table></div>
+          <div id="spacingComplianceSummary" class="spacing-compliance-summary"></div>
+          <div class="table-wrap"><table id="spacingComplianceTable"></table></div>
+        </div>
+        <div class="card module-card">
+          <div class="card-heading">
+            <div><span class="eyebrow">RESUMO</span><h3>Matriz de vizinhança direcional</h3><p>As linhas representam o tanque em chamas; as colunas, os tanques analisados.</p></div>
+          </div>
+          <div class="table-wrap"><table id="matrixTable"></table></div>
         </div>
         <div class="card module-card">
           <div class="card-heading">
@@ -154,10 +162,6 @@
             <div class="fire-selector"><label>Tanque em chamas<select id="fireTank"></select></label><span id="neighborSummary" class="pill"></span></div>
           </div>
           <div class="table-wrap"><table id="distanceTable"></table></div>
-        </div>
-        <div class="card module-card">
-          <div class="card-heading"><div><span class="eyebrow">RESUMO</span><h3>Matriz de vizinhança direcional</h3><p>As linhas representam o tanque em chamas; as colunas, os tanques analisados.</p></div></div>
-          <div class="table-wrap"><table id="matrixTable"></table></div>
         </div>
       </section>
 
@@ -302,6 +306,10 @@
     #secondaryFoamTable .foam-choice{text-align:center;background:#eef8f3}
     #secondaryFoamTable .foam-choice input{width:20px;height:20px;accent-color:#2e625d;cursor:pointer}
     #secondaryFoamTable select{width:100%;min-width:210px}
+    .spacing-compliance-summary{margin:14px 0 8px;padding:11px 14px;border-radius:8px;font-weight:800}
+    .spacing-compliance-summary.ok{background:#e8f6ed;color:#17633c;border-left:4px solid #39a465}
+    .spacing-compliance-summary.bad{background:#fff0f0;color:#a12e2e;border-left:4px solid #cf4646}
+    .spacing-compliance-summary.pending{background:#fff8df;color:#765d14;border-left:4px solid #d6aa2f}
     .scenario-maximum,.scenario-maximum b{color:#c62828!important;font-weight:900!important}
     .study-dialog{width:min(980px,94vw);max-height:82vh;border:0;border-radius:14px;padding:0;box-shadow:0 24px 70px #10271e55;color:#243f34}
     .study-dialog::backdrop{background:#10271e80}
