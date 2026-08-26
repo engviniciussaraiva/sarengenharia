@@ -48,7 +48,7 @@ function prepareOptionalNumericInput(el,commit){
 }
 const STORAGE='sar.parque.tanques.mvp.v1';
 const SYSTEM_STORAGE='sar.parque.tanques.multibacia.v31';
-const defaults={meta:{name:'',reference:'',responsible:'',park:'',basin:''},basin:{type:'around',width:0,length:0,area:0,areaManual:false,precipitation:0,recurrenceTime:0,rain:0,freeboard:0,isolation:0,secondaryFoamRate:0,secondaryMinimumFlow:0,secondaryLineCount:1,secondaryFoamTime:0,secondaryLgePercent:3,basinFoamMethod:'camera',basinFoamLgePercent:3,basinFoamNormative:null,basinFoamPending:false,basinFoamError:''},tanks:[],distances:{},neighborAnalysis:{}};
+const defaults={meta:{name:'',reference:'',responsible:'',park:'',basin:''},basin:{type:'around',width:0,length:0,area:0,areaManual:false,precipitation:0,recurrenceTime:0,rain:0,freeboard:0,isolation:0,secondaryFoamRate:0,secondaryMinimumFlow:0,secondaryLineCount:1,secondaryFoamTime:0,secondaryLgePercent:3,secondaryFoamAdoptedMode:'lines',basinFoamMethod:'camera',basinFoamLgePercent:3,basinFoamNormative:null,basinFoamPending:false,basinFoamError:''},tanks:[],distances:{},neighborAnalysis:{}};
 let state,system,selectedScenario=null,productCatalog=[],thermalClassifier=null,distanceAnalyzer=null,verticalFoamEngine=null,basinFoamEngine=null,coolingEngine=null;
 const coolingRequestTokens=new Map();
 function tank(i={}){return {id:uid(),tag:'TQ1',orientation:'vertical',installation:'apoiado',roofType:'fixo',sealWidth:0,inertized:false,api620:false,diameter:0,height:0,length:0,usefulVolume:0,baseShape:'circular',baseDiameter:0,baseHeight:0,baseVolume:0,baseVolumeManual:false,productId:null,product:'',productScientificName:'',productSource:'',flashPoint:null,boilingPoint:null,vaporPressure:null,vaporPressureConfirmed:false,liquidClass:'',miscibilityWater:'',foamGroup:'',classificationRuleVersion:'',storageTemperature:25,storageTemperatureAssumed:true,scenarioClass:'',thermalMessages:[],thermalRuleVersion:'',thermalPending:false,thermalError:'',foamApplicationType:'',foamApplicationUserSelected:false,foamRate:0,foamTime:0,foamArea:0,lgePercent:3,lgeReserveLiters:0,equipmentModel:'',chamberCount:0,proportionerModel:'',lineCount:0,lineFlow:200,lineTime:0,foamNormative:null,foamPending:false,foamError:'',coolingMethod:'',coolingMethodUserSelected:false,coolingOwnRate:2,coolingNeighborRate:2,coolingNeighborRates:{},coolingTime:0,coolingNormative:null,coolingPending:false,coolingError:'',requiredPressure:0,...i}}
@@ -200,6 +200,11 @@ function secondaryFoam(){
   const solutionVolume=solutionFlow*duration;
   return {largestDiameter,solutionFlow,lineCount,flowPerLine,duration,solutionVolume,combatLge,reserveLge,totalLge:combatLge*2};
 }
+function adoptedSecondaryFoam(){
+  if(state.basin.secondaryFoamAdoptedMode!=='basin')return {...secondaryFoam(),mode:'lines',label:'Linhas suplementares'};
+  const b=basinFoam();
+  return {largestDiameter:0,solutionFlow:b.solutionFlow,lineCount:0,flowPerLine:0,duration:b.duration,solutionVolume:b.solutionVolume,combatLge:b.combatLge,reserveLge:b.reserveLge,totalLge:b.totalLge,area:b.area,rate:b.adoptedRate,mode:'basin',label:`Espuma em toda a bacia — ${foamMethodLabel(state.basin.basinFoamMethod)}`};
+}
 function shellDistance(a,b){return num(state.distances?.[pairKey(a,b)])}
 function neighbor(fire,other){
   if(fire.id===other.id)return false;
@@ -256,7 +261,7 @@ function scenario(fire){
   const cooling=fire.coolingNormative;
   const ownCooling=cooling?.dimensionado?num(cooling.tanque_em_chamas?.vazao_lpm):fireCoolingArea(fire)*num(fire.coolingOwnRate);
   const neighborCooling=cooling?.dimensionado?num(cooling.vazao_vizinhos_lpm):ns.reduce((s,t)=>s+neighborCoolingArea(t)*neighborCoolingRate(fire,t),0);
-  const primary=primaryFoam(fire),secondary=secondaryFoam();
+  const primary=primaryFoam(fire),secondary=adoptedSecondaryFoam();
   const foamMain=primary.solutionFlow;
   const foamLines=secondary.solutionFlow;
   const coolingFlow=ownCooling+neighborCooling, foamFlow=foamMain+foamLines;
@@ -554,46 +559,36 @@ function renderProtection(){
 function renderSecondaryFoam(){
   const table=$('#secondaryFoamTable');if(!table)return;
   table.innerHTML=`<thead><tr>
-    <th>Referência</th><th>Diâmetro do maior tanque<br><small>(m)</small></th>
-    <th>Quantidade de linhas<br><small>Tabela 3.9</small></th>
-    <th>Vazão por linha<br><small>(L/min)</small></th><th>Vazão secundária total<br><small>(L/min)</small></th>
-    <th>Tempo de aplicação<br><small>Tabela 3.10 (min)</small></th><th>Volume de solução<br><small>(litros)</small></th>
-    <th>Dosagem LGE<br><small>(%)</small></th><th>Quantidade LGE combate<br><small>(litros)</small></th>
-    <th>Quantidade LGE reserva<br><small>(litros)</small></th><th>Quantidade LGE total<br><small>(litros)</small></th>
+    <th>Adotar</th><th>Solução de espuma secundária</th><th>Base de cálculo</th><th>Tipo de aplicação</th>
+    <th>Taxa / vazão unitária</th><th>Quantidade</th><th>Vazão total<br><small>(L/min)</small></th>
+    <th>Tempo<br><small>(min)</small></th><th>Volume de solução<br><small>(litros)</small></th>
+    <th>Dosagem LGE<br><small>(%)</small></th><th>LGE total<br><small>(litros)</small></th>
   </tr></thead><tbody>`;
-  const f=secondaryFoam();
+  const f=secondaryFoam(),bf=basinFoam(),n=state.basin.basinFoamNormative,adopted=state.basin.secondaryFoamAdoptedMode||'lines';
   table.innerHTML+=`<tr>
-    <td><b>${state.meta.basin||'Bacia'}</b></td>
-    <td class="calc">${fmt(f.largestDiameter)}</td>
-    <td class="calc"><b>${f.lineCount}</b></td>
-    <td class="calc">${fmt(f.flowPerLine)}</td>
-    <td class="calc"><b>${fmt(f.solutionFlow)}</b></td>
-    <td class="calc"><b>${fmt(f.duration,0)}</b></td>
-    <td class="calc"><b>${fmt(f.solutionVolume)}</b></td>
+    <td class="foam-choice"><input type="radio" name="secondaryFoamAdoptedMode" value="lines" ${adopted==='lines'?'checked':''}></td>
+    <td><b>Linhas suplementares</b><small class="cell-hint">Tabelas 3.9 e 3.10</small></td>
+    <td>Maior Ø: <b>${fmt(f.largestDiameter)} m</b></td><td>Linha manual</td>
+    <td>${fmt(f.flowPerLine)} L/min por linha</td><td><b>${f.lineCount} linha(s)</b></td>
+    <td class="calc"><b>${fmt(f.solutionFlow)}</b></td><td class="calc"><b>${fmt(f.duration,0)}</b></td><td class="calc"><b>${fmt(f.solutionVolume)}</b></td>
     <td><input class="normative" data-basin-foam="secondaryLgePercent" data-numeric="true" type="text" inputmode="decimal" value="${inputNumberValue(state.basin.secondaryLgePercent)}"></td>
-    <td class="calc">${fmt(f.combatLge)}</td><td class="calc">${fmt(f.reserveLge)}</td>
     <td class="calc"><b>${fmt(f.totalLge)}</b></td>
+  </tr><tr>
+    <td class="foam-choice"><input type="radio" name="secondaryFoamAdoptedMode" value="basin" ${adopted==='basin'?'checked':''}></td>
+    <td><b>Espuma em toda a bacia</b><small class="cell-hint">Tabelas 3.6 e 3.7</small></td>
+    <td>Área útil: <b>${fmt(basinCalc().usefulArea)} m²</b></td>
+    <td><select class="normative" data-basin-foam-method ${state.basin.basinFoamPending?'disabled':''}><option value="camera" ${state.basin.basinFoamMethod==='camera'?'selected':''}>Câmara/aplicadores fixos</option><option value="monitor" ${state.basin.basinFoamMethod==='monitor'?'selected':''}>Canhões-monitores/linhas manuais</option></select><small class="cell-hint">${state.basin.basinFoamPending?'Calculando...':'Seleção do projetista'}</small></td>
+    <td>${bf.required?fmt(bf.adoptedRate)+' L/min/m²':'—'}</td><td>—</td>
+    <td class="calc"><b>${bf.required?fmt(bf.solutionFlow):'—'}</b></td><td class="calc"><b>${bf.required?fmt(bf.duration,0):'—'}</b></td><td class="calc"><b>${bf.required?fmt(bf.solutionVolume):'—'}</b></td>
+    <td><input class="normative" data-basin-foam="basinFoamLgePercent" data-numeric="true" type="text" inputmode="decimal" value="${inputNumberValue(state.basin.basinFoamLgePercent)}"></td>
+    <td class="calc"><b>${bf.required?fmt(bf.totalLge):'—'}</b><small class="cell-hint">${bf.required?`${escapeText(bf.product||'—')} · Classe ${escapeText(bf.className||'—')}`:escapeText(n?.motivo||state.basin.basinFoamError||'Aguardando cálculo')}</small></td>
   </tr></tbody>`;
   table.querySelectorAll('[data-basin-foam]').forEach(el=>{
-    const commit=value=>{state.basin[el.dataset.basinFoam]=num(value);save();renderProtection();renderResults()};
+    const commit=value=>{state.basin[el.dataset.basinFoam]=num(value);if(el.dataset.basinFoam==='basinFoamLgePercent')state.basin.basinFoamNormative=null;save();renderProtection();renderResults();if(el.dataset.basinFoam==='basinFoamLgePercent')analyzeBasinFoam()};
     if(el.dataset.numeric==='true')prepareNumericInput(el,commit);else el.onchange=()=>commit(el.value);
   });
-  $('#foamSecondaryMetrics').innerHTML=metric('Maior diâmetro',`${fmt(f.largestDiameter)} m`,'base das Tabelas 3.9 e 3.10')+
-    metric('Vazão secundária',`${fmt(f.solutionFlow)} L/min`,`${f.lineCount} × 200 L/min`)+
-    metric('Linhas necessárias',`${f.lineCount}`,`${fmt(f.flowPerLine)} L/min por linha`)+
-    metric('Volume da solução',`${fmt(f.solutionVolume)} litros`,`${f.duration} min de aplicação`)+
-    metric('LGE total',`${fmt(f.totalLge)} litros`,'combate × 2');
-  const basinTable=$('#basinFoamTable'),bf=basinFoam(),n=state.basin.basinFoamNormative;
-  if(basinTable){
-    basinTable.innerHTML=`<thead><tr><th>Bacia</th><th>Área útil de aplicação (m²)</th><th>Tipo de aplicação</th><th>Produto governante / classe</th><th>Taxa normativa</th><th>Majoração</th><th>Taxa adotada</th><th>Tempo</th><th>Vazão</th><th>Volume solução</th><th>LGE total</th></tr></thead><tbody><tr>
-      <td><b>${escapeText(state.meta.basin||'Bacia')}</b></td><td>${fmt(basinCalc().usefulArea)}</td>
-      <td><select class="normative" data-basin-foam-method ${state.basin.basinFoamPending?'disabled':''}><option value="camera" ${state.basin.basinFoamMethod==='camera'?'selected':''}>Câmara/aplicadores fixos</option><option value="monitor" ${state.basin.basinFoamMethod==='monitor'?'selected':''}>Canhões-monitores/linhas manuais</option></select><small class="cell-hint">${state.basin.basinFoamPending?'Calculando...':'Seleção do projetista'}</small></td>
-      <td>${bf.required?`${escapeText(bf.product||'—')}<small class="cell-hint">Classe ${escapeText(bf.className||'—')}</small>`:escapeText(n?.motivo||state.basin.basinFoamError||'Aguardando cálculo')}</td>
-      <td>${bf.required?fmt(bf.rate)+' L/min/m²':'—'}</td><td>${bf.required&&bf.wind?fmt(bf.wind,0)+'%':'—'}</td><td>${bf.required?fmt(bf.adoptedRate)+' L/min/m²':'—'}</td><td>${bf.required?fmt(bf.duration,0)+' min':'—'}</td><td><b>${bf.required?fmt(bf.solutionFlow)+' L/min':'—'}</b></td><td>${bf.required?fmt(bf.solutionVolume)+' L':'—'}</td><td><b>${bf.required?fmt(bf.totalLge)+' L':'—'}</b></td>
-    </tr></tbody>`;
-    basinTable.querySelector('[data-basin-foam-method]')?.addEventListener('change',e=>{state.basin.basinFoamMethod=e.target.value;state.basin.basinFoamNormative=null;save();renderSecondaryFoam();analyzeBasinFoam()});
-  }
-  if($('#basinFoamMetrics'))$('#basinFoamMetrics').innerHTML=metric('Área útil da bacia',`${fmt(basinCalc().usefulArea)} m²`,'área interna menos projeções')+metric('Vazão da aplicação',`${fmt(bf.solutionFlow)} L/min`,bf.required?foamMethodLabel(state.basin.basinFoamMethod):'Isento')+metric('Tempo',`${fmt(bf.duration,0)} min`,bf.reference||'Tabelas 3.6 e 3.7')+metric('Volume da solução',`${fmt(bf.solutionVolume)} litros`)+metric('LGE total',`${fmt(bf.totalLge)} litros`,'combate × 2');
+  table.querySelectorAll('input[name="secondaryFoamAdoptedMode"]').forEach(el=>el.addEventListener('change',()=>{state.basin.secondaryFoamAdoptedMode=el.value;save();renderSecondaryFoam();renderResults()}));
+  table.querySelector('[data-basin-foam-method]')?.addEventListener('change',e=>{state.basin.basinFoamMethod=e.target.value;state.basin.basinFoamNormative=null;save();renderSecondaryFoam();analyzeBasinFoam()});
 }
 function metric(label,value,sub=''){return `<div class="metric"><span>${label}</span><strong>${value}</strong><small>${sub}</small></div>`}
 function renderResults(){
@@ -708,9 +703,9 @@ function renderCombinedScenarios(){
         <td>${fmt(s.primary.totalLge)} L</td>
       </tr>
       <tr>
-        <td><b>Espuma secundária — ${state.meta.basin||'bacia'}</b><small class="cell-hint">${s.secondary.lineCount} linha(s)</small></td>
-        <td>—</td>
-        <td>${fmt(s.secondary.flowPerLine)} L/min por linha</td>
+        <td><b>Espuma secundária — ${state.meta.basin||'bacia'}</b><small class="cell-hint">${escapeText(s.secondary.label||'Linhas suplementares')}</small></td>
+        <td>${s.secondary.mode==='basin'?fmt(s.secondary.area)+' m²':'—'}</td>
+        <td>${s.secondary.mode==='basin'?fmt(s.secondary.rate)+' L/min/m²':fmt(s.secondary.flowPerLine)+' L/min por linha'}</td>
         <td>${fmt(s.secondary.duration,0)} min</td>
         <td>${fmt(s.foamLines)} L/min</td>
         <td>${fmt(s.secondary.solutionVolume/1000)} m³</td>
@@ -811,8 +806,10 @@ function renderDocs(type){
   const thermalNotes=state.tanks.flatMap(t=>normativeThermalAssessment(t).messages.map(message=>`<li><b>${escapeText(t.tag)}:</b> ${escapeText(message)}</li>`)).join('')||'<li>Nenhuma alteração normativa decorrente da temperatura adotada.</li>';
   const base=`<div class="doc-header"><p>SAR — SISTEMA AVANÇADO DE RESPOSTA</p><h1>${type==='memory'?'MEMÓRIA DE CÁLCULO':'MEMORIAL DESCRITIVO'}</h1><p>${state.meta.name} · ${state.meta.reference||'Sem referência'} · ${date}</p></div>`;
   const tankTable=`<table><tr><th>ID</th><th>Tipo</th><th>Diâmetro (m)</th><th>Volume útil (m³)</th><th>Produto</th><th>Classe original</th><th>Temperatura máxima</th><th>Classe no cenário</th></tr>${rows}</table>`;
-  if(type==='memory')$('#documentPreview').innerHTML=base+`<section><h2>1. Identificação</h2><p>Parque: ${state.meta.park}. Bacia: ${state.meta.basin}. Responsável técnico: ${state.meta.responsible}.</p></section><section><h2>2. Tanques e condição térmica</h2>${tankTable}<ul>${thermalNotes}</ul></section><section><h2>3. Cenários de incêndio</h2><p>Foram calculados ${c.ss.length} cenários direcionais, considerando cada tanque em chamas e seus vizinhos normativos.</p><p>Reserva crítica: <b>${fmt(c.water.totalVolume)} m³ (${c.water.fire.tag})</b>. Vazão crítica: <b>${fmt(c.flow.totalFlow)} L/min (${c.flow.fire.tag})</b>. LGE crítico: <b>${fmt(c.lge.lgeVolume)} m³ (${c.lge.fire.tag})</b>.</p></section><section><h2>4. Bacia</h2><p>Área útil: ${fmt(b.usefulArea)} m². Volume exigido: ${fmt(b.required)} m³. Altura hidráulica: ${fmt(b.hydraulicHeight)} m. Altura mínima calculada do dique: ${fmt(b.finalHeight)} m.</p></section><section><h2>5. Base normativa</h2><p>IT 25/2025 do CBPMESP, Partes 1, 2 e 3. Documento preliminar gerado pelo motor MVP; taxas, tempos e premissas informadas devem ser validados pelo responsável técnico.</p></section><div class="signature">_________________________________<br>${state.meta.responsible}<br>Responsável técnico</div>`;
-  else $('#documentPreview').innerHTML=base+`<section><h2>1. Objeto</h2><p>Este memorial descreve os sistemas de proteção contra incêndio previstos para o ${state.meta.park}, composto por ${state.tanks.length} tanque(s) na ${state.meta.basin}.</p></section><section><h2>2. Instalação e condição térmica</h2>${tankTable}<ul>${thermalNotes}</ul></section><section><h2>3. Sistemas</h2><p>Os cenários contemplam proteção por solução de espuma no tanque em chamas, linhas suplementares quando indicadas, resfriamento do tanque em chamas e resfriamento dos tanques vizinhos. A operação simultânea governa a seleção de vazão e pressão; os tempos individuais governam as reservas.</p></section><section><h2>4. Bacia de contenção</h2><p>A bacia possui área interna de ${fmt(b.area)} m² e área útil efetiva de ${fmt(b.usefulArea)} m². A altura mínima calculada do dique é ${fmt(b.finalHeight)} m, incluídas as parcelas informadas para precipitação e borda livre.</p></section><section><h2>5. Operação e validação</h2><p>Equipamentos, desempenho hidráulico, compatibilidade do LGE, temperatura máxima prevista e catálogos deverão integrar o projeto técnico final. Este documento deve ser revisado e assinado pelo responsável técnico.</p></section><div class="signature">_________________________________<br>${state.meta.responsible}<br>Responsável técnico</div>`;
+  const lines=secondaryFoam(),full=basinFoam(),adopted=adoptedSecondaryFoam();
+  const secondaryMemory=`<section><h2>Proteção por espuma secundária</h2><p><b>Solução adotada no projeto:</b> ${escapeText(adopted.label)}.</p><p><b>Alternativa por linhas suplementares:</b> maior diâmetro ${fmt(lines.largestDiameter)} m; ${lines.lineCount} linha(s) de ${fmt(lines.flowPerLine)} L/min; vazão total ${fmt(lines.solutionFlow)} L/min; tempo ${fmt(lines.duration,0)} min; solução ${fmt(lines.solutionVolume)} L; LGE total ${fmt(lines.totalLge)} L.</p><p><b>Alternativa sobre toda a bacia:</b> área útil ${fmt(b.usefulArea)} m²; aplicação ${escapeText(foamMethodLabel(state.basin.basinFoamMethod))}; taxa adotada ${fmt(full.adoptedRate)} L/min/m²; vazão ${fmt(full.solutionFlow)} L/min; tempo ${fmt(full.duration,0)} min; solução ${fmt(full.solutionVolume)} L; LGE total ${fmt(full.totalLge)} L.</p><p>Para ambas as alternativas, a reserva de LGE é igual ao combate e o total corresponde ao combate × 2.</p></section>`;
+  if(type==='memory')$('#documentPreview').innerHTML=base+`<section><h2>1. Identificação</h2><p>Parque: ${state.meta.park}. Bacia: ${state.meta.basin}. Responsável técnico: ${state.meta.responsible}.</p></section><section><h2>2. Tanques e condição térmica</h2>${tankTable}<ul>${thermalNotes}</ul></section><section><h2>3. Cenários de incêndio</h2><p>Foram calculados ${c.ss.length} cenários direcionais, considerando cada tanque em chamas e seus vizinhos normativos.</p><p>Reserva crítica: <b>${fmt(c.water.totalVolume)} m³ (${c.water.fire.tag})</b>. Vazão crítica: <b>${fmt(c.flow.totalFlow)} L/min (${c.flow.fire.tag})</b>. LGE crítico: <b>${fmt(c.lge.lgeVolume)} m³ (${c.lge.fire.tag})</b>.</p></section>${secondaryMemory}<section><h2>4. Bacia</h2><p>Área útil: ${fmt(b.usefulArea)} m². Volume exigido: ${fmt(b.required)} m³. Altura hidráulica: ${fmt(b.hydraulicHeight)} m. Altura mínima calculada do dique: ${fmt(b.finalHeight)} m.</p></section><section><h2>5. Base normativa</h2><p>IT 25/2025 do CBPMESP, Partes 1, 2 e 3. Documento preliminar gerado pelo motor MVP; taxas, tempos e premissas informadas devem ser validados pelo responsável técnico.</p></section><div class="signature">_________________________________<br>${state.meta.responsible}<br>Responsável técnico</div>`;
+  else $('#documentPreview').innerHTML=base+`<section><h2>1. Objeto</h2><p>Este memorial descreve os sistemas de proteção contra incêndio previstos para o ${state.meta.park}, composto por ${state.tanks.length} tanque(s) na ${state.meta.basin}.</p></section><section><h2>2. Instalação e condição térmica</h2>${tankTable}<ul>${thermalNotes}</ul></section><section><h2>3. Sistemas</h2><p>Os cenários contemplam proteção por solução de espuma no tanque em chamas, proteção secundária adotada para a bacia, resfriamento do tanque em chamas e resfriamento dos tanques vizinhos. A operação simultânea governa a seleção de vazão e pressão; os tempos individuais governam as reservas.</p></section>${secondaryMemory}<section><h2>4. Bacia de contenção</h2><p>A bacia possui área interna de ${fmt(b.area)} m² e área útil efetiva de ${fmt(b.usefulArea)} m². A altura mínima calculada do dique é ${fmt(b.finalHeight)} m, incluídas as parcelas informadas para precipitação e borda livre.</p></section><section><h2>5. Operação e validação</h2><p>Equipamentos, desempenho hidráulico, compatibilidade do LGE, temperatura máxima prevista e catálogos deverão integrar o projeto técnico final. Este documento deve ser revisado e assinado pelo responsável técnico.</p></section><div class="signature">_________________________________<br>${state.meta.responsible}<br>Responsável técnico</div>`;
 }
 function validationIssues(){
   const sections=new Set();
