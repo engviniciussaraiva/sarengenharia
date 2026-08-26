@@ -5,7 +5,7 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler
 
 
-RULE_VERSION = "IT25-2025-P3-26.1-SAR-HORIZONTAL-V2"
+RULE_VERSION = "IT25-2025-P2-P3-AFASTAMENTO-V3"
 DEFAULT_SUPABASE_URL = "https://bjtxbpmrmhfvpmdsthxr.supabase.co"
 DEFAULT_SUPABASE_KEY = "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM"
 
@@ -17,6 +17,43 @@ def request_status(url, headers):
             return response.status
     except urllib.error.HTTPError as error:
         return error.code
+
+
+def number(value, default=0.0):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def liquid_class(value):
+    normalized = str(value or "").upper().replace("CLASSE", "").replace("-", "").replace(" ", "")
+    return {"1": "I", "1A": "I", "1B": "I", "1C": "I", "IA": "I", "IB": "I", "IC": "I", "2": "II", "3A": "IIIA", "3B": "IIIB"}.get(normalized, normalized)
+
+
+def minimum_spacing(a, b, containment, iiib_relaxed):
+    diameter_a = number(a.get("diametro_m"))
+    diameter_b = number(b.get("diametro_m"))
+    diameter_sum = diameter_a + diameter_b
+    if diameter_a <= 0 or diameter_b <= 0:
+        return None, "Informe os diâmetros dos dois tanques."
+    class_a = liquid_class(a.get("classe_cenario"))
+    class_b = liquid_class(b.get("classe_cenario"))
+    if iiib_relaxed and class_a == "IIIB" and class_b == "IIIB":
+        return 1.0, "IT 25/2025 Parte 2, item 18.2.2(d): tanques exclusivamente Classe IIIB, mínimo de 1,00 m."
+    if max(diameter_a, diameter_b) <= 45:
+        return max(1.0, diameter_sum / 6), "IT 25/2025 Parte 2, Tabela 2.7: 1/6 da soma dos diâmetros, nunca inferior a 1,00 m."
+    floating_types = {"flutuante", "flutuante_externo"}
+    both_floating = str(a.get("tipo_teto") or "") in floating_types and str(b.get("tipo_teto") or "") in floating_types
+    has_class_i_or_ii = "IIIB" not in {class_a, class_b} and (class_a in {"I", "II"} or class_b in {"I", "II"})
+    remote_basin = containment == "isolated"
+    if remote_basin:
+        coefficient = 1 / 6 if both_floating or not has_class_i_or_ii else 1 / 4
+        basin_label = "bacia de contenção à distância"
+    else:
+        coefficient = 1 / 4 if both_floating or not has_class_i_or_ii else 1 / 3
+        basin_label = "dique em torno dos tanques"
+    return diameter_sum * coefficient, f"IT 25/2025 Parte 2, Tabela 2.7: tanques acima de 45 m, {basin_label}."
 
 
 class handler(BaseHTTPRequestHandler):
@@ -48,6 +85,7 @@ class handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(length).decode("utf-8"))
             tanks = body.get("tanques") or []
             distances = body.get("distancias") or []
+            containment = str(body.get("tipo_contencao") or "around")
             if not isinstance(tanks, list) or not isinstance(distances, list):
                 raise ValueError
         except (TypeError, ValueError, json.JSONDecodeError):
@@ -106,8 +144,37 @@ class handler(BaseHTTPRequestHandler):
                     })
                 analyses.append(base)
 
+        classes = {liquid_class(tank.get("classe_cenario")) for tank in tanks if tank.get("classe_cenario")}
+        iiib_relaxed = not bool(classes.intersection({"I", "II"}))
+        spacings = []
+        for index, tank_a in enumerate(tanks):
+            for tank_b in tanks[index + 1:]:
+                tank_a_id = str(tank_a.get("id") or "")
+                tank_b_id = str(tank_b.get("id") or "")
+                if not tank_a_id or not tank_b_id:
+                    continue
+                pair_id = "|".join(sorted((tank_a_id, tank_b_id)))
+                informed = distance_map.get(tuple(sorted((tank_a_id, tank_b_id))))
+                minimum, criterion = minimum_spacing(tank_a, tank_b, containment, iiib_relaxed)
+                if informed is None or minimum is None:
+                    result = "pendente"
+                else:
+                    result = "atende" if informed + 1e-9 >= minimum else "nao_atende"
+                spacings.append({
+                    "par_id": pair_id,
+                    "tanque_a_id": tank_a_id,
+                    "tanque_b_id": tank_b_id,
+                    "tanque_a_tag": tank_a.get("tag"),
+                    "tanque_b_tag": tank_b.get("tag"),
+                    "distancia_informada_m": informed,
+                    "afastamento_minimo_m": round(minimum, 6) if minimum is not None else None,
+                    "resultado": result,
+                    "criterio": criterion,
+                })
+
         return self.send_json(200, {
             "analisado": True,
             "analises": analyses,
+            "afastamentos": spacings,
             "versao_regra": RULE_VERSION,
         })
