@@ -6,7 +6,7 @@ import urllib.parse
 import urllib.request
 from http.server import BaseHTTPRequestHandler
 
-RULE_VERSION="MOTOR-RESFRIAMENTO-BANCO-V3"
+RULE_VERSION="MOTOR-RESFRIAMENTO-BANCO-V4"
 NORM_VERSION="IT25-2025-P3"
 DEFAULT_SUPABASE_URL="https://bjtxbpmrmhfvpmdsthxr.supabase.co"
 DEFAULT_SUPABASE_KEY="sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM"
@@ -31,7 +31,7 @@ def load_rules(url,key):
 
 def normalize_class(value):
     value=str(value or "").upper().replace("CLASSE","").replace("-","").replace(" ","")
-    return {"1":"I","1A":"I","1B":"I","IA":"I","IB":"I","2":"II","3A":"IIIA","3B":"IIIB"}.get(value,value)
+    return {"1":"I","1A":"I","1B":"I","1C":"I","IA":"I","IB":"I","IC":"I","2":"II","3A":"IIIA","3B":"IIIB"}.get(value,value)
 
 def parameter(rules,code):
     row=next((x for x in rules["parameters"] if x.get("codigo")==code),None)
@@ -40,7 +40,7 @@ def parameter(rules,code):
 
 def system_rule(rows,liquid_class,height,volume):
     for row in rows:
-        if row.get("classe_produto")!=liquid_class:continue
+        if normalize_class(row.get("classe_produto"))!=normalize_class(liquid_class):continue
         if row.get("altura_min_inclusiva_m") is not None and height<number(row["altura_min_inclusiva_m"]):continue
         if row.get("altura_max_exclusiva_m") is not None and height>=number(row["altura_max_exclusiva_m"]):continue
         if row.get("volume_min_exclusivo_m3") is not None and volume<=number(row["volume_min_exclusivo_m3"]):continue
