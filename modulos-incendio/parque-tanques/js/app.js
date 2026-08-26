@@ -48,7 +48,7 @@ function prepareOptionalNumericInput(el,commit){
 }
 const STORAGE='sar.parque.tanques.mvp.v1';
 const SYSTEM_STORAGE='sar.parque.tanques.multibacia.v31';
-const defaults={meta:{name:'',reference:'',responsible:'',park:'',basin:''},basin:{type:'around',width:0,length:0,area:0,areaManual:false,precipitation:0,recurrenceTime:0,rain:0,freeboard:0,isolation:0,secondaryFoamRate:0,secondaryMinimumFlow:0,secondaryLineCount:1,secondaryFoamTime:0,secondaryLgePercent:3,secondaryFoamAdoptedMode:'lines',basinFoamMethod:'camera',basinFoamLgePercent:3,basinFoamNormative:null,basinFoamPending:false,basinFoamError:''},tanks:[],distances:{},neighborAnalysis:{}};
+const defaults={meta:{name:'',reference:'',responsible:'',park:'',basin:''},basin:{type:'around',width:0,length:0,area:0,areaManual:false,precipitation:0,recurrenceTime:0,rain:0,freeboard:0,isolation:0,secondaryFoamRate:0,secondaryMinimumFlow:0,secondaryLineCount:1,secondaryFoamTime:0,secondaryLgePercent:3,secondaryFoamAdoptedMode:'lines',basinFoamMethod:'camera',basinFoamLgePercent:3,basinFoamNormative:null,basinFoamPending:false,basinFoamError:''},tanks:[],distances:{},neighborAnalysis:{},spacingAnalysis:{}};
 let state,system,selectedScenario=null,productCatalog=[],thermalClassifier=null,distanceAnalyzer=null,verticalFoamEngine=null,basinFoamEngine=null,coolingEngine=null;
 const coolingRequestTokens=new Map();
 function tank(i={}){return {id:uid(),tag:'TQ1',orientation:'vertical',installation:'apoiado',roofType:'fixo',sealWidth:0,inertized:false,api620:false,diameter:0,height:0,length:0,usefulVolume:0,baseShape:'circular',baseDiameter:0,baseHeight:0,baseVolume:0,baseVolumeManual:false,productId:null,product:'',productScientificName:'',productSource:'',flashPoint:null,boilingPoint:null,vaporPressure:null,vaporPressureConfirmed:false,liquidClass:'',miscibilityWater:'',foamGroup:'',classificationRuleVersion:'',storageTemperature:25,storageTemperatureAssumed:true,scenarioClass:'',thermalMessages:[],thermalRuleVersion:'',thermalPending:false,thermalError:'',foamApplicationType:'',foamApplicationUserSelected:false,foamRate:0,foamTime:0,foamArea:0,lgePercent:3,lgeReserveLiters:0,equipmentModel:'',chamberCount:0,proportionerModel:'',lineCount:0,lineFlow:200,lineTime:0,foamNormative:null,foamPending:false,foamError:'',coolingMethod:'',coolingMethodUserSelected:false,coolingOwnRate:2,coolingNeighborRate:2,coolingNeighborRates:{},coolingTime:0,coolingNormative:null,coolingPending:false,coolingError:'',requiredPressure:0,...i}}
@@ -56,7 +56,7 @@ function pairKey(a,b){return [a.id,b.id].sort().join('|')}
 function coordinateShellDistance(a,b){return Math.max(0,Math.hypot(num(a.x)-num(b.x),num(a.y)-num(b.y))-(num(a.diameter)+num(b.diameter))/2)}
 function normalizeState(raw){
   const next={...structuredClone(defaults),...(raw||{})};
-  next.meta={...defaults.meta,...(raw?.meta||{})};next.basin={...defaults.basin,...(raw?.basin||{})};next.tanks=(raw?.tanks||[]).map(item=>tank(item));next.distances={...(raw?.distances||{})};next.neighborAnalysis={...(raw?.neighborAnalysis||{})};
+  next.meta={...defaults.meta,...(raw?.meta||{})};next.basin={...defaults.basin,...(raw?.basin||{})};next.tanks=(raw?.tanks||[]).map(item=>tank(item));next.distances={...(raw?.distances||{})};next.neighborAnalysis={...(raw?.neighborAnalysis||{})};next.spacingAnalysis={...(raw?.spacingAnalysis||{})};
   Object.keys(defaults.basin).forEach(key=>{
     if(typeof defaults.basin[key]==='number')next.basin[key]=num(next.basin[key]);
   });
@@ -133,7 +133,7 @@ async function reclassifyTankTemperature(target){
     target.thermalError=error instanceof Error?error.message:String(error);
     alert(`Não foi possível reclassificar ${target.tag}.\n${target.thermalError}`);
   }finally{
-    target.thermalPending=false;target.foamNormative=null;target.coolingNormative=null;save(false);renderTanks();renderResults();analyzeVerticalFoam(target);analyzeAllCooling();
+    target.thermalPending=false;target.foamNormative=null;target.coolingNormative=null;state.spacingAnalysis={};save(false);renderTanks();renderResults();analyzeVerticalFoam(target);analyzeAllCooling();analyzeAllNeighbors();
   }
 }
 const escapeText=v=>String(v??'').replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll("'",'&#39;').replaceAll('<','&lt;').replaceAll('>','&gt;');
@@ -215,11 +215,13 @@ async function analyzeAllNeighbors(){
   if(typeof distanceAnalyzer!=='function'||state.tanks.length<2)return;
   try{
     const result=await distanceAnalyzer({
-      tanques:state.tanks.map(t=>({id:t.id,tag:t.tag,orientacao:t.orientation,diametro_m:t.diameter})),
+      tipo_contencao:state.basin.type,
+      tanques:state.tanks.map(t=>({id:t.id,tag:t.tag,orientacao:t.orientation,diametro_m:t.diameter,tipo_teto:t.roofType,classe_cenario:t.scenarioClass||t.liquidClass})),
       distancias:Object.entries(state.distances||{}).map(([key,value])=>{const [tanque_a_id,tanque_b_id]=key.split('|');return {tanque_a_id,tanque_b_id,distancia_costado_costado_m:value}})
     });
     state.neighborAnalysis={};
     (result.analises||[]).forEach(item=>{if(!state.neighborAnalysis[item.tanque_em_chamas_id])state.neighborAnalysis[item.tanque_em_chamas_id]={};state.neighborAnalysis[item.tanque_em_chamas_id][item.tanque_analisado_id]=item});
+    state.spacingAnalysis=Object.fromEntries((result.afastamentos||[]).map(item=>[item.par_id,item]));
     save(false);renderDistances();renderResults();validate();analyzeAllCooling();
   }catch(error){alert(`Não foi possível analisar a vizinhança.\n${error instanceof Error?error.message:String(error)}`)}
 }
@@ -403,15 +405,16 @@ function basinCalc(){
 }
 function bindStatic(){
   const map={studyName:['meta','name'],studyReference:['meta','reference'],responsible:['meta','responsible'],parkName:['meta','park'],basinName:['meta','basin'],basinType:['basin','type'],basinWidth:['basin','width'],basinLength:['basin','length'],precipitation:['basin','precipitation'],recurrenceTime:['basin','recurrenceTime'],rainHeight:['basin','rain'],freeboard:['basin','freeboard'],basinIsolation:['basin','isolation']};
-  Object.entries(map).forEach(([id,path])=>{const el=$('#'+id);if(!el)return;const numeric=el.type==='number'||el.dataset.numeric==='true';el.value=state[path[0]][path[1]]??'';if(numeric)prepareNumericInput(el,value=>{state[path[0]][path[1]]=value;if(['width','length'].includes(path[1]))state.basin.basinFoamNormative=null;save();renderBasinFields();renderResults();if(['width','length'].includes(path[1]))analyzeBasinFoam()});else el.oninput=()=>{state[path[0]][path[1]]=el.value;save();renderBasinFields();renderResults()}})
+  Object.entries(map).forEach(([id,path])=>{const el=$('#'+id);if(!el)return;const numeric=el.type==='number'||el.dataset.numeric==='true';el.value=state[path[0]][path[1]]??'';if(numeric)prepareNumericInput(el,value=>{state[path[0]][path[1]]=value;if(['width','length'].includes(path[1]))state.basin.basinFoamNormative=null;save();renderBasinFields();renderResults();if(['width','length'].includes(path[1]))analyzeBasinFoam()});else el.oninput=()=>{state[path[0]][path[1]]=el.value;if(path[1]==='type'){state.spacingAnalysis={};state.neighborAnalysis={}}save();renderBasinFields();renderResults();if(path[1]==='type')analyzeAllNeighbors()}})
 }
-function setCount(n){n=Math.max(1,Math.min(100,num(n)));while(state.tanks.length<n)state.tanks.push(tank({tag:`TQ${state.tanks.length+1}`}));state.tanks=state.tanks.slice(0,n);const ids=new Set(state.tanks.map(t=>t.id));state.distances=Object.fromEntries(Object.entries(state.distances||{}).filter(([k])=>k.split('|').every(id=>ids.has(id))));state.neighborAnalysis={};save();renderAll()}
+function setCount(n){n=Math.max(1,Math.min(100,num(n)));while(state.tanks.length<n)state.tanks.push(tank({tag:`TQ${state.tanks.length+1}`}));state.tanks=state.tanks.slice(0,n);const ids=new Set(state.tanks.map(t=>t.id));state.distances=Object.fromEntries(Object.entries(state.distances||{}).filter(([k])=>k.split('|').every(id=>ids.has(id))));state.neighborAnalysis={};state.spacingAnalysis={};save();renderAll()}
 function deleteTank(id){
   const target=state.tanks.find(t=>t.id===id);if(!target)return;
   if(state.tanks.length===1){alert('A bacia precisa manter pelo menos um tanque. Para remover toda a bacia, use Excluir no gerenciador de bacias.');return}
   if(!confirm(`Excluir o tanque ${target.tag||'selecionado'} da ${state.meta.basin||'bacia'}?\n\nAs distâncias, vínculos de vizinhança e cenários deste tanque também serão removidos.`))return;
   state.tanks=state.tanks.filter(t=>t.id!==id);
   state.neighborAnalysis={};
+  state.spacingAnalysis={};
   state.distances=Object.fromEntries(Object.entries(state.distances||{}).filter(([key])=>!key.split('|').includes(id)));
   state.tanks.forEach(t=>{
     if(!t.coolingNeighborRates)return;
@@ -453,7 +456,7 @@ function selectProductForTank(tankId,productId){
       thermalMessages:[],thermalRuleVersion:'',thermalPending:false,thermalError:''
     });
   }
-  target.foamNormative=null;target.coolingNormative=null;state.basin.basinFoamNormative=null;save();renderAll();analyzeVerticalFoam(target);analyzeBasinFoam();analyzeAllCooling();
+  target.foamNormative=null;target.coolingNormative=null;state.basin.basinFoamNormative=null;state.spacingAnalysis={};save();renderAll();analyzeVerticalFoam(target);analyzeBasinFoam();analyzeAllCooling();analyzeAllNeighbors();
 }
 function renderTanks(){
   $('#tankCount').value=state.tanks.length;
@@ -503,7 +506,7 @@ function renderTanks(){
   renderFireSelect();renderBasinFields();
 }
 function bindTableInputs(root){root.querySelectorAll('[data-id]').forEach(el=>{
-  const commit=value=>{const t=state.tanks.find(x=>x.id===el.dataset.id);t[el.dataset.key]=el.dataset.numeric==='true'?num(value):value;if(['diameter','height','length','orientation'].includes(el.dataset.key))t.usefulVolume=tankTotalVolume(t);if(el.dataset.key==='foamApplicationType')t.foamApplicationUserSelected=true;if(el.hasAttribute('data-base-volume'))t.baseVolumeManual=true;if(['baseDiameter','baseHeight'].includes(el.dataset.key)&&!t.baseVolumeManual)t.baseVolume=Math.PI*num(t.baseDiameter)**2/4*num(t.baseHeight);if(['diameter','orientation'].includes(el.dataset.key))state.neighborAnalysis={};if(['diameter','height','orientation','roofType','lgePercent','sealWidth','inertized','api620','foamApplicationType'].includes(el.dataset.key))t.foamNormative=null;if(['diameter','height','length','orientation','roofType'].includes(el.dataset.key))t.coolingNormative=null;if(['diameter','height','length','orientation'].includes(el.dataset.key))state.basin.basinFoamNormative=null;save();renderAll();if(['diameter','height','orientation','roofType','lgePercent','sealWidth','inertized','api620','foamApplicationType'].includes(el.dataset.key))analyzeVerticalFoam(t);if(['diameter','height','length','orientation','roofType'].includes(el.dataset.key))analyzeAllCooling();if(['diameter','height','length','orientation'].includes(el.dataset.key))analyzeBasinFoam()};
+  const commit=value=>{const t=state.tanks.find(x=>x.id===el.dataset.id);t[el.dataset.key]=el.dataset.numeric==='true'?num(value):value;if(['diameter','height','length','orientation'].includes(el.dataset.key))t.usefulVolume=tankTotalVolume(t);if(el.dataset.key==='foamApplicationType')t.foamApplicationUserSelected=true;if(el.hasAttribute('data-base-volume'))t.baseVolumeManual=true;if(['baseDiameter','baseHeight'].includes(el.dataset.key)&&!t.baseVolumeManual)t.baseVolume=Math.PI*num(t.baseDiameter)**2/4*num(t.baseHeight);if(['diameter','orientation','roofType'].includes(el.dataset.key)){state.neighborAnalysis={};state.spacingAnalysis={}}if(['diameter','height','orientation','roofType','lgePercent','sealWidth','inertized','api620','foamApplicationType'].includes(el.dataset.key))t.foamNormative=null;if(['diameter','height','length','orientation','roofType'].includes(el.dataset.key))t.coolingNormative=null;if(['diameter','height','length','orientation'].includes(el.dataset.key))state.basin.basinFoamNormative=null;save();renderAll();if(['diameter','height','orientation','roofType','lgePercent','sealWidth','inertized','api620','foamApplicationType'].includes(el.dataset.key))analyzeVerticalFoam(t);if(['diameter','height','length','orientation','roofType'].includes(el.dataset.key))analyzeAllCooling();if(['diameter','height','length','orientation'].includes(el.dataset.key))analyzeBasinFoam();if(['diameter','orientation','roofType'].includes(el.dataset.key))analyzeAllNeighbors()};
   if(el.dataset.numeric==='true')prepareNumericInput(el,commit);else el.onchange=()=>commit(el.value);
 })}
 function renderBasinFields(){
@@ -519,12 +522,17 @@ function renderDistanceInputMatrix(){
     if(j<i)return `<td class="calc distance-mirror">${value===undefined?'—':fmt(value)} m</td>`;
     return `<td><input class="required distance-input" type="text" inputmode="decimal" data-numeric="true" data-distance-key="${key}" value="${inputNumberValue(value)}" placeholder="0,00 m"></td>`;
   }).join('')}</tr>`).join('')+'</tbody>';
-  $$('[data-distance-key]').forEach(el=>prepareNumericInput(el,value=>{state.distances[el.dataset.distanceKey]=value;state.neighborAnalysis={};state.tanks.forEach(t=>t.coolingNormative=null);save(false);renderDistances();renderResults();validate();analyzeAllNeighbors()}));
+  $$('[data-distance-key]').forEach(el=>prepareNumericInput(el,value=>{state.distances[el.dataset.distanceKey]=value;state.neighborAnalysis={};state.spacingAnalysis={};state.tanks.forEach(t=>t.coolingNormative=null);save(false);renderDistances();renderResults();validate();analyzeAllNeighbors()}));
 }
 function renderDistances(){
   const fire=state.tanks.find(t=>t.id===$('#fireTank').value)||state.tanks[0];if(!fire)return;
   renderDistanceInputMatrix();
   const ns=neighbors(fire);
+  const spacingRows=state.tanks.flatMap((a,i)=>state.tanks.slice(i+1).map(b=>state.spacingAnalysis?.[pairKey(a,b)]||{par_id:pairKey(a,b),tanque_a_tag:a.tag,tanque_b_tag:b.tag,distancia_informada_m:state.distances?.[pairKey(a,b)],resultado:'pendente'}));
+  const spacingFailures=spacingRows.filter(item=>item.resultado==='nao_atende'),spacingPending=spacingRows.filter(item=>item.resultado==='pendente');
+  const spacingSummary=$('#spacingComplianceSummary');
+  if(spacingSummary){spacingSummary.className=`spacing-compliance-summary ${spacingFailures.length?'bad':spacingPending.length?'pending':'ok'}`;spacingSummary.textContent=spacingFailures.length?`✕ ${spacingFailures.length} par(es) não atende(m) ao afastamento mínimo entre costados.`:spacingPending.length?`! Informe todas as distâncias para verificar o afastamento mínimo entre costados.`:'✓ Todos os afastamentos informados atendem ao mínimo normativo entre costados.'}
+  const spacingTable=$('#spacingComplianceTable');if(spacingTable)spacingTable.innerHTML='<thead><tr><th>Par de tanques</th><th>Distância informada</th><th>Afastamento mínimo</th><th>Atendimento</th><th>Critério</th></tr></thead><tbody>'+spacingRows.map(item=>`<tr><td><b>${escapeText(item.tanque_a_tag||'—')} × ${escapeText(item.tanque_b_tag||'—')}</b></td><td>${item.distancia_informada_m===null||item.distancia_informada_m===undefined?'Não informada':fmt(item.distancia_informada_m)+' m'}</td><td>${item.afastamento_minimo_m===null||item.afastamento_minimo_m===undefined?'—':`<b>${fmt(item.afastamento_minimo_m)} m</b>`}</td><td class="${item.resultado==='atende'?'ok':item.resultado==='nao_atende'?'bad':'muted'}">${item.resultado==='atende'?'✓ ATENDE':item.resultado==='nao_atende'?'✕ NÃO ATENDE':'PENDENTE'}</td><td>${escapeText(item.criterio||'Aguardando análise do motor normativo.')}</td></tr>`).join('')+'</tbody>';
   $('#neighborSummary').textContent=fire.orientation==='horizontal'?'Cenário de bacia — sem análise de vizinhos':`${ns.length} vizinho(s) de ${Math.max(0,state.tanks.length-1)}`;
   $('#distanceTable').innerHTML='<thead><tr><th>Tanque analisado</th><th>Distância informada</th><th>Referência calculada</th><th>Limite adotado</th><th>Resultado</th><th>Justificativa</th></tr></thead><tbody>'+state.tanks.filter(t=>t.id!==fire.id).map(t=>{const key=pairKey(fire,t),has=state.distances?.[key]!==undefined,item=state.neighborAnalysis?.[fire.id]?.[t.id],basin=item?.resultado==='cenario_bacia'||fire.orientation==='horizontal',yes=item?.resultado==='vizinho',pending=!basin&&(!item||item.resultado==='pendente');return `<tr><td>${t.tag}</td><td>${basin?'Não se aplica':has?fmt(shellDistance(fire,t))+' m':'Não informado'}</td><td>${item?.referencia_calculada_m===null||item?.referencia_calculada_m===undefined?'—':fmt(item.referencia_calculada_m)+' m'}</td><td>${item?.limite_adotado_m===null||item?.limite_adotado_m===undefined?'—':`<b>${fmt(item.limite_adotado_m)} m</b>`}</td><td class="${basin||yes?'ok':pending?'muted':'bad'}">${basin?'CENÁRIO DE BACIA':pending?'PENDENTE':yes?'SIM':'NÃO'}</td><td>${escapeText(item?.justificativa||(basin?'Regra SAR: espuma em toda a bacia, sem resfriamento.':!has?'Informe a distância para executar a análise.':'Análise aguardando o motor normativo.'))}</td></tr>`}).join('')+'</tbody>';
   $('#matrixTable').innerHTML='<thead><tr><th>Em chamas ↓ / Analisado →</th>'+state.tanks.map(t=>`<th>${t.tag}</th>`).join('')+'<th>Total</th></tr></thead><tbody>'+state.tanks.map(f=>`<tr><th>${f.tag}</th>${state.tanks.map(t=>{const basin=f.orientation==='horizontal'&&f.id!==t.id,item=state.neighborAnalysis?.[f.id]?.[t.id],pending=f.id!==t.id&&!basin&&(!item||item.resultado==='pendente');return `<td class="${f.id===t.id||pending?'muted':basin||neighbor(f,t)?'ok':'bad'}">${f.id===t.id?'—':basin?'BACIA':pending?'PENDENTE':neighbor(f,t)?'SIM':'NÃO'}</td>`}).join('')}<td><b>${f.orientation==='horizontal'?'Bacia':neighbors(f).length}</b></td></tr>`).join('')+'</tbody>';
@@ -543,7 +551,7 @@ function renderProtection(){
   bindTableInputs(table);
   const rows=state.tanks.map(t=>({tank:t,...primaryFoam(t)}));
   const details=$('#foamPrimaryDetails');
-  if(details)details.innerHTML=state.tanks.map((t,index)=>{const f=primaryFoam(t),n=t.foamNormative,isExempt=n?.dimensionado&&!n.exigido,status=t.foamError?`Falha: ${t.foamError}`:n?.motivo||'Aguardando motor normativo';return `<details class="step-card foam-scenario" ${index===0?'open':''}>
+  if(details)details.innerHTML=state.tanks.map((t,index)=>{const f=primaryFoam(t),n=t.foamNormative,isExempt=n?.dimensionado&&!n.exigido,status=t.foamError?`Falha: ${t.foamError}`:n?.motivo||'Aguardando motor normativo';return `<details class="step-card foam-scenario">
     <summary><span>${index+1}</span><div><b>Resultado — ${t.tag}</b><small>${escapeText(t.product||'Produto não informado')} · Classe ${escapeText(classify(t))} · ${isExempt?'Isento':foamMethodLabel(t.foamApplicationType)}</small></div></summary>
     <div class="step-body">${isExempt?`<div class="callout"><b>Isento de espuma:</b> ${escapeText(status)}</div>`:`<div class="table-wrap"><table><thead><tr><th>Área</th><th>Taxa normativa</th><th>Vento</th><th>Taxa adotada</th><th>Tempo</th><th>Vazão</th><th>LGE combate</th><th>LGE reserva</th><th>LGE total</th></tr></thead><tbody><tr><td>${fmt(f.area)} m²</td><td>${fmt(f.rate)} L/min/m²</td><td>${f.wind?fmt(f.wind,0)+'%':'—'}</td><td>${fmt(f.majoratedRate)} L/min/m²</td><td>${fmt(t.foamTime,0)} min</td><td><b>${fmt(f.solutionFlow)} L/min</b></td><td>${fmt(f.combatLge)} L</td><td>${fmt(f.reserveLge)} L</td><td><b>${fmt(f.totalLge)} L</b></td></tr></tbody></table></div><p class="cooling-area-note"><b>Dados:</b> diâmetro ${fmt(t.diameter)} m · altura ${fmt(t.height)} m · volume ${fmt(t.usefulVolume)} m³ · produto ${escapeText(t.product||'—')} · Classe ${escapeText(classify(t))}.</p>`}</div>
   </details>`}).join('');
@@ -603,21 +611,21 @@ function renderResults(){
 function renderScenarioDetail(){
   const host=$('#coolingScenarios');if(!host)return;
   const requirements=$('#coolingRequirements');
-  if(requirements)requirements.innerHTML=`<thead><tr><th>Tanque</th><th>Altura (m)</th><th>Diâmetro (m)</th><th>Volume total (m³)</th><th>Produto / classe</th><th>Sistema mínimo normativo</th><th>Sistema adotado</th></tr></thead><tbody>${state.tanks.map(t=>`<tr><td><b>${t.tag}</b></td><td>${fmt(t.height)}</td><td>${fmt(t.diameter)}</td><td><b>${fmt(t.usefulVolume)}</b></td><td>${escapeText(t.product||'—')}<small class="cell-hint"><b>Classe ${escapeText(classify(t))}</b></small></td><td>${t.orientation==='horizontal'?'Cenário de bacia — sem resfriamento':t.coolingNormative?.isento?'Isento':coolingMinimumLabel(t.coolingNormative?.sistema_minimo)}</td><td>${t.orientation==='horizontal'||t.coolingNormative?.isento?'—':`<select class="normative" data-cooling-id="${t.id}" data-cooling-key="coolingMethod" aria-label="Sistema de resfriamento adotado para ${escapeText(t.tag)}" ${t.coolingPending?'disabled':''}>${coolingMethodOptions(t)}</select><small class="cell-hint">${t.coolingPending?'Recalculando taxas e vazões...':'Somente opção equivalente ou superior'}</small>`}</td></tr>`).join('')}</tbody>`;
+  if(requirements)requirements.innerHTML=`<thead><tr><th>Tanque</th><th>Altura (m)</th><th>Diâmetro (m)</th><th>Volume total (m³)</th><th>Produto / classe</th><th>Sistema mínimo normativo</th><th>Sistema adotado</th></tr></thead><tbody>${state.tanks.map(t=>{const ready=t.orientation==='horizontal'||t.coolingNormative?.dimensionado;const minimum=t.orientation==='horizontal'?'Cenário de bacia — sem resfriamento':t.coolingPending?'Calculando...':t.coolingError?`<span class="bad">Falha no motor</span><small class="cell-hint">${escapeText(t.coolingError)}</small>`:t.coolingNormative?.isento?'Isento':t.coolingNormative?.dimensionado?coolingMinimumLabel(t.coolingNormative.sistema_minimo):'<span class="muted">Aguardando cálculo</span>';return `<tr><td><b>${t.tag}</b></td><td>${fmt(t.height)}</td><td>${fmt(t.diameter)}</td><td><b>${fmt(t.usefulVolume)}</b></td><td>${escapeText(t.product||'—')}<small class="cell-hint"><b>Classe ${escapeText(classify(t))}</b></small></td><td>${minimum}</td><td>${t.orientation==='horizontal'||t.coolingNormative?.isento||!ready?'—':`<select class="normative" data-cooling-id="${t.id}" data-cooling-key="coolingMethod" aria-label="Sistema de resfriamento adotado para ${escapeText(t.tag)}" ${t.coolingPending?'disabled':''}>${coolingMethodOptions(t)}</select><small class="cell-hint">${t.coolingPending?'Recalculando taxas e vazões...':'Somente opção equivalente ou superior'}</small>`}</td></tr>`}).join('')}</tbody>`;
   host.innerHTML=scenarios().map((s,index)=>{
     const fire=s.fire,others=state.tanks.filter(t=>t.id!==fire.id),time=num(fire.coolingTime);
-    if(s.basinFire)return `<details class="step-card cooling-scenario" ${index===0?'open':''}>
+    if(s.basinFire)return `<details class="step-card cooling-scenario">
       <summary><span>${index+1}</span><div><b>Cenário — ${fire.tag} horizontal em chamas</b><small>Espuma em toda a bacia · sem resfriamento</small></div></summary>
       <div class="step-body"><div class="callout warning"><b>Regra SAR — cenário de bacia:</b> aplicar espuma em toda a bacia de contenção. Não prever resfriamento do tanque em chamas nem dos demais tanques. O dimensionamento de vazão, tempo, RTI e LGE será concluído pelo motor de espuma da bacia.</div></div>
     </details>`;
-    if(fire.coolingNormative?.isento)return `<details class="step-card cooling-scenario" ${index===0?'open':''}>
+    if(fire.coolingNormative?.isento)return `<details class="step-card cooling-scenario">
       <summary><span>${index+1}</span><div><b>Cenário — ${fire.tag} em chamas</b><small>Isento de resfriamento</small></div></summary>
       <div class="step-body"><div class="callout"><b>Resultado do motor normativo:</b> ${escapeText(fire.coolingNormative.motivo||'Cenário isento conforme Tabela 3.1.')} Vazão e reserva de resfriamento iguais a zero.</div></div>
     </details>`;
     const roofRule='somente costado';
     const reservoir=s.coolingFlow*time/1000;
     const cooling=fire.coolingNormative,details=Object.fromEntries((cooling?.vizinhos||[]).map(item=>[item.tanque_id,item]));
-    return `<details class="step-card cooling-scenario" ${index===0?'open':''}>
+    return `<details class="step-card cooling-scenario">
       <summary><span>${index+1}</span><div><b>Cenário — ${fire.tag} em chamas</b><small>${fire.coolingPending?'Calculando no motor...':fire.coolingError?`Falha: ${escapeText(fire.coolingError)}`:`${s.ns.length} tanque(s) vizinho(s) considerado(s)`}</small></div></summary>
       <div class="step-body">
         <p class="cooling-area-note"><b>Sistema adotado: ${coolingMethodLabel(fire.coolingMethod)}.</b> Cenário apresentado somente para consulta. ${fire.tag} em chamas recebe resfriamento somente no costado. Nos tanques vizinhos, teto fixo recebe teto + costado e teto flutuante recebe somente costado.</p>
@@ -814,7 +822,7 @@ function renderDocs(type){
 function validationIssues(){
   const sections=new Set();
   if(!state.tanks.length||state.tanks.some(t=>!t.tag||!t.diameter||!t.usefulVolume||!t.product))sections.add('Cadastro');
-  if(state.tanks.some((a,i)=>state.tanks.slice(i+1).some(b=>state.distances?.[pairKey(a,b)]===undefined)))sections.add('Distâncias');
+  if(state.tanks.some((a,i)=>state.tanks.slice(i+1).some(b=>state.distances?.[pairKey(a,b)]===undefined||state.spacingAnalysis?.[pairKey(a,b)]?.resultado==='nao_atende')))sections.add('Distâncias');
   if(state.tanks.some(t=>t.orientation!=='horizontal'&&t.foamNormative?.exigido!==false&&(!t.foamRate||!t.foamTime||!t.lgePercent))||!state.basin.secondaryLgePercent)sections.add('Espuma');
   if(state.tanks.some(t=>t.orientation!=='horizontal'&&(!t.coolingNormative||(!t.coolingNormative.isento&&!t.coolingTime))))sections.add('Resfriamento');
   return [...sections];
@@ -854,7 +862,7 @@ $('#tabs').onclick=e=>{const b=e.target.closest('button[data-tab]');if(!b)return
 $('#applyTankCount').onclick=()=>setCount($('#tankCount').value);$('#fireTank').onchange=renderDistances;$('#recalculate').onclick=analyzeAllNeighbors;
 $('#openPrecipitationModule').onclick=()=>alert('O módulo de precipitação por localidade e tempo de recorrência será desenvolvido e conectado a este campo.');
 $('#copyTankData').onclick=()=>{const source=state.tanks[0];state.tanks.slice(1).forEach(t=>['orientation','installation','roofType','diameter','height','length','usefulVolume'].forEach(k=>t[k]=source[k]));save();renderAll()};
-$('#copyProductData').onclick=()=>{const source=state.tanks[0];state.tanks.slice(1).forEach(t=>['productId','product','productScientificName','productSource','flashPoint','boilingPoint','vaporPressure','vaporPressureConfirmed','liquidClass','miscibilityWater','foamGroup','classificationRuleVersion'].forEach(k=>t[k]=source[k]));save();renderAll()};
+$('#copyProductData').onclick=()=>{const source=state.tanks[0];state.tanks.slice(1).forEach(t=>['productId','product','productScientificName','productSource','flashPoint','boilingPoint','vaporPressure','vaporPressureConfirmed','liquidClass','miscibilityWater','foamGroup','classificationRuleVersion'].forEach(k=>t[k]=source[k]));state.spacingAnalysis={};save();renderAll();analyzeAllNeighbors();analyzeAllVerticalFoam();analyzeAllCooling()};
 $('#copyBaseData').onclick=()=>{const source=state.tanks[0];state.tanks.slice(1).forEach(t=>['baseShape','baseDiameter','baseHeight','baseVolume','baseVolumeManual'].forEach(k=>t[k]=source[k]));save();renderAll()};
 $('#copyPrimaryFoamData').onclick=()=>{const source=state.tanks[0];state.tanks.slice(1).forEach(t=>['foamApplicationType','foamRate','foamTime','lgePercent','equipmentModel','chamberCount','proportionerModel'].forEach(k=>t[k]=source[k]));save();renderAll()};
 $('#addBasin').onclick=()=>{const n=system.basins.length+1,b=newBasin({meta:{...state.meta,basin:`Bacia ${String(n).padStart(2,'0')}`,park:state.meta.park}});system.basins.push(b);activateBasin(b.id)};
@@ -865,10 +873,10 @@ bindStatic();renderAll();
 window.SARTanques={
   get:()=>structuredClone(system),
   name:()=>state?.meta?.name||'Novo estudo',
-  set:raw=>{system=normalizeSystem(raw);state=system.basins.find(b=>b.id===system.activeBasinId)||system.basins[0]||newBasin();selectedScenario=null;bindStatic();save();renderAll();analyzeAllVerticalFoam()},
+  set:raw=>{system=normalizeSystem(raw);state=system.basins.find(b=>b.id===system.activeBasinId)||system.basins[0]||newBasin();selectedScenario=null;bindStatic();save();renderAll();analyzeAllVerticalFoam();analyzeAllNeighbors()},
   setProducts:products=>{productCatalog=Array.isArray(products)?products:[];renderTanks();analyzeAllVerticalFoam()},
   setThermalClassifier:classifier=>{thermalClassifier=typeof classifier==='function'?classifier:null},
-  setDistanceAnalyzer:analyzer=>{distanceAnalyzer=typeof analyzer==='function'?analyzer:null},
+  setDistanceAnalyzer:analyzer=>{distanceAnalyzer=typeof analyzer==='function'?analyzer:null;analyzeAllNeighbors()},
   setVerticalFoamEngine:engine=>{verticalFoamEngine=typeof engine==='function'?engine:null;analyzeAllVerticalFoam()},
   setBasinFoamEngine:engine=>{basinFoamEngine=typeof engine==='function'?engine:null;analyzeBasinFoam()},
   setCoolingEngine:engine=>{coolingEngine=typeof engine==='function'?engine:null;analyzeAllCooling()},
