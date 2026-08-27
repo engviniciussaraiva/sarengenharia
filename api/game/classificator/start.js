@@ -38,14 +38,20 @@ export default async function handler(req, res) {
 
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-    return res.status(405).json({ ok: false });
+
+    return res.status(405).json({
+      ok: false
+    });
   }
 
   const secret = process.env.GAME_SESSION_SECRET;
 
   if (!secret || secret.length < 32) {
-    console.error("GAME_SESSION_SECRET ausente ou muito curto.");
-    return res.status(500).json({ ok: false });
+    console.error("GAME_SESSION_SECRET ausente ou inválido.");
+
+    return res.status(500).json({
+      ok: false
+    });
   }
 
   const token = createSessionToken(secret);
@@ -64,6 +70,6 @@ export default async function handler(req, res) {
 
   return res.status(200).json({
     ok: true,
-    next: "/game-classificator/fase-01/"
+    next: "fase-01"
   });
 }
