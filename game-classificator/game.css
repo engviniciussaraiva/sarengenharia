@@ -1,160 +1,169 @@
-(() => {
-  "use strict";
+:root{
+  --bg:#07090b;
+  --orange:#ff7a00;
+}
 
-  const API_START = "/api/game/classificator/start";
+*{
+  box-sizing:border-box;
+}
 
-  let iniciando = false;
+html,
+body{
+  margin:0;
+  width:100%;
+  min-height:100%;
+  background:var(--bg);
+}
 
-  function localizarBotao() {
-    return (
-      document.getElementById("btnIniciar") ||
-      document.querySelector('[data-action="start-game"]') ||
-      document.querySelector(".btn-iniciar") ||
-      document.querySelector(".start-button")
+body{
+  min-height:100vh;
+  font-family:"Segoe UI",Arial,sans-serif;
+  overflow-x:hidden;
+}
+
+/*
+  ÁREA DO MÓDULO
+*/
+
+.game-shell{
+  width:100%;
+  min-height:100vh;
+
+  display:flex;
+  flex-direction:column;
+
+  align-items:center;
+  justify-content:center;
+
+  padding:12px;
+
+  background:
+    radial-gradient(
+      circle at 50% 70%,
+      rgba(255,92,0,.10),
+      transparent 38%
+    ),
+    #07090b;
+}
+
+/*
+  A PRÓPRIA IMAGEM É O BOTÃO
+*/
+
+.poster-button{
+  display:block;
+
+  width:min(
+    440px,
+    calc(100vw - 28px)
+  );
+
+  margin:0 auto;
+  padding:0;
+
+  border:0;
+  outline:0;
+
+  background:transparent;
+
+  cursor:pointer;
+
+  line-height:0;
+
+  appearance:none;
+  -webkit-appearance:none;
+
+  -webkit-tap-highlight-color:transparent;
+
+  transition:
+    transform .18s ease,
+    filter .18s ease;
+}
+
+.poster-button:hover{
+  transform:scale(1.008);
+
+  filter:
+    drop-shadow(
+      0 0 13px
+      rgba(255,110,0,.17)
+    );
+}
+
+.poster-button:active{
+  transform:scale(.995);
+}
+
+.poster-button:focus-visible{
+  outline:2px solid var(--orange);
+  outline-offset:4px;
+}
+
+/*
+  IMAGEM
+*/
+
+.poster-image{
+  display:block;
+
+  width:100%;
+  height:auto;
+
+  margin:0 auto;
+
+  border:0;
+
+  user-select:none;
+  -webkit-user-select:none;
+
+  pointer-events:none;
+}
+
+/*
+  MENSAGEM DURANTE O CARREGAMENTO
+*/
+
+.status-game{
+  min-height:20px;
+
+  margin-top:5px;
+
+  color:#fff;
+
+  font-size:12px;
+  font-weight:600;
+
+  text-align:center;
+
+  opacity:.85;
+}
+
+/*
+  TELAS MENORES
+*/
+
+@media(max-height:760px){
+
+  .poster-button{
+    width:min(
+      390px,
+      calc((100vh - 38px) * .666666)
     );
   }
 
-  function localizarStatus() {
-    return (
-      document.getElementById("statusGame") ||
-      document.querySelector(".status-game")
+}
+
+@media(max-width:600px){
+
+  .game-shell{
+    padding:8px;
+  }
+
+  .poster-button{
+    width:min(
+      420px,
+      calc(100vw - 16px)
     );
   }
 
-  function atualizarStatus(texto) {
-    const status = localizarStatus();
-
-    if (status) {
-      status.textContent = texto;
-    }
-  }
-
-  async function iniciarGame(event) {
-    if (event) {
-      event.preventDefault();
-    }
-
-    if (iniciando) {
-      return;
-    }
-
-    const botao = localizarBotao();
-
-    if (!botao) {
-      console.error(
-        "GAME ClassificaTOR: botão INICIAR não encontrado."
-      );
-
-      return;
-    }
-
-    iniciando = true;
-
-    botao.style.pointerEvents = "none";
-    botao.setAttribute("aria-busy", "true");
-
-    atualizarStatus("Preparando classificação...");
-
-    try {
-      const response = await fetch(API_START, {
-        method: "POST",
-
-        credentials: "same-origin",
-
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "SAR-ClassificaTOR",
-          "Accept": "application/json"
-        },
-
-        body: JSON.stringify({})
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          `Erro ao iniciar GAME: ${response.status}`
-        );
-      }
-
-      const data = await response.json();
-
-      if (
-        !data ||
-        data.ok !== true ||
-        typeof data.next !== "string" ||
-        !data.next
-      ) {
-        throw new Error(
-          "Resposta inválida recebida do servidor."
-        );
-      }
-
-      atualizarStatus("Iniciando...");
-
-      /*
-       * IMPORTANTE:
-       *
-       * O GAME está sendo executado dentro
-       * da área interna do sistema SAR.
-       *
-       * Portanto, esta navegação altera somente
-       * a página do módulo.
-       *
-       * A barra principal continuará:
-       *
-       * sarengenharia.com.br/sistema.html
-       */
-
-      window.location.assign(data.next);
-
-    } catch (error) {
-      console.error(
-        "GAME ClassificaTOR:",
-        error
-      );
-
-      atualizarStatus(
-        "Não foi possível iniciar. Tente novamente."
-      );
-
-      iniciando = false;
-
-      botao.style.pointerEvents = "";
-      botao.removeAttribute("aria-busy");
-    }
-  }
-
-  function configurarGame() {
-    const botao = localizarBotao();
-
-    if (!botao) {
-      console.error(
-        "GAME ClassificaTOR: botão INICIAR não encontrado na página."
-      );
-
-      return;
-    }
-
-    botao.addEventListener(
-      "click",
-      iniciarGame
-    );
-
-    console.log(
-      "GAME ClassificaTOR: Tela inicial carregada."
-    );
-  }
-
-  if (document.readyState === "loading") {
-
-    document.addEventListener(
-      "DOMContentLoaded",
-      configurarGame
-    );
-
-  } else {
-
-    configurarGame();
-
-  }
-})();
+}
