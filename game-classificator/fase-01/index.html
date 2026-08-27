@@ -3,8 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR">
+
+  <meta
+    name="sar-recurso-codigo"
+    content="GAME_CLASSIFICATOR"
+  >
+
   <title>GAME ClassificaTOR | Fase 1</title>
+
   <script src="/js/sar.page-guard.js"></script>
 
   <style>
@@ -20,9 +26,12 @@
       --warn-ink:#8a6a12;
     }
 
-    *{box-sizing:border-box}
+    *{
+      box-sizing:border-box;
+    }
 
-    html,body{
+    html,
+    body{
       margin:0;
       min-height:100%;
       font-family:"Segoe UI",Arial,sans-serif;
@@ -42,6 +51,8 @@
       max-width:1500px;
       margin:0 auto;
     }
+
+    /* CABEÇALHO */
 
     .fase-head{
       display:flex;
@@ -73,6 +84,8 @@
       font-size:14px;
     }
 
+    /* BOTÕES SUPERIORES */
+
     .fase-actions{
       display:flex;
       gap:10px;
@@ -97,6 +110,8 @@
       border-color:#9fb8ad;
     }
 
+    /* ÁREA PRINCIPAL */
+
     .workspace{
       min-height:500px;
       padding:28px;
@@ -106,21 +121,32 @@
       box-shadow:0 4px 16px rgba(31,65,57,.05);
     }
 
+    /* CARDS */
+
     .cards{
       display:grid;
-      grid-template-columns:repeat(3, minmax(280px, 1fr));
+      grid-template-columns:repeat(3,minmax(280px,1fr));
       gap:24px;
       align-items:start;
     }
 
     .option-card{
       position:relative;
+      width:100%;
+      padding:0;
+      overflow:hidden;
+
       border:1px solid #dce4e1;
       border-radius:12px;
+
       background:#fff;
-      overflow:hidden;
+
       text-align:center;
-      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+
+      transition:
+        transform .18s ease,
+        border-color .18s ease,
+        box-shadow .18s ease;
     }
 
     .option-card.active{
@@ -133,16 +159,28 @@
       box-shadow:0 8px 22px rgba(49,88,88,.12);
     }
 
+    .option-card.active:focus-visible{
+      outline:3px solid rgba(124,179,66,.35);
+      outline-offset:3px;
+    }
+
+    /* CARDS FUTUROS */
+
     .option-card.disabled{
-      opacity:.82;
-      filter:saturate(.92);
+      opacity:.78;
+      filter:saturate(.82);
       cursor:not-allowed;
     }
+
+    /* IMAGENS */
 
     .card-image{
       position:relative;
       width:100%;
-      aspect-ratio:1.3 / 1;
+
+      /* Imagens novas em formato horizontal */
+      aspect-ratio:3 / 2;
+
       overflow:hidden;
       background:#edf2ef;
       border-bottom:1px solid #e7eeea;
@@ -153,37 +191,56 @@
       width:100%;
       height:100%;
       object-fit:cover;
+      object-position:center;
+      user-select:none;
+      pointer-events:none;
+    }
+
+    .option-card.active .card-image img{
+      transition:transform .25s ease;
     }
 
     .option-card.active:hover .card-image img{
-      transform:scale(1.02);
-      transition:transform .22s ease;
+      transform:scale(1.025);
     }
 
+    /* TEXTO */
+
     .card-body{
-      padding:16px 14px 18px;
+      min-height:100px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:17px 14px 19px;
     }
 
     .card-title{
       margin:0;
       color:var(--sar);
-      font-size:26px;
+      font-size:24px;
       font-weight:800;
-      line-height:1.15;
+      line-height:1.18;
       text-transform:uppercase;
     }
+
+    /* SELOS */
 
     .badge{
       position:absolute;
       top:12px;
       right:12px;
+      z-index:2;
+
       padding:6px 10px;
+
       border-radius:999px;
+
       font-size:12px;
       font-weight:800;
       letter-spacing:.04em;
       text-transform:uppercase;
-      z-index:2;
+
+      box-shadow:0 2px 6px rgba(0,0,0,.08);
     }
 
     .badge.active{
@@ -198,6 +255,8 @@
       border:1px solid #ead58e;
     }
 
+    /* STATUS */
+
     .status{
       min-height:22px;
       margin-top:20px;
@@ -206,14 +265,25 @@
       text-align:center;
     }
 
+    /* RESPONSIVO */
+
     @media(max-width:1100px){
+
       .cards{
         grid-template-columns:1fr;
+      }
+
+      .option-card{
+        max-width:650px;
+        margin:0 auto;
       }
     }
 
     @media(max-width:760px){
-      body{padding:10px}
+
+      body{
+        padding:10px;
+      }
 
       .fase-head{
         display:block;
@@ -232,140 +302,288 @@
       }
 
       .card-title{
-        font-size:22px;
+        font-size:21px;
       }
     }
   </style>
 </head>
+
 <body>
+
   <main class="shell">
+
     <header class="fase-head">
+
       <div>
-        <p class="eyebrow">Fase 1</p>
-        <h1>Selecione a Configuração do Lote</h1>
-        <p class="subtitle">Quantas edificações possui no lote?</p>
+
+        <p class="eyebrow">
+          Fase 1
+        </p>
+
+        <h1>
+          Selecione a Configuração do Lote
+        </h1>
+
+        <p class="subtitle">
+          Quantas edificações possui no lote?
+        </p>
+
       </div>
 
       <div class="fase-actions">
-        <button class="ghost-btn" id="btnInicio" type="button">Início</button>
-        <button class="ghost-btn" id="btnVoltar" type="button">Voltar fase anterior</button>
+
+        <button
+          class="ghost-btn"
+          id="btnInicio"
+          type="button"
+        >
+          Início
+        </button>
+
+        <button
+          class="ghost-btn"
+          id="btnVoltar"
+          type="button"
+        >
+          Voltar fase anterior
+        </button>
+
       </div>
+
     </header>
 
+
     <section class="workspace">
+
       <div class="cards">
 
-        <!-- CARD 1 - ATIVO -->
+        <!-- ================================= -->
+        <!-- 01 - UMA EDIFICAÇÃO - DISPONÍVEL -->
+        <!-- ================================= -->
+
         <button
           class="option-card active"
           id="cardUmaEdificacao"
           type="button"
           aria-label="Selecionar lote com uma edificação"
         >
-          <span class="badge active">Disponível</span>
+
+          <span class="badge active">
+            Disponível
+          </span>
 
           <div class="card-image">
+
             <img
               src="/game-classificator/assets/lote-uma-edificacao.png"
               alt="Lote com uma edificação"
               draggable="false"
             >
+
           </div>
 
           <div class="card-body">
+
             <h2 class="card-title">
-              LOTE COM UMA<br>EDIFICAÇÃO
+              LOTE COM UMA<br>
+              EDIFICAÇÃO
             </h2>
+
           </div>
+
         </button>
 
-        <!-- CARD 2 - BLOQUEADO -->
+
+        <!-- ============================== -->
+        <!-- 02 - DUAS EDIFICAÇÕES - FUTURO -->
+        <!-- ============================== -->
+
         <div
           class="option-card disabled"
-          aria-label="Lote com duas edificações em breve"
+          aria-label="Lote com duas edificações - em breve"
         >
-          <span class="badge soon">Em breve</span>
+
+          <span class="badge soon">
+            Em breve
+          </span>
 
           <div class="card-image">
+
             <img
               src="/game-classificator/assets/lote-duas-edificacoes.png"
               alt="Lote com duas edificações"
               draggable="false"
             >
+
           </div>
 
           <div class="card-body">
+
             <h2 class="card-title">
-              LOTE COM DUAS<br>EDIFICAÇÕES
+              LOTE COM DUAS<br>
+              EDIFICAÇÕES
             </h2>
+
           </div>
+
         </div>
 
-        <!-- CARD 3 - BLOQUEADO -->
+
+        <!-- ===================================== -->
+        <!-- 03 - MAIS DE DUAS EDIFICAÇÕES - FUTURO -->
+        <!-- ===================================== -->
+
         <div
           class="option-card disabled"
-          aria-label="Lote com mais de duas edificações em breve"
+          aria-label="Lote com mais de duas edificações - em breve"
         >
-          <span class="badge soon">Em breve</span>
+
+          <span class="badge soon">
+            Em breve
+          </span>
 
           <div class="card-image">
+
             <img
               src="/game-classificator/assets/lote-mais-de-duas-edificacoes.png"
               alt="Lote com mais de duas edificações"
               draggable="false"
             >
+
           </div>
 
           <div class="card-body">
+
             <h2 class="card-title">
-              LOTE COM MAIS DE DUAS<br>EDIFICAÇÕES
+              LOTE COM MAIS DE DUAS<br>
+              EDIFICAÇÕES
             </h2>
+
           </div>
+
         </div>
 
       </div>
 
-      <div class="status" id="statusFase" aria-live="polite"></div>
+
+      <div
+        class="status"
+        id="statusFase"
+        aria-live="polite"
+      ></div>
+
     </section>
+
   </main>
 
+
   <script>
+
     (() => {
+
       "use strict";
 
-      const btnInicio = document.getElementById("btnInicio");
-      const btnVoltar = document.getElementById("btnVoltar");
-      const cardUmaEdificacao = document.getElementById("cardUmaEdificacao");
-      const statusFase = document.getElementById("statusFase");
+
+      const btnInicio =
+        document.getElementById("btnInicio");
+
+      const btnVoltar =
+        document.getElementById("btnVoltar");
+
+      const cardUmaEdificacao =
+        document.getElementById("cardUmaEdificacao");
+
+      const statusFase =
+        document.getElementById("statusFase");
+
 
       function atualizarStatus(texto){
+
         if(statusFase){
           statusFase.textContent = texto || "";
         }
+
       }
 
-      btnInicio?.addEventListener("click", () => {
-        window.location.assign("/game-classificator/");
-      });
 
-      btnVoltar?.addEventListener("click", () => {
-        window.location.assign("/game-classificator/");
-      });
+      /*
+       * INÍCIO
+       */
 
-      cardUmaEdificacao?.addEventListener("click", () => {
-        atualizarStatus("Opção selecionada. Preparando próxima fase...");
-        console.log("GAME ClassificaTOR: caminho 'uma edificação' selecionado.");
+      btnInicio?.addEventListener(
+        "click",
+        () => {
 
-        /*
-          Próximo passo:
-          aqui vamos conectar com a Vercel Function da Fase 1
-          para registrar a escolha no motor escondido.
-        */
+          window.location.assign(
+            "/game-classificator/"
+          );
 
-        // Exemplo futuro:
-        // window.location.assign("/game-classificator/fase-02/");
-      });
+        }
+      );
+
+
+      /*
+       * FASE ANTERIOR
+       *
+       * Na Fase 1, a fase anterior é
+       * justamente a abertura do GAME.
+       */
+
+      btnVoltar?.addEventListener(
+        "click",
+        () => {
+
+          window.location.assign(
+            "/game-classificator/"
+          );
+
+        }
+      );
+
+
+      /*
+       * UMA EDIFICAÇÃO
+       *
+       * ÚNICO CAMINHO DISPONÍVEL
+       * nesta versão.
+       */
+
+      cardUmaEdificacao?.addEventListener(
+        "click",
+        () => {
+
+          if(cardUmaEdificacao.disabled){
+            return;
+          }
+
+
+          atualizarStatus(
+            "Configuração selecionada. Preparando próxima fase..."
+          );
+
+
+          /*
+           * AQUI entraremos com:
+           *
+           * /api/game/classificator/fase-01
+           *
+           * A escolha será enviada para
+           * o motor protegido.
+           *
+           * NÃO vamos colocar as regras
+           * técnicas aqui no frontend.
+           */
+
+          console.log(
+            "GAME ClassificaTOR: uma edificação selecionada."
+          );
+
+        }
+      );
+
     })();
+
   </script>
+
 </body>
 </html>
