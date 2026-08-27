@@ -1,26 +1,39 @@
 (() => {
   "use strict";
 
-  const btn = document.getElementById("btnIniciar");
-  const status = document.getElementById("statusGame");
+  const API_START = "/api/game/classificator/start";
 
-  if (!btn || !status) return;
+  let iniciando = false;
+
+  function localizarBotaoIniciar() {
+    return (
+      document.getElementById("btnIniciar") ||
+      document.getElementById("startGame") ||
+      document.querySelector('[data-action="start-game"]') ||
+      document.querySelector(".start-button") ||
+      document.querySelector(".btn-iniciar")
+    );
+  }
 
   async function iniciarGame() {
-    if (btn.disabled) return;
+    if (iniciando) return;
 
-    btn.disabled = true;
-    status.textContent = "Preparando classificação...";
+    iniciando = true;
+
+    const botao = localizarBotaoIniciar();
+
+    if (botao) {
+      botao.style.pointerEvents = "none";
+      botao.setAttribute("aria-busy", "true");
+    }
 
     try {
-      const response = await fetch("/api/game/classificator/start", {
+      const response = await fetch(API_START, {
         method: "POST",
         credentials: "same-origin",
         headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "SAR-ClassificaTOR"
-        },
-        body: JSON.stringify({})
+          Accept: "application/json"
+        }
       });
 
       if (!response.ok) {
@@ -29,18 +42,88 @@
 
       const data = await response.json();
 
-      if (!data || data.ok !== true || typeof data.next !== "string") {
+      if (!data.ok || !data.next) {
         throw new Error("Resposta inválida do servidor.");
       }
 
-      status.textContent = "Iniciando...";
-      window.location.assign(data.next);
+      abrirFase(data.next);
+
     } catch (error) {
       console.error("GAME ClassificaTOR:", error);
-      status.textContent = "Não foi possível iniciar. Tente novamente.";
-      btn.disabled = false;
+
+      alert(
+        "Não foi possível iniciar o GAME ClassificaTOR. Tente novamente."
+      );
+
+    } finally {
+      iniciando = false;
+
+      if (botao) {
+        botao.style.pointerEvents = "";
+        botao.removeAttribute("aria-busy");
+      }
     }
   }
 
-  btn.addEventListener("click", iniciarGame);
+  function abrirFase(fase) {
+    /*
+      IMPORTANTE:
+
+      Não usamos:
+      window.location.href
+      location.assign()
+      location.replace()
+
+      O GAME continua dentro do sistema.html.
+    */
+
+    if (fase === "fase-01") {
+      prepararFase01();
+      return;
+    }
+
+    console.error("Fase não reconhecida:", fase);
+  }
+
+  function prepararFase01() {
+    /*
+      A FASE 01 será construída no próximo passo.
+
+      Por enquanto confirmamos apenas que:
+      1. O botão INICIAR funcionou;
+      2. A Vercel Function respondeu;
+      3. A sessão protegida foi criada;
+      4. Não houve mudança de URL.
+    */
+
+    document.dispatchEvent(
+      new CustomEvent("classificator:fase", {
+        detail: {
+          fase: "fase-01"
+        }
+      })
+    );
+
+    console.log("GAME ClassificaTOR: Fase 01 autorizada.");
+  }
+
+  function configurar() {
+    const botao = localizarBotaoIniciar();
+
+    if (!botao) {
+      console.warn(
+        "GAME ClassificaTOR: botão INICIAR não encontrado."
+      );
+
+      return;
+    }
+
+    botao.addEventListener("click", iniciarGame);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", configurar);
+  } else {
+    configurar();
+  }
 })();
