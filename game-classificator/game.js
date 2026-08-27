@@ -1,129 +1,142 @@
 (() => {
+
   "use strict";
 
-  const API_START = "/api/game/classificator/start";
+  const btnIniciar =
+    document.getElementById("btnIniciar");
+
+  const statusGame =
+    document.getElementById("statusGame");
+
+
+  if(!btnIniciar){
+    console.error(
+      "GAME ClassificaTOR: botão inicial não encontrado."
+    );
+
+    return;
+  }
+
 
   let iniciando = false;
 
-  function localizarBotaoIniciar() {
-    return (
-      document.getElementById("btnIniciar") ||
-      document.getElementById("startGame") ||
-      document.querySelector('[data-action="start-game"]') ||
-      document.querySelector(".start-button") ||
-      document.querySelector(".btn-iniciar")
-    );
+
+  function atualizarStatus(texto){
+
+    if(statusGame){
+      statusGame.textContent = texto || "";
+    }
+
   }
 
-  async function iniciarGame() {
-    if (iniciando) return;
+
+  async function iniciarGame(){
+
+    if(iniciando){
+      return;
+    }
+
 
     iniciando = true;
 
-    const botao = localizarBotaoIniciar();
+    btnIniciar.disabled = true;
 
-    if (botao) {
-      botao.style.pointerEvents = "none";
-      botao.setAttribute("aria-busy", "true");
-    }
-
-    try {
-      const response = await fetch(API_START, {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          Accept: "application/json"
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error("Não foi possível iniciar o GAME.");
-      }
-
-      const data = await response.json();
-
-      if (!data.ok || !data.next) {
-        throw new Error("Resposta inválida do servidor.");
-      }
-
-      abrirFase(data.next);
-
-    } catch (error) {
-      console.error("GAME ClassificaTOR:", error);
-
-      alert(
-        "Não foi possível iniciar o GAME ClassificaTOR. Tente novamente."
-      );
-
-    } finally {
-      iniciando = false;
-
-      if (botao) {
-        botao.style.pointerEvents = "";
-        botao.removeAttribute("aria-busy");
-      }
-    }
-  }
-
-  function abrirFase(fase) {
-    /*
-      IMPORTANTE:
-
-      Não usamos:
-      window.location.href
-      location.assign()
-      location.replace()
-
-      O GAME continua dentro do sistema.html.
-    */
-
-    if (fase === "fase-01") {
-      prepararFase01();
-      return;
-    }
-
-    console.error("Fase não reconhecida:", fase);
-  }
-
-  function prepararFase01() {
-    /*
-      A FASE 01 será construída no próximo passo.
-
-      Por enquanto confirmamos apenas que:
-      1. O botão INICIAR funcionou;
-      2. A Vercel Function respondeu;
-      3. A sessão protegida foi criada;
-      4. Não houve mudança de URL.
-    */
-
-    document.dispatchEvent(
-      new CustomEvent("classificator:fase", {
-        detail: {
-          fase: "fase-01"
-        }
-      })
+    atualizarStatus(
+      "Preparando classificação..."
     );
 
-    console.log("GAME ClassificaTOR: Fase 01 autorizada.");
-  }
 
-  function configurar() {
-    const botao = localizarBotaoIniciar();
+    try{
 
-    if (!botao) {
-      console.warn(
-        "GAME ClassificaTOR: botão INICIAR não encontrado."
+      const response = await fetch(
+        "/api/game/classificator/start",
+        {
+          method:"POST",
+
+          credentials:"same-origin",
+
+          headers:{
+            "Content-Type":"application/json",
+            "Accept":"application/json",
+            "X-Requested-With":"SAR-ClassificaTOR"
+          },
+
+          body:JSON.stringify({})
+        }
       );
 
-      return;
+
+      if(!response.ok){
+
+        throw new Error(
+          `Erro ${response.status}`
+        );
+
+      }
+
+
+      const data =
+        await response.json();
+
+
+      if(
+        !data ||
+        data.ok !== true ||
+        typeof data.next !== "string" ||
+        !data.next
+      ){
+
+        throw new Error(
+          "Resposta inválida do servidor."
+        );
+
+      }
+
+
+      atualizarStatus(
+        "Iniciando..."
+      );
+
+
+      /*
+        ESTA NAVEGAÇÃO ACONTECE SOMENTE
+        DENTRO DO MÓDULO DO SAR.
+
+        A BARRA PRINCIPAL CONTINUA:
+
+        sarengenharia.com.br/sistema.html
+      */
+
+      window.location.assign(
+        data.next
+      );
+
+
+    }catch(error){
+
+      console.error(
+        "GAME ClassificaTOR:",
+        error
+      );
+
+
+      atualizarStatus(
+        "Não foi possível iniciar. Tente novamente."
+      );
+
+
+      iniciando = false;
+
+      btnIniciar.disabled = false;
+
     }
 
-    botao.addEventListener("click", iniciarGame);
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", configurar);
-  } else {
-    configurar();
-  }
+
+  btnIniciar.addEventListener(
+    "click",
+    iniciarGame
+  );
+
 })();
