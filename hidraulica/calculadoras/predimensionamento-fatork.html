@@ -1,1 +1,938 @@
-RTSTES
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="sar-recurso-codigo"
+    content="HIDRAULICA_CALCULADORAS_PREDIMENSIONAMENTO_FATOR_K"
+  >
+
+  <script src="/js/sar.page-guard.js"></script>
+
+  <title>Pré-dimensionamento hidráulico por Fator K</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f1f4f4;
+      color: #263737;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button, input, select { font: inherit; }
+
+    .sar-predk {
+      width: 100%;
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 24px;
+      border: 1px solid #315858;
+      border-radius: 14px;
+      background: #ffffff;
+    }
+
+    .sar-predk-cabecalho {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #dbe3e3;
+    }
+
+    .sar-predk-icone {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 58px;
+      height: 58px;
+      flex: 0 0 58px;
+      border-radius: 12px;
+      background: #eaf1f0;
+      color: #294f4f;
+      font-size: 21px;
+      font-weight: 800;
+    }
+
+    .sar-predk-cabecalho h1 {
+      margin: 0 0 6px;
+      color: #294f4f;
+      font-size: 24px;
+      line-height: 1.25;
+    }
+
+    .sar-predk-cabecalho p {
+      margin: 0;
+      color: #647474;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .sar-predk-modos {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+      margin-bottom: 18px;
+      padding: 5px;
+      border: 1px solid #d7dfdf;
+      border-radius: 9px;
+      background: #f4f7f7;
+    }
+
+    .sar-predk-modo {
+      min-height: 44px;
+      padding: 10px 14px;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+      background: transparent;
+      color: #526363;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .sar-predk-modo.ativo {
+      background: #315858;
+      color: #ffffff;
+    }
+
+    .sar-predk-bloco {
+      margin-bottom: 16px;
+      padding: 18px;
+      border: 1px solid #d7dfdf;
+      border-radius: 10px;
+      background: #fafbfb;
+    }
+
+    .sar-predk-titulo {
+      margin-bottom: 14px;
+      color: #294f4f;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .sar-predk-grade {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .sar-predk-campo { min-width: 0; }
+
+    .sar-predk-campo label {
+      display: block;
+      margin-bottom: 7px;
+      color: #263737;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .sar-predk-input,
+    .sar-predk-select {
+      width: 100%;
+      min-height: 46px;
+      padding: 11px 12px;
+      border: 1px solid #acbaba;
+      border-radius: 7px;
+      background: #ffffff;
+      color: #263737;
+      outline: 0;
+    }
+
+    .sar-predk-input:focus,
+    .sar-predk-select:focus,
+    .sar-predk-input-unidade:focus-within {
+      border-color: #315858;
+      box-shadow: 0 0 0 3px rgba(49, 88, 88, 0.12);
+    }
+
+    .sar-predk-input-unidade {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 165px;
+      width: 100%;
+      min-height: 46px;
+      overflow: hidden;
+      border: 1px solid #acbaba;
+      border-radius: 7px;
+      background: #ffffff;
+    }
+
+    .sar-predk-input-unidade input,
+    .sar-predk-input-unidade select {
+      width: 100%;
+      min-width: 0;
+      padding: 11px 12px;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #263737;
+    }
+
+    .sar-predk-input-unidade select {
+      border-left: 1px solid #d0d9d9;
+      background: #edf2f2;
+      color: #294f4f;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .sar-predk-ajuda,
+    .sar-predk-status {
+      margin: 8px 0 0;
+      color: #697777;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .sar-predk-equipamento {
+      display: none;
+      margin-top: 14px;
+      padding: 13px 15px;
+      border-left: 4px solid #315858;
+      border-radius: 7px;
+      background: #edf4f3;
+    }
+
+    .sar-predk-equipamento strong {
+      display: block;
+      margin-bottom: 5px;
+      color: #294f4f;
+      font-size: 15px;
+    }
+
+    .sar-predk-equipamento span {
+      color: #536767;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .sar-predk-manual { display: none; }
+    .sar-predk-manual.ativo { display: block; }
+
+    .sar-predk-painel-dado { display: none; }
+    .sar-predk-painel-dado.ativo { display: block; }
+
+    .sar-predk-mensagem {
+      display: none;
+      margin-bottom: 16px;
+      padding: 13px 15px;
+      border: 1px solid #e0b5b5;
+      border-radius: 8px;
+      background: #fff1f1;
+      color: #8b2929;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .sar-predk-botoes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .sar-predk-botao {
+      flex: 1 1 180px;
+      min-height: 46px;
+      padding: 11px 18px;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .sar-predk-botao:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .sar-predk-botao-principal {
+      background: #315858;
+      color: #ffffff;
+    }
+
+    .sar-predk-botao-secundario {
+      background: #d9dede;
+      color: #354444;
+    }
+
+    .sar-predk-resultado {
+      display: none;
+      margin-top: 20px;
+      overflow: hidden;
+      border: 1px solid #cbd7d7;
+      border-radius: 10px;
+      background: #ffffff;
+    }
+
+    .sar-predk-resultado-cabecalho {
+      padding: 14px 18px;
+      background: #315858;
+      color: #ffffff;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .sar-predk-destaque {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      padding: 18px;
+      background: #edf4f3;
+      border-bottom: 1px solid #dce6e4;
+    }
+
+    .sar-predk-destaque span {
+      color: #294f4f;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .sar-predk-destaque strong {
+      color: #234949;
+      font-size: 23px;
+      text-align: right;
+    }
+
+    .sar-predk-metricas {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1px;
+      background: #dfe7e6;
+    }
+
+    .sar-predk-metrica {
+      min-height: 84px;
+      padding: 14px 16px;
+      background: #ffffff;
+    }
+
+    .sar-predk-metrica span {
+      display: block;
+      margin-bottom: 7px;
+      color: #647474;
+      font-size: 12px;
+    }
+
+    .sar-predk-metrica strong {
+      color: #263f3f;
+      font-size: 16px;
+    }
+
+    .sar-predk-memoria {
+      padding: 17px 18px;
+      background: #fafbfb;
+      color: #596969;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .sar-predk-memoria h3 {
+      margin: 0 0 10px;
+      color: #354e4e;
+      font-size: 15px;
+    }
+
+    .sar-predk-formula {
+      margin: 7px 0;
+      padding: 9px 12px;
+      border-left: 4px solid #315858;
+      background: #edf4f3;
+      color: #294f4f;
+      font-weight: 700;
+    }
+
+    @media (max-width: 760px) {
+      body { padding: 10px; }
+      .sar-predk { padding: 16px; border-radius: 10px; }
+      .sar-predk-cabecalho { align-items: flex-start; }
+      .sar-predk-cabecalho h1 { font-size: 20px; }
+      .sar-predk-grade,
+      .sar-predk-modos,
+      .sar-predk-metricas { grid-template-columns: 1fr; }
+      .sar-predk-destaque {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 7px;
+      }
+      .sar-predk-destaque strong { text-align: left; }
+      .sar-predk-botoes { flex-direction: column; }
+      .sar-predk-botao { flex-basis: auto; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="sar-predk">
+    <header class="sar-predk-cabecalho">
+      <div class="sar-predk-icone">Q/P</div>
+      <div>
+        <h1>Pré-dimensionamento hidráulico por Fator K</h1>
+        <p>
+          Determine a vazão do equipamento ou a pressão necessária
+          a partir do seu Fator K de descarga.
+        </p>
+      </div>
+    </header>
+
+    <div class="sar-predk-modos" role="tablist">
+      <button
+        type="button"
+        class="sar-predk-modo ativo"
+        data-modo="vazao"
+      >
+        Calcular vazão
+      </button>
+      <button
+        type="button"
+        class="sar-predk-modo"
+        data-modo="pressao"
+      >
+        Calcular pressão necessária
+      </button>
+    </div>
+
+    <section class="sar-predk-bloco">
+      <div class="sar-predk-titulo">Equipamento e Fator K</div>
+
+      <div class="sar-predk-grade">
+        <div class="sar-predk-campo">
+          <label for="predkOrigem">Origem do Fator K</label>
+          <select id="predkOrigem" class="sar-predk-select">
+            <option value="banco">Banco de equipamentos</option>
+            <option value="manual">Informar manualmente</option>
+          </select>
+        </div>
+
+        <div id="predkBancoCampo" class="sar-predk-campo">
+          <label for="predkEquipamento">Equipamento cadastrado</label>
+          <select id="predkEquipamento" class="sar-predk-select">
+            <option value="">Carregando equipamentos...</option>
+          </select>
+          <p id="predkBancoStatus" class="sar-predk-status"></p>
+        </div>
+      </div>
+
+      <div id="predkManual" class="sar-predk-manual">
+        <div class="sar-predk-grade" style="margin-top: 14px;">
+          <div class="sar-predk-campo">
+            <label for="predkKManual">Fator K do equipamento</label>
+            <div class="sar-predk-input-unidade">
+              <input
+                id="predkKManual"
+                type="text"
+                inputmode="decimal"
+                autocomplete="off"
+                placeholder="Ex.: 80,00"
+              >
+              <select id="predkKUnidade" aria-label="Unidade do Fator K">
+                <option value="lminbar">L/min/√bar</option>
+                <option value="lminmca">L/min/√mca</option>
+                <option value="gpmpsi">gpm/√psi</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="predkEquipamentoResumo" class="sar-predk-equipamento"></div>
+    </section>
+
+    <section class="sar-predk-bloco">
+      <div id="predkDadoTitulo" class="sar-predk-titulo">
+        Pressão disponível no equipamento
+      </div>
+
+      <div id="predkPainelVazao" class="sar-predk-painel-dado ativo">
+        <div class="sar-predk-grade">
+          <div class="sar-predk-campo">
+            <label for="predkPressao">Pressão disponível</label>
+            <div class="sar-predk-input-unidade">
+              <input
+                id="predkPressao"
+                type="text"
+                inputmode="decimal"
+                autocomplete="off"
+                placeholder="Ex.: 2,00"
+              >
+              <select id="predkPressaoUnidade" aria-label="Unidade da pressão">
+                <option value="bar">bar</option>
+                <option value="kgfcm2">kgf/cm²</option>
+                <option value="mca">mca</option>
+                <option value="kpa">kPa</option>
+                <option value="mpa">MPa</option>
+                <option value="psi">psi</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <p class="sar-predk-ajuda">
+          O resultado indicará a vazão efetiva do equipamento nessa pressão.
+        </p>
+      </div>
+
+      <div id="predkPainelPressao" class="sar-predk-painel-dado">
+        <div class="sar-predk-grade">
+          <div class="sar-predk-campo">
+            <label for="predkVazao">Vazão desejada</label>
+            <div class="sar-predk-input-unidade">
+              <input
+                id="predkVazao"
+                type="text"
+                inputmode="decimal"
+                autocomplete="off"
+                placeholder="Ex.: 120,00"
+              >
+              <select id="predkVazaoUnidade" aria-label="Unidade da vazão">
+                <option value="lmin">L/min</option>
+                <option value="ls">L/s</option>
+                <option value="m3h">m³/h</option>
+                <option value="gpm">gpm</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <p class="sar-predk-ajuda">
+          O resultado indicará a pressão mínima necessária para alcançar essa vazão.
+        </p>
+      </div>
+    </section>
+
+    <div id="predkMensagem" class="sar-predk-mensagem" role="alert"></div>
+
+    <div class="sar-predk-botoes">
+      <button
+        type="button"
+        id="predkCalcular"
+        class="sar-predk-botao sar-predk-botao-principal"
+      >
+        Calcular vazão
+      </button>
+      <button
+        type="button"
+        id="predkLimpar"
+        class="sar-predk-botao sar-predk-botao-secundario"
+      >
+        Limpar
+      </button>
+    </div>
+
+    <section id="predkResultado" class="sar-predk-resultado">
+      <div id="predkResultadoTitulo" class="sar-predk-resultado-cabecalho">
+        Vazão calculada
+      </div>
+      <div class="sar-predk-destaque">
+        <span id="predkResultadoRotulo">Vazão do equipamento:</span>
+        <strong id="predkResultadoPrincipal">—</strong>
+      </div>
+      <div id="predkMetricas" class="sar-predk-metricas"></div>
+      <div class="sar-predk-memoria">
+        <h3>Memória de pré-dimensionamento</h3>
+        <div id="predkFormula" class="sar-predk-formula"></div>
+        <div id="predkSubstituicao"></div>
+        <div id="predkConclusao" style="margin-top: 10px;"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const PREDK_API_URL = "/api/hidraulica/fator-k";
+    const PREDK_SUPABASE_URL =
+      "https://bjtxbpmrmhfvpmdsthxr.supabase.co";
+    const PREDK_SUPABASE_KEY =
+      "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM";
+
+    let predkSupabasePromise = null;
+    let predkEquipamentos = [];
+    let predkModo = "vazao";
+
+    const predkModos = document.querySelectorAll(".sar-predk-modo");
+    const predkOrigem = document.getElementById("predkOrigem");
+    const predkBancoCampo = document.getElementById("predkBancoCampo");
+    const predkBancoStatus = document.getElementById("predkBancoStatus");
+    const predkEquipamento = document.getElementById("predkEquipamento");
+    const predkEquipamentoResumo = document.getElementById("predkEquipamentoResumo");
+    const predkManual = document.getElementById("predkManual");
+    const predkKManual = document.getElementById("predkKManual");
+    const predkKUnidade = document.getElementById("predkKUnidade");
+    const predkDadoTitulo = document.getElementById("predkDadoTitulo");
+    const predkPainelVazao = document.getElementById("predkPainelVazao");
+    const predkPainelPressao = document.getElementById("predkPainelPressao");
+    const predkPressao = document.getElementById("predkPressao");
+    const predkPressaoUnidade = document.getElementById("predkPressaoUnidade");
+    const predkVazao = document.getElementById("predkVazao");
+    const predkVazaoUnidade = document.getElementById("predkVazaoUnidade");
+    const predkMensagem = document.getElementById("predkMensagem");
+    const predkCalcular = document.getElementById("predkCalcular");
+    const predkLimpar = document.getElementById("predkLimpar");
+    const predkResultado = document.getElementById("predkResultado");
+    const predkResultadoTitulo = document.getElementById("predkResultadoTitulo");
+    const predkResultadoRotulo = document.getElementById("predkResultadoRotulo");
+    const predkResultadoPrincipal = document.getElementById("predkResultadoPrincipal");
+    const predkMetricas = document.getElementById("predkMetricas");
+    const predkFormula = document.getElementById("predkFormula");
+    const predkSubstituicao = document.getElementById("predkSubstituicao");
+    const predkConclusao = document.getElementById("predkConclusao");
+
+    function predkNumero(valor) {
+      if (typeof valor !== "string") {
+        return Number(valor);
+      }
+      let texto = valor.trim().replace(/\s/g, "");
+      if (texto.includes(",") && texto.includes(".")) {
+        texto = texto.replace(/\./g, "").replace(",", ".");
+      } else if (texto.includes(",")) {
+        texto = texto.replace(",", ".");
+      }
+      return Number(texto);
+    }
+
+    function predkFormatar(valor, casas = 2) {
+      return Number(valor).toLocaleString("pt-BR", {
+        minimumFractionDigits: casas,
+        maximumFractionDigits: casas
+      });
+    }
+
+    function predkEscapar(valor) {
+      return String(valor ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    async function predkObterSupabase() {
+      if (!predkSupabasePromise) {
+        predkSupabasePromise = import(
+          "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
+        ).then(function (modulo) {
+          return modulo.createClient(
+            PREDK_SUPABASE_URL,
+            PREDK_SUPABASE_KEY,
+            {
+              auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true
+              }
+            }
+          );
+        });
+      }
+      return predkSupabasePromise;
+    }
+
+    async function predkMotor(operacao, dados) {
+      const supabase = await predkObterSupabase();
+      const {
+        data: { session },
+        error
+      } = await supabase.auth.getSession();
+
+      if (error || !session?.access_token) {
+        throw new Error("Sua sessão expirou. Entre novamente no SAR.");
+      }
+
+      const resposta = await fetch(PREDK_API_URL, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${session.access_token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ operacao, dados })
+      });
+
+      let retorno = {};
+      try {
+        retorno = await resposta.json();
+      } catch (erroResposta) {
+        retorno = {};
+      }
+
+      if (!resposta.ok || retorno.sucesso !== true) {
+        throw new Error(
+          retorno.mensagem ||
+          `Falha no motor de pré-dimensionamento (${resposta.status}).`
+        );
+      }
+
+      return retorno.resultado || {};
+    }
+
+    function predkMostrarErro(texto) {
+      predkMensagem.textContent = `⚠️ ${texto}`;
+      predkMensagem.style.display = "block";
+    }
+
+    function predkOcultarErro() {
+      predkMensagem.textContent = "";
+      predkMensagem.style.display = "none";
+    }
+
+    function predkRotuloEquipamento(item) {
+      return [
+        item.equipamento,
+        item.fabricante,
+        item.modelo,
+        item.diametro ? `DN ${item.diametro}` : ""
+      ].filter(Boolean).join(" · ");
+    }
+
+    async function predkCarregarEquipamentos() {
+      predkBancoStatus.textContent = "Carregando banco de equipamentos...";
+      try {
+        const resultado = await predkMotor("listar_equipamentos", {});
+        predkEquipamentos = (resultado.registros || []).filter(function (item) {
+          return Number.isFinite(item.kBar) && item.kBar > 0;
+        });
+
+        predkEquipamento.innerHTML =
+          '<option value="">Selecione um equipamento</option>' +
+          predkEquipamentos.map(function (item, indice) {
+            return `<option value="${indice}">${predkEscapar(predkRotuloEquipamento(item))}</option>`;
+          }).join("");
+
+        predkBancoStatus.textContent =
+          `${predkEquipamentos.length} equipamento(s) com Fator K disponível(is).`;
+      } catch (erro) {
+        predkEquipamentos = [];
+        predkEquipamento.innerHTML =
+          '<option value="">Banco indisponível</option>';
+        predkBancoStatus.textContent =
+          "Não foi possível carregar o banco. Use a entrada manual.";
+        predkOrigem.value = "manual";
+        predkAtualizarOrigem();
+      }
+    }
+
+    function predkEquipamentoSelecionado() {
+      if (predkEquipamento.value === "") {
+        return null;
+      }
+      const indice = Number(predkEquipamento.value);
+      return Number.isInteger(indice) ? predkEquipamentos[indice] : null;
+    }
+
+    function predkAtualizarEquipamento() {
+      const item = predkEquipamentoSelecionado();
+      if (!item) {
+        predkEquipamentoResumo.style.display = "none";
+        predkEquipamentoResumo.innerHTML = "";
+        return;
+      }
+
+      predkEquipamentoResumo.innerHTML = `
+        <strong>${predkEscapar(predkRotuloEquipamento(item))}</strong>
+        <span>
+          K = ${predkFormatar(item.kBar)} L/min/√bar ·
+          ${predkFormatar(item.kMca)} L/min/√mca ·
+          ${predkFormatar(item.kPsi)} gpm/√psi
+        </span>
+      `;
+      predkEquipamentoResumo.style.display = "block";
+    }
+
+    function predkAtualizarOrigem() {
+      const manual = predkOrigem.value === "manual";
+      predkBancoCampo.style.display = manual ? "none" : "block";
+      predkManual.classList.toggle("ativo", manual);
+      predkEquipamentoResumo.style.display =
+        !manual && predkEquipamentoSelecionado() ? "block" : "none";
+      predkResultado.style.display = "none";
+      predkOcultarErro();
+    }
+
+    function predkDefinirModo(modo) {
+      predkModo = modo;
+      predkModos.forEach(function (botao) {
+        botao.classList.toggle("ativo", botao.dataset.modo === modo);
+      });
+
+      const calcularVazao = modo === "vazao";
+      predkPainelVazao.classList.toggle("ativo", calcularVazao);
+      predkPainelPressao.classList.toggle("ativo", !calcularVazao);
+      predkDadoTitulo.textContent = calcularVazao
+        ? "Pressão disponível no equipamento"
+        : "Vazão requerida no equipamento";
+      predkCalcular.textContent = calcularVazao
+        ? "Calcular vazão"
+        : "Calcular pressão necessária";
+      predkResultado.style.display = "none";
+      predkOcultarErro();
+    }
+
+    function predkObterK() {
+      if (predkOrigem.value === "manual") {
+        const valor = predkNumero(predkKManual.value);
+        if (!Number.isFinite(valor) || valor <= 0) {
+          throw new Error("Informe um Fator K válido, maior que zero.");
+        }
+        return {
+          fator_k: predkKManual.value,
+          unidade_fator_k: predkKUnidade.value,
+          equipamento: "Equipamento informado manualmente"
+        };
+      }
+
+      const item = predkEquipamentoSelecionado();
+      if (!item) {
+        throw new Error("Selecione um equipamento cadastrado.");
+      }
+      return {
+        fator_k: item.kBar,
+        unidade_fator_k: "lminbar",
+        equipamento: predkRotuloEquipamento(item)
+      };
+    }
+
+    function predkMetricasHtml(itens) {
+      return itens.map(function (item) {
+        return `
+          <div class="sar-predk-metrica">
+            <span>${predkEscapar(item.rotulo)}</span>
+            <strong>${predkEscapar(item.valor)}</strong>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function predkRenderizarVazao(resultado, equipamento) {
+      predkResultadoTitulo.textContent = "Vazão calculada";
+      predkResultadoRotulo.textContent = "Vazão do equipamento:";
+      predkResultadoPrincipal.textContent =
+        `${predkFormatar(resultado.vazao_lmin)} L/min`;
+      predkMetricas.innerHTML = predkMetricasHtml([
+        { rotulo: "Vazão", valor: `${predkFormatar(resultado.vazao_ls)} L/s` },
+        { rotulo: "Vazão", valor: `${predkFormatar(resultado.vazao_m3h)} m³/h` },
+        { rotulo: "Vazão", valor: `${predkFormatar(resultado.vazao_gpm)} gpm` },
+        { rotulo: "Fator K adotado", valor: `${predkFormatar(resultado.k_lmin_bar)} L/min/√bar` },
+        { rotulo: "Pressão considerada", valor: `${predkFormatar(resultado.pressao_bar)} bar` },
+        { rotulo: "Pressão equivalente", valor: `${predkFormatar(resultado.pressao_mca)} mca` }
+      ]);
+      predkFormula.textContent = "Q = K × √P";
+      predkSubstituicao.textContent =
+        `Q = ${predkFormatar(resultado.k_lmin_bar)} × ` +
+        `√${predkFormatar(resultado.pressao_bar)} = ` +
+        `${predkFormatar(resultado.vazao_lmin)} L/min`;
+      predkConclusao.textContent =
+        `${equipamento}: para a pressão informada, a vazão estimada ` +
+        `é de ${predkFormatar(resultado.vazao_lmin)} L/min.`;
+    }
+
+    function predkRenderizarPressao(resultado, equipamento) {
+      predkResultadoTitulo.textContent = "Pressão necessária calculada";
+      predkResultadoRotulo.textContent = "Pressão necessária:";
+      predkResultadoPrincipal.textContent =
+        `${predkFormatar(resultado.pressao_bar)} bar`;
+      predkMetricas.innerHTML = predkMetricasHtml([
+        { rotulo: "Pressão", valor: `${predkFormatar(resultado.pressao_mca)} mca` },
+        { rotulo: "Pressão", valor: `${predkFormatar(resultado.pressao_kgfcm2)} kgf/cm²` },
+        { rotulo: "Pressão", valor: `${predkFormatar(resultado.pressao_kpa)} kPa` },
+        { rotulo: "Pressão", valor: `${predkFormatar(resultado.pressao_mpa)} MPa` },
+        { rotulo: "Pressão", valor: `${predkFormatar(resultado.pressao_psi)} psi` },
+        { rotulo: "Vazão requerida", valor: `${predkFormatar(resultado.vazao_lmin)} L/min` }
+      ]);
+      predkFormula.textContent = "P = (Q ÷ K)²";
+      predkSubstituicao.textContent =
+        `P = (${predkFormatar(resultado.vazao_lmin)} ÷ ` +
+        `${predkFormatar(resultado.k_lmin_bar)})² = ` +
+        `${predkFormatar(resultado.pressao_bar)} bar`;
+      predkConclusao.textContent =
+        `${equipamento}: para fornecer ${predkFormatar(resultado.vazao_lmin)} ` +
+        `L/min, a pressão mínima estimada é ` +
+        `${predkFormatar(resultado.pressao_bar)} bar.`;
+    }
+
+    async function predkExecutarCalculo() {
+      predkOcultarErro();
+      predkResultado.style.display = "none";
+
+      let fator;
+      try {
+        fator = predkObterK();
+      } catch (erro) {
+        predkMostrarErro(erro.message);
+        return;
+      }
+
+      const textoOriginal = predkCalcular.textContent;
+      predkCalcular.disabled = true;
+      predkCalcular.textContent = "Calculando...";
+
+      try {
+        let resultado;
+        if (predkModo === "vazao") {
+          resultado = await predkMotor("calcular_vazao", {
+            fator_k: fator.fator_k,
+            unidade_fator_k: fator.unidade_fator_k,
+            pressao: predkPressao.value,
+            unidade_pressao: predkPressaoUnidade.value
+          });
+          predkRenderizarVazao(resultado, fator.equipamento);
+        } else {
+          resultado = await predkMotor("calcular_pressao", {
+            fator_k: fator.fator_k,
+            unidade_fator_k: fator.unidade_fator_k,
+            vazao: predkVazao.value,
+            unidade_vazao: predkVazaoUnidade.value
+          });
+          predkRenderizarPressao(resultado, fator.equipamento);
+        }
+        predkResultado.style.display = "block";
+      } catch (erro) {
+        predkMostrarErro(
+          erro.message || "Não foi possível concluir o pré-dimensionamento."
+        );
+      } finally {
+        predkCalcular.disabled = false;
+        predkCalcular.textContent = textoOriginal;
+      }
+    }
+
+    function predkLimparTudo() {
+      predkEquipamento.value = "";
+      predkKManual.value = "";
+      predkKUnidade.value = "lminbar";
+      predkPressao.value = "";
+      predkPressaoUnidade.value = "bar";
+      predkVazao.value = "";
+      predkVazaoUnidade.value = "lmin";
+      predkEquipamentoResumo.style.display = "none";
+      predkResultado.style.display = "none";
+      predkOcultarErro();
+    }
+
+    predkModos.forEach(function (botao) {
+      botao.addEventListener("click", function () {
+        predkDefinirModo(botao.dataset.modo);
+      });
+    });
+
+    predkOrigem.addEventListener("change", predkAtualizarOrigem);
+    predkEquipamento.addEventListener("change", predkAtualizarEquipamento);
+    predkCalcular.addEventListener("click", predkExecutarCalculo);
+    predkLimpar.addEventListener("click", predkLimparTudo);
+
+    [predkKManual, predkPressao, predkVazao].forEach(function (campo) {
+      campo.addEventListener("keydown", function (evento) {
+        if (evento.key === "Enter") {
+          predkExecutarCalculo();
+        }
+      });
+    });
+
+    predkCarregarEquipamentos();
+  </script>
+</body>
+</html>
