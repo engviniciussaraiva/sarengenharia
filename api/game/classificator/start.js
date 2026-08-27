@@ -36,6 +36,7 @@ export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
   res.setHeader("X-Content-Type-Options", "nosniff");
 
+  // Apenas POST
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
 
@@ -44,16 +45,20 @@ export default async function handler(req, res) {
     });
   }
 
+  // Segredo armazenado somente na Vercel
   const secret = process.env.GAME_SESSION_SECRET;
 
   if (!secret || secret.length < 32) {
-    console.error("GAME_SESSION_SECRET ausente ou inválido.");
+    console.error(
+      "GAME_SESSION_SECRET ausente ou inválido."
+    );
 
     return res.status(500).json({
       ok: false
     });
   }
 
+  // Cria sessão protegida do GAME
   const token = createSessionToken(secret);
 
   res.setHeader(
@@ -68,8 +73,9 @@ export default async function handler(req, res) {
     ].join("; ")
   );
 
+  // Próxima tela dentro do módulo
   return res.status(200).json({
     ok: true,
-    next: "fase-01"
+    next: "/game-classificator/fase-01/"
   });
 }
