@@ -3,6 +3,25 @@ export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
   res.setHeader("X-Content-Type-Options", "nosniff");
 
+  /*
+   * =========================================================
+   * GAME CLASSIFICATOR
+   * API DE MENSAGENS
+   *
+   * Variáveis exclusivas do GAME:
+   *
+   * GAME_SUPABASE_URL
+   * GAME_SUPABASE_SECRET_KEY
+   *
+   * A chave secreta NUNCA é enviada ao navegador.
+   * =========================================================
+   */
+
+
+  /*
+   * SOMENTE GET
+   */
+
   if (req.method !== "GET") {
 
     res.setHeader("Allow", "GET");
@@ -16,6 +35,10 @@ export default async function handler(req, res) {
 
 
   try {
+
+    /*
+     * CÓDIGO DA MENSAGEM
+     */
 
     const codigo = String(
       req.query.codigo || ""
@@ -34,51 +57,91 @@ export default async function handler(req, res) {
     }
 
 
-    const supabaseUrl =
-      process.env.SUPABASE_URL;
+    /*
+     * ACEITA SOMENTE CÓDIGOS NO PADRÃO:
+     *
+     * FASE_01_UMA_EDIFICACAO
+     *
+     * Isso evita valores estranhos chegando
+     * à consulta.
+     */
 
-    const supabaseKey =
-      process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!/^[A-Z0-9_]{3,100}$/.test(codigo)) {
+
+      return res.status(400).json({
+        ok: false,
+        erro: "CODIGO_INVALIDO"
+      });
+
+    }
 
 
     /*
-     * Não mostramos nenhuma chave na resposta.
+     * VARIÁVEIS EXCLUSIVAS DO GAME
+     */
+
+    const supabaseUrl =
+      process.env.GAME_SUPABASE_URL;
+
+    const supabaseSecretKey =
+      process.env.GAME_SUPABASE_SECRET_KEY;
+
+
+    /*
+     * CONFERE CONFIGURAÇÃO
      */
 
     if (!supabaseUrl) {
 
       console.error(
-        "GAME ClassificaTOR: SUPABASE_URL ausente."
+        "GAME ClassificaTOR: GAME_SUPABASE_URL ausente."
       );
 
       return res.status(500).json({
         ok: false,
-        erro: "SUPABASE_URL_AUSENTE"
+        erro: "GAME_SUPABASE_URL_AUSENTE"
       });
 
     }
 
 
-    if (!supabaseKey) {
+    if (!supabaseSecretKey) {
 
       console.error(
-        "GAME ClassificaTOR: SUPABASE_SERVICE_ROLE_KEY ausente."
+        "GAME ClassificaTOR: GAME_SUPABASE_SECRET_KEY ausente."
       );
 
       return res.status(500).json({
         ok: false,
-        erro: "SUPABASE_KEY_AUSENTE"
+        erro: "GAME_SUPABASE_SECRET_KEY_AUSENTE"
       });
 
     }
 
+
+    /*
+     * REMOVE BARRA FINAL DA URL,
+     * CASO TENHA SIDO CADASTRADA.
+     */
 
     const baseUrl =
       supabaseUrl.replace(/\/+$/, "");
 
 
+    /*
+     * CONSULTA SOMENTE:
+     *
+     * codigo informado
+     * ativo = true
+     *
+     * E DEVOLVE SOMENTE:
+     *
+     * texto
+     */
+
     const endpoint =
-      `${baseUrl}/rest/v1/sar_game_classificator_mensagens` +
+      `${baseUrl}/rest/v1/` +
+      `sar_game_classificator_mensagens` +
       `?codigo=eq.${encodeURIComponent(codigo)}` +
       `&ativo=eq.true` +
       `&select=texto` +
@@ -86,40 +149,37 @@ export default async function handler(req, res) {
 
 
     /*
-     * Cabeçalhos compatíveis tanto com
-     * chave antiga JWT quanto com chave
-     * secreta nova do Supabase.
-     */
-
-    const headers = {
-      "apikey": supabaseKey,
-      "Accept": "application/json"
-    };
-
-
-    /*
-     * Chaves antigas service_role normalmente
-     * são JWT e começam com "eyJ".
+     * IMPORTANTE:
      *
-     * Nesse caso também usamos Authorization.
+     * A nova Secret Key do Supabase:
+     *
+     * sb_secret_...
+     *
+     * é enviada pelo header "apikey".
+     *
+     * NÃO usamos:
+     *
+     * Authorization: Bearer
+     *
+     * porque essa nova chave não é um JWT.
      */
-
-    if (supabaseKey.startsWith("eyJ")) {
-
-      headers["Authorization"] =
-        `Bearer ${supabaseKey}`;
-
-    }
-
 
     const response = await fetch(
       endpoint,
       {
         method: "GET",
-        headers
+
+        headers: {
+          "apikey": supabaseSecretKey,
+          "Accept": "application/json"
+        }
       }
     );
 
+
+    /*
+     * ERRO NA COMUNICAÇÃO COM SUPABASE
+     */
 
     if (!response.ok) {
 
@@ -127,15 +187,15 @@ export default async function handler(req, res) {
         await response.text();
 
       console.error(
-        "GAME ClassificaTOR - erro Supabase:",
+        "GAME ClassificaTOR - Supabase:",
         response.status,
         detalhe
       );
 
 
       /*
-       * Não devolvemos chave ou detalhes
-       * internos para o navegador.
+       * Não devolvemos detalhes internos
+       * nem qualquer chave ao navegador.
        */
 
       return res.status(500).json({
@@ -147,6 +207,10 @@ export default async function handler(req, res) {
     }
 
 
+    /*
+     * RESULTADO
+     */
+
     const dados =
       await response.json();
 
@@ -156,7 +220,7 @@ export default async function handler(req, res) {
       dados.length === 0
     ) {
 
-      console.error(
+      console.warn(
         "GAME ClassificaTOR: mensagem não encontrada:",
         codigo
       );
@@ -170,7 +234,9 @@ export default async function handler(req, res) {
 
 
     const texto =
-      String(dados[0]?.texto || "").trim();
+      String(
+        dados[0]?.texto || ""
+      ).trim();
 
 
     if (!texto) {
@@ -183,16 +249,23 @@ export default async function handler(req, res) {
     }
 
 
+    /*
+     * ÚNICA INFORMAÇÃO DO BANCO
+     * DEVOLVIDA AO FRONTEND:
+     *
+     * O TEXTO DA MENSAGEM.
+     */
+
     return res.status(200).json({
       ok: true,
-      texto
+      texto: texto
     });
 
 
   } catch (error) {
 
     console.error(
-      "GAME ClassificaTOR - mensagem:",
+      "GAME ClassificaTOR - erro interno:",
       error
     );
 
