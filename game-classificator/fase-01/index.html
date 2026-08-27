@@ -549,38 +549,101 @@
        * nesta versão.
        */
 
-      cardUmaEdificacao?.addEventListener(
-        "click",
-        () => {
+     async function escreverMensagemIA(elemento, texto){
 
-          if(cardUmaEdificacao.disabled){
-            return;
+  elemento.textContent = "";
+
+  const velocidade = 26;
+
+  for(let i = 0; i < texto.length; i++){
+
+    elemento.textContent += texto.charAt(i);
+
+    await new Promise(resolve =>
+      setTimeout(resolve, velocidade)
+    );
+
+  }
+
+}
+
+
+cardUmaEdificacao?.addEventListener(
+  "click",
+  async () => {
+
+    if(cardUmaEdificacao.disabled){
+      return;
+    }
+
+    cardUmaEdificacao.disabled = true;
+
+    atualizarStatus("");
+
+    try{
+
+      const response = await fetch(
+        "/api/game/classificator/mensagem?codigo=FASE_01_UMA_EDIFICACAO",
+        {
+          method:"GET",
+          credentials:"same-origin",
+          headers:{
+            "Accept":"application/json"
           }
-
-
-          atualizarStatus(
-            "Configuração selecionada. Preparando próxima fase..."
-          );
-
-
-          /*
-           * AQUI entraremos com:
-           *
-           * /api/game/classificator/fase-01
-           *
-           * A escolha será enviada para
-           * o motor protegido.
-           *
-           * NÃO vamos colocar as regras
-           * técnicas aqui no frontend.
-           */
-
-          console.log(
-            "GAME ClassificaTOR: uma edificação selecionada."
-          );
-
         }
       );
+
+      if(!response.ok){
+        throw new Error(
+          "Não foi possível carregar a mensagem."
+        );
+      }
+
+      const data =
+        await response.json();
+
+      if(
+        !data ||
+        data.ok !== true ||
+        !data.texto
+      ){
+        throw new Error(
+          "Mensagem inválida."
+        );
+      }
+
+      await escreverMensagemIA(
+        statusFase,
+        data.texto
+      );
+
+      /*
+       * DEPOIS LIGAREMOS AQUI:
+       *
+       * await ...
+       *
+       * window.location.assign(
+       *   "/game-classificator/fase-02/"
+       * );
+       */
+
+    }catch(error){
+
+      console.error(
+        "GAME ClassificaTOR:",
+        error
+      );
+
+      atualizarStatus(
+        "Não foi possível continuar. Tente novamente."
+      );
+
+      cardUmaEdificacao.disabled = false;
+
+    }
+
+  }
+); 
 
     })();
 
