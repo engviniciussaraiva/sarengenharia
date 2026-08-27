@@ -669,6 +669,84 @@
         </p>
       </section>
 
+      <section class="sar-fatork-bloco">
+        <div class="sar-fatork-titulo-secao">
+          Conversão direta do Fator K de catálogo
+        </div>
+
+        <div class="sar-fatork-grade">
+          <div class="sar-fatork-campo">
+            <label for="fatorkCatalogoValor">
+              Fator K informado no catálogo
+            </label>
+
+            <div class="sar-fatork-input-unidade">
+              <input
+                type="text"
+                id="fatorkCatalogoValor"
+                inputmode="decimal"
+                autocomplete="off"
+                placeholder="Ex.: 30,00"
+              >
+
+              <select
+                id="fatorkCatalogoUnidade"
+                aria-label="Unidade do Fator K informado"
+              >
+                <option value="gpmpsi">gpm/√psi</option>
+                <option value="lminbar">L/min/√bar</option>
+                <option value="lminmca">L/min/√mca</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sar-fatork-campo">
+            <label>Conversão</label>
+            <button
+              type="button"
+              id="fatorkCatalogoConverter"
+              class="sar-fatork-botao sar-fatork-botao-principal"
+            >
+              Converter Fator K
+            </button>
+          </div>
+        </div>
+
+        <p class="sar-fatork-ajuda">
+          Use esta opção quando o catálogo já informar diretamente o Fator K,
+          inclusive em unidades americanas, como K = 30 gpm/√psi.
+        </p>
+
+        <div
+          id="fatorkCatalogoResultado"
+          class="sar-fatork-resultado"
+        >
+          <div class="sar-fatork-resultado-titulo">
+            Fator K convertido
+          </div>
+
+          <div class="sar-fatork-resultado-linha destaque">
+            <span>Sistema americano:</span>
+            <strong id="fatorkCatalogoResultadoPsi">—</strong>
+          </div>
+
+          <div class="sar-fatork-resultado-linha">
+            <span>Sistema métrico — bar:</span>
+            <strong id="fatorkCatalogoResultadoBar">—</strong>
+          </div>
+
+          <div class="sar-fatork-resultado-linha">
+            <span>Sistema métrico — mca:</span>
+            <strong id="fatorkCatalogoResultadoMca">—</strong>
+          </div>
+
+          <div class="sar-fatork-memoria">
+            <h3>Conversão de unidades</h3>
+            <div id="fatorkCatalogoMemoria" class="sar-fatork-conclusao"></div>
+          </div>
+        </div>
+      </section>
+
       <div
         id="fatorkMensagem"
         class="sar-fatork-mensagem"
@@ -1098,13 +1176,78 @@
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMzy4thrXA3EZ6_kP1KwXTejPBNrrLP961DKB4qMlrqDmVocLQlmKafViegPUvI47UyqT5UnsJc2Lu/pub?output=csv";
 
     /*
-      CONSTANTES
+      MOTOR VERCEL
     */
 
-    const FATORK_LITROS_POR_GALAO_US = 3.785411784;
-    const FATORK_BAR_POR_MCA = 0.0980665;
-    const FATORK_BAR_POR_PSI = 0.0689475729;
-const FATORK_BAR_POR_KGFCM2 = 0.980665;
+    const FATORK_API_URL = "/api/hidraulica/fator-k";
+    const FATORK_SUPABASE_URL =
+      "https://bjtxbpmrmhfvpmdsthxr.supabase.co";
+    const FATORK_SUPABASE_KEY =
+      "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM";
+
+    let fatorkSupabasePromise = null;
+
+    async function fatorkObterSupabase() {
+      if (!fatorkSupabasePromise) {
+        fatorkSupabasePromise = import(
+          "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
+        ).then(function (modulo) {
+          return modulo.createClient(
+            FATORK_SUPABASE_URL,
+            FATORK_SUPABASE_KEY,
+            {
+              auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true
+              }
+            }
+          );
+        });
+      }
+
+      return fatorkSupabasePromise;
+    }
+
+    async function fatorkExecutarMotor(operacao, dados) {
+      const supabase = await fatorkObterSupabase();
+      const {
+        data: { session },
+        error
+      } = await supabase.auth.getSession();
+
+      if (error || !session?.access_token) {
+        throw new Error(
+          "Sua sessão expirou. Entre novamente no SAR."
+        );
+      }
+
+      const resposta = await fetch(FATORK_API_URL, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${session.access_token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ operacao, dados })
+      });
+
+      let retorno = {};
+
+      try {
+        retorno = await resposta.json();
+      } catch (erroResposta) {
+        retorno = {};
+      }
+
+      if (!resposta.ok || retorno.sucesso !== true) {
+        throw new Error(
+          retorno.mensagem ||
+          `Falha no motor Fator K (${resposta.status}).`
+        );
+      }
+
+      return retorno.resultado || {};
+    }
 
     /*
       ELEMENTOS
@@ -1133,6 +1276,30 @@ const FATORK_BAR_POR_KGFCM2 = 0.980665;
 
     const fatorkConversaoPressao =
       document.getElementById("fatorkConversaoPressao");
+
+    const fatorkCatalogoValor =
+      document.getElementById("fatorkCatalogoValor");
+
+    const fatorkCatalogoUnidade =
+      document.getElementById("fatorkCatalogoUnidade");
+
+    const fatorkCatalogoConverter =
+      document.getElementById("fatorkCatalogoConverter");
+
+    const fatorkCatalogoResultado =
+      document.getElementById("fatorkCatalogoResultado");
+
+    const fatorkCatalogoResultadoPsi =
+      document.getElementById("fatorkCatalogoResultadoPsi");
+
+    const fatorkCatalogoResultadoBar =
+      document.getElementById("fatorkCatalogoResultadoBar");
+
+    const fatorkCatalogoResultadoMca =
+      document.getElementById("fatorkCatalogoResultadoMca");
+
+    const fatorkCatalogoMemoria =
+      document.getElementById("fatorkCatalogoMemoria");
 
     const fatorkMensagem =
       document.getElementById("fatorkMensagem");
@@ -1363,51 +1530,6 @@ const FATORK_BAR_POR_KGFCM2 = 0.980665;
       CONVERSÕES
     */
 
-    function fatorkConverterVazaoParaLmin(valor, unidade) {
-      switch (unidade) {
-        case "lmin":
-          return valor;
-
-        case "ls":
-          return valor * 60;
-
-        case "m3h":
-          return valor * 1000 / 60;
-
-        case "gpm":
-          return valor * FATORK_LITROS_POR_GALAO_US;
-
-        default:
-          return NaN;
-      }
-    }
-
-    function fatorkConverterPressaoParaBar(valor, unidade) {
-      switch (unidade) {
-        case "bar":
-          return valor;
-
-case "kgfcm2":
-  return valor * FATORK_BAR_POR_KGFCM2;
-
-
-        case "mca":
-          return valor * FATORK_BAR_POR_MCA;
-
-        case "kpa":
-          return valor / 100;
-
-        case "mpa":
-          return valor * 10;
-
-        case "psi":
-          return valor * FATORK_BAR_POR_PSI;
-
-        default:
-          return NaN;
-      }
-    }
-
     function fatorkRotuloVazao(unidade) {
       const rotulos = {
         lmin: "L/min",
@@ -1422,7 +1544,7 @@ case "kgfcm2":
     function fatorkRotuloPressao(unidade) {
       const rotulos = {
         bar: "bar",
-kgfcm2: "kgf/cm²",
+        kgfcm2: "kgf/cm²",
         mca: "mca",
         kpa: "kPa",
         mpa: "MPa",
@@ -1431,6 +1553,63 @@ kgfcm2: "kgf/cm²",
 
       return rotulos[unidade] || unidade;
     }
+
+    async function fatorkConverterKCatalogo() {
+      fatorkOcultarMensagem();
+
+      const valor =
+        fatorkConverterNumero(fatorkCatalogoValor.value);
+
+      if (!Number.isFinite(valor) || valor <= 0) {
+        fatorkCatalogoResultado.style.display = "none";
+        fatorkExibirMensagem(
+          "Informe um Fator K de catálogo válido, maior que zero."
+        );
+        return;
+      }
+
+      const textoOriginal = fatorkCatalogoConverter.textContent;
+      fatorkCatalogoConverter.disabled = true;
+      fatorkCatalogoConverter.textContent = "Convertendo...";
+
+      try {
+        const resultado = await fatorkExecutarMotor(
+          "converter_k",
+          {
+            valor: fatorkCatalogoValor.value,
+            unidade: fatorkCatalogoUnidade.value
+          }
+        );
+
+        fatorkCatalogoResultadoPsi.textContent =
+          `${fatorkFormatarNumero(resultado.k_gpm_psi)} gpm/√psi`;
+
+        fatorkCatalogoResultadoBar.textContent =
+          `${fatorkFormatarNumero(resultado.k_lmin_bar)} L/min/√bar`;
+
+        fatorkCatalogoResultadoMca.textContent =
+          `${fatorkFormatarNumero(resultado.k_lmin_mca)} L/min/√mca`;
+
+        fatorkCatalogoMemoria.textContent =
+          `O valor informado (${fatorkFormatarNumero(valor)}) foi ` +
+          `convertido pelo motor Vercel para as três unidades ` +
+          `padronizadas do banco técnico.`;
+
+        fatorkCatalogoResultado.style.display = "block";
+      } catch (erro) {
+        fatorkCatalogoResultado.style.display = "none";
+        fatorkExibirMensagem(
+          erro.message ||
+          "Não foi possível converter o Fator K informado."
+        );
+      } finally {
+        fatorkCatalogoConverter.disabled = false;
+        fatorkCatalogoConverter.textContent = textoOriginal;
+      }
+    }
+
+    let fatorkConversaoTimer = null;
+    let fatorkConversaoToken = 0;
 
     function fatorkAtualizarConversoes() {
       const vazaoOriginal =
@@ -1442,41 +1621,57 @@ kgfcm2: "kgf/cm²",
       fatorkConversaoVazao.innerHTML = "";
       fatorkConversaoPressao.innerHTML = "";
 
-      if (
-        Number.isFinite(vazaoOriginal) &&
-        vazaoOriginal > 0
-      ) {
-        const vazaoLmin =
-          fatorkConverterVazaoParaLmin(
-            vazaoOriginal,
-            fatorkUnidadeVazao.value
-          );
+      clearTimeout(fatorkConversaoTimer);
+      const token = ++fatorkConversaoToken;
+      const possuiVazao =
+        Number.isFinite(vazaoOriginal) && vazaoOriginal > 0;
+      const possuiPressao =
+        Number.isFinite(pressaoOriginal) && pressaoOriginal > 0;
 
-        fatorkConversaoVazao.innerHTML = `
-          Conversão automática:
-          <strong>
-            ${fatorkFormatarNumero(vazaoLmin)} L/min
-          </strong>
-        `;
+      if (!possuiVazao && !possuiPressao) {
+        return;
       }
 
-      if (
-        Number.isFinite(pressaoOriginal) &&
-        pressaoOriginal > 0
-      ) {
-        const pressaoBar =
-          fatorkConverterPressaoParaBar(
-            pressaoOriginal,
-            fatorkUnidadePressao.value
+      fatorkConversaoTimer = setTimeout(async function () {
+        try {
+          const resultado = await fatorkExecutarMotor(
+            "converter_entradas",
+            {
+              vazao: possuiVazao ? fatorkVazao.value : null,
+              unidade_vazao: fatorkUnidadeVazao.value,
+              pressao: possuiPressao ? fatorkPressao.value : null,
+              unidade_pressao: fatorkUnidadePressao.value
+            }
           );
 
-        fatorkConversaoPressao.innerHTML = `
-          Conversão automática:
-          <strong>
-            ${fatorkFormatarNumero(pressaoBar)} bar
-          </strong>
-        `;
-      }
+          if (token !== fatorkConversaoToken) {
+            return;
+          }
+
+          if (possuiVazao) {
+            fatorkConversaoVazao.innerHTML = `
+              Conversão automática:
+              <strong>
+                ${fatorkFormatarNumero(resultado.vazao_lmin)} L/min
+              </strong>
+            `;
+          }
+
+          if (possuiPressao) {
+            fatorkConversaoPressao.innerHTML = `
+              Conversão automática:
+              <strong>
+                ${fatorkFormatarNumero(resultado.pressao_bar)} bar
+              </strong>
+            `;
+          }
+        } catch (erro) {
+          if (token === fatorkConversaoToken) {
+            fatorkConversaoVazao.innerHTML = "";
+            fatorkConversaoPressao.innerHTML = "";
+          }
+        }
+      }, 350);
     }
 
     /*
@@ -1490,7 +1685,7 @@ kgfcm2: "kgf/cm²",
       fatorkUltimoResultado = null;
     }
 
-    function fatorkCalcular() {
+    async function fatorkCalcular() {
       fatorkOcultarMensagem();
 
       const vazaoOriginal =
@@ -1520,86 +1715,78 @@ kgfcm2: "kgf/cm²",
       const unidadePressao =
         fatorkUnidadePressao.value;
 
-      const vazaoLmin =
-        fatorkConverterVazaoParaLmin(
+      const textoOriginal = fatorkBotaoCalcular.textContent;
+      fatorkBotaoCalcular.disabled = true;
+      fatorkBotaoCalcular.textContent = "Calculando...";
+
+      try {
+        const resultado = await fatorkExecutarMotor(
+          "calcular",
+          {
+            vazao: fatorkVazao.value,
+            unidade_vazao: unidadeVazao,
+            pressao: fatorkPressao.value,
+            unidade_pressao: unidadePressao
+          }
+        );
+
+        const vazaoLmin = resultado.vazao_lmin;
+        const pressaoBar = resultado.pressao_bar;
+        const kLminBar = resultado.k_lmin_bar;
+        const kLminMca = resultado.k_lmin_mca;
+        const kGpmPsi = resultado.k_gpm_psi;
+
+        const conclusao =
+          `Para a vazão de ` +
+          `${fatorkFormatarNumero(vazaoOriginal)} ` +
+          `${fatorkRotuloVazao(unidadeVazao)} e pressão de ` +
+          `${fatorkFormatarNumero(pressaoOriginal)} ` +
+          `${fatorkRotuloPressao(unidadePressao)}, o equipamento ` +
+          `apresenta Fator K de descarga igual a ` +
+          `${fatorkFormatarNumero(kLminBar)} L/min/√bar, ` +
+          `equivalente a ` +
+          `${fatorkFormatarNumero(kLminMca)} L/min/√mca e ` +
+          `${fatorkFormatarNumero(kGpmPsi)} gpm/√psi.`;
+
+        fatorkResultadoBar.textContent =
+          `${fatorkFormatarNumero(kLminBar)} L/min/√bar`;
+
+        fatorkResultadoMca.textContent =
+          `${fatorkFormatarNumero(kLminMca)} L/min/√mca`;
+
+        fatorkSubstituicao.textContent =
+          `K = ${fatorkFormatarNumero(vazaoLmin)} ÷ ` +
+          `√${fatorkFormatarNumero(pressaoBar)} = ` +
+          `${fatorkFormatarNumero(kLminBar)} L/min/√bar`;
+
+        fatorkConclusao.textContent = conclusao;
+
+        fatorkUltimoResultado = {
           vazaoOriginal,
-          unidadeVazao
-        );
-
-      const pressaoBar =
-        fatorkConverterPressaoParaBar(
+          unidadeVazao,
           pressaoOriginal,
-          unidadePressao
-        );
+          unidadePressao,
+          vazaoLmin,
+          pressaoBar,
+          kLminBar,
+          kLminMca,
+          kGpmPsi,
+          conclusao
+        };
 
-      if (
-        !Number.isFinite(vazaoLmin) ||
-        vazaoLmin <= 0 ||
-        !Number.isFinite(pressaoBar) ||
-        pressaoBar <= 0
-      ) {
+        fatorkResultado.style.display = "block";
+        fatorkBotaoCopiar.disabled = false;
+        fatorkBotaoImprimir.disabled = false;
+      } catch (erro) {
         fatorkOcultarResultado();
-
         fatorkExibirMensagem(
-          "Não foi possível converter os dados informados."
+          erro.message ||
+          "Não foi possível calcular o Fator K."
         );
-
-        return;
+      } finally {
+        fatorkBotaoCalcular.disabled = false;
+        fatorkBotaoCalcular.textContent = textoOriginal;
       }
-
-      const kLminBar =
-        vazaoLmin / Math.sqrt(pressaoBar);
-
-      const kLminMca =
-        kLminBar * Math.sqrt(FATORK_BAR_POR_MCA);
-
-      const kGpmPsi =
-        kLminBar *
-        Math.sqrt(FATORK_BAR_POR_PSI) /
-        FATORK_LITROS_POR_GALAO_US;
-
-      const conclusao =
-        `Para a vazão de ` +
-        `${fatorkFormatarNumero(vazaoOriginal)} ` +
-        `${fatorkRotuloVazao(unidadeVazao)} e pressão de ` +
-        `${fatorkFormatarNumero(pressaoOriginal)} ` +
-        `${fatorkRotuloPressao(unidadePressao)}, o equipamento ` +
-        `apresenta Fator K de descarga igual a ` +
-        `${fatorkFormatarNumero(kLminBar)} L/min/√bar, ` +
-        `equivalente a ` +
-        `${fatorkFormatarNumero(kLminMca)} L/min/√mca e ` +
-        `${fatorkFormatarNumero(kGpmPsi)} gpm/√psi.`;
-
-      fatorkResultadoBar.textContent =
-        `${fatorkFormatarNumero(kLminBar)} L/min/√bar`;
-
-      fatorkResultadoMca.textContent =
-        `${fatorkFormatarNumero(kLminMca)} L/min/√mca`;
-
-      fatorkSubstituicao.textContent =
-        `K = ${fatorkFormatarNumero(vazaoLmin)} ÷ ` +
-        `√${fatorkFormatarNumero(pressaoBar)} = ` +
-        `${fatorkFormatarNumero(kLminBar)} L/min/√bar`;
-
-      fatorkConclusao.textContent =
-        conclusao;
-
-      fatorkUltimoResultado = {
-        vazaoOriginal,
-        unidadeVazao,
-        pressaoOriginal,
-        unidadePressao,
-        vazaoLmin,
-        pressaoBar,
-        kLminBar,
-        kLminMca,
-        kGpmPsi,
-        conclusao
-      };
-
-      fatorkResultado.style.display = "block";
-      fatorkBotaoCopiar.disabled = false;
-      fatorkBotaoImprimir.disabled = false;
     }
 
     function fatorkLimpar() {
@@ -1610,6 +1797,9 @@ kgfcm2: "kgf/cm²",
 
       fatorkConversaoVazao.innerHTML = "";
       fatorkConversaoPressao.innerHTML = "";
+      fatorkCatalogoValor.value = "";
+      fatorkCatalogoUnidade.value = "gpmpsi";
+      fatorkCatalogoResultado.style.display = "none";
 
       fatorkOcultarMensagem();
       fatorkOcultarResultado();
@@ -2204,108 +2394,6 @@ kgfcm2: "kgf/cm²",
       });
     }
 
-    function fatorkLerCampo(registro, nomes) {
-      const chaves = Object.keys(registro);
-
-      for (const nome of nomes) {
-        const chaveEncontrada =
-          chaves.find(function (chave) {
-            return fatorkNormalizarTexto(chave) ===
-              fatorkNormalizarTexto(nome);
-          });
-
-        if (chaveEncontrada) {
-          return registro[chaveEncontrada];
-        }
-      }
-
-      return "";
-    }
-
-    function fatorkPrepararRegistro(registro) {
-      const kBarTexto =
-        fatorkLerCampo(registro, [
-          "FATOR_K_LMIN_BAR",
-          "K_LMIN_BAR",
-          "FATOR K LMIN BAR"
-        ]);
-
-      const kMcaTexto =
-        fatorkLerCampo(registro, [
-          "FATOR_K_LMIN_MCA",
-          "K_LMIN_MCA",
-          "FATOR K LMIN MCA"
-        ]);
-
-      const kPsiTexto =
-        fatorkLerCampo(registro, [
-          "FATOR_K_GPM_PSI",
-          "K_GPM_PSI",
-          "FATOR K GPM PSI"
-        ]);
-
-      let kBar =
-        fatorkConverterNumero(kBarTexto);
-
-      let kMca =
-        fatorkConverterNumero(kMcaTexto);
-
-      let kPsi =
-        fatorkConverterNumero(kPsiTexto);
-
-      if (
-        Number.isFinite(kBar) &&
-        kBar > 0
-      ) {
-        if (!Number.isFinite(kMca) || kMca <= 0) {
-          kMca =
-            kBar * Math.sqrt(FATORK_BAR_POR_MCA);
-        }
-
-        if (!Number.isFinite(kPsi) || kPsi <= 0) {
-          kPsi =
-            kBar *
-            Math.sqrt(FATORK_BAR_POR_PSI) /
-            FATORK_LITROS_POR_GALAO_US;
-        }
-      }
-
-      return {
-        id:
-          fatorkLerCampo(registro, ["ID"]),
-        categoria:
-          fatorkLerCampo(registro, ["CATEGORIA"]),
-        equipamento:
-          fatorkLerCampo(registro, ["EQUIPAMENTO"]),
-        fabricante:
-          fatorkLerCampo(registro, ["FABRICANTE"]),
-        modelo:
-          fatorkLerCampo(registro, ["MODELO"]),
-        diametro:
-          fatorkLerCampo(registro, [
-            "DIAMETRO_NOMINAL",
-            "DIÂMETRO_NOMINAL",
-            "DIAMETRO",
-            "DN"
-          ]),
-        kBar,
-        kMca,
-        kPsi,
-        aplicacao:
-          fatorkLerCampo(registro, ["APLICACAO", "APLICAÇÃO"]),
-        referencia:
-          fatorkLerCampo(registro, ["REFERENCIA", "REFERÊNCIA"]),
-        observacao:
-          fatorkLerCampo(registro, ["OBSERVACAO", "OBSERVAÇÃO"]),
-        status:
-          fatorkLerCampo(registro, ["STATUS"]),
-        ordem:
-          fatorkConverterNumero(
-            fatorkLerCampo(registro, ["ORDEM"])
-          )
-      };
-    }
-
     async function fatorkCarregarBanco() {
       fatorkBancoStatus.textContent =
         "Carregando banco de dados...";
@@ -2336,9 +2424,13 @@ kgfcm2: "kgf/cm²",
         const texto =
           await resposta.text();
 
+        const normalizacao = await fatorkExecutarMotor(
+          "normalizar_registros",
+          { registros: fatorkParseCsv(texto) }
+        );
+
         const registros =
-          fatorkParseCsv(texto)
-            .map(fatorkPrepararRegistro)
+          (normalizacao.registros || [])
             .filter(function (item) {
               const status =
                 fatorkNormalizarTexto(item.status);
@@ -2388,7 +2480,7 @@ kgfcm2: "kgf/cm²",
         fatorkTabelaCorpo.innerHTML = `
           <tr>
             <td colspan="8" class="sar-fatork-sem-dados">
-              Verifique o link CSV publicado e tente novamente.
+              Verifique a sessão, o motor Vercel e a fonte de dados.
             </td>
           </tr>
         `;
@@ -2713,6 +2805,20 @@ kgfcm2: "kgf/cm²",
       fatorkCalcular
     );
 
+    fatorkCatalogoConverter.addEventListener(
+      "click",
+      fatorkConverterKCatalogo
+    );
+
+    fatorkCatalogoValor.addEventListener(
+      "keydown",
+      function (evento) {
+        if (evento.key === "Enter") {
+          fatorkConverterKCatalogo();
+        }
+      }
+    );
+
     fatorkBotaoCopiar.addEventListener(
       "click",
       fatorkCopiarResultado
@@ -2828,5 +2934,3 @@ kgfcm2: "kgf/cm²",
 
 </body>
 </html>
-
-
