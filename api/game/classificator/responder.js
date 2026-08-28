@@ -514,6 +514,22 @@ export default async function handler(req, res) {
     const sessao = await obterSessao(token.nonce);
 
     /*
+     * A classificação só pode começar depois que
+     * uma jurisdição válida tiver sido escolhida.
+     *
+     * Nesta versão: São Paulo / CBPMESP.
+     */
+    if (
+      sessao.estado?.jurisdicao?.uf !== "SP" ||
+      sessao.estado?.jurisdicao?.pacote_normativo !== "SP"
+    ) {
+      return res.status(409).json({
+        ok: false,
+        erro: "JURISDICAO_NAO_DEFINIDA"
+      });
+    }
+
+    /*
      * MOTOR DE CLASSIFICAÇÃO
      */
     const classificado = motorClassificacao(
