@@ -549,101 +549,112 @@
        * nesta versão.
        */
 
-     async function escreverMensagemIA(elemento, texto){
+      async function escreverMensagemIA(elemento, texto){
 
-  elemento.textContent = "";
+        elemento.textContent = "";
 
-  const velocidade = 26;
+        const velocidade = 26;
 
-  for(let i = 0; i < texto.length; i++){
+        for(let i = 0; i < texto.length; i++){
 
-    elemento.textContent += texto.charAt(i);
+          elemento.textContent += texto.charAt(i);
 
-    await new Promise(resolve =>
-      setTimeout(resolve, velocidade)
-    );
+          await new Promise(resolve =>
+            setTimeout(resolve, velocidade)
+          );
 
-  }
-
-}
-
-
-cardUmaEdificacao?.addEventListener(
-  "click",
-  async () => {
-
-    if(cardUmaEdificacao.disabled){
-      return;
-    }
-
-    cardUmaEdificacao.disabled = true;
-
-    atualizarStatus("");
-
-    try{
-
-      const response = await fetch(
-        "/api/game/classificator/mensagem?codigo=FASE_01_UMA_EDIFICACAO",
-        {
-          method:"GET",
-          credentials:"same-origin",
-          headers:{
-            "Accept":"application/json"
-          }
         }
-      );
 
-      if(!response.ok){
-        throw new Error(
-          "Não foi possível carregar a mensagem."
-        );
       }
 
-      const data =
-        await response.json();
-
-      if(
-        !data ||
-        data.ok !== true ||
-        !data.texto
-      ){
-        throw new Error(
-          "Mensagem inválida."
-        );
-      }
-
-      await escreverMensagemIA(
-        statusFase,
-        data.texto
-      );
 
       /*
-       * DEPOIS LIGAREMOS AQUI:
+       * FASE 1 -> FASE 2
        *
-       * await ...
+       * IMPORTANTE:
+       * aqui NÃO ocorre classificação.
        *
-       * window.location.assign(
-       *   "/game-classificator/fase-02/"
-       * );
+       * A Fase 1 serve apenas para conduzir
+       * o usuário à Fase 2.
        */
 
-    }catch(error){
+      cardUmaEdificacao?.addEventListener(
+        "click",
+        async () => {
 
-      console.error(
-        "GAME ClassificaTOR:",
-        error
+          if(cardUmaEdificacao.disabled){
+            return;
+          }
+
+          cardUmaEdificacao.disabled = true;
+
+          atualizarStatus("");
+
+          try{
+
+            const response = await fetch(
+              "/api/game/classificator/mensagem?codigo=FASE_01_UMA_EDIFICACAO",
+              {
+                method:"GET",
+                credentials:"same-origin",
+                headers:{
+                  "Accept":"application/json"
+                }
+              }
+            );
+
+            if(!response.ok){
+              throw new Error(
+                "Não foi possível carregar a mensagem."
+              );
+            }
+
+            const data = await response.json();
+
+            if(
+              !data ||
+              data.ok !== true ||
+              !data.texto
+            ){
+              throw new Error(
+                "Mensagem inválida."
+              );
+            }
+
+            await escreverMensagemIA(
+              statusFase,
+              data.texto
+            );
+
+            await new Promise(resolve =>
+              setTimeout(resolve, 450)
+            );
+
+            /*
+             * SOMENTE NAVEGAÇÃO.
+             * A classificação começa nos cards da Fase 2.
+             */
+            window.location.assign(
+              "/game-classificator/fase-02/"
+            );
+
+          }catch(error){
+
+            console.error(
+              "GAME ClassificaTOR:",
+              error
+            );
+
+            atualizarStatus(
+              "Não foi possível continuar. Tente novamente."
+            );
+
+            cardUmaEdificacao.disabled = false;
+
+          }
+
+        }
       );
-
-      atualizarStatus(
-        "Não foi possível continuar. Tente novamente."
-      );
-
-      cardUmaEdificacao.disabled = false;
-
-    }
-
-  }
-); 
 
     })();
 
