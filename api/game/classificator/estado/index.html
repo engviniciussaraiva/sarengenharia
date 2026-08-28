@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="sar-recurso-codigo"
+    content="GAME_CLASSIFICATOR"
+  >
+
+  <title>GAME ClassificaTOR | Selecionar Estado</title>
+
+  <script src="/js/sar.page-guard.js"></script>
+
+  <style>
+    :root{
+      --sar:#315858;
+      --sar-light:#7cb342;
+      --ink:#263b3b;
+      --muted:#6e7d7d;
+      --line:#dfe6e3;
+      --bg:#f4f7f5;
+      --white:#ffffff;
+      --locked:#dfe6e3;
+      --locked-stroke:#c4d0cb;
+      --sp:#7cb342;
+      --sp-dark:#527c24;
+      --warn:#fff4d6;
+      --warn-ink:#8a6a12;
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{
+      margin:0;
+      min-height:100%;
+      font-family:"Segoe UI",Arial,sans-serif;
+      color:var(--ink);
+      background:var(--bg);
+    }
+
+    body{padding:18px}
+    button{font:inherit}
+
+    .shell{
+      max-width:1500px;
+      margin:0 auto;
+    }
+
+    .fase-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:20px;
+      margin-bottom:18px;
+    }
+
+    .eyebrow{
+      margin:0 0 4px;
+      color:var(--sar-light);
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+    }
+
+    h1{
+      margin:0;
+      color:var(--sar);
+      font-size:26px;
+      line-height:1.15;
+    }
+
+    .subtitle{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .fase-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .ghost-btn{
+      min-width:130px;
+      padding:10px 16px;
+      border:1px solid #cfdad6;
+      border-radius:8px;
+      background:#fff;
+      color:var(--sar);
+      font-size:13px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.18s;
+    }
+
+    .ghost-btn:hover{
+      background:#f4f8f6;
+      border-color:#9fb8ad;
+    }
+
+    .workspace{
+      min-height:570px;
+      padding:24px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#fff;
+      box-shadow:0 4px 16px rgba(31,65,57,.05);
+    }
+
+    .state-grid{
+      display:grid;
+      grid-template-columns:minmax(420px,1.35fr) minmax(260px,.65fr);
+      gap:28px;
+      align-items:center;
+      max-width:1040px;
+      margin:0 auto;
+    }
+
+    .map-card{
+      min-height:500px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:
+        radial-gradient(circle at 50% 45%, #ffffff 0%, #f7faf8 74%);
+    }
+
+    #mapaBrasil{
+      width:100%;
+      height:auto;
+      max-height:500px;
+      overflow:visible;
+    }
+
+    .estado-path{
+      fill:var(--locked);
+      stroke:#fff;
+      stroke-width:1.35;
+      vector-effect:non-scaling-stroke;
+      transition:
+        fill .15s ease,
+        filter .15s ease,
+        transform .15s ease;
+      cursor:not-allowed;
+    }
+
+    .estado-path:hover{
+      fill:#d3ddd9;
+    }
+
+    .estado-path.disponivel{
+      fill:var(--sp);
+      stroke:#fff;
+      stroke-width:1.7;
+      cursor:pointer;
+      filter:drop-shadow(0 2px 3px rgba(82,124,36,.22));
+    }
+
+    .estado-path.disponivel:hover,
+    .estado-path.disponivel:focus{
+      fill:#8bc34a;
+      filter:drop-shadow(0 4px 6px rgba(82,124,36,.35));
+      outline:none;
+    }
+
+    .estado-label{
+      fill:#647571;
+      font-size:9px;
+      font-weight:700;
+      text-anchor:middle;
+      dominant-baseline:central;
+      pointer-events:none;
+      user-select:none;
+    }
+
+    .estado-label.sp{
+      fill:#fff;
+      font-size:11px;
+      font-weight:900;
+    }
+
+    .side{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .side-title{
+      margin:0;
+      color:var(--sar);
+      font-size:19px;
+    }
+
+    .side-text{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.55;
+    }
+
+    .uf-card{
+      position:relative;
+      width:100%;
+      padding:20px;
+      border:1px solid #cddfd5;
+      border-radius:12px;
+      background:#f8fbf8;
+      text-align:left;
+      cursor:pointer;
+      transition:.18s;
+    }
+
+    .uf-card:hover{
+      transform:translateY(-2px);
+      border-color:#91b678;
+      box-shadow:0 7px 18px rgba(49,88,88,.10);
+    }
+
+    .uf-card:disabled{
+      cursor:wait;
+      opacity:.65;
+      transform:none;
+      box-shadow:none;
+    }
+
+    .uf-badge{
+      display:inline-block;
+      margin-bottom:11px;
+      padding:5px 9px;
+      border-radius:999px;
+      background:#eef7e3;
+      border:1px solid #d6e9b2;
+      color:#5c7e22;
+      font-size:11px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+
+    .uf-name{
+      display:block;
+      color:var(--sar);
+      font-size:22px;
+      font-weight:800;
+    }
+
+    .uf-meta{
+      display:block;
+      margin-top:5px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .soon{
+      padding:13px 14px;
+      border-radius:9px;
+      background:var(--warn);
+      color:var(--warn-ink);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .map-hover{
+      min-height:38px;
+      padding:9px 12px;
+      border-radius:8px;
+      background:#f4f7f5;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.4;
+    }
+
+    .status{
+      min-height:24px;
+      margin-top:18px;
+      color:var(--muted);
+      font-size:13px;
+      text-align:center;
+    }
+
+    .status::after{
+      content:"";
+      display:inline-block;
+      width:1px;
+      height:1em;
+      margin-left:3px;
+      vertical-align:-2px;
+      background:currentColor;
+      opacity:0;
+    }
+
+    .status.escrevendo::after{
+      opacity:.75;
+      animation:piscar .7s steps(1) infinite;
+    }
+
+    @keyframes piscar{
+      0%,49%{opacity:.75}
+      50%,100%{opacity:0}
+    }
+
+    .map-error{
+      color:var(--muted);
+      font-size:13px;
+      text-align:center;
+      line-height:1.5;
+    }
+
+    @media(max-width:950px){
+      .state-grid{
+        grid-template-columns:1fr;
+      }
+
+      .side{
+        max-width:620px;
+        width:100%;
+        margin:0 auto;
+      }
+    }
+
+    @media(max-width:760px){
+      body{padding:10px}
+
+      .fase-head{display:block}
+
+      .fase-actions{
+        margin-top:14px;
+      }
+
+      .workspace{
+        padding:16px;
+      }
+
+      h1{font-size:22px}
+
+      .map-card{
+        min-height:390px;
+        padding:8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="shell">
+
+    <header class="fase-head">
+
+      <div>
+        <p class="eyebrow">
+          Selecionar Estado
+        </p>
+
+        <h1>
+          Selecione o Estado
+        </h1>
+
+        <p class="subtitle">
+          Escolha a unidade federativa para definir a base normativa da classificação.
+        </p>
+      </div>
+
+      <div class="fase-actions">
+
+        <button
+          class="ghost-btn"
+          id="btnInicio"
+          type="button"
+        >
+          Início
+        </button>
+
+        <button
+          class="ghost-btn"
+          id="btnVoltar"
+          type="button"
+        >
+          Voltar fase anterior
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <section class="workspace">
+
+      <div class="state-grid">
+
+        <div class="map-card">
+          <div id="mapContainer" style="width:100%;">
+            <svg
+              id="mapaBrasil"
+              viewBox="0 0 620 650"
+              role="img"
+              aria-label="Mapa do Brasil para seleção do estado"
+            ></svg>
+          </div>
+        </div>
+
+
+        <aside class="side">
+
+          <div>
+            <h2 class="side-title">
+              Base normativa
+            </h2>
+
+            <p class="side-text">
+              Nesta versão do GAME ClassificaTOR, o Estado de São Paulo está disponível.
+              Os demais estados serão liberados conforme suas bases normativas forem incorporadas.
+            </p>
+          </div>
+
+
+          <button
+            class="uf-card"
+            id="btnSaoPaulo"
+            type="button"
+          >
+            <span class="uf-badge">
+              Disponível
+            </span>
+
+            <span class="uf-name">
+              São Paulo
+            </span>
+
+            <span class="uf-meta">
+              SP • CBPMESP
+            </span>
+          </button>
+
+
+          <div class="soon">
+            <strong>Demais estados:</strong> em breve.
+          </div>
+
+
+          <div
+            class="map-hover"
+            id="mapHover"
+            aria-live="polite"
+          >
+            Passe o mouse sobre o mapa. São Paulo está destacado em verde.
+          </div>
+
+        </aside>
+
+      </div>
+
+
+      <div
+        class="status"
+        id="statusFase"
+        aria-live="polite"
+      ></div>
+
+    </section>
+
+  </main>
+
+
+  <script>
+
+    (() => {
+
+      "use strict";
+
+      /*
+       * Geometria pública dos estados brasileiros.
+       * Dados do IBGE compilados em GeoJSON e servidos via jsDelivr.
+       *
+       * Nenhuma regra normativa é carregada aqui.
+       */
+      const GEOJSON_URL =
+        "https://cdn.jsdelivr.net/gh/henriquemalvar/br-geojson@main/dist/estados.geojson";
+
+      const btnInicio =
+        document.getElementById("btnInicio");
+
+      const btnVoltar =
+        document.getElementById("btnVoltar");
+
+      const btnSaoPaulo =
+        document.getElementById("btnSaoPaulo");
+
+      const statusFase =
+        document.getElementById("statusFase");
+
+      const mapHover =
+        document.getElementById("mapHover");
+
+      const svg =
+        document.getElementById("mapaBrasil");
+
+      let selecionando = false;
+
+
+      btnInicio?.addEventListener(
+        "click",
+        () => window.location.assign(
+          "/game-classificator/"
+        )
+      );
+
+
+      btnVoltar?.addEventListener(
+        "click",
+        () => window.location.assign(
+          "/game-classificator/"
+        )
+      );
+
+
+      async function escreverMensagemIA(
+        elemento,
+        texto
+      ){
+
+        elemento.textContent = "";
+        elemento.classList.add("escrevendo");
+
+        const velocidade = 24;
+
+        for(let i = 0; i < texto.length; i++){
+
+          elemento.textContent +=
+            texto.charAt(i);
+
+          await new Promise(resolve =>
+            setTimeout(resolve, velocidade)
+          );
+
+        }
+
+        elemento.classList.remove("escrevendo");
+      }
+
+
+      async function selecionarSaoPaulo(){
+
+        if(selecionando){
+          return;
+        }
+
+        selecionando = true;
+        btnSaoPaulo.disabled = true;
+
+        statusFase.textContent =
+          "Definindo base normativa...";
+
+        try{
+
+          const response = await fetch(
+            "/api/game/classificator/estado",
+            {
+              method:"POST",
+              credentials:"same-origin",
+
+              headers:{
+                "Content-Type":"application/json",
+                "Accept":"application/json",
+                "X-Requested-With":"SAR-ClassificaTOR"
+              },
+
+              body:JSON.stringify({
+                uf:"SP"
+              })
+            }
+          );
+
+
+          if(!response.ok){
+
+            if(response.status === 401){
+              throw new Error(
+                "Sua sessão expirou. Volte ao início do GAME."
+              );
+            }
+
+            throw new Error(
+              "Não foi possível selecionar o Estado."
+            );
+          }
+
+
+          const data =
+            await response.json();
+
+
+          if(
+            !data ||
+            data.ok !== true ||
+            !data.mensagem ||
+            !data.next
+          ){
+            throw new Error(
+              "Resposta inválida do servidor."
+            );
+          }
+
+
+          await escreverMensagemIA(
+            statusFase,
+            data.mensagem
+          );
+
+
+          await new Promise(resolve =>
+            setTimeout(resolve, 450)
+          );
+
+
+          window.location.assign(
+            data.next
+          );
+
+
+        }catch(error){
+
+          console.error(
+            "GAME ClassificaTOR:",
+            error
+          );
+
+          statusFase.classList.remove(
+            "escrevendo"
+          );
+
+          statusFase.textContent =
+            error.message ||
+            "Não foi possível continuar. Tente novamente.";
+
+          selecionando = false;
+          btnSaoPaulo.disabled = false;
+
+        }
+
+      }
+
+
+      btnSaoPaulo?.addEventListener(
+        "click",
+        selecionarSaoPaulo
+      );
+
+
+      function coletarPontos(geometry){
+
+        const pontos = [];
+
+        function percorrer(valor){
+
+          if(
+            Array.isArray(valor) &&
+            valor.length >= 2 &&
+            typeof valor[0] === "number" &&
+            typeof valor[1] === "number"
+          ){
+            pontos.push(valor);
+            return;
+          }
+
+          if(Array.isArray(valor)){
+            valor.forEach(percorrer);
+          }
+        }
+
+        percorrer(geometry.coordinates);
+
+        return pontos;
+      }
+
+
+      function caminhoGeometry(
+        geometry,
+        projetar
+      ){
+
+        let d = "";
+
+        function anel(ring){
+
+          if(!ring?.length){
+            return;
+          }
+
+          ring.forEach((ponto, index) => {
+
+            const [x,y] =
+              projetar(ponto);
+
+            d +=
+              `${index === 0 ? "M" : "L"}` +
+              `${x.toFixed(2)},${y.toFixed(2)} `;
+
+          });
+
+          d += "Z ";
+        }
+
+
+        if(geometry.type === "Polygon"){
+
+          geometry.coordinates.forEach(
+            anel
+          );
+
+        }else if(
+          geometry.type === "MultiPolygon"
+        ){
+
+          geometry.coordinates.forEach(
+            polygon =>
+              polygon.forEach(anel)
+          );
+
+        }
+
+        return d;
+      }
+
+
+      function centroBBox(feature){
+
+        const pontos =
+          coletarPontos(feature.geometry);
+
+        const xs =
+          pontos.map(p => p[0]);
+
+        const ys =
+          pontos.map(p => p[1]);
+
+        return [
+          (Math.min(...xs) + Math.max(...xs)) / 2,
+          (Math.min(...ys) + Math.max(...ys)) / 2
+        ];
+      }
+
+
+      async function carregarMapa(){
+
+        try{
+
+          const response =
+            await fetch(GEOJSON_URL);
+
+          if(!response.ok){
+            throw new Error(
+              "Falha ao carregar mapa."
+            );
+          }
+
+          const geojson =
+            await response.json();
+
+          const features =
+            Array.isArray(geojson?.features)
+              ? geojson.features
+              : [];
+
+          if(!features.length){
+            throw new Error(
+              "Mapa sem estados."
+            );
+          }
+
+
+          const todosPontos =
+            features.flatMap(
+              f => coletarPontos(f.geometry)
+            );
+
+
+          const minLon =
+            Math.min(...todosPontos.map(p => p[0]));
+
+          const maxLon =
+            Math.max(...todosPontos.map(p => p[0]));
+
+          const minLat =
+            Math.min(...todosPontos.map(p => p[1]));
+
+          const maxLat =
+            Math.max(...todosPontos.map(p => p[1]));
+
+
+          const W = 620;
+          const H = 650;
+          const PAD = 22;
+
+          const escala =
+            Math.min(
+              (W - PAD * 2) /
+                (maxLon - minLon),
+
+              (H - PAD * 2) /
+                (maxLat - minLat)
+            );
+
+
+          const larguraMapa =
+            (maxLon - minLon) * escala;
+
+          const alturaMapa =
+            (maxLat - minLat) * escala;
+
+          const offsetX =
+            (W - larguraMapa) / 2;
+
+          const offsetY =
+            (H - alturaMapa) / 2;
+
+
+          const projetar =
+            ([lon,lat]) => [
+
+              offsetX +
+              (lon - minLon) * escala,
+
+              offsetY +
+              (maxLat - lat) * escala
+
+            ];
+
+
+          svg.innerHTML = "";
+
+
+          features.forEach(feature => {
+
+            const uf =
+              feature.properties?.sigla || "";
+
+            const nome =
+              feature.properties?.nome || uf;
+
+            const disponivel =
+              uf === "SP";
+
+
+            const path =
+              document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "path"
+              );
+
+
+            path.setAttribute(
+              "d",
+              caminhoGeometry(
+                feature.geometry,
+                projetar
+              )
+            );
+
+            path.setAttribute(
+              "fill-rule",
+              "evenodd"
+            );
+
+            path.setAttribute(
+              "class",
+              `estado-path${
+                disponivel
+                  ? " disponivel"
+                  : ""
+              }`
+            );
+
+            path.dataset.uf = uf;
+            path.dataset.nome = nome;
+
+
+            const title =
+              document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "title"
+              );
+
+            title.textContent =
+              disponivel
+                ? `${nome} (${uf}) — Disponível`
+                : `${nome} (${uf}) — Em breve`;
+
+            path.appendChild(title);
+
+
+            path.addEventListener(
+              "mouseenter",
+              () => {
+
+                mapHover.textContent =
+                  disponivel
+                    ? `${nome} (${uf}) — Disponível • CBPMESP`
+                    : `${nome} (${uf}) — Em breve`;
+
+              }
+            );
+
+
+            if(disponivel){
+
+              path.setAttribute(
+                "tabindex",
+                "0"
+              );
+
+              path.setAttribute(
+                "role",
+                "button"
+              );
+
+              path.setAttribute(
+                "aria-label",
+                "Selecionar Estado de São Paulo"
+              );
+
+
+              path.addEventListener(
+                "click",
+                selecionarSaoPaulo
+              );
+
+
+              path.addEventListener(
+                "keydown",
+                event => {
+
+                  if(
+                    event.key === "Enter" ||
+                    event.key === " "
+                  ){
+
+                    event.preventDefault();
+                    selecionarSaoPaulo();
+
+                  }
+
+                }
+              );
+
+            }
+
+
+            svg.appendChild(path);
+
+          });
+
+
+          /*
+           * Labels das UFs.
+           */
+          features.forEach(feature => {
+
+            const uf =
+              feature.properties?.sigla || "";
+
+            const centro =
+              centroBBox(feature);
+
+            const [x,y] =
+              projetar(centro);
+
+
+            const label =
+              document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "text"
+              );
+
+
+            label.setAttribute("x", x);
+            label.setAttribute("y", y);
+
+            label.setAttribute(
+              "class",
+              `estado-label${
+                uf === "SP"
+                  ? " sp"
+                  : ""
+              }`
+            );
+
+            label.textContent = uf;
+
+            svg.appendChild(label);
+
+          });
+
+
+        }catch(error){
+
+          console.error(
+            "GAME ClassificaTOR - mapa:",
+            error
+          );
+
+          document.getElementById(
+            "mapContainer"
+          ).innerHTML = `
+            <div class="map-error">
+              O mapa não pôde ser carregado neste momento.<br>
+              Você ainda pode selecionar <strong>São Paulo</strong>
+              pelo botão ao lado.
+            </div>
+          `;
+
+        }
+
+      }
+
+
+      carregarMapa();
+
+    })();
+
+  </script>
+
+</body>
+</html>
