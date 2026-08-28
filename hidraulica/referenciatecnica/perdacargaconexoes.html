@@ -213,9 +213,12 @@
 </style>
 
 <script>
-  const PL_VIEW = "vw_hidraulica_comprimentos_equivalentes";
+  const PL_API = "/api/hidraulica/perda-carga-conexoes";
+  const PL_SUPABASE_URL = "https://bjtxbpmrmhfvpmdsthxr.supabase.co";
+  const PL_SUPABASE_KEY = "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM";
 
   let plDados = [];
+  let plSupabasePromise = null;
 
   const plFiltroMaterial = document.getElementById("plFiltroMaterial");
   const plFiltroDn = document.getElementById("plFiltroDn");
@@ -231,6 +234,62 @@
     });
   }
 
+  async function plObterSupabase() {
+    if (!plSupabasePromise) {
+      plSupabasePromise = import(
+        "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
+      ).then(modulo => modulo.createClient(
+        PL_SUPABASE_URL,
+        PL_SUPABASE_KEY,
+        {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        }
+      ));
+    }
+    return plSupabasePromise;
+  }
+
+  async function plExecutarMotor(operacao, dados = {}) {
+    const supabase = await plObterSupabase();
+    const {
+      data: { session },
+      error
+    } = await supabase.auth.getSession();
+
+    if (error || !session?.access_token) {
+      throw new Error("Sua sessão expirou. Entre novamente no SAR.");
+    }
+
+    const resposta = await fetch(PL_API, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${session.access_token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ operacao, dados })
+    });
+
+    let retorno = {};
+    try {
+      retorno = await resposta.json();
+    } catch (erroResposta) {
+      retorno = {};
+    }
+
+    if (!resposta.ok || retorno.sucesso !== true) {
+      throw new Error(
+        retorno.mensagem ||
+        `Falha no banco de conexões (${resposta.status}).`
+      );
+    }
+
+    return retorno.resultado || {};
+  }
+
   async function plCarregarDados() {
     plTabelaCorpo.innerHTML = `
       <tr>
@@ -238,39 +297,24 @@
       </tr>
     `;
 
-    const cliente = window.supabaseClient || window.supabase;
+    try {
+      const resultado = await plExecutarMotor(
+        "listar_comprimentos_equivalentes"
+      );
+      plDados = Array.isArray(resultado.registros)
+        ? resultado.registros
+        : [];
 
-    if (!cliente) {
-      plTabelaCorpo.innerHTML = `
-        <tr>
-          <td colspan="5">Supabase não encontrado na página.</td>
-        </tr>
-      `;
-      return;
-    }
-
-    const { data, error } = await cliente
-      .from(PL_VIEW)
-      .select("*")
-      .order("material", { ascending: true })
-      .order("dn_mm", { ascending: true })
-      .order("ordem", { ascending: true });
-
-    if (error) {
+      plPreencherFiltros();
+      plRenderizar();
+    } catch (error) {
       console.error(error);
-
       plTabelaCorpo.innerHTML = `
         <tr>
-          <td colspan="5">Erro ao carregar dados do Supabase.</td>
+          <td colspan="5">${error.message || "Erro ao carregar o banco de conexões."}</td>
         </tr>
       `;
-      return;
     }
-
-    plDados = data || [];
-
-    plPreencherFiltros();
-    plRenderizar();
   }
 
   function plPreencherFiltros() {
@@ -349,6 +393,5 @@
 
   plCarregarDados();
 </script>
-
 
 
