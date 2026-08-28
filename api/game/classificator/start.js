@@ -20,7 +20,7 @@ function createSessionToken(secret) {
   const payload = {
     v: 1,
     game: "classificator",
-    step: "fase-01",
+    step: "estado",
     iat: now,
     exp: now + SESSION_TTL_SECONDS,
     nonce: crypto.randomBytes(24).toString("base64url")
@@ -57,7 +57,7 @@ async function criarSessaoNoBanco(payload) {
     },
     body: JSON.stringify({
       session_id: payload.nonce,
-      fase_atual: "fase-01",
+      fase_atual: "estado",
       estado: {},
       classificacao: {
         status: "nao_iniciada",
@@ -98,7 +98,7 @@ export default async function handler(req, res) {
     const { token, payload } = createSessionToken(secret);
 
     // Cria apenas a sessão.
-    // Nenhuma classificação ocorre na Tela Inicial ou na Fase 1.
+    // Nenhuma classificação ocorre na Tela Inicial, na Seleção do Estado ou na Fase 1.
     await criarSessaoNoBanco(payload);
 
     res.setHeader(
@@ -115,7 +115,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       ok: true,
-      next: "/game-classificator/fase-01/"
+      next: "/game-classificator/estado/"
     });
 
   } catch (error) {
