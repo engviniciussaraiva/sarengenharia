@@ -1169,13 +1169,6 @@
 
   <script>
     /*
-      BANCO CSV
-    */
-
-    const FATORK_URL_CSV =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMzy4thrXA3EZ6_kP1KwXTejPBNrrLP961DKB4qMlrqDmVocLQlmKafViegPUvI47UyqT5UnsJc2Lu/pub?output=csv";
-
-    /*
       MOTOR VERCEL
     */
 
@@ -2282,118 +2275,6 @@
       fatorkFecharModalImpressao();
     }
 
-    /*
-      CSV
-    */
-
-    function fatorkDetectarSeparador(texto) {
-      const primeiraLinha =
-        texto.split(/\r?\n/)[0] || "";
-
-      const quantidadePontoVirgula =
-        (primeiraLinha.match(/;/g) || []).length;
-
-      const quantidadeVirgula =
-        (primeiraLinha.match(/,/g) || []).length;
-
-      return quantidadePontoVirgula > quantidadeVirgula
-        ? ";"
-        : ",";
-    }
-
-    function fatorkParseCsv(texto) {
-      const separador =
-        fatorkDetectarSeparador(texto);
-
-      const linhas = [];
-      let linha = [];
-      let campo = "";
-      let dentroAspas = false;
-
-      for (let i = 0; i < texto.length; i++) {
-        const caractere = texto[i];
-        const proximo = texto[i + 1];
-
-        if (caractere === '"') {
-          if (dentroAspas && proximo === '"') {
-            campo += '"';
-            i++;
-          } else {
-            dentroAspas = !dentroAspas;
-          }
-
-          continue;
-        }
-
-        if (
-          caractere === separador &&
-          !dentroAspas
-        ) {
-          linha.push(campo);
-          campo = "";
-          continue;
-        }
-
-        if (
-          (caractere === "\n" || caractere === "\r") &&
-          !dentroAspas
-        ) {
-          if (
-            caractere === "\r" &&
-            proximo === "\n"
-          ) {
-            i++;
-          }
-
-          linha.push(campo);
-
-          if (
-            linha.some(function (item) {
-              return item.trim() !== "";
-            })
-          ) {
-            linhas.push(linha);
-          }
-
-          linha = [];
-          campo = "";
-          continue;
-        }
-
-        campo += caractere;
-      }
-
-      linha.push(campo);
-
-      if (
-        linha.some(function (item) {
-          return item.trim() !== "";
-        })
-      ) {
-        linhas.push(linha);
-      }
-
-      if (linhas.length === 0) {
-        return [];
-      }
-
-      const cabecalhos =
-        linhas[0].map(function (item) {
-          return item.trim();
-        });
-
-      return linhas.slice(1).map(function (valores) {
-        const objeto = {};
-
-        cabecalhos.forEach(function (cabecalho, indice) {
-          objeto[cabecalho] =
-            String(valores[indice] ?? "").trim();
-        });
-
-        return objeto;
-      });
-    }
-
     async function fatorkCarregarBanco() {
       fatorkBancoStatus.textContent =
         "Carregando banco de dados...";
@@ -2407,30 +2288,13 @@
       `;
 
       try {
-        const urlSemCache =
-          `${FATORK_URL_CSV}&t=${Date.now()}`;
-
-        const resposta =
-          await fetch(urlSemCache, {
-            cache: "no-store"
-          });
-
-        if (!resposta.ok) {
-          throw new Error(
-            `Erro HTTP ${resposta.status}`
-          );
-        }
-
-        const texto =
-          await resposta.text();
-
-        const normalizacao = await fatorkExecutarMotor(
-          "normalizar_registros",
-          { registros: fatorkParseCsv(texto) }
+        const banco = await fatorkExecutarMotor(
+          "listar_equipamentos",
+          {}
         );
 
         const registros =
-          (normalizacao.registros || [])
+          (banco.registros || [])
             .filter(function (item) {
               const status =
                 fatorkNormalizarTexto(item.status);
@@ -2480,7 +2344,7 @@
         fatorkTabelaCorpo.innerHTML = `
           <tr>
             <td colspan="8" class="sar-fatork-sem-dados">
-              Verifique a sessão, o motor Vercel e a fonte de dados.
+              Verifique a sessão, o motor Vercel e o banco do Supabase.
             </td>
           </tr>
         `;
