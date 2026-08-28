@@ -1,6 +1,7 @@
 import json
 import math
 import os
+import re
 import unicodedata
 import urllib.error
 import urllib.parse
@@ -8,9 +9,10 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler
 
 
-MOTOR_VERSION = "FATOR-K-VERCEL-V3-SUPABASE"
+MOTOR_VERSION = "FATOR-K-VERCEL-V4-BIBLIOTECA"
 DEFAULT_SUPABASE_URL = "https://bjtxbpmrmhfvpmdsthxr.supabase.co"
 DEFAULT_SUPABASE_KEY = "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM"
+EQUIPMENT_RESOURCE_CODE = "BIBLIOTECA_TECNICA_EQUIPAMENTOS_HIDRAULICOS"
 
 LITERS_PER_US_GALLON = 3.785411784
 BAR_PER_MCA = 0.0980665
@@ -312,10 +314,49 @@ def normalize_records(data):
     return [normalize_equipment(record) for record in records]
 
 
-def request_json(url, headers):
-    request = urllib.request.Request(url, headers=headers)
+def request_json(url, headers, method="GET", data=None):
+    payload = None
+    request_headers = dict(headers)
+    if data is not None:
+        payload = json.dumps(data, ensure_ascii=False).encode("utf-8")
+        request_headers.setdefault("Content-Type", "application/json")
+    request = urllib.request.Request(
+        url,
+        data=payload,
+        headers=request_headers,
+        method=method,
+    )
     with urllib.request.urlopen(request, timeout=20) as response:
-        return json.loads(response.read().decode("utf-8"))
+        content = response.read().decode("utf-8")
+        return json.loads(content) if content else None
+
+
+def service_headers(service_key, prefer=None):
+    headers = {
+        "apikey": service_key,
+        "Authorization": f"Bearer {service_key}",
+        "Accept": "application/json",
+    }
+    if prefer:
+        headers["Prefer"] = prefer
+    return headers
+
+
+def database_request_json(url, headers, method="GET", data=None):
+    try:
+        return request_json(url, headers, method=method, data=data)
+    except urllib.error.HTTPError as error:
+        message = "Não foi possível concluir a operação no banco de equipamentos."
+        try:
+            response = json.loads(error.read().decode("utf-8"))
+            detail = response.get("message") or response.get("details")
+            if detail:
+                message = str(detail)
+        except (ValueError, UnicodeDecodeError):
+            pass
+        if error.code == 409 or "duplicate key" in message.lower():
+            message = "Já existe um equipamento cadastrado com esse código."
+        raise RuntimeError(message) from error
 
 
 def load_equipment_records(supabase_url, service_key):
@@ -360,11 +401,7 @@ def load_equipment_records(supabase_url, service_key):
             "order": "ordem.asc,nome_equipamento.asc",
         }
     )
-    headers = {
-        "apikey": service_key,
-        "Authorization": f"Bearer {service_key}",
-        "Accept": "application/json",
-    }
+    headers = service_headers(service_key)
     rows = request_json(
         f"{supabase_url}/rest/v1/sar_tec_hidraulica_equipamentos?{query}",
         headers,
@@ -406,6 +443,282 @@ def load_equipment_records(supabase_url, service_key):
     ]
 
 
+def load_library_equipment_records(supabase_url, service_key):
+    if not service_key:
+        raise RuntimeError("SUPABASE_SERVICE_ROLE_KEY não configurada na Vercel.")
+
+    fields = ",".join(
+        [
+            "id",
+            "codigo",
+            "categoria",
+            "nome_equipamento",
+            "tipo_equipamento",
+            "aplicacao",
+            "fabricante",
+            "modelo",
+            "diametro_nominal",
+            "conexao",
+            "forma_dimensionamento",
+            "fator_k_valor_original",
+            "fator_k_unidade_original",
+            "fator_k_lmin_bar",
+            "fator_k_lmin_mca",
+            "fator_k_gpm_psi",
+            "pressao_min_bar",
+            "pressao_nominal_bar",
+            "pressao_max_bar",
+            "vazao_min_lpm",
+            "vazao_nominal_lpm",
+            "vazao_max_lpm",
+            "area_cobertura_m2",
+            "angulo_cobertura_graus",
+            "referencia",
+            "catalogo_url",
+            "observacao",
+            "ativo",
+            "ordem",
+            "criado_em",
+            "atualizado_em",
+        ]
+    )
+    query = urllib.parse.urlencode(
+        {
+            "select": fields,
+            "order": "ordem.asc,nome_equipamento.asc",
+        }
+    )
+    return database_request_json(
+        f"{supabase_url}/rest/v1/sar_tec_hidraulica_equipamentos?{query}",
+        service_headers(service_key),
+    ) or []
+
+
+def required_text(data, field, label, maximum=180):
+    value = str(data.get(field) or "").strip()
+    if not value:
+        raise ValueError(f"Informe {label}.")
+    if len(value) > maximum:
+        raise ValueError(f"{label} excede o limite de {maximum} caracteres.")
+    return value
+
+
+def optional_text(data, field, maximum=1000):
+    value = str(data.get(field) or "").strip()
+    if not value:
+        return None
+    if len(value) > maximum:
+        raise ValueError(f"O campo {field} excede o limite de {maximum} caracteres.")
+    return value
+
+
+def optional_nonnegative(data, field, label):
+    value = data.get(field)
+    if value in (None, ""):
+        return None
+    number = parse_number(value)
+    if number < 0:
+        raise ValueError(f"{label} não pode ser negativo.")
+    return number
+
+
+def validate_numeric_range(payload, minimum_field, nominal_field, maximum_field, label):
+    minimum = payload.get(minimum_field)
+    nominal = payload.get(nominal_field)
+    maximum = payload.get(maximum_field)
+    if minimum is not None and nominal is not None and minimum > nominal:
+        raise ValueError(f"{label} mínima não pode ser maior que a nominal.")
+    if nominal is not None and maximum is not None and nominal > maximum:
+        raise ValueError(f"{label} nominal não pode ser maior que a máxima.")
+    if minimum is not None and maximum is not None and minimum > maximum:
+        raise ValueError(f"{label} mínima não pode ser maior que a máxima.")
+
+
+def normalize_equipment_code(value):
+    text = unicodedata.normalize("NFD", str(value or "").strip().upper())
+    text = "".join(char for char in text if unicodedata.category(char) != "Mn")
+    text = re.sub(r"[^A-Z0-9]+", "-", text).strip("-")
+    if not text:
+        raise ValueError("Informe o código do equipamento.")
+    if len(text) > 100:
+        raise ValueError("O código do equipamento excede 100 caracteres.")
+    return text
+
+
+def clean_equipment_payload(data):
+    if not isinstance(data, dict):
+        raise ValueError("Dados do equipamento inválidos.")
+
+    forms = {"fator_k", "vazao_nominal", "curva_hidraulica"}
+    form = str(data.get("forma_dimensionamento") or "fator_k").strip().lower()
+    if form not in forms:
+        raise ValueError("Forma de dimensionamento não reconhecida.")
+
+    payload = {
+        "codigo": normalize_equipment_code(data.get("codigo")),
+        "categoria": required_text(data, "categoria", "a categoria"),
+        "nome_equipamento": required_text(
+            data, "nome_equipamento", "o nome do equipamento"
+        ),
+        "tipo_equipamento": required_text(
+            data, "tipo_equipamento", "o tipo de equipamento"
+        ),
+        "aplicacao": optional_text(data, "aplicacao", 180),
+        "fabricante": required_text(data, "fabricante", "o fabricante"),
+        "modelo": required_text(data, "modelo", "o modelo"),
+        "diametro_nominal": optional_text(data, "diametro_nominal", 80),
+        "conexao": optional_text(data, "conexao", 100),
+        "forma_dimensionamento": form,
+        "pressao_min_bar": optional_nonnegative(
+            data, "pressao_min_bar", "A pressão mínima"
+        ),
+        "pressao_nominal_bar": optional_nonnegative(
+            data, "pressao_nominal_bar", "A pressão nominal"
+        ),
+        "pressao_max_bar": optional_nonnegative(
+            data, "pressao_max_bar", "A pressão máxima"
+        ),
+        "vazao_min_lpm": optional_nonnegative(
+            data, "vazao_min_lpm", "A vazão mínima"
+        ),
+        "vazao_nominal_lpm": optional_nonnegative(
+            data, "vazao_nominal_lpm", "A vazão nominal"
+        ),
+        "vazao_max_lpm": optional_nonnegative(
+            data, "vazao_max_lpm", "A vazão máxima"
+        ),
+        "area_cobertura_m2": optional_nonnegative(
+            data, "area_cobertura_m2", "A área de cobertura"
+        ),
+        "angulo_cobertura_graus": optional_nonnegative(
+            data, "angulo_cobertura_graus", "O ângulo de cobertura"
+        ),
+        "referencia": optional_text(data, "referencia", 1000),
+        "catalogo_url": optional_text(data, "catalogo_url", 1000),
+        "observacao": optional_text(data, "observacao", 2000),
+        "ativo": data.get("ativo") is not False,
+    }
+
+    try:
+        payload["ordem"] = max(0, int(data.get("ordem") or 0))
+    except (TypeError, ValueError) as error:
+        raise ValueError("A ordem deve ser um número inteiro.") from error
+
+    if payload["angulo_cobertura_graus"] is not None and payload["angulo_cobertura_graus"] > 360:
+        raise ValueError("O ângulo de cobertura não pode ser maior que 360°.")
+
+    catalog_url = payload["catalogo_url"]
+    if catalog_url:
+        parsed_url = urllib.parse.urlsplit(catalog_url)
+        if parsed_url.scheme not in {"http", "https"} or not parsed_url.netloc:
+            raise ValueError("Informe uma URL de catálogo válida, iniciada por http ou https.")
+
+    validate_numeric_range(
+        payload,
+        "pressao_min_bar",
+        "pressao_nominal_bar",
+        "pressao_max_bar",
+        "A pressão",
+    )
+    validate_numeric_range(
+        payload,
+        "vazao_min_lpm",
+        "vazao_nominal_lpm",
+        "vazao_max_lpm",
+        "A vazão",
+    )
+
+    if form == "fator_k":
+        k_value = positive_number(
+            data.get("fator_k_valor_original"), "Fator K"
+        )
+        k_unit = str(data.get("fator_k_unidade_original") or "").strip()
+        allowed_units = {
+            "lmin_sqrt_bar",
+            "lmin_sqrt_mca",
+            "gpm_sqrt_psi",
+        }
+        if k_unit not in allowed_units:
+            raise ValueError("Selecione a unidade original do Fator K.")
+        payload["fator_k_valor_original"] = k_value
+        payload["fator_k_unidade_original"] = k_unit
+    else:
+        payload["fator_k_valor_original"] = None
+        payload["fator_k_unidade_original"] = None
+
+    if form == "vazao_nominal" and payload["vazao_nominal_lpm"] is None:
+        raise ValueError("Informe a vazão nominal do equipamento.")
+
+    return payload
+
+
+def save_equipment_record(supabase_url, service_key, data):
+    if not service_key:
+        raise RuntimeError("SUPABASE_SERVICE_ROLE_KEY não configurada na Vercel.")
+
+    payload = clean_equipment_payload(data)
+    record_id = data.get("id")
+    base_url = f"{supabase_url}/rest/v1/sar_tec_hidraulica_equipamentos"
+    method = "POST"
+    if record_id not in (None, ""):
+        try:
+            record_id = int(record_id)
+        except (TypeError, ValueError) as error:
+            raise ValueError("Identificador do equipamento inválido.") from error
+        method = "PATCH"
+        base_url += "?" + urllib.parse.urlencode({"id": f"eq.{record_id}"})
+
+    rows = database_request_json(
+        base_url,
+        service_headers(service_key, "return=representation"),
+        method=method,
+        data=payload,
+    ) or []
+    if not rows:
+        raise RuntimeError("O banco não confirmou o salvamento do equipamento.")
+    return rows[0]
+
+
+def set_equipment_active(supabase_url, service_key, data):
+    if not service_key:
+        raise RuntimeError("SUPABASE_SERVICE_ROLE_KEY não configurada na Vercel.")
+    try:
+        record_id = int(data.get("id"))
+    except (TypeError, ValueError) as error:
+        raise ValueError("Identificador do equipamento inválido.") from error
+    active = data.get("ativo") is True
+    query = urllib.parse.urlencode({"id": f"eq.{record_id}"})
+    rows = database_request_json(
+        f"{supabase_url}/rest/v1/sar_tec_hidraulica_equipamentos?{query}",
+        service_headers(service_key, "return=representation"),
+        method="PATCH",
+        data={"ativo": active},
+    ) or []
+    if not rows:
+        raise RuntimeError("Equipamento não encontrado.")
+    return rows[0]
+
+
+def load_resource_permission(supabase_url, supabase_key, authorization):
+    permissions = request_json(
+        f"{supabase_url}/rest/v1/rpc/sar_minhas_permissoes",
+        {
+            "apikey": supabase_key,
+            "Authorization": authorization,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        },
+        method="POST",
+        data={},
+    )
+    if not isinstance(permissions, list):
+        return None
+    for permission in permissions:
+        if str(permission.get("codigo") or "").strip().upper() == EQUIPMENT_RESOURCE_CODE:
+            return permission
+    return None
+
+
 def request_status(url, headers):
     try:
         request = urllib.request.Request(url, headers=headers)
@@ -438,6 +751,24 @@ def execute(body, supabase_url=None, service_key=None):
     elif operation == "listar_equipamentos":
         result = {
             "registros": load_equipment_records(supabase_url, service_key)
+        }
+    elif operation == "listar_equipamentos_biblioteca":
+        result = {
+            "registros": load_library_equipment_records(
+                supabase_url, service_key
+            )
+        }
+    elif operation == "salvar_equipamento":
+        result = {
+            "registro": save_equipment_record(
+                supabase_url, service_key, data
+            )
+        }
+    elif operation == "definir_status_equipamento":
+        result = {
+            "registro": set_equipment_active(
+                supabase_url, service_key, data
+            )
         }
     else:
         raise ValueError("Operação do motor Fator K não reconhecida.")
@@ -482,9 +813,46 @@ class handler(BaseHTTPRequestHandler):
         try:
             length = int(self.headers.get("Content-Length", "0"))
             body = json.loads(self.rfile.read(length).decode("utf-8"))
+            operation = str(body.get("operacao") or "").strip().lower()
             service_key = (
                 os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or ""
             ).strip()
+
+            library_operations = {
+                "listar_equipamentos_biblioteca",
+                "salvar_equipamento",
+                "definir_status_equipamento",
+            }
+            if operation in library_operations:
+                permission = load_resource_permission(
+                    supabase_url,
+                    supabase_key,
+                    authorization,
+                )
+                can_view = bool(permission and permission.get("visualizar") is True)
+                can_edit = bool(
+                    permission
+                    and (
+                        permission.get("editar") is True
+                        or permission.get("administrar") is True
+                    )
+                )
+                if not can_view:
+                    return self.send_json(
+                        403,
+                        {
+                            "sucesso": False,
+                            "mensagem": "Este recurso não está liberado para seu usuário.",
+                        },
+                    )
+                if operation != "listar_equipamentos_biblioteca" and not can_edit:
+                    return self.send_json(
+                        403,
+                        {
+                            "sucesso": False,
+                            "mensagem": "Você não possui permissão para alterar a biblioteca.",
+                        },
+                    )
             return self.send_json(
                 200,
                 execute(
