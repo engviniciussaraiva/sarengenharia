@@ -3,11 +3,12 @@ import math
 import os
 import unicodedata
 import urllib.error
+import urllib.parse
 import urllib.request
 from http.server import BaseHTTPRequestHandler
 
 
-MOTOR_VERSION = "FATOR-K-VERCEL-V1"
+MOTOR_VERSION = "FATOR-K-VERCEL-V3-SUPABASE"
 DEFAULT_SUPABASE_URL = "https://bjtxbpmrmhfvpmdsthxr.supabase.co"
 DEFAULT_SUPABASE_KEY = "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM"
 
@@ -126,6 +127,84 @@ def calculate_from_flow_pressure(data):
     return result
 
 
+def flow_equivalents(flow_lmin):
+    return {
+        "vazao_lmin": round(flow_lmin, 9),
+        "vazao_ls": round(flow_lmin / 60.0, 9),
+        "vazao_m3h": round(flow_lmin * 60.0 / 1000.0, 9),
+        "vazao_gpm": round(flow_lmin / LITERS_PER_US_GALLON, 9),
+    }
+
+
+def pressure_equivalents(pressure_bar):
+    return {
+        "pressao_bar": round(pressure_bar, 9),
+        "pressao_kgfcm2": round(pressure_bar / BAR_PER_KGFCM2, 9),
+        "pressao_mca": round(pressure_bar / BAR_PER_MCA, 9),
+        "pressao_kpa": round(pressure_bar * 100.0, 9),
+        "pressao_mpa": round(pressure_bar / 10.0, 9),
+        "pressao_psi": round(pressure_bar / BAR_PER_PSI, 9),
+    }
+
+
+def calculate_flow_from_k(data):
+    k_original = positive_number(data.get("fator_k"), "Fator K")
+    k_unit = normalized_unit(
+        data.get("unidade_fator_k"), K_UNITS, "Unidade do Fator K"
+    )
+    pressure_original = positive_number(data.get("pressao"), "Pressão")
+    pressure_unit = normalized_unit(
+        data.get("unidade_pressao"), PRESSURE_UNITS, "Unidade de pressão"
+    )
+
+    k_lmin_bar = k_to_lmin_bar(k_original, k_unit)
+    pressure_bar = pressure_to_bar(pressure_original, pressure_unit)
+    flow_lmin = k_lmin_bar * math.sqrt(pressure_bar)
+
+    result = {}
+    result.update(k_equivalents(k_lmin_bar))
+    result.update(pressure_equivalents(pressure_bar))
+    result.update(flow_equivalents(flow_lmin))
+    result.update(
+        {
+            "fator_k_original": k_original,
+            "unidade_fator_k": k_unit,
+            "pressao_original": pressure_original,
+            "unidade_pressao": pressure_unit,
+        }
+    )
+    return result
+
+
+def calculate_pressure_from_k(data):
+    k_original = positive_number(data.get("fator_k"), "Fator K")
+    k_unit = normalized_unit(
+        data.get("unidade_fator_k"), K_UNITS, "Unidade do Fator K"
+    )
+    flow_original = positive_number(data.get("vazao"), "Vazão")
+    flow_unit = normalized_unit(
+        data.get("unidade_vazao"), FLOW_UNITS, "Unidade de vazão"
+    )
+
+    k_lmin_bar = k_to_lmin_bar(k_original, k_unit)
+    flow_lmin = flow_to_lmin(flow_original, flow_unit)
+    pressure_bar = (flow_lmin / k_lmin_bar) ** 2
+
+    result = {}
+    result.update(k_equivalents(k_lmin_bar))
+    result.update(flow_equivalents(flow_lmin))
+    result.update(pressure_equivalents(pressure_bar))
+    result.update(
+        {
+            "fator_k_original": k_original,
+            "unidade_fator_k": k_unit,
+            "vazao_original": flow_original,
+            "unidade_vazao": flow_unit,
+        }
+    )
+    return result
+
+
 def convert_k(data):
     original = positive_number(data.get("valor"), "Fator K")
     unit = normalized_unit(data.get("unidade"), K_UNITS, "Unidade do Fator K")
@@ -233,6 +312,100 @@ def normalize_records(data):
     return [normalize_equipment(record) for record in records]
 
 
+def request_json(url, headers):
+    request = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(request, timeout=20) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def load_equipment_records(supabase_url, service_key):
+    if not service_key:
+        raise RuntimeError("SUPABASE_SERVICE_ROLE_KEY não configurada na Vercel.")
+
+    fields = ",".join(
+        [
+            "id",
+            "codigo",
+            "categoria",
+            "nome_equipamento",
+            "tipo_equipamento",
+            "aplicacao",
+            "fabricante",
+            "modelo",
+            "diametro_nominal",
+            "conexao",
+            "forma_dimensionamento",
+            "fator_k_lmin_bar",
+            "fator_k_lmin_mca",
+            "fator_k_gpm_psi",
+            "pressao_min_bar",
+            "pressao_nominal_bar",
+            "pressao_max_bar",
+            "vazao_min_lpm",
+            "vazao_nominal_lpm",
+            "vazao_max_lpm",
+            "area_cobertura_m2",
+            "angulo_cobertura_graus",
+            "referencia",
+            "catalogo_url",
+            "observacao",
+            "ordem",
+        ]
+    )
+    query = urllib.parse.urlencode(
+        {
+            "ativo": "eq.true",
+            "fator_k_lmin_bar": "not.is.null",
+            "select": fields,
+            "order": "ordem.asc,nome_equipamento.asc",
+        }
+    )
+    headers = {
+        "apikey": service_key,
+        "Authorization": f"Bearer {service_key}",
+        "Accept": "application/json",
+    }
+    rows = request_json(
+        f"{supabase_url}/rest/v1/sar_tec_hidraulica_equipamentos?{query}",
+        headers,
+    )
+
+    return [
+        {
+            "id": row.get("id"),
+            "codigo": row.get("codigo"),
+            "categoria": row.get("categoria"),
+            "equipamento": row.get("nome_equipamento"),
+            "tipoEquipamento": row.get("tipo_equipamento"),
+            "aplicacao": row.get("aplicacao"),
+            "fabricante": row.get("fabricante"),
+            "modelo": row.get("modelo"),
+            "diametro": row.get("diametro_nominal"),
+            "conexao": row.get("conexao"),
+            "formaDimensionamento": row.get("forma_dimensionamento"),
+            "kBar": optional_positive(row.get("fator_k_lmin_bar")),
+            "kMca": optional_positive(row.get("fator_k_lmin_mca")),
+            "kPsi": optional_positive(row.get("fator_k_gpm_psi")),
+            "pressaoMinBar": optional_number(row.get("pressao_min_bar")),
+            "pressaoNominalBar": optional_number(row.get("pressao_nominal_bar")),
+            "pressaoMaxBar": optional_number(row.get("pressao_max_bar")),
+            "vazaoMinLpm": optional_number(row.get("vazao_min_lpm")),
+            "vazaoNominalLpm": optional_number(row.get("vazao_nominal_lpm")),
+            "vazaoMaxLpm": optional_number(row.get("vazao_max_lpm")),
+            "areaCoberturaM2": optional_number(row.get("area_cobertura_m2")),
+            "anguloCoberturaGraus": optional_number(
+                row.get("angulo_cobertura_graus")
+            ),
+            "referencia": row.get("referencia"),
+            "catalogoUrl": row.get("catalogo_url"),
+            "observacao": row.get("observacao"),
+            "status": "ativo",
+            "ordem": optional_number(row.get("ordem")),
+        }
+        for row in rows
+    ]
+
+
 def request_status(url, headers):
     try:
         request = urllib.request.Request(url, headers=headers)
@@ -244,7 +417,7 @@ def request_status(url, headers):
         return 503
 
 
-def execute(body):
+def execute(body, supabase_url=None, service_key=None):
     operation = str(body.get("operacao") or "").strip().lower()
     data = body.get("dados") or {}
     if not isinstance(data, dict):
@@ -252,12 +425,20 @@ def execute(body):
 
     if operation == "calcular":
         result = calculate_from_flow_pressure(data)
+    elif operation == "calcular_vazao":
+        result = calculate_flow_from_k(data)
+    elif operation == "calcular_pressao":
+        result = calculate_pressure_from_k(data)
     elif operation == "converter_k":
         result = convert_k(data)
     elif operation == "converter_entradas":
         result = convert_inputs(data)
     elif operation == "normalizar_registros":
         result = {"registros": normalize_records(data)}
+    elif operation == "listar_equipamentos":
+        result = {
+            "registros": load_equipment_records(supabase_url, service_key)
+        }
     else:
         raise ValueError("Operação do motor Fator K não reconhecida.")
 
@@ -301,9 +482,30 @@ class handler(BaseHTTPRequestHandler):
         try:
             length = int(self.headers.get("Content-Length", "0"))
             body = json.loads(self.rfile.read(length).decode("utf-8"))
-            return self.send_json(200, execute(body))
+            service_key = (
+                os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or ""
+            ).strip()
+            return self.send_json(
+                200,
+                execute(
+                    body,
+                    supabase_url=supabase_url,
+                    service_key=service_key,
+                ),
+            )
+        except RuntimeError as error:
+            return self.send_json(
+                500, {"sucesso": False, "mensagem": str(error)}
+            )
         except (ValueError, TypeError, json.JSONDecodeError) as error:
             return self.send_json(
                 400, {"sucesso": False, "mensagem": str(error)}
             )
-
+        except (urllib.error.HTTPError, urllib.error.URLError) as error:
+            return self.send_json(
+                502,
+                {
+                    "sucesso": False,
+                    "mensagem": "Não foi possível consultar o banco de equipamentos.",
+                },
+            )
