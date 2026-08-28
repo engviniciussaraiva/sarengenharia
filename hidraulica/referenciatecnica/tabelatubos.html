@@ -411,10 +411,138 @@ td.texto{
 
 <script>
 
-const URL_BIBLIOTECA_TUBOS =
-'https://docs.google.com/spreadsheets/d/e/2PACX-1vSu83uk0c1Rz3bojXA6LIK8Uwq3E-dg6OmWpm7QgfBBJNL3claiEqqnSGD83ZbGFsxlGJN3jr_vQqyi/pub?output=csv';
+const API_BIBLIOTECA_TUBOS =
+    '/api/hidraulica/tubulacoes';
+
+const SUPABASE_URL =
+    'https://bjtxbpmrmhfvpmdsthxr.supabase.co';
+
+const SUPABASE_KEY =
+    'sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM';
 
 let tubos = [];
+let supabasePromise = null;
+
+async function obterSupabase(){
+
+    if(!supabasePromise){
+        supabasePromise = import(
+            'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        ).then(modulo => modulo.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY,
+            {
+                auth:{
+                    persistSession:true,
+                    autoRefreshToken:true,
+                    detectSessionInUrl:true
+                }
+            }
+        ));
+    }
+
+    return supabasePromise;
+}
+
+async function executarMotor(operacao, dados = {}){
+
+    const supabase = await obterSupabase();
+    const {
+        data:{ session },
+        error
+    } = await supabase.auth.getSession();
+
+    if(error || !session?.access_token){
+        throw new Error(
+            'Sua sessão expirou. Entre novamente no SAR.'
+        );
+    }
+
+    const resposta = await fetch(
+        API_BIBLIOTECA_TUBOS,
+        {
+            method:'POST',
+            headers:{
+                'Authorization':`Bearer ${session.access_token}`,
+                'Content-Type':'application/json'
+            },
+            body:JSON.stringify({ operacao, dados })
+        }
+    );
+
+    let retorno = {};
+
+    try{
+        retorno = await resposta.json();
+    }catch(erroResposta){
+        retorno = {};
+    }
+
+    if(!resposta.ok || retorno.sucesso !== true){
+        throw new Error(
+            retorno.mensagem ||
+            `Falha na biblioteca de tubos (${resposta.status}).`
+        );
+    }
+
+    return retorno.resultado || {};
+}
+
+function formatarNumeroBanco(valor){
+
+    if(valor === null || valor === undefined || valor === ''){
+        return '';
+    }
+
+    const numero = Number(valor);
+
+    if(!Number.isFinite(numero)){
+        return String(valor);
+    }
+
+    return numero.toLocaleString(
+        'pt-BR',
+        { maximumFractionDigits:8 }
+    );
+}
+
+function adaptarRegistro(registro){
+
+    return {
+        CODIGO:registro.codigo,
+        MATERIAL:registro.material,
+        NORMA_CLASSE:registro.norma_classe,
+        DIAMETRO_NOMINAL:registro.diametro_nominal,
+        DIAMETRO_EXTERNO_MM:
+            formatarNumeroBanco(registro.diametro_externo_mm),
+        ESPESSURA_MM:
+            formatarNumeroBanco(registro.espessura_mm),
+        DIAMETRO_INTERNO_MM:
+            formatarNumeroBanco(registro.diametro_interno_mm),
+        AREA_INTERNA_CM2:
+            formatarNumeroBanco(registro.area_interna_cm2),
+        AREA_EXTERNA_SECAO_CM2:
+            formatarNumeroBanco(registro.area_externa_secao_cm2),
+        AREA_SUPERFICIAL_EXTERNA_M2_M:
+            formatarNumeroBanco(
+                registro.area_superficial_externa_m2_m
+            ),
+        VOLUME_INTERNO_L_M:
+            formatarNumeroBanco(registro.volume_interno_l_m),
+        PESO_VAZIO_KG_M:
+            formatarNumeroBanco(registro.peso_vazio_kg_m),
+        PESO_CHEIO_KG_M:
+            formatarNumeroBanco(registro.peso_cheio_kg_m),
+        VAZAO_MAX_5MS_LPM:
+            formatarNumeroBanco(registro.vazao_max_5ms_lpm),
+        FATOR_C_HAZEN:
+            formatarNumeroBanco(registro.fator_c_hazen),
+        ORDEM:registro.ordem,
+        ATIVO:'ATIVO',
+        OBSERVACAO:registro.observacao,
+        FONTE_URL:registro.fonte_url
+    };
+}
 
 /* =========================================
    NORMALIZAR TEXTOS
@@ -427,90 +555,6 @@ function normalizar(valor){
         .replace(/[\u0300-\u036f]/g, '')
         .trim()
         .toUpperCase();
-}
-
-
-/* =========================================
-   LEITOR CSV
-   Aceita campos entre aspas e vírgulas
-   decimais existentes na planilha.
-========================================= */
-
-function lerCSV(texto){
-
-    const linhas = [];
-    let linha = [];
-    let campo = '';
-    let dentroAspas = false;
-
-    for(let i = 0; i < texto.length; i++){
-
-        const caractere = texto[i];
-        const proximo = texto[i + 1];
-
-        if(caractere === '"'){
-
-            if(dentroAspas && proximo === '"'){
-                campo += '"';
-                i++;
-            }else{
-                dentroAspas = !dentroAspas;
-            }
-
-            continue;
-        }
-
-        if(caractere === ',' && !dentroAspas){
-
-            linha.push(campo);
-            campo = '';
-            continue;
-        }
-
-        if(
-            (caractere === '\n' || caractere === '\r') &&
-            !dentroAspas
-        ){
-
-            if(
-                caractere === '\r' &&
-                proximo === '\n'
-            ){
-                i++;
-            }
-
-            linha.push(campo);
-
-            if(
-                linha.some(valor =>
-                    String(valor).trim() !== ''
-                )
-            ){
-                linhas.push(linha);
-            }
-
-            linha = [];
-            campo = '';
-            continue;
-        }
-
-        campo += caractere;
-    }
-
-    if(campo !== '' || linha.length > 0){
-
-        linha.push(campo);
-
-        if(
-            linha.some(valor =>
-                String(valor).trim() !== ''
-            )
-        ){
-            linhas.push(linha);
-        }
-    }
-
-    return linhas;
 }
 
 
@@ -545,62 +589,17 @@ async function carregarBiblioteca(){
 
     try{
 
-        const resposta = await fetch(
-            URL_BIBLIOTECA_TUBOS,
-            { cache:'no-store' }
+        const banco = await executarMotor(
+            'listar_tubulacoes'
         );
 
-        if(!resposta.ok){
+        if(!Array.isArray(banco.registros)){
             throw new Error(
-                'Falha ao acessar o banco de tubos.'
+                'O banco de tubulações retornou dados inválidos.'
             );
         }
 
-        const texto = await resposta.text();
-        const matriz = lerCSV(texto);
-
-        if(matriz.length < 2){
-            throw new Error(
-                'O banco não possui registros publicados.'
-            );
-        }
-
-        const cabecalhos = matriz[0]
-            .map(valor => String(valor).trim());
-
-        tubos = matriz
-            .slice(1)
-            .map(linha => {
-
-                const registro = {};
-
-                cabecalhos.forEach(
-                    (cabecalho, indice) => {
-                        registro[cabecalho] =
-                            String(
-                                linha[indice] ?? ''
-                            ).trim();
-                    }
-                );
-
-                return registro;
-            })
-            .filter(registro => {
-
-                const ativo = normalizar(
-                    obter(
-                        registro,
-                        ['ATIVO', 'STATUS']
-                    )
-                );
-
-                return (
-                    ativo === '' ||
-                    ativo === 'ATIVO' ||
-                    ativo === 'SIM' ||
-                    ativo === 'TRUE'
-                );
-            });
+        tubos = banco.registros.map(adaptarRegistro);
 
         tubos.sort((a, b) => {
 
@@ -644,8 +643,8 @@ async function carregarBiblioteca(){
         estado.innerHTML = `
             Não foi possível carregar a biblioteca de tubos.<br>
             <small>
-                Verifique se a planilha está publicada como CSV
-                e se os nomes das colunas estão corretos.
+                Verifique a implantação da Vercel Function
+                e a tabela de tubulações no Supabase.
             </small>
         `;
     }
