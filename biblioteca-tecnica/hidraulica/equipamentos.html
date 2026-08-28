@@ -1,1 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="sar-recurso-codigo" content="BIBLIOTECA_TECNICA_EQUIPAMENTOS_HIDRAULICOS">
+  <title>Equipamentos hidráulicos | Biblioteca Técnica SAR</title>
+  <script src="/js/sar.page-guard.js"></script>
+  <style>
+    :root{--sar:#315858;--sar-dark:#274949;--green:#7cb342;--ink:#263b3b;--muted:#6e7d7d;--line:#dce6e2;--bg:#f4f7f5;--danger:#a63838;--warning:#9a6815;--blue:#2873b8}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--bg)}body{padding:18px}button,input,select,textarea{font:inherit}
+    .shell{max-width:1700px;margin:0 auto}.sticky{position:sticky;top:0;z-index:10;padding:2px 0 1px;background:var(--bg)}
+    .head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:16px}.eyebrow{margin:0 0 4px;color:var(--green);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}h1{margin:0;color:var(--sar);font-size:27px}.subtitle{margin:5px 0 0;color:var(--muted);font-size:14px}
+    .head-actions,.filters,.form-actions,.row-actions{display:flex;gap:9px;align-items:center}.btn{min-height:40px;padding:0 15px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--sar);font-weight:700;cursor:pointer}.btn:hover{border-color:#9db9ad;background:#f8fbf9}.btn.primary{border-color:var(--sar);background:var(--sar);color:#fff}.btn.primary:hover{background:var(--sar-dark)}.btn.danger{color:var(--danger)}.btn:disabled{opacity:.5;cursor:not-allowed}
+    .card{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 4px 16px rgba(31,65,57,.05)}.toolbar{display:flex;justify-content:space-between;gap:16px;padding:14px;margin-bottom:14px}.search{position:relative;flex:1;max-width:620px}.search input{width:100%;min-height:42px;padding:0 14px 0 40px;border:1px solid #cfdcd7;border-radius:8px;color:var(--ink);outline:none}.search span{position:absolute;left:14px;top:10px;color:var(--muted)}.filters select{min-height:42px;padding:0 35px 0 12px;border:1px solid #cfdcd7;border-radius:8px;background:#fff;color:var(--ink)}
+    .summary{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:10px;margin:0 0 14px}.summary article{padding:13px 15px}.summary span{display:block;color:var(--muted);font-size:12px}.summary strong{display:block;margin-top:3px;color:var(--sar);font-size:22px}
+    .status{min-height:22px;margin:10px 2px;color:var(--muted);font-size:13px}.status.error{color:var(--danger)}.status.ok{color:#477126}.count{padding:0 2px 10px;color:var(--muted);font-size:13px}
+    .table-card{overflow:hidden}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:1450px}th{padding:11px 12px;background:#edf3f0;color:#526666;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.03em}td{padding:12px;border-top:1px solid #e5ebe8;font-size:13px;vertical-align:middle}tbody tr:hover{background:#fafcfb}.code{display:block;margin-top:3px;color:var(--muted);font-size:11px}.nowrap{white-space:nowrap}.empty,.loading{padding:48px 20px;text-align:center;color:var(--muted)}
+    .badge{display:inline-flex;align-items:center;min-height:25px;padding:0 9px;border-radius:999px;background:#e8f1f1;color:var(--sar);font-size:12px;font-weight:700}.badge.active{background:#edf4e6;color:#52742e}.badge.inactive{background:#f6eaea;color:var(--danger)}.badge.form{background:#eef1f6;color:#50627c}.icon-btn{min-width:34px;height:34px;padding:0 9px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--sar);cursor:pointer;font-weight:700}.icon-btn:hover{border-color:#9db9ad}.icon-btn.status-off{color:var(--danger)}
+    .modal-backdrop{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(25,44,44,.48)}.modal-backdrop.open{display:flex}.modal{width:min(1120px,100%);max-height:calc(100vh - 34px);overflow:auto;border-radius:13px;background:#fff;box-shadow:0 24px 70px rgba(0,0,0,.22)}.modal-head{position:sticky;top:0;z-index:3;display:flex;justify-content:space-between;gap:15px;padding:18px 22px;border-bottom:1px solid var(--line);background:#fff}.modal-head h2{margin:0;color:var(--sar);font-size:21px}.close{width:36px;height:36px;border:0;border-radius:8px;background:#f2f5f4;color:#587070;font-size:20px;cursor:pointer}
+    form{padding:20px 22px}.section{margin:0 0 20px;padding:0 0 20px;border-bottom:1px solid #e8eeeb}.section:last-of-type{border-bottom:0}.section h3{margin:0 0 13px;color:var(--sar);font-size:16px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.field{display:flex;flex-direction:column;gap:6px}.field.span2{grid-column:span 2}.field.full{grid-column:1/-1}.field label{font-size:12px;font-weight:700;color:#506565}.field.required label:after{content:" *";color:var(--blue)}.field input,.field select,.field textarea{width:100%;min-height:42px;padding:0 11px;border:1px solid #cfdcd7;border-radius:8px;outline:none}.field textarea{min-height:76px;padding:10px 11px;resize:vertical;line-height:1.4}.field input:focus,.field select:focus,.field textarea:focus,.search input:focus{border-color:var(--sar);box-shadow:0 0 0 3px rgba(49,88,88,.1)}.field input[readonly]{background:#f2f5f4;color:#607171}.helper{color:var(--muted);font-size:11px;line-height:1.35}.check{display:flex;align-items:center;gap:9px;min-height:42px;padding:0 12px;border:1px solid #cfdcd7;border-radius:8px;background:#f8fbf9}.check input{width:18px;min-height:18px;accent-color:var(--sar)}.conditional[hidden]{display:none}.k-results{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px;border:1px solid #cedddd;border-radius:9px;background:#f5f9f8}.k-results .field input{background:#fff}.modal-status{display:none;margin:14px 0 0;padding:11px 13px;border:1px solid transparent;border-radius:8px;font-size:13px;line-height:1.45}.modal-status.visible{display:block}.modal-status.error{border-color:#e3b9b9;background:#fff2f2;color:var(--danger)}.modal-status.info{border-color:#cfdcd7;background:#f4f8f6;color:var(--sar)}.form-actions{position:sticky;bottom:0;justify-content:flex-end;margin:0 -22px -20px;padding:15px 22px;border-top:1px solid var(--line);background:#fff}
+    @media(max-width:1050px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.summary{grid-template-columns:repeat(2,1fr)}}@media(max-width:760px){body{padding:10px}.head,.toolbar{display:block}.head-actions,.filters{margin-top:10px;flex-wrap:wrap}.grid,.k-results{grid-template-columns:1fr}.field.span2,.field.full{grid-column:auto}.summary{grid-template-columns:1fr 1fr}.head-actions .btn{flex:1}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="sticky">
+      <header class="head">
+        <div><p class="eyebrow">Biblioteca Técnica</p><h1>Equipamentos hidráulicos</h1><p class="subtitle">Cadastro central utilizado pelas calculadoras e pelos módulos de projeto do SAR.</p></div>
+        <div class="head-actions"><button class="btn" id="btnAtualizar" type="button">Atualizar</button><button class="btn primary" id="btnNovo" type="button">+ Novo equipamento</button></div>
+      </header>
+      <section class="toolbar card" aria-label="Pesquisa e filtros">
+        <label class="search"><span>⌕</span><input id="pesquisa" type="search" placeholder="Equipamento, código, fabricante ou modelo"></label>
+        <div class="filters">
+          <select id="filtroCategoria" aria-label="Filtrar por categoria"><option value="">Todas as categorias</option></select>
+          <select id="filtroAplicacao" aria-label="Filtrar por aplicação"><option value="">Todas as aplicações</option></select>
+          <select id="filtroStatus" aria-label="Filtrar por status"><option value="">Todos</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option></select>
+        </div>
+      </section>
+    </div>
+
+    <section class="summary">
+      <article class="card"><span>Total cadastrado</span><strong id="totalGeral">0</strong></article>
+      <article class="card"><span>Equipamentos ativos</span><strong id="totalAtivos">0</strong></article>
+      <article class="card"><span>Dimensionados por Fator K</span><strong id="totalFatorK">0</strong></article>
+      <article class="card"><span>Fabricantes</span><strong id="totalFabricantes">0</strong></article>
+    </section>
+
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+    <div class="count" id="contador"></div>
+    <section class="card table-card"><div class="table-wrap"><table>
+      <thead><tr><th>Equipamento</th><th>Categoria / aplicação</th><th>Fabricante / modelo</th><th>DN / conexão</th><th>Dimensionamento</th><th>K original</th><th>K L/min/√bar</th><th>K gpm/√psi</th><th>Pressão (bar)</th><th>Status</th><th>Ações</th></tr></thead>
+      <tbody id="lista"><tr><td colspan="11" class="loading">Carregando equipamentos...</td></tr></tbody>
+    </table></div></section>
+  </main>
+
+  <div class="modal-backdrop" id="modalCadastro" role="dialog" aria-modal="true" aria-labelledby="tituloModal">
+    <section class="modal">
+      <header class="modal-head"><div><h2 id="tituloModal">Novo equipamento</h2></div><button class="close" id="btnFechar" type="button" aria-label="Fechar">×</button></header>
+      <form id="formEquipamento">
+        <input id="equipamentoId" type="hidden">
+        <section class="section"><h3>Identificação do equipamento</h3><div class="grid">
+          <div class="field required"><label for="codigo">Código único</label><input id="codigo" maxlength="100" required placeholder="EX.: FAB-BICO-K30-DN15"></div>
+          <div class="field required"><label for="categoria">Categoria</label><input id="categoria" maxlength="180" required placeholder="Ex.: Bico aberto"></div>
+          <div class="field required span2"><label for="nomeEquipamento">Nome do equipamento</label><input id="nomeEquipamento" maxlength="180" required placeholder="Descrição técnica do equipamento"></div>
+          <div class="field required"><label for="tipoEquipamento">Tipo do equipamento</label><input id="tipoEquipamento" maxlength="180" required placeholder="Ex.: bico_resfriamento"></div>
+          <div class="field"><label for="aplicacao">Aplicação</label><input id="aplicacao" maxlength="180" placeholder="Ex.: resfriamento"></div>
+          <div class="field required"><label for="fabricante">Fabricante</label><input id="fabricante" maxlength="180" required></div>
+          <div class="field required"><label for="modelo">Modelo</label><input id="modelo" maxlength="180" required></div>
+          <div class="field"><label for="diametroNominal">Diâmetro nominal</label><input id="diametroNominal" maxlength="80" placeholder="Ex.: 1/2&quot; ou DN15"></div>
+          <div class="field"><label for="conexao">Conexão</label><input id="conexao" maxlength="100" placeholder="Ex.: Rosca NPT"></div>
+          <div class="field"><label for="ordem">Ordem de apresentação</label><input id="ordem" type="number" min="0" step="1" value="0"></div>
+          <div class="field"><label>Situação</label><label class="check"><input id="ativo" type="checkbox" checked> Equipamento ativo</label></div>
+        </div></section>
+
+        <section class="section"><h3>Forma de dimensionamento</h3><div class="grid">
+          <div class="field required"><label for="formaDimensionamento">Forma de cálculo</label><select id="formaDimensionamento" required><option value="fator_k">Fator K</option><option value="vazao_nominal">Vazão nominal</option><option value="curva_hidraulica">Curva hidráulica</option></select></div>
+          <div class="field required conditional" data-forma="fator_k"><label for="fatorKOriginal">Fator K do catálogo</label><input id="fatorKOriginal" type="number" min="0" step="any" inputmode="decimal"></div>
+          <div class="field required conditional" data-forma="fator_k"><label for="unidadeKOriginal">Unidade original</label><select id="unidadeKOriginal"><option value="lmin_sqrt_bar">L/min/√bar</option><option value="lmin_sqrt_mca">L/min/√mca</option><option value="gpm_sqrt_psi">gpm/√psi — catálogo americano</option></select></div>
+          <div class="field conditional" data-forma="fator_k"><label>&nbsp;</label><button class="btn" id="btnConverterK" type="button">Calcular equivalências</button></div>
+          <div class="k-results conditional" data-forma="fator_k">
+            <div class="field"><label for="kBar">K equivalente — L/min/√bar</label><input id="kBar" readonly></div>
+            <div class="field"><label for="kMca">K equivalente — L/min/√mca</label><input id="kMca" readonly></div>
+            <div class="field"><label for="kPsi">K equivalente — gpm/√psi</label><input id="kPsi" readonly></div>
+          </div>
+          <div class="field full conditional" data-forma="vazao_nominal"><span class="helper">Informe a vazão nominal na faixa operacional abaixo. Esse valor será obrigatório para salvar o equipamento.</span></div>
+          <div class="field full conditional" data-forma="curva_hidraulica"><span class="helper">O equipamento será identificado como dependente de curva hidráulica. Os pontos da curva serão estruturados em uma etapa específica.</span></div>
+        </div></section>
+
+        <section class="section"><h3>Faixa operacional e cobertura</h3><div class="grid">
+          <div class="field"><label for="pressaoMin">Pressão mínima (bar)</label><input id="pressaoMin" type="number" min="0" step="any"></div>
+          <div class="field"><label for="pressaoNominal">Pressão nominal (bar)</label><input id="pressaoNominal" type="number" min="0" step="any"></div>
+          <div class="field"><label for="pressaoMax">Pressão máxima (bar)</label><input id="pressaoMax" type="number" min="0" step="any"></div>
+          <div></div>
+          <div class="field"><label for="vazaoMin">Vazão mínima (L/min)</label><input id="vazaoMin" type="number" min="0" step="any"></div>
+          <div class="field"><label for="vazaoNominalFaixa">Vazão nominal (L/min)</label><input id="vazaoNominalFaixa" type="number" min="0" step="any"></div>
+          <div class="field"><label for="vazaoMax">Vazão máxima (L/min)</label><input id="vazaoMax" type="number" min="0" step="any"></div>
+          <div></div>
+          <div class="field"><label for="areaCobertura">Área de cobertura (m²)</label><input id="areaCobertura" type="number" min="0" step="any"></div>
+          <div class="field"><label for="anguloCobertura">Ângulo de cobertura (°)</label><input id="anguloCobertura" type="number" min="0" max="360" step="any"></div>
+        </div></section>
+
+        <section class="section"><h3>Documentação técnica</h3><div class="grid">
+          <div class="field span2"><label for="referencia">Referência técnica</label><textarea id="referencia" maxlength="1000" placeholder="Fabricante, catálogo, edição, página ou tabela"></textarea></div>
+          <div class="field span2"><label for="catalogoUrl">URL do catálogo</label><input id="catalogoUrl" type="url" maxlength="1000" placeholder="https://..."></div>
+          <div class="field full"><label for="observacao">Observações</label><textarea id="observacao" maxlength="2000"></textarea></div>
+        </div></section>
+
+        <div class="modal-status" id="statusModal" role="alert" aria-live="assertive"></div>
+        <div class="form-actions"><button class="btn" id="btnCancelar" type="button">Cancelar</button><button class="btn primary" id="btnSalvar" type="submit">Salvar equipamento</button></div>
+      </form>
+    </section>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+    const supabase=createClient("https://bjtxbpmrmhfvpmdsthxr.supabase.co","sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+    const API="/api/hidraulica/fator-k",$=id=>document.getElementById(id);let equipamentos=[];
+    const els={lista:$("lista"),status:$("status"),contador:$("contador"),pesquisa:$("pesquisa"),categoria:$("filtroCategoria"),aplicacao:$("filtroAplicacao"),filtroStatus:$("filtroStatus"),modal:$("modalCadastro"),form:$("formEquipamento"),statusModal:$("statusModal")};
+    const escapeHtml=value=>String(value??"").replace(/[&<>'"]/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#039;",'"':"&quot;"}[char]));
+    const numero=(value,casas=2)=>value===null||value===undefined||value===""?"—":new Intl.NumberFormat("pt-BR",{minimumFractionDigits:casas,maximumFractionDigits:casas}).format(Number(value));
+    const texto=(id)=>$(id).value.trim()||null,num=(id)=>$(id).value===""?null:Number($(id).value);
+    const permissoes=()=>window.SAR_PAGINA_PERMISSAO||{editar:false,administrar:false};
+    const podeEditar=()=>permissoes().editar===true||permissoes().administrar===true;
+    function mensagem(texto,tipo=""){els.status.textContent=texto;els.status.className=`status ${tipo}`.trim()}
+    function mensagemModal(texto,tipo="error"){els.statusModal.textContent=texto;els.statusModal.className=`modal-status ${texto?"visible ":""}${tipo}`.trim()}
+    async function motor(operacao,dados={}){const {data:{session},error}=await supabase.auth.getSession();if(error||!session?.access_token)throw new Error("Sua sessão expirou. Entre novamente no SAR.");const resposta=await fetch(API,{method:"POST",headers:{Authorization:`Bearer ${session.access_token}`,"Content-Type":"application/json"},body:JSON.stringify({operacao,dados})});let retorno={};try{retorno=await resposta.json()}catch{}if(!resposta.ok||retorno.sucesso!==true)throw new Error(retorno.mensagem||`Falha na biblioteca de equipamentos (${resposta.status}).`);return retorno.resultado||{}}
+    const formaLabel=value=>({fator_k:"Fator K",vazao_nominal:"Vazão nominal",curva_hidraulica:"Curva hidráulica"}[value]||value||"—");
+    const unidadeLabel=value=>({lmin_sqrt_bar:"L/min/√bar",lmin_sqrt_mca:"L/min/√mca",gpm_sqrt_psi:"gpm/√psi"}[value]||"—");
+    function preencherFiltro(select,valores,rotulo){const atual=select.value;select.innerHTML=`<option value="">${rotulo}</option>`+[...new Set(valores.filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR")).map(value=>`<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("");select.value=atual}
+    function atualizarResumo(){$("totalGeral").textContent=equipamentos.length;$("totalAtivos").textContent=equipamentos.filter(x=>x.ativo===true).length;$("totalFatorK").textContent=equipamentos.filter(x=>x.forma_dimensionamento==="fator_k").length;$("totalFabricantes").textContent=new Set(equipamentos.map(x=>x.fabricante).filter(Boolean)).size}
+    function filtrar(){const termo=els.pesquisa.value.trim().toLocaleLowerCase("pt-BR"),categoria=els.categoria.value,aplicacao=els.aplicacao.value,status=els.filtroStatus.value;return equipamentos.filter(item=>(!termo||`${item.nome_equipamento||""} ${item.codigo||""} ${item.fabricante||""} ${item.modelo||""}`.toLocaleLowerCase("pt-BR").includes(termo))&&(!categoria||item.categoria===categoria)&&(!aplicacao||item.aplicacao===aplicacao)&&(!status||(status==="ativo"?item.ativo===true:item.ativo!==true)))}
+    function pressao(item){const values=[item.pressao_min_bar,item.pressao_nominal_bar,item.pressao_max_bar];if(values.every(value=>value===null||value===undefined))return "—";return `${numero(item.pressao_min_bar)} / ${numero(item.pressao_nominal_bar)} / ${numero(item.pressao_max_bar)}`}
+    function renderizar(){const itens=filtrar(),editar=podeEditar();els.contador.textContent=`${itens.length} equipamento${itens.length===1?"":"s"} encontrado${itens.length===1?"":"s"}`;if(!itens.length){els.lista.innerHTML='<tr><td colspan="11" class="empty">Nenhum equipamento encontrado.</td></tr>';return}els.lista.innerHTML=itens.map(item=>`<tr><td><strong>${escapeHtml(item.nome_equipamento)}</strong><span class="code">${escapeHtml(item.codigo)}</span></td><td>${escapeHtml(item.categoria)||"—"}<span class="code">${escapeHtml(item.aplicacao)||"—"}</span></td><td>${escapeHtml(item.fabricante)||"—"}<span class="code">${escapeHtml(item.modelo)||"—"}</span></td><td class="nowrap">${escapeHtml(item.diametro_nominal)||"—"}<span class="code">${escapeHtml(item.conexao)||"—"}</span></td><td><span class="badge form">${escapeHtml(formaLabel(item.forma_dimensionamento))}</span></td><td class="nowrap">${numero(item.fator_k_valor_original)}<span class="code">${escapeHtml(unidadeLabel(item.fator_k_unidade_original))}</span></td><td class="nowrap">${numero(item.fator_k_lmin_bar)}</td><td class="nowrap">${numero(item.fator_k_gpm_psi)}</td><td class="nowrap">${pressao(item)}<span class="code">mín. / nom. / máx.</span></td><td><span class="badge ${item.ativo?"active":"inactive"}">${item.ativo?"Ativo":"Inativo"}</span></td><td><div class="row-actions">${editar?`<button class="icon-btn" type="button" data-editar="${item.id}" title="Editar">Editar</button><button class="icon-btn ${item.ativo?"status-off":""}" type="button" data-status="${item.id}" title="${item.ativo?"Desativar":"Ativar"}">${item.ativo?"Desativar":"Ativar"}</button>`:'<span class="code">Somente leitura</span>'}</div></td></tr>`).join("")}
+    async function carregar(){mensagem("Carregando biblioteca...");els.lista.innerHTML='<tr><td colspan="11" class="loading">Carregando equipamentos...</td></tr>';try{const resultado=await motor("listar_equipamentos_biblioteca");equipamentos=resultado.registros||[];preencherFiltro(els.categoria,equipamentos.map(x=>x.categoria),"Todas as categorias");preencherFiltro(els.aplicacao,equipamentos.map(x=>x.aplicacao),"Todas as aplicações");atualizarResumo();renderizar();mensagem("")}catch(error){mensagem(error instanceof Error?error.message:String(error),"error");els.lista.innerHTML='<tr><td colspan="11" class="empty">Falha ao carregar a biblioteca.</td></tr>'}}
+    function atualizarForma(){const forma=$("formaDimensionamento").value;document.querySelectorAll("[data-forma]").forEach(el=>el.hidden=el.dataset.forma!==forma);$("fatorKOriginal").required=forma==="fator_k";$("unidadeKOriginal").required=forma==="fator_k";$("vazaoNominalFaixa").required=forma==="vazao_nominal"}
+    function preencherConversoes(item={}){$("kBar").value=item.fator_k_lmin_bar==null?"":numero(item.fator_k_lmin_bar,6);$("kMca").value=item.fator_k_lmin_mca==null?"":numero(item.fator_k_lmin_mca,6);$("kPsi").value=item.fator_k_gpm_psi==null?"":numero(item.fator_k_gpm_psi,6)}
+    async function converterK(){const valor=num("fatorKOriginal");if(!(valor>0)){preencherConversoes();return}const unidade={lmin_sqrt_bar:"lminbar",lmin_sqrt_mca:"lminmca",gpm_sqrt_psi:"gpmpsi"}[$("unidadeKOriginal").value];$("btnConverterK").disabled=true;try{const resultado=await motor("converter_k",{valor,unidade});preencherConversoes({fator_k_lmin_bar:resultado.k_lmin_bar,fator_k_lmin_mca:resultado.k_lmin_mca,fator_k_gpm_psi:resultado.k_gpm_psi});mensagemModal("")}catch(error){mensagemModal(error instanceof Error?error.message:String(error))}finally{$("btnConverterK").disabled=false}}
+    function abrir(item=null){if(!podeEditar())return;els.form.reset();mensagemModal("");$("equipamentoId").value=item?.id||"";$("tituloModal").textContent=item?"Editar equipamento":"Novo equipamento";$("codigo").value=item?.codigo||"";$("categoria").value=item?.categoria||"";$("nomeEquipamento").value=item?.nome_equipamento||"";$("tipoEquipamento").value=item?.tipo_equipamento||"";$("aplicacao").value=item?.aplicacao||"";$("fabricante").value=item?.fabricante||"";$("modelo").value=item?.modelo||"";$("diametroNominal").value=item?.diametro_nominal||"";$("conexao").value=item?.conexao||"";$("ordem").value=item?.ordem??0;$("ativo").checked=item?item.ativo===true:true;$("formaDimensionamento").value=item?.forma_dimensionamento||"fator_k";$("fatorKOriginal").value=item?.fator_k_valor_original??"";$("unidadeKOriginal").value=item?.fator_k_unidade_original||"lmin_sqrt_bar";$("pressaoMin").value=item?.pressao_min_bar??"";$("pressaoNominal").value=item?.pressao_nominal_bar??"";$("pressaoMax").value=item?.pressao_max_bar??"";$("vazaoMin").value=item?.vazao_min_lpm??"";$("vazaoNominalFaixa").value=item?.vazao_nominal_lpm??"";$("vazaoMax").value=item?.vazao_max_lpm??"";$("areaCobertura").value=item?.area_cobertura_m2??"";$("anguloCobertura").value=item?.angulo_cobertura_graus??"";$("referencia").value=item?.referencia||"";$("catalogoUrl").value=item?.catalogo_url||"";$("observacao").value=item?.observacao||"";preencherConversoes(item||{});atualizarForma();els.modal.classList.add("open");setTimeout(()=>$("codigo").focus(),0)}
+    function fechar(){els.modal.classList.remove("open");mensagemModal("")}
+    async function salvar(event){event.preventDefault();if(!podeEditar())return;const forma=$("formaDimensionamento").value;const payload={id:$("equipamentoId").value||null,codigo:texto("codigo"),categoria:texto("categoria"),nome_equipamento:texto("nomeEquipamento"),tipo_equipamento:texto("tipoEquipamento"),aplicacao:texto("aplicacao"),fabricante:texto("fabricante"),modelo:texto("modelo"),diametro_nominal:texto("diametroNominal"),conexao:texto("conexao"),ordem:num("ordem")||0,ativo:$("ativo").checked,forma_dimensionamento:forma,fator_k_valor_original:num("fatorKOriginal"),fator_k_unidade_original:$("unidadeKOriginal").value,pressao_min_bar:num("pressaoMin"),pressao_nominal_bar:num("pressaoNominal"),pressao_max_bar:num("pressaoMax"),vazao_min_lpm:num("vazaoMin"),vazao_nominal_lpm:num("vazaoNominalFaixa"),vazao_max_lpm:num("vazaoMax"),area_cobertura_m2:num("areaCobertura"),angulo_cobertura_graus:num("anguloCobertura"),referencia:texto("referencia"),catalogo_url:texto("catalogoUrl"),observacao:texto("observacao")};$("btnSalvar").disabled=true;mensagemModal("Salvando equipamento...","info");try{await motor("salvar_equipamento",payload);fechar();await carregar();mensagem(payload.id?"Equipamento atualizado com sucesso.":"Equipamento cadastrado com sucesso.","ok")}catch(error){mensagemModal(error instanceof Error?error.message:String(error))}finally{$("btnSalvar").disabled=false}}
+    async function alterarStatus(id){if(!podeEditar())return;const item=equipamentos.find(x=>String(x.id)===String(id));if(!item)return;const novoStatus=!item.ativo;if(!novoStatus&&!window.confirm(`Desativar o equipamento “${item.nome_equipamento}”?\n\nEle deixará de aparecer nas calculadoras e nos novos projetos.`))return;mensagem(`${novoStatus?"Ativando":"Desativando"} equipamento...`);try{await motor("definir_status_equipamento",{id:item.id,ativo:novoStatus});await carregar();mensagem(`Equipamento ${novoStatus?"ativado":"desativado"} com sucesso.`,"ok")}catch(error){mensagem(error instanceof Error?error.message:String(error),"error")}}
+    function iniciar(){$("btnNovo").disabled=!podeEditar();carregar()}
+    [els.pesquisa,els.categoria,els.aplicacao,els.filtroStatus].forEach(el=>el.addEventListener(el.tagName==="INPUT"?"input":"change",renderizar));
+    $("btnAtualizar").addEventListener("click",carregar);$("btnNovo").addEventListener("click",()=>abrir());$("btnFechar").addEventListener("click",fechar);$("btnCancelar").addEventListener("click",fechar);els.form.addEventListener("submit",salvar);$("formaDimensionamento").addEventListener("change",atualizarForma);$("btnConverterK").addEventListener("click",converterK);$("fatorKOriginal").addEventListener("blur",converterK);$("unidadeKOriginal").addEventListener("change",converterK);
+    els.lista.addEventListener("click",event=>{const edit=event.target.closest("[data-editar]"),status=event.target.closest("[data-status]");if(edit)abrir(equipamentos.find(x=>String(x.id)===edit.dataset.editar));if(status)alterarStatus(status.dataset.status)});els.modal.addEventListener("click",event=>{if(event.target===els.modal)fechar()});document.addEventListener("keydown",event=>{if(event.key==="Escape"&&els.modal.classList.contains("open"))fechar()});
+    if(window.SAR_PAGINA_PERMISSAO)iniciar();else window.addEventListener("sar:pagina-autorizada",iniciar,{once:true});
+  </script>
+</body>
+</html>
 
