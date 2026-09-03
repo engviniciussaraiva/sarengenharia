@@ -10,6 +10,7 @@
 >
 
 <script src="/js/sar.page-guard.js"></script>
+<script src="/js/sar.api.js"></script>
 
   <title>Fator K de Descarga</title>
 
@@ -1168,74 +1169,19 @@
   </div>
 
   <script>
-    /*
-      MOTOR VERCEL
-    */
+    /* MOTOR PRIVADO SAR — RAILWAY */
 
     const FATORK_API_URL = "/api/hidraulica/fator-k";
-    const FATORK_SUPABASE_URL =
-      "https://bjtxbpmrmhfvpmdsthxr.supabase.co";
-    const FATORK_SUPABASE_KEY =
-      "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM";
-
-    let fatorkSupabasePromise = null;
-
-    async function fatorkObterSupabase() {
-      if (!fatorkSupabasePromise) {
-        fatorkSupabasePromise = import(
-          "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
-        ).then(function (modulo) {
-          return modulo.createClient(
-            FATORK_SUPABASE_URL,
-            FATORK_SUPABASE_KEY,
-            {
-              auth: {
-                persistSession: true,
-                autoRefreshToken: true,
-                detectSessionInUrl: true
-              }
-            }
-          );
-        });
-      }
-
-      return fatorkSupabasePromise;
-    }
 
     async function fatorkExecutarMotor(operacao, dados) {
-      const supabase = await fatorkObterSupabase();
-      const {
-        data: { session },
-        error
-      } = await supabase.auth.getSession();
-
-      if (error || !session?.access_token) {
-        throw new Error(
-          "Sua sessão expirou. Entre novamente no SAR."
-        );
-      }
-
-      const resposta = await fetch(FATORK_API_URL, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${session.access_token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ operacao, dados })
-      });
-
-      let retorno = {};
-
-      try {
-        retorno = await resposta.json();
-      } catch (erroResposta) {
-        retorno = {};
-      }
-
-      if (!resposta.ok || retorno.sucesso !== true) {
+      const retorno = await window.SARAPI.post(
+        FATORK_API_URL,
+        { operacao, dados }
+      );
+      if (retorno.sucesso !== true) {
         throw new Error(
           retorno.mensagem ||
-          `Falha no motor Fator K (${resposta.status}).`
+          "Falha no motor Fator K."
         );
       }
 
@@ -1585,7 +1531,7 @@
 
         fatorkCatalogoMemoria.textContent =
           `O valor informado (${fatorkFormatarNumero(valor)}) foi ` +
-          `convertido pelo motor Vercel para as três unidades ` +
+          `convertido pelo motor privado SAR para as três unidades ` +
           `padronizadas do banco técnico.`;
 
         fatorkCatalogoResultado.style.display = "block";
@@ -2344,7 +2290,7 @@
         fatorkTabelaCorpo.innerHTML = `
           <tr>
             <td colspan="8" class="sar-fatork-sem-dados">
-              Verifique a sessão, o motor Vercel e o banco do Supabase.
+              Verifique a sessão, o motor SAR e o banco do Supabase.
             </td>
           </tr>
         `;

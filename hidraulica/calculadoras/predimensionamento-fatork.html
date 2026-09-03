@@ -10,6 +10,7 @@
   >
 
   <script src="/js/sar.page-guard.js"></script>
+  <script src="/js/sar.api.js"></script>
 
   <title>Pré-dimensionamento hidráulico por Fator K</title>
 
@@ -546,12 +547,6 @@
 
   <script>
     const PREDK_API_URL = "/api/hidraulica/fator-k";
-    const PREDK_SUPABASE_URL =
-      "https://bjtxbpmrmhfvpmdsthxr.supabase.co";
-    const PREDK_SUPABASE_KEY =
-      "sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM";
-
-    let predkSupabasePromise = null;
     let predkEquipamentos = [];
     let predkModo = "vazao";
 
@@ -612,58 +607,15 @@
         .replace(/'/g, "&#039;");
     }
 
-    async function predkObterSupabase() {
-      if (!predkSupabasePromise) {
-        predkSupabasePromise = import(
-          "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
-        ).then(function (modulo) {
-          return modulo.createClient(
-            PREDK_SUPABASE_URL,
-            PREDK_SUPABASE_KEY,
-            {
-              auth: {
-                persistSession: true,
-                autoRefreshToken: true,
-                detectSessionInUrl: true
-              }
-            }
-          );
-        });
-      }
-      return predkSupabasePromise;
-    }
-
     async function predkMotor(operacao, dados) {
-      const supabase = await predkObterSupabase();
-      const {
-        data: { session },
-        error
-      } = await supabase.auth.getSession();
-
-      if (error || !session?.access_token) {
-        throw new Error("Sua sessão expirou. Entre novamente no SAR.");
-      }
-
-      const resposta = await fetch(PREDK_API_URL, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${session.access_token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ operacao, dados })
-      });
-
-      let retorno = {};
-      try {
-        retorno = await resposta.json();
-      } catch (erroResposta) {
-        retorno = {};
-      }
-
-      if (!resposta.ok || retorno.sucesso !== true) {
+      const retorno = await window.SARAPI.post(
+        PREDK_API_URL,
+        { operacao, dados }
+      );
+      if (retorno.sucesso !== true) {
         throw new Error(
           retorno.mensagem ||
-          `Falha no motor de pré-dimensionamento (${resposta.status}).`
+          "Falha no motor de pré-dimensionamento."
         );
       }
 
