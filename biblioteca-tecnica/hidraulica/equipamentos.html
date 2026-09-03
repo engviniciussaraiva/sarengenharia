@@ -6,6 +6,7 @@
   <meta name="sar-recurso-codigo" content="BIBLIOTECA_TECNICA_EQUIPAMENTOS_HIDRAULICOS">
   <title>Equipamentos hidráulicos | Biblioteca Técnica SAR</title>
   <script src="/js/sar.page-guard.js"></script>
+  <script src="/js/sar.api.js"></script>
   <style>
     :root{--sar:#315858;--sar-dark:#274949;--green:#7cb342;--ink:#263b3b;--muted:#6e7d7d;--line:#dce6e2;--bg:#f4f7f5;--danger:#a63838;--warning:#9a6815;--blue:#2873b8}
     *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--bg)}body{padding:18px}button,input,select,textarea{font:inherit}
@@ -112,9 +113,7 @@
     </section>
   </div>
 
-  <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-    const supabase=createClient("https://bjtxbpmrmhfvpmdsthxr.supabase.co","sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  <script>
     const API="/api/hidraulica/fator-k",$=id=>document.getElementById(id);let equipamentos=[];
     const els={lista:$("lista"),status:$("status"),contador:$("contador"),pesquisa:$("pesquisa"),categoria:$("filtroCategoria"),aplicacao:$("filtroAplicacao"),filtroStatus:$("filtroStatus"),modal:$("modalCadastro"),form:$("formEquipamento"),statusModal:$("statusModal")};
     const escapeHtml=value=>String(value??"").replace(/[&<>'"]/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#039;",'"':"&quot;"}[char]));
@@ -124,7 +123,7 @@
     const podeEditar=()=>permissoes().editar===true||permissoes().administrar===true;
     function mensagem(texto,tipo=""){els.status.textContent=texto;els.status.className=`status ${tipo}`.trim()}
     function mensagemModal(texto,tipo="error"){els.statusModal.textContent=texto;els.statusModal.className=`modal-status ${texto?"visible ":""}${tipo}`.trim()}
-    async function motor(operacao,dados={}){const {data:{session},error}=await supabase.auth.getSession();if(error||!session?.access_token)throw new Error("Sua sessão expirou. Entre novamente no SAR.");const resposta=await fetch(API,{method:"POST",headers:{Authorization:`Bearer ${session.access_token}`,"Content-Type":"application/json"},body:JSON.stringify({operacao,dados})});let retorno={};try{retorno=await resposta.json()}catch{}if(!resposta.ok||retorno.sucesso!==true)throw new Error(retorno.mensagem||`Falha na biblioteca de equipamentos (${resposta.status}).`);return retorno.resultado||{}}
+    async function motor(operacao,dados={}){const retorno=await window.SARAPI.post(API,{operacao,dados});if(retorno.sucesso!==true)throw new Error(retorno.mensagem||"Falha na biblioteca de equipamentos.");return retorno.resultado||{}}
     const formaLabel=value=>({fator_k:"Fator K",vazao_nominal:"Vazão nominal",curva_hidraulica:"Curva hidráulica"}[value]||value||"—");
     const unidadeLabel=value=>({lmin_sqrt_bar:"L/min/√bar",lmin_sqrt_mca:"L/min/√mca",gpm_sqrt_psi:"gpm/√psi"}[value]||"—");
     function preencherFiltro(select,valores,rotulo){const atual=select.value;select.innerHTML=`<option value="">${rotulo}</option>`+[...new Set(valores.filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR")).map(value=>`<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("");select.value=atual}
@@ -148,4 +147,3 @@
   </script>
 </body>
 </html>
-
