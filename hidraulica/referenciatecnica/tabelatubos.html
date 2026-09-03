@@ -10,6 +10,7 @@
 >
 
 <script src="/js/sar.page-guard.js"></script>
+<script src="/js/sar.api.js"></script>
 
 <title>Tabela de Tubos</title>
 
@@ -414,74 +415,17 @@ td.texto{
 const API_BIBLIOTECA_TUBOS =
     '/api/hidraulica/tubulacoes';
 
-const SUPABASE_URL =
-    'https://bjtxbpmrmhfvpmdsthxr.supabase.co';
-
-const SUPABASE_KEY =
-    'sb_publishable_E1Oxs2VdHcNrVbb7yIGnsg_zd6EYMvM';
-
 let tubos = [];
-let supabasePromise = null;
-
-async function obterSupabase(){
-
-    if(!supabasePromise){
-        supabasePromise = import(
-            'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
-        ).then(modulo => modulo.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY,
-            {
-                auth:{
-                    persistSession:true,
-                    autoRefreshToken:true,
-                    detectSessionInUrl:true
-                }
-            }
-        ));
-    }
-
-    return supabasePromise;
-}
 
 async function executarMotor(operacao, dados = {}){
-
-    const supabase = await obterSupabase();
-    const {
-        data:{ session },
-        error
-    } = await supabase.auth.getSession();
-
-    if(error || !session?.access_token){
-        throw new Error(
-            'Sua sessão expirou. Entre novamente no SAR.'
-        );
-    }
-
-    const resposta = await fetch(
+    const retorno = await window.SARAPI.post(
         API_BIBLIOTECA_TUBOS,
-        {
-            method:'POST',
-            headers:{
-                'Authorization':`Bearer ${session.access_token}`,
-                'Content-Type':'application/json'
-            },
-            body:JSON.stringify({ operacao, dados })
-        }
+        { operacao, dados }
     );
-
-    let retorno = {};
-
-    try{
-        retorno = await resposta.json();
-    }catch(erroResposta){
-        retorno = {};
-    }
-
-    if(!resposta.ok || retorno.sucesso !== true){
+    if(retorno.sucesso !== true){
         throw new Error(
             retorno.mensagem ||
-            `Falha na biblioteca de tubos (${resposta.status}).`
+            'Falha na biblioteca de tubos.'
         );
     }
 
@@ -643,7 +587,7 @@ async function carregarBiblioteca(){
         estado.innerHTML = `
             Não foi possível carregar a biblioteca de tubos.<br>
             <small>
-                Verifique a implantação da Vercel Function
+                Verifique a conexão com o motor SAR
                 e a tabela de tubulações no Supabase.
             </small>
         `;
