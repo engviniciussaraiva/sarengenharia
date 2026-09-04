@@ -918,6 +918,41 @@ async function atualizarSessao(
 }
 
 
+
+
+/* ============================================================
+ * CLASSIFICAÇÃO PÚBLICA PARA O CABEÇALHO
+ * Não expõe regras, fundamentos ou critérios internos.
+ * ============================================================ */
+
+function resumoPublicoClassificacao(classificacao) {
+  const processo = classificacao?.processo || null;
+  const certificacao = classificacao?.certificacao || null;
+
+  if (!processo?.codigo || !certificacao?.codigo) {
+    return {
+      status: "EM_ANALISE",
+      provisorio: true,
+      processo: { codigo: null, texto: "Em análise" },
+      certificacao: { codigo: null, texto: "Em análise" }
+    };
+  }
+
+  return {
+    status: classificacao?.status || "EM_ANDAMENTO",
+    provisorio: classificacao?.status !== "FINAL",
+    processo: {
+      codigo: processo.codigo,
+      texto: processo.texto || processo.codigo
+    },
+    certificacao: {
+      codigo: certificacao.codigo,
+      texto: certificacao.texto || certificacao.codigo
+    }
+  };
+}
+
+
 /* ============================================================
  * HANDLER
  * ============================================================ */
@@ -926,8 +961,8 @@ export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
   res.setHeader("X-Content-Type-Options", "nosniff");
 
-  if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
+  if (!['GET', 'POST'].includes(req.method)) {
+    res.setHeader("Allow", "GET, POST");
 
     return res.status(405).json({
       ok: false,
@@ -938,6 +973,14 @@ export default async function handler(req, res) {
   try {
     const token = validarSessao(req);
     const sessao = await obterSessao(token.nonce);
+
+    if (req.method === "GET") {
+      return res.status(200).json({
+        ok: true,
+        fase_atual: sessao.fase_atual || null,
+        classificacao: resumoPublicoClassificacao(sessao.classificacao)
+      });
+    }
 
     const uf = String(
       sessao.estado?.jurisdicao?.uf || ""
@@ -1107,11 +1150,13 @@ export default async function handler(req, res) {
         ? proximaEtapa.rota
         : null;
 
-    // Resposta mínima: não expõe regras nem classificação interna.
+    // Resposta pública mínima: não expõe regras, fundamentos ou critérios internos.
+    // Envia apenas o resultado provisório necessário ao cabeçalho visual.
     return res.status(200).json({
       ok: true,
       mensagem,
-      next
+      next,
+      classificacao: resumoPublicoClassificacao(classificacao)
     });
 
   } catch (error) {
