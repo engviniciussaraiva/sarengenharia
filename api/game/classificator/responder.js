@@ -1136,9 +1136,17 @@ export default async function handler(req, res) {
       }
     };
 
+    // Se a próxima tela ainda não estiver publicada, mantém a sessão
+    // na etapa atual. O motor registra a próxima etapa pendente, mas
+    // o usuário não fica preso em uma rota ainda inexistente.
+    const fasePersistida =
+      proximaEtapa.ativo && proximaEtapa.publicado
+        ? proximaEtapa.etapa_codigo
+        : etapaCodigo;
+
     await atualizarSessao(
       token.nonce,
-      proximaEtapa.etapa_codigo,
+      fasePersistida,
       novoEstado,
       classificacao
     );

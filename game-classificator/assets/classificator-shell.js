@@ -7,11 +7,18 @@
   const faseTexto = String(host.dataset.phaseLabel || host.dataset.phase || "").trim();
   const faseNumero = Number(host.dataset.phase || 0);
   const total = 10;
+  const ehAux2A = faseTexto.toUpperCase() === "2A";
 
-  const steps = Array.from({length: total}, (_, i) => {
-    const n = i + 1;
-    const cls = n < faseNumero ? "done" : (n === faseNumero ? "current" : "");
-    return `<span class="classificator-step ${cls}" aria-label="Fase ${n}">${n}</span>`;
+  const sequencia = [];
+  for (let n = 1; n <= total; n++) {
+    sequencia.push({label:String(n), numero:n, aux:false});
+    if (ehAux2A && n === 2) sequencia.push({label:"2A", numero:2.1, aux:true});
+  }
+
+  const atualNumero = ehAux2A ? 2.1 : faseNumero;
+  const steps = sequencia.map(item => {
+    const cls = item.numero < atualNumero ? "done" : (item.numero === atualNumero ? "current" : "");
+    return `<span class="classificator-step ${item.aux ? "aux" : ""} ${cls}" aria-label="Fase ${item.label}">${item.label}</span>`;
   }).join("");
 
   host.innerHTML = `
@@ -24,7 +31,7 @@
 
         <div class="classificator-progress-wrap">
           <p class="classificator-progress-label">${faseTexto ? `FASE ${faseTexto}` : "CLASSIFICAÇÃO"}</p>
-          <div class="classificator-progress">${steps}</div>
+          <div class="classificator-progress ${ehAux2A ? "has-aux" : ""}">${steps}</div>
           <div class="classificator-current-caption">Avanço da classificação</div>
         </div>
 

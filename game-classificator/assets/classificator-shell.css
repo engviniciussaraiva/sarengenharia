@@ -68,3 +68,7 @@ button,input{font:inherit}
 @media(max-width:720px){
   .classificator-topbar-inner{grid-template-columns:1fr;padding:15px}.classificator-result{justify-self:stretch}.classificator-progress-wrap{grid-column:auto;grid-row:auto}.classificator-brand-title{font-size:27px}.classificator-step{width:25px;height:25px;font-size:11px}.page-shell{padding:0 10px}.page-head{display:block}.page-actions{margin-top:14px}.workspace{padding:14px}.page-title{font-size:22px}
 }
+
+/* Etapas auxiliares como 2A podem ser exibidas entre fases principais. */
+.classificator-progress.has-aux{grid-template-columns:repeat(11,1fr)}
+.classificator-step.aux{font-size:11px}
