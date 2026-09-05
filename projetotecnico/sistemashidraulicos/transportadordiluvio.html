@@ -441,8 +441,8 @@ tr:nth-child(even){
 
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
+<script src="/js/sar.api.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 </head>
@@ -461,17 +461,17 @@ tr:nth-child(even){
     <div class="grid-3 dados-iniciais"> 
       <div class="field">
         <label>Referência</label>
-        <input id="referencia" class="obrigatorio"  type="text">
+        <input id="referencia" type="text">
       </div>
 
       <div class="field">
         <label>Local protegido</label>
-<input id="localProtegido" class="obrigatorio"  type="text" placeholder="Ex.: Túnel / Aéreo / Transportador">         
+<input id="localProtegido" type="text" placeholder="Ex.: Túnel / Aéreo / Transportador">         
       </div>
 
       <div class="field">
         <label>Identificação Trecho/Chave</label>
-        <input id="chave" class="obrigatorio"  type="text" placeholder="Ex.: TC-01 / CH-01">
+        <input id="chave" type="text" placeholder="Ex.: TC-01 / CH-01">
       </div>
     </div>
       <h2 class="section-title" style="margin-top:18px;">Rede de Dilúvio</h2>
@@ -512,7 +512,7 @@ tr:nth-child(even){
 
       <div class="field">
         <label>Modelo do Bico</label>
-        <select id="modeloBico" class="warn" onchange="selecaoManual=true; calcular()">
+        <select id="modeloBico" class="warn" onchange="alterarModeloBico()">
 </select> 
 
       </div>
@@ -699,10 +699,31 @@ tr:nth-child(even){
 </div>
 
 <script>
-const bicos = [];
-
+const DILUVIO_API_PATH = "/api/hidraulica/diluvio-transportadores";
 let linhas = [];
-let selecaoManual = false; 
+let selecaoManual = false;
+let timerCalculo = null;
+let sequenciaCalculo = 0;
+
+window.BICOS_DILUVIO = [];
+window.COMP_EQ_DILUVIO = [];
+
+async function executarMotorDiluvio(operacao, dados = {}){
+  if(!window.SARAPI){
+    throw new Error("Conector seguro do SAR não carregado.");
+  }
+
+  const retorno = await window.SARAPI.post(DILUVIO_API_PATH, {
+    operacao,
+    dados
+  });
+
+  if(!retorno?.sucesso || !retorno?.resultado){
+    throw new Error(retorno?.mensagem || "Resposta inválida do motor SAR.");
+  }
+
+  return retorno.resultado;
+}
 
 function n(id){
   const v = parseFloat(document.getElementById(id).value);
@@ -716,79 +737,22 @@ function fmt(v, c=2){
   });
 }
 
-function escolherBico(vazaoTotal, comprimento, largura, altura){
-  let melhor = null;
-
-  const listaBicos = window.BICOS_SUPABASE || bicos;
-
-  listaBicos.forEach(b => {
-    const modelo = b.modelo || "";
-    const tipo = b.tipo || "";
-    const angulo = Number(b.angulo_graus || b.angulo || 0);
-    const k = Number(b.fator_k || b.k || 0);
-    const diametro = b.diametro_descarga_mm || b.diametro || "";
-    const pressaoMinima = Number(b.pressao_min_mca || 0);
-
-    if(!angulo || !k) return;
-
-    const aberturaCalculada =
-  altura * Math.tan((angulo / 2) * Math.PI / 180) * 2;
-
-const coberturaUtil =
-  aberturaCalculada * 0.90; // 10% de transpasse
-
-const espacamentoPlanejado =
-  Math.min(3.00, Math.max(1.2, coberturaUtil));
-
-    const qtdPlanejada = Math.max(1, Math.ceil(comprimento / espacamentoPlanejado));
-    const vazaoPorBico = vazaoTotal / qtdPlanejada;
-    const pressao = Math.pow(vazaoPorBico / k, 2) * 10.197;
-
-    const distanciaIdeal10 = Math.abs(10 - pressao);
-    const penalidadePoucoBico = qtdPlanejada < 2 ? 20 : 0;
-    const penalidadePressaoAlta = pressao > 15 ? 50 : pressao > 12 ? 15 : 0;
-    const penalidadePressaoBaixa = pressao < pressaoMinima ? 30 : 0;
-
-    const score =
-      distanciaIdeal10 +
-      penalidadePoucoBico +
-      penalidadePressaoAlta +
-      penalidadePressaoBaixa;
-
-    const item = {
-      modelo,
-      tipo,
-      angulo,
-      k,
-      diametro,
-      entrada: "",
-      pressaoMinima,
-      espacamentoPlanejado,
-      qtdPlanejada,
-      vazaoPorBico,
-      pressao,
-      score
-    };
-
-    if(!melhor || item.score < melhor.score){
-      melhor = item;
-    }
-  });
-
-  return melhor;
+function textoOpcional(v){
+  const texto = String(v || "").trim();
+  return texto || "—";
 }
 
-
-function classificarPressao(p){
-  if(p <= 10) return "Recomendado";
-  if(p <= 12) return "Aceitável";
-  if(p <= 15) return "Revisar";
-  return "Não recomendado";
+function htmlSeguro(v){
+  return String(v ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-
-function preencherDropsBico(escolhido){
-  const listaBicos = window.BICOS_SUPABASE || bicos;
+function preencherDropsBico(escolhido, forcarEscolha = false){
+  const listaBicos = window.BICOS_DILUVIO || [];
 
   const selectModelo = document.getElementById("modeloBico");
   const selectAngulo = document.getElementById("angulo");
@@ -796,33 +760,69 @@ function preencherDropsBico(escolhido){
   const modeloAntes = selectModelo.value;
   const anguloAntes = selectAngulo.value;
 
-  selectModelo.innerHTML = "";
+  const modelos = [...new Set(listaBicos.map(b => b.modelo).filter(Boolean))];
+  const modeloEscolhido =
+    !forcarEscolha && selecaoManual && modelos.includes(modeloAntes)
+      ? modeloAntes
+      : escolhido.modelo;
 
-  const modelos = [...new Set(listaBicos.map(b => b.modelo))];
+  selectModelo.replaceChildren(
+    ...modelos.map(modelo => new Option(modelo, modelo))
+  );
+  selectModelo.value = modeloEscolhido;
 
-  modelos.forEach(modelo => {
-    selectModelo.innerHTML += `<option value="${modelo}">${modelo}</option>`;
-  });
-
-  selectModelo.value = selecaoManual && modeloAntes ? modeloAntes : escolhido.modelo;
-
-  selectAngulo.innerHTML = "";
-
-  listaBicos
+  const angulos = listaBicos
     .filter(b => b.modelo === selectModelo.value)
-    .forEach(b => {
-      selectAngulo.innerHTML += `
-        <option value="${b.angulo_graus}">${b.angulo_graus}</option>
-      `;
-    });
+    .map(b => String(b.angulo));
+  const anguloEscolhido =
+    !forcarEscolha && selecaoManual && angulos.includes(String(anguloAntes))
+      ? String(anguloAntes)
+      : String(escolhido.angulo);
 
-  selectAngulo.value = selecaoManual && anguloAntes ? anguloAntes : escolhido.angulo;
+  selectAngulo.replaceChildren(
+    ...angulos.map(angulo => new Option(angulo, angulo))
+  );
+  selectAngulo.value = anguloEscolhido;
 
   document.getElementById("tipoBico").value = escolhido.tipo || "Média Velocidade";
 }
 
+function alterarModeloBico(){
+  selecaoManual = true;
+  const modelo = document.getElementById("modeloBico").value;
+  const primeiro = (window.BICOS_DILUVIO || []).find(b => b.modelo === modelo);
+
+  if(primeiro){
+    document.getElementById("angulo").replaceChildren(
+      ...(window.BICOS_DILUVIO || [])
+        .filter(b => b.modelo === modelo)
+        .map(b => new Option(String(b.angulo), String(b.angulo)))
+    );
+    document.getElementById("angulo").value = String(primeiro.angulo);
+  }
+  calcular();
+}
+
+function limparResultadosCalculo(){
+  [
+    "area", "vazaoTotal", "fatorK", "diametroDescarga",
+    "distPlanejada", "bicosPlanejado", "distReal",
+    "vazaoPlanejadaBico", "pressaoPlanejada", "pressaoAjustada",
+    "vazaoRealBico", "vazaoProjetadaTotal", "volumeReservatorio"
+  ].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+  window.STATUS_CALCULO = "";
+}
 
 function calcular(){
+  window.clearTimeout(timerCalculo);
+  timerCalculo = window.setTimeout(() => {
+    calcularAgora(false);
+  }, 250);
+}
+
+async function calcularAgora(mostrarErro = false){
 
   const comprimento = n("comprimento");
   const largura = n("largura");
@@ -830,154 +830,72 @@ function calcular(){
   const densidade = n("densidade");
   const tempo = n("tempo");
 
-  const area = comprimento * largura;
-  const vazaoTotal = area * densidade;
-
-  if(vazaoTotal <= 0 || comprimento <= 0 || largura <= 0 || altura <= 0){
-    document.getElementById("area").value = "";
-    document.getElementById("vazaoTotal").value = "";
-    return;
-  }
-
-  let escolhido = escolherBico(vazaoTotal, comprimento, largura, altura);
-
-  if(!escolhido){
-    return;
-  }
-
-  preencherDropsBico(escolhido);
-
-  if(selecaoManual){
-    const listaBicos = window.BICOS_SUPABASE || bicos;
-
-    const modeloManual = document.getElementById("modeloBico").value;
-    const anguloManual = Number(document.getElementById("angulo").value);
-
-    const bicoManual = listaBicos.find(b =>
-      b.modelo === modeloManual &&
-      Number(b.angulo_graus || b.angulo) === anguloManual
-    );
-
-    if(bicoManual){
-      const angulo = Number(bicoManual.angulo_graus || bicoManual.angulo);
-      const k = Number(bicoManual.fator_k || bicoManual.k);
-      const diametro = bicoManual.diametro_descarga_mm || bicoManual.diametro || "";
-      const tipo = bicoManual.tipo || "Média Velocidade";
-
-      const aberturaCalculada =
-  altura * Math.tan((angulo / 2) * Math.PI / 180) * 2;
-
-const coberturaUtil =
-  aberturaCalculada * 0.90; // 10% de transpasse
-
-const espacamentoPlanejado =
-  Math.min(3.00, Math.max(1.2, coberturaUtil));
-
-
-      const qtdPlanejada =
-        Math.max(1, Math.ceil(comprimento / espacamentoPlanejado));
-
-      const vazaoPorBico =
-        vazaoTotal / qtdPlanejada;
-
-      const pressao =
-        Math.pow(vazaoPorBico / k, 2)* 10.197;
-
-      escolhido = {
-        modelo: bicoManual.modelo,
-        tipo,
-        angulo,
-        k,
-        diametro,
-        entrada: "",
-        espacamentoPlanejado,
-        qtdPlanejada,
-        vazaoPorBico,
-        pressao
-      };
+  if(comprimento <= 0 || largura <= 0 || altura <= 0 || densidade <= 0 || tempo <= 0){
+    limparResultadosCalculo();
+    if(mostrarErro){
+      alert("Informe Comprimento, Largura, Altura, Densidade e Tempo.");
     }
+    return null;
   }
 
-  let bicosProjetado = parseInt(document.getElementById("bicosProjetado").value);
+  const minhaSequencia = ++sequenciaCalculo;
 
-  if(!bicosProjetado || bicosProjetado < escolhido.qtdPlanejada){
-    bicosProjetado = escolhido.qtdPlanejada;
-    document.getElementById("bicosProjetado").value = bicosProjetado;
+  try{
+    const escolhido = await executarMotorDiluvio("dimensionar", {
+      comprimento,
+      largura,
+      altura,
+      densidade,
+      tempo,
+      bicos_projetados: n("bicosProjetado"),
+      selecao_manual: selecaoManual,
+      modelo: document.getElementById("modeloBico").value,
+      angulo: n("angulo")
+    });
+
+    if(minhaSequencia !== sequenciaCalculo) return null;
+
+    preencherDropsBico(escolhido);
+    window.STATUS_CALCULO = escolhido.status;
+
+    document.getElementById("area").value = fmt(escolhido.area_m2);
+    document.getElementById("vazaoTotal").value = fmt(escolhido.vazao_total_minima_lpm);
+    document.getElementById("tipoBico").value = escolhido.tipo || "Média Velocidade";
+    document.getElementById("fatorK").value = escolhido.fator_k;
+    document.getElementById("diametroDescarga").value = escolhido.diametro_descarga_mm;
+    document.getElementById("distPlanejada").value = fmt(escolhido.espacamento_planejado_m);
+    document.getElementById("bicosPlanejado").value = escolhido.bicos_planejados;
+    document.getElementById("bicosProjetado").value = escolhido.bicos_projetados;
+    document.getElementById("distReal").value = fmt(escolhido.espacamento_real_m);
+    document.getElementById("vazaoPlanejadaBico").value = fmt(escolhido.vazao_planejada_bico_lpm);
+    document.getElementById("pressaoPlanejada").value = fmt(escolhido.pressao_calculada_mca);
+    document.getElementById("pressaoAjustada").value = fmt(escolhido.pressao_ajustada_mca);
+    document.getElementById("vazaoRealBico").value = fmt(escolhido.vazao_real_bico_lpm);
+    document.getElementById("vazaoProjetadaTotal").value = fmt(escolhido.vazao_projetada_total_lpm);
+    document.getElementById("volumeReservatorio").value = fmt(escolhido.volume_reservatorio_m3);
+    document.getElementById("observacao").value = escolhido.observacao;
+
+    atualizarMemoria();
+    return escolhido;
+  }catch(error){
+    if(minhaSequencia === sequenciaCalculo){
+      document.getElementById("observacao").value = error.message;
+    }
+    console.error("Erro no motor de dilúvio:", error);
+    if(mostrarErro) alert(error.message);
+    return null;
   }
-
-  const distReal =
-    bicosProjetado > 0 ? comprimento / bicosProjetado : 0;
-
-  const vazaoRealBico =
-    bicosProjetado > 0 ? vazaoTotal / bicosProjetado : 0;
-
-  const pressaoCalculada =
-  Math.pow(vazaoRealBico / escolhido.k, 2)*10.197;
-
-const pressaoAjustada =
-  Math.max(10, pressaoCalculada);
-
-const pressaoParaVazao =
-  pressaoCalculada < 10 ? 10 : pressaoCalculada;
-
-const vazaoRealAjustada =
-  escolhido.k * Math.sqrt(pressaoParaVazao / 10.197);
-
-
-
-const volumeM3 =
-  (vazaoRealAjustada * bicosProjetado * tempo) / 1000;
-
-
-  const status =
-    classificarPressao(pressaoAjustada);
-
-  window.STATUS_CALCULO = status;
-
-  document.getElementById("area").value = fmt(area);
-  document.getElementById("vazaoTotal").value = fmt(vazaoTotal);
-  document.getElementById("tipoBico").value = escolhido.tipo || "Média Velocidade";
-  document.getElementById("fatorK").value = escolhido.k;
-  document.getElementById("diametroDescarga").value = escolhido.diametro;
-  document.getElementById("distPlanejada").value = fmt(escolhido.espacamentoPlanejado);
-  document.getElementById("bicosPlanejado").value = escolhido.qtdPlanejada;
-  document.getElementById("distReal").value = fmt(distReal);
-  document.getElementById("vazaoPlanejadaBico").value = fmt(escolhido.vazaoPorBico);
-  document.getElementById("pressaoPlanejada").value = fmt(pressaoCalculada);
-  document.getElementById("pressaoAjustada").value = fmt(pressaoAjustada);
-
-
-document.getElementById("vazaoRealBico").value = fmt(vazaoRealAjustada);
-
-document.getElementById("vazaoProjetadaTotal").value =
-  fmt(vazaoRealAjustada * bicosProjetado);
-
-
-  document.getElementById("volumeReservatorio").value = fmt(volumeM3);
-
-document.getElementById("observacao").value =
-  pressaoCalculada < 10
-    ? "Pressão calculada abaixo de 10 mca. Adotada pressão mínima de 10 mca para operação."
-    : pressaoCalculada > 15
-      ? "Pressão inicial no bico elevada, reavaliar o modelo."
-      : status === "Recomendado" ? "Pressão próxima do ideal." :
-        status === "Aceitável" ? "Pressão aceitável, verificar margem." :
-        status === "Revisar" ? "Pressão elevada, avaliar mais bicos." :
-        "Rever seleção e quantidade de bicos.";
-
-
-
-  atualizarMemoria();
 }
 
 
-function dadosAtuais(){
-  calcular();
+async function dadosAtuais(){
+  const resultado = await calcularAgora(true);
+  if(!resultado) return null;
 
   return {
-    referencia: document.getElementById("referencia").value,
-    local: document.getElementById("localProtegido").value,
-    chave: document.getElementById("chave").value,
+    referencia: document.getElementById("referencia").value.trim(),
+    local: document.getElementById("localProtegido").value.trim(),
+    chave: document.getElementById("chave").value.trim(),
 materialTubulacao:
   document.getElementById("materialTubulacao").value,
 
@@ -999,23 +917,18 @@ materialTubulacao:
 }
 
 
-function inserirLinha(){
-  const d = dadosAtuais();
+async function inserirLinha(){
+  const d = await dadosAtuais();
+  if(!d) return;
 
   const materialTubulacao =
   document.getElementById("materialTubulacao").value;
 
 
-if(
-  !d.referencia ||
-  !d.chave ||
-  !materialTubulacao ||
-  d.comprimento <= 0 ||
-  d.largura <= 0
-)
+if(!materialTubulacao || d.comprimento <= 0 || d.largura <= 0 || d.altura <= 0)
 {
   alert(
-    "Informe Referência, Trecho/Chave, Material da Tubulação, Comprimento e Largura."
+    "Informe Material da Tubulação, Comprimento, Largura e Altura."
   );
   return;
 }
@@ -1044,16 +957,16 @@ function desenharTabela(){
 
     tbody.innerHTML += `
       <tr>
-        <td>${l.referencia}</td>
-        <td>${l.local}</td>
-        <td>${l.chave}</td>
+        <td>${htmlSeguro(textoOpcional(l.referencia))}</td>
+        <td>${htmlSeguro(textoOpcional(l.local))}</td>
+        <td>${htmlSeguro(textoOpcional(l.chave))}</td>
         <td>${fmt(l.comprimento)}</td>
         <td>${fmt(l.largura)}</td>
         <td>${fmt(l.altura)}</td>
         <td>${fmt(l.densidade)}</td>
         <td>${l.area}</td>
         <td>${l.vazao}</td>
-        <td>${l.modelo}</td>
+        <td>${htmlSeguro(l.modelo)}</td>
         <td>${l.angulo}°</td>
         <td>${l.k}</td>
         <td>${l.bicos}</td>
@@ -1267,7 +1180,7 @@ function removerLinha(i){
   atualizarMemoria();
 }
 
-function editarLinha(i){
+async function editarLinha(i){
   const l = linhas[i];
 
   selecaoManual = true;
@@ -1286,13 +1199,14 @@ document.getElementById("materialTubulacao").value =
 
   document.getElementById("bicosProjetado").value = l.bicos;
 
-  calcular();
-
-  setTimeout(() => {
-    document.getElementById("modeloBico").value = l.modelo;
-    document.getElementById("angulo").value = String(l.angulo).replace("°", "");
-    calcular();
-  }, 50);
+  preencherDropsBico({
+    modelo: l.modelo,
+    angulo: String(l.angulo).replace("°", ""),
+    tipo: ""
+  }, true);
+  document.getElementById("modeloBico").value = l.modelo;
+  document.getElementById("angulo").value = String(l.angulo).replace("°", "");
+  await calcularAgora(true);
 
   linhas.splice(i, 1);
   desenharTabela();
@@ -1303,46 +1217,6 @@ document.getElementById("materialTubulacao").value =
     behavior: "smooth"
   });
 }
-
-function buscarTubo(material, dn){
-
-  if(!window.TUBOS_SUPABASE) return null;
-
-  const resultado = window.TUBOS_SUPABASE.find(t => {
-
-    return (
-      String(t.modo_exibicao || "").trim() === String(material).trim()
-      &&
-      Number(t.dn_mm) === Number(dn)
-    );
-
-  }) || null;
-
-  return resultado;
-}
-
-
-
-function calcularVelocidade(vazaoLpm, diMm){
-const qM3s = vazaoLpm / 1000 / 60;
-const diametroM = diMm / 1000; 
-  const areaM2 = Math.PI * Math.pow(diametroM, 2) / 4;
-
-  if(areaM2 <= 0) return 0;
-
-  return qM3s / areaM2;
-}
-
-function calcularPerdaMetro(vazaoLpm, diMm, c=120){
-const qM3s = vazaoLpm / 1000 / 60;
-const dM = diMm / 1000; 
-
-  if(qM3s <= 0 || dM <= 0 || c <= 0) return 0;
-
-  return 10.67 * Math.pow(qM3s, 1.852) /
-    (Math.pow(c, 1.852) * Math.pow(dM, 4.87));
-}
-
 
 function recalcularComprimentoTotal(input){
   const linha = input.closest("tr");
@@ -1378,183 +1252,71 @@ const material =
   recalcularTabelaHidraulica(tabela);
 }
 
-function recalcularTabelaHidraulica(tabela){
-  const k = valorNum(tabela.dataset.k);
-  let pressaoAtual = valorNum(tabela.dataset.pressaoInicial);
-  let vazaoAcumulada = 0;
+function referenciaTrecho(tr){
+  const input = tr.children[0]?.querySelector("input");
+  return (input?.value || tr.children[0]?.textContent || "").trim();
+}
 
+async function recalcularTabelaHidraulica(tabela){
   const linhasTabela = [...tabela.querySelectorAll("tbody tr")];
+  const infoPressao = tabela.parentElement.querySelector(".info-pressao-manometro");
+  const sequencia = Number(tabela.dataset.sequencia || 0) + 1;
+  tabela.dataset.sequencia = String(sequencia);
 
-const material = tabela.dataset.material; 
-
-  linhasTabela.forEach((tr, idx) => {
-    const temBico = tr.dataset.temBico === "sim";
-
-    const dn = valorNum(tr.querySelector(".dn-edit")?.value);
-    const compReal = valorNum(tr.querySelector(".comp-real-edit")?.value || tr.querySelector(".comp-real")?.textContent);
-    const compEq = valorNum(tr.querySelector(".comp-eq")?.value);
-    const elevacao = valorNum(tr.querySelector(".elevacao-edit")?.value);
-
-    const compTotal = compReal + compEq;
-
-    let vazaoBico = 0;
-
-    if(temBico){
-      vazaoBico = k * Math.sqrt(pressaoAtual / 10.197);
-      vazaoAcumulada += vazaoBico;
-    }
-
-const tubo =
-  buscarTubo(material, dn);
-
-
-const di =
-  tubo
-    ? Number(tubo.diametro_interno_mm)
-    : 0;
-
-const fatorC =
-  tubo
-    ? Number(tubo.fator_c)
-    : 120;
-
-tr.querySelector(".di-mm").textContent =
-  fmt(di);
-
-const velocidade =
-  calcularVelocidade(vazaoAcumulada, di);
-
-const perdaMetro =
-  calcularPerdaMetro(
-    vazaoAcumulada,
-    di,
-    fatorC
-  );
-
-
-
-    const perdaTotal = perdaMetro * compTotal;
-    const pressaoReq = pressaoAtual + perdaTotal + elevacao;
-
-    tr.querySelector(".pressao").textContent = fmt(pressaoAtual);
-    tr.querySelector(".vazao-bico").textContent = temBico ? fmt(vazaoBico) : "-";
-    tr.querySelector(".vazao-acum").textContent = fmt(vazaoAcumulada);
-    tr.querySelector(".comp-total").textContent = fmt(compTotal);
-    tr.querySelector(".perda-metro").textContent = fmt(perdaMetro,4);
-    tr.querySelector(".perda-total").textContent = fmt(perdaTotal,4);
-    tr.querySelector(".pressao-req").textContent = fmt(pressaoReq);
-    tr.querySelector(".velocidade").textContent = fmt(velocidade);
-
-    pressaoAtual = pressaoReq;
-  
-  });
-
-   const infoPressao =
-    tabela.parentElement.querySelector(".info-pressao-manometro");
-
-  if(infoPressao){
-
-    const linhaManometro = [...linhasTabela].find(tr => {
-      const ref = tr.children[0]?.textContent || "";
-      return ref.includes("Manômetro");
+  try{
+    const resultado = await executarMotorDiluvio("calcular_rede", {
+      fator_k: valorNum(tabela.dataset.k),
+      pressao_inicial: valorNum(tabela.dataset.pressaoInicial),
+      material: tabela.dataset.material,
+      linhas: linhasTabela.map(tr => ({
+        referencia: referenciaTrecho(tr),
+        tem_bico: tr.dataset.temBico === "sim",
+        dn_mm: valorNum(tr.querySelector(".dn-edit")?.value),
+        comprimento_real_m: valorNum(
+          tr.querySelector(".comp-real-edit")?.value ||
+          tr.querySelector(".comp-real")?.textContent
+        ),
+        comprimento_equivalente_m: valorNum(tr.querySelector(".comp-eq")?.value),
+        elevacao_m: valorNum(tr.querySelector(".elevacao-edit")?.value)
+      }))
     });
 
-    let pressaoManometro = pressaoAtual;
+    if(Number(tabela.dataset.sequencia) !== sequencia) return;
 
-    if(linhaManometro){
-      pressaoManometro = valorNum(
-        linhaManometro.querySelector(".pressao-req")?.textContent
-      );
+    resultado.linhas.forEach((linha, idx) => {
+      const tr = linhasTabela[idx];
+      if(!tr) return;
+      tr.querySelector(".di-mm").textContent = fmt(linha.diametro_interno_mm);
+      tr.querySelector(".pressao").textContent = fmt(linha.pressao_mca);
+      tr.querySelector(".vazao-bico").textContent =
+        linha.vazao_bico_lpm === null ? "-" : fmt(linha.vazao_bico_lpm);
+      tr.querySelector(".vazao-acum").textContent = fmt(linha.vazao_acumulada_lpm);
+      tr.querySelector(".comp-total").textContent = fmt(linha.comprimento_total_m);
+      tr.querySelector(".perda-metro").textContent = fmt(linha.perda_metro, 4);
+      tr.querySelector(".perda-total").textContent = fmt(linha.perda_total_mca, 4);
+      tr.querySelector(".pressao-req").textContent = fmt(linha.pressao_requerida_mca);
+      tr.querySelector(".velocidade").textContent = fmt(linha.velocidade_ms);
+    });
+
+    if(infoPressao){
+      const aviso = resultado.avisos?.length
+        ? ` · Atenção: ${resultado.avisos.join(" ")}`
+        : "";
+      infoPressao.textContent =
+        `Pressão de trabalho no manômetro: ${fmt(resultado.pressao_manometro_mca)} m.c.a. = ` +
+        `${fmt(resultado.pressao_manometro_kgf_cm2)} kgf/cm²${aviso}`;
     }
-
-    infoPressao.textContent =
-      `Pressão de trabalho no manômetro: ${fmt(pressaoManometro)} m.c.a. = ${fmt(pressaoManometro/10)} kgf/cm²`;
-
+  }catch(error){
+    console.error("Erro no cálculo hidráulico:", error);
+    if(infoPressao){
+      infoPressao.textContent = `Não foi possível recalcular: ${error.message}`;
+    }
   }
-
-}
- 
-
-
-function dnMinimoPorBicosAcumulados(qtd){
-  if(qtd <= 5) return 40;
-  if(qtd <= 10) return 50;
-  if(qtd <= 20) return 65;
-  if(qtd <= 40) return 80;
-  if(qtd <= 65) return 90;
-  if(qtd <= 100) return 100;
-  if(qtd <= 160) return 125;
-  if(qtd <= 275) return 150;
-  return 200;
-}
-
-function criarLinhaFinal(referencia,dn){
-
-  return `
-    <tr data-tem-bico="nao" class="linha-final-manometro"> 
-
-      <td>${referencia}</td>
-
-      <td class="pressao">0,00</td>
-
-      <td>-</td>
-
-      <td class="vazao-bico">-</td>
-
-      <td class="vazao-acum">0,00</td>
-
-      <td>
-        <input
-          class="hidraulica-edit dn-edit"
-          type="number"
-          value="${dn}"
-          oninput="alterarDN(this)">
-      </td>
-
-      <td class="di-mm">0,00</td>
-
-      <td>
-        <input
-          class="hidraulica-edit comp-real-edit"
-          type="text"
-          value="0,00"
-          oninput="recalcularTabelaHidraulica(this.closest('table'))">
-      </td>
-
-      <td>
-        <input
-class="hidraulica-edit comp-eq"
-type="text"
-value="0,00"
-readonly
-onclick="abrirModalCompEq(this)"> 
-      </td>
-
-      <td class="comp-total">0,00</td>
-
-      <td class="perda-metro">0,0000</td>
-
-      <td class="perda-total">0,0000</td>
-
-      <td>
-        <input
-          class="hidraulica-edit elevacao-edit"
-          type="text"
-          value="0,00"
-          oninput="recalcularTabelaHidraulica(this.closest('table'))">
-      </td>
-
-      <td class="pressao-req">0,00</td>
-
-      <td class="velocidade">0,00</td> 
-
-    </tr>
-  `;
 }
 
 
 
-function calculoHidraulicoChave(i){
+async function calculoHidraulicoChave(i){
   const l = linhas[i];
 
   const qtd = Number(l.bicos || 0);
@@ -1562,17 +1324,26 @@ function calculoHidraulicoChave(i){
   const pressaoInicial = valorNum(l.pressao);
   const espacamento = valorNum(l.espacamento);
 
-
   const calcId = `calc-chave-${i}-${Date.now()}`;
+
+  let redeInicial;
+  try{
+    redeInicial = await executarMotorDiluvio("preparar_rede", {
+      quantidade_bicos: qtd,
+      espacamento,
+      material: l.materialTubulacao
+    });
+  }catch(error){
+    alert(`Não foi possível montar a rede hidráulica: ${error.message}`);
+    return;
+  }
 
   let linhasTabela = "";
 
-  for(let n = 1; n <= qtd; n++){
-    const referenciaTrecho = n < qtd ? `B${n}-B${n+1}` : `B${n}-Manômetro`;
-
+  redeInicial.linhas.forEach(trecho => {
     linhasTabela += `
       <tr data-tem-bico="sim">
-        <td>${referenciaTrecho}</td>
+        <td>${htmlSeguro(trecho.referencia)}</td>
         <td class="pressao">0,00</td>
         <td>${fmt(k)}</td>
         <td class="vazao-bico">0,00</td>
@@ -1581,7 +1352,7 @@ function calculoHidraulicoChave(i){
 <td>
 <input class="hidraulica-edit dn-edit"
 type="number"
-value="${dnMinimoPorBicosAcumulados(n)}"
+value="${trecho.dn_mm}"
 oninput="alterarDN(this)">
 </td>
 
@@ -1591,7 +1362,7 @@ oninput="alterarDN(this)">
 <input class="hidraulica-edit comp-real-edit"
 
 
-type="text" value="${fmt(espacamento)}" oninput="recalcularTabelaHidraulica(this.closest('table'))">
+type="text" value="${fmt(trecho.comprimento_real_m)}" oninput="recalcularTabelaHidraulica(this.closest('table'))">
 </td>
 
         <td>
@@ -1611,19 +1382,9 @@ type="text" value="${fmt(espacamento)}" oninput="recalcularTabelaHidraulica(this
         <td class="velocidade">0,00</td>
       </tr>
     `;
-  }
+  });
 
-
-const tuboCabecalho =
-  buscarTubo(
-    l.materialTubulacao,
-    dnMinimoPorBicosAcumulados(1)
-  );
-
-const fatorCCabecalho =
-  tuboCabecalho
-    ? tuboCabecalho.fator_c
-    : "-";
+  const fatorCCabecalho = redeInicial.fator_c_cabecalho ?? "-";
 
 
   const html = `
@@ -1661,12 +1422,12 @@ margin-bottom:10px;
 
 
 
-<div class="hidraulica-title">${l.referencia} - ${l.chave}</div> 
+<div class="hidraulica-title">${htmlSeguro(textoOpcional(l.referencia))} · ${htmlSeguro(textoOpcional(l.chave))}</div> 
 
     <div class="hidraulica-subtitle">
-  Bico: ${l.modelo} · K: ${l.k} · Ângulo: ${l.angulo}° · Quantidade: ${l.bicos}
+  Bico: ${htmlSeguro(l.modelo)} · K: ${l.k} · Ângulo: ${l.angulo}° · Quantidade: ${l.bicos}
   <br>
-  Tubulação: ${l.materialTubulacao} · Hazen-Williams C = ${fatorCCabecalho}
+  Tubulação: ${htmlSeguro(l.materialTubulacao)} · Hazen-Williams C = ${fatorCCabecalho}
 </div>
 
 
@@ -1674,7 +1435,9 @@ margin-bottom:10px;
       <table
 data-k="${k}"
 data-pressao-inicial="${pressaoInicial}"
-data-material="${l.materialTubulacao}"> 
+data-material="${l.materialTubulacao}"
+data-dn-final="${redeInicial.dn_final_mm}"
+data-material-comp-eq="${redeInicial.material_comprimentos_equivalentes}"> 
         <thead>
           <tr>
             <th>Referência</th>
@@ -1748,7 +1511,7 @@ onclick="excluirUltimoTrechoAdicionado('${calcId}')">
   bloco.innerHTML = html;
 
   const tabela = bloco.querySelector("table");
-  recalcularTabelaHidraulica(tabela);
+  await recalcularTabelaHidraulica(tabela);
 }
 
   
@@ -1759,12 +1522,7 @@ function adicionarTrechoAposManometro(calcId){
   const tabela = bloco.querySelector("table");
   const tbody = tabela.querySelector("tbody");
 
-  const material = tabela.dataset.material;
-
-  const linhas = [...tbody.querySelectorAll("tr")];
-  const qtdBicos = linhas.filter(tr => tr.dataset.temBico === "sim").length;
-
-  const dn = dnMinimoPorBicosAcumulados(qtdBicos);
+  const dn = valorNum(tabela.dataset.dnFinal);
 
   const novaLinha = document.createElement("tr");
   novaLinha.dataset.temBico = "nao";
@@ -1873,8 +1631,8 @@ function atualizarMemoria(){
   let txt = "MEMÓRIA DE CÁLCULO - SISTEMA DE DILÚVIO EM TRANSPORTADORES\\n\\n";
 
   linhas.forEach((l, i) => {
-    txt += `${i+1}. ${l.chave}\\n`;
-    txt += `Local protegido: ${l.local}\\n`;
+    txt += `${i+1}. ${textoOpcional(l.chave)}\\n`;
+    txt += `Local protegido: ${textoOpcional(l.local)}\\n`;
     txt += `Área protegida: ${l.area} m²\\n`;
     txt += `Vazão mínima: ${l.vazao} L/min\\n`;
     txt += `Bico selecionado: ${l.modelo} / Ângulo ${l.angulo}° / K ${l.k}\\n`;
@@ -1913,59 +1671,23 @@ function limpar(){
 
 
 
-const SUPABASE_URL = "https://bjtxbpmrmhfvpmdsthxr.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdHhicG1ybWhmdnBtZHN0aHhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzIyNTgsImV4cCI6MjA5NzU0ODI1OH0.zHZvSLzt6sWCrrKMW_zQXdqj8KCPF8OjTcsyza07dPI";
+async function carregarReferenciasDiluvio(){
+  try{
+    const resultado = await executarMotorDiluvio("carregar_referencias");
+    window.BICOS_DILUVIO = resultado.bicos || [];
+    window.COMP_EQ_DILUVIO = resultado.comprimentos_equivalentes || [];
 
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+    if(window.BICOS_DILUVIO.length === 0){
+      throw new Error("Nenhum bico ativo foi encontrado.");
+    }
 
-async function carregarBicosSupabase(){
-
-const { data, error } = await supabaseClient
-.from("sar_diluvio_bicos")
-.select("*")
-.eq("ativo", true)
-.eq("ativo_calculo", true);
-
-if(error){
-console.error("Erro Supabase:", error);
-alert("Erro ao carregar bicos do Supabase.");
-return;
-}
-
-window.BICOS_SUPABASE = data;
-} 
-
-async function carregarTubosSupabase(){
-
-  const { data, error } = await supabaseClient
-    .from("vw_tubos_ativos")
-    .select("*");
-
-  if(error){
-    console.error(error);
-    return;
+    preencherDropsBico(window.BICOS_DILUVIO[0]);
+    await calcularAgora(false);
+  }catch(error){
+    console.error("Erro ao carregar referências de dilúvio:", error);
+    document.getElementById("observacao").value = error.message;
+    alert(`Não foi possível carregar o módulo de dilúvio: ${error.message}`);
   }
-
-  window.TUBOS_SUPABASE = data;
-
-}
-
-async function carregarComprimentosEquivalentesSupabase(){
-
-  const { data, error } = await supabaseClient
-    .from("vw_hidraulica_comprimentos_equivalentes")
-    .select("*");
-
-  if(error){
-    console.error("Erro ao carregar comprimentos equivalentes:", error);
-    return;
-  }
-
-  window.COMP_EQ_SUPABASE = data || [];
-
 }
 
 let inputCompEqAtivo = null;
@@ -1973,17 +1695,6 @@ let inputCompEqAtivo = null;
 function fecharModalCompEq(){
   document.getElementById("modalCompEq").style.display = "none";
   inputCompEqAtivo = null;
-}
-
-function materialBancoCompEq(materialTela){
-
-  const mat = String(materialTela || "").toLowerCase();
-
-  if(mat.includes("pvc") || mat.includes("pead")){
-    return "PVC / PEAD";
-  }
-
-  return "Aço";
 }
 
 function recalcularModalCompEq(){
@@ -2019,8 +1730,7 @@ function abrirModalCompEq(input){
   const linha = input.closest("tr");
   const tabela = input.closest("table");
 
-  const materialTela = tabela.dataset.material || "-";
-  const materialBanco = materialBancoCompEq(materialTela);
+  const materialBanco = tabela.dataset.materialCompEq || "Aço";
 
   const dn = Number(linha.querySelector(".dn-edit")?.value || 0);
   const trecho = linha.children[0]?.textContent?.trim() || "-";
@@ -2029,7 +1739,7 @@ function abrirModalCompEq(input){
   document.getElementById("modalDN").textContent = dn;
   document.getElementById("modalTrecho").textContent = trecho;
 
-  const lista = (window.COMP_EQ_SUPABASE || [])
+  const lista = (window.COMP_EQ_DILUVIO || [])
     .filter(item =>
       item.material === materialBanco &&
       Number(item.dn_mm) === Number(dn)
@@ -2057,7 +1767,7 @@ function abrirModalCompEq(input){
 
     tbody.innerHTML += `
       <tr>
-        <td>${item.conexao}</td>
+        <td>${htmlSeguro(item.conexao)}</td>
 
         <td>
           <input
@@ -2206,9 +1916,7 @@ function exportarPDFChave(id){
 }
 
   
-carregarBicosSupabase();
-carregarTubosSupabase();
-carregarComprimentosEquivalentesSupabase(); 
+carregarReferenciasDiluvio();
 
   
 </script>
@@ -2314,5 +2022,3 @@ carregarComprimentosEquivalentesSupabase();
   
 </body>
 </html>
-
-
