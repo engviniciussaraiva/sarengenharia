@@ -4,55 +4,82 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR">
-  <title>GAME ClassificaTOR | Fase 3</title>
+  <title>GAME ClassificaTOR | Fase 3 — Ocupação</title>
   <script src="/js/sar.page-guard.js"></script>
   <link rel="stylesheet" href="/game-classificator/assets/classificator-shell.css">
   <style>
-    .area-info{display:flex;align-items:center;gap:10px;margin:0 0 18px;width:100%;max-width:none;padding:12px 15px;border:1px solid #cfe9dc;border-radius:10px;background:#effaf4;color:#315858;font-size:13px;line-height:1.35}.area-info strong{display:flex;align-items:center;justify-content:center;width:25px;height:25px;border:2px solid #2a9d68;border-radius:50%;color:#2a9d68;font-size:15px;flex:0 0 auto}
-    .cards{display:grid;grid-template-columns:repeat(3,minmax(280px,1fr));gap:20px;align-items:stretch}
-    .option-card{width:100%;padding:0;overflow:hidden;border:1px solid #dce4e1;border-radius:14px;background:#fff;text-align:center;cursor:pointer;transition:.18s;box-shadow:0 2px 8px rgba(31,65,57,.03)}
-    .option-card:hover{transform:translateY(-4px);box-shadow:0 9px 24px rgba(49,88,88,.13)}.option-card:focus-visible{outline:3px solid rgba(124,179,66,.35);outline-offset:3px}.option-card:disabled{opacity:.58;cursor:wait;transform:none}
-    .option-card.green{border-color:#8bc9a4;background:linear-gradient(#f7fffa,#effaf4)}.option-card.blue{border-color:#91b8eb;background:linear-gradient(#fbfdff,#eff6ff)}.option-card.purple{border-color:#bea3d5;background:linear-gradient(#fffaff,#f7f0fb)}
-    .card-image{height:250px;overflow:hidden;border-bottom:1px solid rgba(80,110,100,.12);background:#f4f7f5}.card-image img{width:100%;height:100%;object-fit:cover;display:block;user-select:none;pointer-events:none;transition:.22s}.option-card:hover .card-image img{transform:scale(1.02)}
-    .card-body{min-height:125px;padding:18px 16px;display:flex;align-items:center;justify-content:center}.card-title{margin:0;font-size:20px;line-height:1.2;font-weight:800;color:#244b48}.green .card-title strong{color:#21764e}.blue .card-title strong{color:#1c61a9}.purple .card-title strong{color:#713b91}
-    @media(max-width:980px){.cards{grid-template-columns:1fr}.option-card{max-width:720px;margin:0 auto}.card-image{height:300px}.area-info{margin-left:0}}
+    .occupation-grid{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:14px}
+    .occupation-card{padding:17px 16px;border:1px solid #d8e3df;border-radius:11px;background:#fff;color:#315858;text-align:left;cursor:pointer;transition:.18s;min-height:92px}
+    .occupation-card:hover{transform:translateY(-2px);border-color:#9ebdb0;box-shadow:0 7px 18px rgba(49,88,88,.09)}
+    .occupation-card.selected{border-color:#2a9d68;background:#effaf4;box-shadow:0 0 0 3px rgba(42,157,104,.10)}
+    .occupation-code{display:block;margin-bottom:5px;color:#2a9d68;font-size:13px;font-weight:900;letter-spacing:.08em}
+    .occupation-name{display:block;font-size:15px;font-weight:800;line-height:1.2}
+    .subsoil-panel{display:none;margin-top:22px;padding:18px;border:1px solid #dce5e1;border-radius:12px;background:#f9fbfa}
+    .subsoil-panel.show{display:block}
+    .subsoil-title{margin:0 0 6px;color:#315858;font-size:18px;font-weight:800}
+    .subsoil-help{margin:0 0 14px;color:#6e7d7d;font-size:13px}
+    .subsoil-options{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:12px}
+    .subsoil-option{padding:14px;border:1px solid #d8e3df;border-radius:10px;background:#fff;color:#315858;text-align:left;cursor:pointer;font-weight:700;line-height:1.25}
+    .subsoil-option.selected{border-color:#2a9d68;background:#effaf4;box-shadow:0 0 0 3px rgba(42,157,104,.10)}
+    .subsoil-area{display:none;margin-top:14px;align-items:center;gap:10px}.subsoil-area.show{display:flex}
+    .subsoil-area label{font-weight:800;color:#315858}.subsoil-area input{width:160px;padding:10px 12px;border:1px solid #b9cbc4;border-radius:8px;text-align:right;font-weight:800;color:#173e3a}
+    .phase-note{margin:0 0 18px;padding:12px 15px;border:1px solid #cfe0ef;border-radius:10px;background:#f1f7ff;color:#2a4d6f;font-size:13px;line-height:1.4}
+    .form-actions{display:flex;justify-content:flex-end;margin-top:20px}.primary-btn{min-width:155px;padding:12px 20px;border:0;border-radius:9px;background:#315858;color:#fff;font-weight:800;cursor:pointer}.primary-btn:disabled{opacity:.5;cursor:not-allowed}
+    .validation{min-height:20px;margin-top:10px;color:#a14545;font-size:12px;text-align:right}
+    @media(max-width:1100px){.occupation-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:820px){.occupation-grid,.subsoil-options{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:560px){.occupation-grid,.subsoil-options{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <div data-classificator-header data-phase="3" data-phase-label="3"></div>
+  <div data-classificator-header data-stage="FASE_03"></div>
 
   <main class="page-shell">
     <header class="page-head">
       <div>
-        <p class="page-eyebrow">Fase 3</p>
-        <h1 class="page-title">Qual a área total construída da edificação?</h1>
-        <p class="page-subtitle">Selecione a faixa correspondente à área total construída considerada para a classificação.</p>
+        <p class="page-eyebrow">Fase 3 — Ocupação</p>
+        <h1 class="page-title">Qual é a ocupação da edificação?</h1>
+        <p class="page-subtitle">Selecione o grupo correspondente à ocupação predominante da edificação.</p>
       </div>
-      <div class="page-actions">
-        <button class="ghost-btn" id="btnInicio" type="button">Início</button>
-        <button class="ghost-btn" id="btnVoltar" type="button">Voltar fase anterior</button>
-      </div>
+      <div class="page-actions"><button class="ghost-btn" id="btnInicio" type="button">Início</button></div>
     </header>
 
     <section class="workspace">
-      <div class="area-info"><strong>i</strong><span>Considere a <b>área total construída</b> da edificação. As exclusões normativas aplicáveis serão tratadas pelo motor nas etapas correspondentes.</span></div>
+      <div class="phase-note">A ocupação será utilizada pelo motor para avaliar o tipo de projeto, a certificação e os critérios específicos das próximas etapas.</div>
 
-      <div class="cards">
-        <button class="option-card green" type="button" data-opcao="AREA_ATE_750">
-          <div class="card-image"><img src="/game-classificator/assets/area-ate-750.png" alt="Representação de área total construída até 750 metros quadrados" draggable="false"></div>
-          <div class="card-body"><h2 class="card-title">Área total construída<br><strong>até 750,00 m²</strong></h2></div>
-        </button>
-
-        <button class="option-card blue" type="button" data-opcao="AREA_750_1500">
-          <div class="card-image"><img src="/game-classificator/assets/area-750-1500.png" alt="Representação de área total construída entre 750,01 e 1500 metros quadrados" draggable="false"></div>
-          <div class="card-body"><h2 class="card-title">Área total construída<br><strong>entre 750,01 m² e 1.500,00 m²</strong></h2></div>
-        </button>
-
-        <button class="option-card purple" type="button" data-opcao="AREA_ACIMA_1500">
-          <div class="card-image"><img src="/game-classificator/assets/area-acima-1500.png" alt="Representação de área total construída acima de 1500 metros quadrados" draggable="false"></div>
-          <div class="card-body"><h2 class="card-title">Área total construída<br><strong>acima de 1.500,00 m²</strong></h2></div>
-        </button>
+      <div class="occupation-grid" id="occupationGrid">
+        <button class="occupation-card" data-opcao="OCUP_A" type="button"><span class="occupation-code">GRUPO A</span><span class="occupation-name">Residencial</span></button>
+        <button class="occupation-card" data-opcao="OCUP_B" type="button"><span class="occupation-code">GRUPO B</span><span class="occupation-name">Serviço de hospedagem</span></button>
+        <button class="occupation-card" data-opcao="OCUP_C" type="button"><span class="occupation-code">GRUPO C</span><span class="occupation-name">Comercial</span></button>
+        <button class="occupation-card" data-opcao="OCUP_D" type="button"><span class="occupation-code">GRUPO D</span><span class="occupation-name">Serviço profissional</span></button>
+        <button class="occupation-card" data-opcao="OCUP_E" type="button"><span class="occupation-code">GRUPO E</span><span class="occupation-name">Educacional e cultura física</span></button>
+        <button class="occupation-card" data-opcao="OCUP_F" type="button"><span class="occupation-code">GRUPO F</span><span class="occupation-name">Local de reunião de público</span></button>
+        <button class="occupation-card" data-opcao="OCUP_G" type="button"><span class="occupation-code">GRUPO G</span><span class="occupation-name">Serviços automotivos</span></button>
+        <button class="occupation-card" data-opcao="OCUP_H" type="button"><span class="occupation-code">GRUPO H</span><span class="occupation-name">Serviço de saúde e institucional</span></button>
+        <button class="occupation-card" data-opcao="OCUP_I" type="button"><span class="occupation-code">GRUPO I</span><span class="occupation-name">Indústria</span></button>
+        <button class="occupation-card" data-opcao="OCUP_J" type="button"><span class="occupation-code">GRUPO J</span><span class="occupation-name">Depósito</span></button>
+        <button class="occupation-card" data-opcao="OCUP_K" type="button"><span class="occupation-code">GRUPO K</span><span class="occupation-name">Energia</span></button>
+        <button class="occupation-card" data-opcao="OCUP_L" type="button"><span class="occupation-code">GRUPO L</span><span class="occupation-name">Explosivos</span></button>
+        <button class="occupation-card" data-opcao="OCUP_M" type="button"><span class="occupation-code">GRUPO M</span><span class="occupation-name">Especial</span></button>
       </div>
+
+      <div class="subsoil-panel" id="subsoilPanel">
+        <h2 class="subsoil-title">Ocupação do subsolo</h2>
+        <p class="subsoil-help">Na Fase 2 você informou que a edificação possui subsolo. Defina abaixo o uso do subsolo para o motor determinar como ele será considerado nas etapas seguintes.</p>
+        <div class="subsoil-options">
+          <button class="subsoil-option" type="button" data-subsolo="ESTACIONAMENTO">Exclusivamente estacionamento</button>
+          <button class="subsoil-option" type="button" data-subsolo="GRUPO_F">Local de reunião de público — Grupo F</button>
+          <button class="subsoil-option" type="button" data-subsolo="OUTRA_OCUPACAO">Outra ocupação</button>
+        </div>
+        <div class="subsoil-area" id="subsoilAreaWrap">
+          <label for="areaSubsolo">Área ocupada no subsolo</label>
+          <input id="areaSubsolo" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00">
+          <span>m²</span>
+        </div>
+      </div>
+
+      <div class="validation" id="validation" aria-live="polite"></div>
+      <div class="form-actions"><button class="primary-btn" id="btnContinuar" type="button" disabled>Continuar</button></div>
       <div class="status" id="statusFase" aria-live="polite"></div>
     </section>
   </main>
@@ -61,24 +88,71 @@
   <script>
     (()=>{
       "use strict";
-      const cards=[...document.querySelectorAll(".option-card[data-opcao]")],status=document.getElementById("statusFase");
+      const cards=[...document.querySelectorAll(".occupation-card")];
+      const subOptions=[...document.querySelectorAll(".subsoil-option")];
+      const panel=document.getElementById("subsoilPanel");
+      const areaWrap=document.getElementById("subsoilAreaWrap");
+      const areaInput=document.getElementById("areaSubsolo");
+      const btn=document.getElementById("btnContinuar");
+      const validation=document.getElementById("validation");
+      const status=document.getElementById("statusFase");
+      let opcao=null, usoSubsolo=null, possuiSubsolo=null;
+
       document.getElementById("btnInicio")?.addEventListener("click",()=>window.location.assign("/game-classificator/fase-01/"));
-      document.getElementById("btnVoltar")?.addEventListener("click",()=>{if(history.length>1)history.back();else window.location.assign("/game-classificator/fase-02/")});
-      const travar=v=>cards.forEach(c=>c.disabled=v);
-      async function escrever(texto){status.textContent="";status.classList.add("escrevendo");for(let i=0;i<texto.length;i++){status.textContent+=texto.charAt(i);await new Promise(r=>setTimeout(r,18));}status.classList.remove("escrevendo")}
-      async function responder(card){
-        const opcao=String(card.dataset.opcao||"").trim();if(!opcao)return;travar(true);status.textContent="Analisando área total construída...";
-        try{
-          const response=await fetch("/api/game/classificator/responder",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json",Accept:"application/json","X-Requested-With":"SAR-ClassificaTOR"},body:JSON.stringify({fase:"fase-03",opcao})});
-          const data=await response.json().catch(()=>null);
-          if(!response.ok||!data?.ok)throw new Error(response.status===401?"Sua sessão expirou. Volte à Fase 1.":"Não foi possível registrar a área.");
-          if(data.classificacao)window.SARClassificatorUI?.updateClassification(data.classificacao);
-          await escrever(data.mensagem||"Área registrada. A classificação provisória foi atualizada.");
-          if(data.next){await new Promise(r=>setTimeout(r,350));window.location.assign(data.next);return;}
-          travar(false);
-        }catch(err){console.error(err);status.classList.remove("escrevendo");status.textContent=err.message||"Não foi possível continuar. Tente novamente.";travar(false)}
+
+      function numeroPtBr(valor){
+        const s=String(valor||"").trim().replace(/\s/g,"").replace(/\./g,"").replace(",",".");
+        const n=Number(s);return Number.isFinite(n)?n:null;
       }
-      cards.forEach(c=>c.addEventListener("click",()=>responder(c)));
+      function atualizarBotao(){
+        const ocupacaoOk=Boolean(opcao);
+        const subsoloOk=possuiSubsolo===false || (possuiSubsolo===true && usoSubsolo);
+        const areaOk=usoSubsolo!=="OUTRA_OCUPACAO" || (numeroPtBr(areaInput.value)!==null && numeroPtBr(areaInput.value)>=0);
+        btn.disabled=!(ocupacaoOk&&subsoloOk&&areaOk);
+      }
+
+      cards.forEach(card=>card.addEventListener("click",()=>{
+        cards.forEach(c=>c.classList.remove("selected"));card.classList.add("selected");opcao=card.dataset.opcao;validation.textContent="";atualizarBotao();
+      }));
+      subOptions.forEach(item=>item.addEventListener("click",()=>{
+        subOptions.forEach(c=>c.classList.remove("selected"));item.classList.add("selected");usoSubsolo=item.dataset.subsolo;
+        areaWrap.classList.toggle("show",usoSubsolo==="OUTRA_OCUPACAO");validation.textContent="";atualizarBotao();
+      }));
+      areaInput.addEventListener("input",()=>{areaInput.value=areaInput.value.replace(/[^0-9,.]/g,"");validation.textContent="";atualizarBotao();});
+
+      async function carregarContexto(){
+        const data=await window.SARClassificatorUI?.refreshState?.();
+        if(!data?.ok){validation.textContent="Não foi possível carregar os dados da tipologia.";return;}
+        possuiSubsolo=data.contexto_ui?.possui_subsolo===true;
+        panel.classList.toggle("show",possuiSubsolo);
+        atualizarBotao();
+      }
+
+      async function escrever(texto){status.textContent="";status.classList.add("escrevendo");for(let i=0;i<texto.length;i++){status.textContent+=texto.charAt(i);await new Promise(r=>setTimeout(r,16));}status.classList.remove("escrevendo")}
+
+      btn.addEventListener("click",async()=>{
+        const dados={};
+        if(possuiSubsolo){
+          dados.uso_subsolo=usoSubsolo;
+          if(usoSubsolo==="OUTRA_OCUPACAO"){
+            const area=numeroPtBr(areaInput.value);
+            if(area===null||area<0){validation.textContent="Informe a área ocupada no subsolo.";areaInput.focus();return;}
+            dados.area_subsolo_m2=area;
+          }
+        }
+        btn.disabled=true;status.textContent="Analisando ocupação...";
+        try{
+          const response=await fetch("/api/game/classificator/responder",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json",Accept:"application/json","X-Requested-With":"SAR-ClassificaTOR"},body:JSON.stringify({fase:"fase-03",opcao,dados})});
+          const data=await response.json().catch(()=>null);
+          if(!response.ok||!data?.ok)throw new Error(response.status===401?"Sua sessão expirou. Volte à Fase 1.":"Não foi possível registrar a ocupação.");
+          if(data.classificacao)window.SARClassificatorUI?.updateClassification(data.classificacao);
+          await escrever(data.mensagem||"Ocupação registrada. A classificação provisória foi atualizada.");
+          if(data.next){await new Promise(r=>setTimeout(r,260));window.location.assign(data.next);return;}
+          atualizarBotao();
+        }catch(err){console.error(err);status.classList.remove("escrevendo");status.textContent=err.message||"Não foi possível continuar.";atualizarBotao();}
+      });
+
+      carregarContexto();
     })();
   </script>
 </body>

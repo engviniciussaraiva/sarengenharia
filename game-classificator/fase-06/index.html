@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR">
+  <title>GAME ClassificaTOR | Fase 6 — Demais Critérios</title>
+  <script src="/js/sar.page-guard.js"></script>
+  <link rel="stylesheet" href="/game-classificator/assets/classificator-shell.css">
+  <style>
+    .criteria-grid{display:grid;grid-template-columns:repeat(3,minmax(240px,1fr));gap:14px}
+    .criteria-card{padding:18px;border:1px solid #dce5e1;border-radius:12px;background:#f9fbfa;min-height:112px}
+    .criteria-card h2{margin:0 0 7px;color:#315858;font-size:16px}.criteria-card p{margin:0;color:#6e7d7d;font-size:13px;line-height:1.4}
+    .criteria-note{margin-bottom:18px;padding:13px 15px;border:1px solid #d6e3ef;border-radius:10px;background:#f2f7fc;color:#31536f;font-size:13px;line-height:1.45}
+    @media(max-width:900px){.criteria-grid{grid-template-columns:1fr 1fr}}@media(max-width:580px){.criteria-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div data-classificator-header data-stage="FASE_06"></div>
+  <main class="page-shell">
+    <header class="page-head">
+      <div>
+        <p class="page-eyebrow">Fase 6 — Demais Critérios</p>
+        <h1 class="page-title">Critérios técnicos adicionais e riscos específicos</h1>
+        <p class="page-subtitle">Nesta fase o motor verificará as condições complementares que podem alterar o tipo de projeto ou a certificação.</p>
+      </div>
+      <div class="page-actions"><button class="ghost-btn" id="btnInicio" type="button">Início</button></div>
+    </header>
+    <section class="workspace">
+      <div class="criteria-note">A estrutura desta fase já está preparada para receber as perguntas do banco normativo. As respostas serão apresentadas uma a uma pela tela central, conforme o caminho aplicável à edificação.</div>
+      <div class="criteria-grid">
+        <div class="criteria-card"><h2>Restrições específicas da ocupação</h2><p>Lotação, divisões de ocupação e demais condições particulares.</p></div>
+        <div class="criteria-card"><h2>GLP e gases inflamáveis</h2><p>Armazenamento, consumo, revenda e limites aplicáveis.</p></div>
+        <div class="criteria-card"><h2>Líquidos igníferos</h2><p>Armazenamento, processo e limites correspondentes.</p></div>
+        <div class="criteria-card"><h2>Produtos perigosos</h2><p>Condições que impedem ou restringem os enquadramentos simplificados.</p></div>
+        <div class="criteria-card"><h2>Materiais combustíveis</h2><p>Armazenamentos descobertos e demais situações específicas.</p></div>
+        <div class="criteria-card"><h2>Sistemas e condições especiais</h2><p>Critérios adicionais que direcionam o processo para PT quando aplicáveis.</p></div>
+      </div>
+    </section>
+  </main>
+  <script src="/game-classificator/assets/classificator-shell.js"></script>
+  <script>document.getElementById("btnInicio")?.addEventListener("click",()=>window.location.assign("/game-classificator/fase-01/"));</script>
+</body>
+</html>

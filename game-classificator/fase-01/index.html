@@ -20,18 +20,17 @@
   </style>
 </head>
 <body>
-  <div data-classificator-header data-phase="1" data-phase-label="1"></div>
+  <div data-classificator-header data-stage="FASE_01"></div>
 
   <main class="page-shell">
     <header class="page-head">
       <div>
-        <p class="page-eyebrow">Fase 1</p>
-        <h1 class="page-title">Selecione a Configuração do Lote</h1>
+        <p class="page-eyebrow">Fase 1 — Implantação</p>
+        <h1 class="page-title">Selecione a configuração da implantação</h1>
         <p class="page-subtitle">Quantas edificações possui no lote?</p>
       </div>
       <div class="page-actions">
         <button class="ghost-btn" id="btnInicio" type="button">Início</button>
-        <button class="ghost-btn" id="btnVoltar" type="button">Voltar fase anterior</button>
       </div>
     </header>
 
@@ -63,30 +62,32 @@
   <script>
     (() => {
       "use strict";
-      const btnInicio=document.getElementById("btnInicio");
-      const btnVoltar=document.getElementById("btnVoltar");
       const card=document.getElementById("cardUmaEdificacao");
       const status=document.getElementById("statusFase");
-
-      btnInicio?.addEventListener("click",()=>window.location.assign("/game-classificator/fase-01/"));
-      btnVoltar?.addEventListener("click",()=>window.location.assign("/game-classificator/estado/"));
+      document.getElementById("btnInicio")?.addEventListener("click",()=>window.location.assign("/game-classificator/fase-01/"));
 
       async function escrever(texto){
         status.textContent="";status.classList.add("escrevendo");
-        for(let i=0;i<texto.length;i++){status.textContent+=texto.charAt(i);await new Promise(r=>setTimeout(r,22));}
+        for(let i=0;i<texto.length;i++){status.textContent+=texto.charAt(i);await new Promise(r=>setTimeout(r,18));}
         status.classList.remove("escrevendo");
       }
 
       card?.addEventListener("click",async()=>{
-        if(card.disabled)return; card.disabled=true; status.textContent="";
+        if(card.disabled)return;
+        card.disabled=true;status.textContent="Registrando implantação...";
         try{
-          const response=await fetch("/api/game/classificator/mensagem?codigo=FASE_01_UMA_EDIFICACAO",{method:"GET",credentials:"same-origin",headers:{Accept:"application/json"}});
-          if(!response.ok)throw new Error("Não foi possível carregar a mensagem.");
-          const data=await response.json();
-          if(!data?.ok||!data.texto)throw new Error("Mensagem inválida.");
-          await escrever(data.texto); await new Promise(r=>setTimeout(r,350));
-          window.location.assign("/game-classificator/fase-02/");
-        }catch(err){console.error(err);status.textContent="Não foi possível continuar. Tente novamente.";card.disabled=false;}
+          const response=await fetch("/api/game/classificator/responder",{
+            method:"POST",credentials:"same-origin",
+            headers:{"Content-Type":"application/json",Accept:"application/json","X-Requested-With":"SAR-ClassificaTOR"},
+            body:JSON.stringify({fase:"fase-01",opcao:"LOTE_UMA_EDIFICACAO"})
+          });
+          const data=await response.json().catch(()=>null);
+          if(!response.ok||!data?.ok)throw new Error(response.status===401?"Sua sessão expirou. Reinicie o ClassificaTOR.":"Não foi possível registrar a implantação.");
+          if(data.classificacao)window.SARClassificatorUI?.updateClassification(data.classificacao);
+          await escrever(data.mensagem||"Implantação registrada.");
+          if(data.next){await new Promise(r=>setTimeout(r,260));window.location.assign(data.next);return;}
+          card.disabled=false;
+        }catch(err){console.error(err);status.classList.remove("escrevendo");status.textContent=err.message||"Não foi possível continuar.";card.disabled=false;}
       });
     })();
   </script>

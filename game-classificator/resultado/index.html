@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR">
+  <title>GAME ClassificaTOR | Resultado</title>
+  <script src="/js/sar.page-guard.js"></script>
+  <link rel="stylesheet" href="/game-classificator/assets/classificator-shell.css">
+  <style>
+    .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.result-panel{padding:20px;border:1px solid #dce5e1;border-radius:12px;background:#fff;min-height:150px}.result-panel h2{margin:0 0 12px;color:#315858;font-size:17px}.result-big{font-size:28px;font-weight:900;color:#214c47}.result-muted{color:#6e7d7d;font-size:13px;line-height:1.45}.result-panel.wide{grid-column:1/-1}@media(max-width:760px){.result-grid{grid-template-columns:1fr}.result-panel.wide{grid-column:auto}}
+  </style>
+</head>
+<body>
+  <div data-classificator-header data-stage="RESULTADO"></div>
+  <main class="page-shell">
+    <header class="page-head"><div><p class="page-eyebrow">Resultado</p><h1 class="page-title">Resultado final da classificação</h1><p class="page-subtitle">Consolidação do processo, certificação, medidas de segurança e validade.</p></div><div class="page-actions"><button class="ghost-btn" id="btnInicio" type="button">Início</button></div></header>
+    <section class="workspace">
+      <div class="result-grid">
+        <div class="result-panel"><h2>Tipo do Projeto</h2><div class="result-big" id="resultadoProcesso">Em análise</div></div>
+        <div class="result-panel"><h2>Certificação</h2><div class="result-big" id="resultadoCertificacao">Em análise</div></div>
+        <div class="result-panel wide"><h2>Medidas de segurança</h2><p class="result-muted">Para os enquadramentos aplicáveis, especialmente CLCB e AVCB até 750,00 m², o ClassificaTOR apresentará aqui as medidas de segurança correspondentes ao caso.</p></div>
+        <div class="result-panel wide"><h2>Validade</h2><p class="result-muted">A validade do AVCB/CLCB será apresentada conforme a regra aplicável à ocupação e ao enquadramento final.</p></div>
+      </div>
+    </section>
+  </main>
+  <script src="/game-classificator/assets/classificator-shell.js"></script>
+  <script>
+    document.getElementById("btnInicio")?.addEventListener("click",()=>window.location.assign("/game-classificator/fase-01/"));
+    window.addEventListener("sar:classificator-state",e=>{
+      const c=e.detail?.classificacao;
+      document.getElementById("resultadoProcesso").textContent=c?.processo?.codigo||"Em análise";
+      document.getElementById("resultadoCertificacao").textContent=c?.certificacao?.codigo||"Em análise";
+    });
+  </script>
+</body>
+</html>

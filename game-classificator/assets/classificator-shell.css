@@ -14,33 +14,73 @@
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;font-family:"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--bg)}
 body{padding:0 0 20px}
-button,input{font:inherit}
+button,input,select{font:inherit}
 
 .classificator-topbar{
+  position:sticky;
+  top:0;
+  z-index:1000;
   background:linear-gradient(135deg,var(--sar-darker),var(--sar-dark) 62%,#16584d);
   color:#fff;
-  box-shadow:0 4px 16px rgba(8,55,47,.16);
+  box-shadow:0 4px 16px rgba(8,55,47,.18);
 }
 .classificator-topbar-inner{
-  max-width:1500px;
+  max-width:1580px;
   margin:0 auto;
-  min-height:108px;
-  padding:16px 22px;
+  min-height:112px;
+  padding:14px 22px;
   display:grid;
-  grid-template-columns:minmax(250px,.95fr) minmax(430px,1.35fr) minmax(300px,.95fr);
-  gap:28px;
+  grid-template-columns:minmax(280px,.95fr) minmax(520px,1.55fr) minmax(300px,.9fr);
+  gap:26px;
   align-items:center;
 }
 .classificator-brand-title{font-size:31px;font-weight:800;line-height:1;margin:0;letter-spacing:-.03em}
 .classificator-brand-title span{color:#48d79a}
-.classificator-brand-sub{margin:7px 0 0;font-size:14px;color:#d7ebe5}
-.classificator-progress-label{margin:0 0 8px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:center;color:#eff9f6}
-.classificator-progress{display:grid;grid-template-columns:repeat(10,1fr);align-items:center;gap:0;position:relative;padding:0 8px}
-.classificator-progress::before{content:"";position:absolute;left:5%;right:5%;top:50%;height:3px;background:rgba(255,255,255,.26);transform:translateY(-50%);border-radius:999px}
-.classificator-step{position:relative;z-index:1;width:30px;height:30px;margin:0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#6e8983;color:#fff;font-size:13px;font-weight:800;border:2px solid transparent;transition:.2s}
+.classificator-brand-sub{margin:8px 0 0;font-size:13px;line-height:1.32;color:#d7ebe5}
+.classificator-brand-sub span{display:block}
+
+.classificator-progress-label{margin:0 0 7px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:center;color:#eff9f6}
+.classificator-progress{
+  display:grid;
+  grid-template-columns:repeat(6,1fr) minmax(86px,1.25fr);
+  align-items:center;
+  gap:0;
+  position:relative;
+  padding:0 6px;
+}
+.classificator-progress::before{
+  content:"";
+  position:absolute;
+  left:5%;right:9%;top:50%;height:3px;
+  background:rgba(255,255,255,.24);
+  transform:translateY(-50%);
+  border-radius:999px;
+}
+.classificator-step{
+  appearance:none;
+  position:relative;
+  z-index:1;
+  width:31px;height:31px;
+  margin:0 auto;
+  padding:0;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:#6e8983;color:#fff;
+  font-size:13px;font-weight:800;
+  border:2px solid transparent;
+  transition:.18s;
+}
+button.classificator-step{cursor:pointer}
+button.classificator-step:hover{transform:translateY(-1px);box-shadow:0 0 0 4px rgba(255,255,255,.09)}
 .classificator-step.done{background:#20b779}
 .classificator-step.current{background:#fff;color:#18745b;border-color:#33d094;box-shadow:0 0 0 4px rgba(51,208,148,.18)}
-.classificator-current-caption{margin-top:8px;text-align:center;font-size:12px;color:#d8ebe6}
+.classificator-step.locked{cursor:not-allowed;opacity:.72}
+.classificator-step.na{background:#566f69;color:#d6e2df;border-style:dashed;cursor:not-allowed}
+.classificator-step.result{
+  width:auto;min-width:78px;height:29px;padding:0 10px;border-radius:999px;font-size:10px;letter-spacing:.05em;
+}
+.classificator-current-caption{margin-top:7px;text-align:center;font-size:11px;color:#d8ebe6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
 .classificator-result{justify-self:end;min-width:295px}
 .classificator-result-title{margin:0 0 8px;font-size:14px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:#f3fbf8}
 .classificator-result-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -62,13 +102,21 @@ button,input{font:inherit}
 .status.escrevendo::after{content:"";display:inline-block;width:1px;height:1em;margin-left:3px;vertical-align:-2px;background:currentColor;opacity:.75;animation:piscar .7s steps(1) infinite}
 @keyframes piscar{0%,49%{opacity:.75}50%,100%{opacity:0}}
 
-@media(max-width:1050px){
-  .classificator-topbar-inner{grid-template-columns:1fr 1fr;gap:14px}.classificator-progress-wrap{grid-column:1/-1;grid-row:2}.classificator-result{min-width:0;width:100%}
+@media(max-width:1120px){
+  .classificator-topbar-inner{grid-template-columns:1fr 1fr;gap:14px}
+  .classificator-progress-wrap{grid-column:1/-1;grid-row:2}
+  .classificator-result{min-width:0;width:100%}
 }
 @media(max-width:720px){
-  .classificator-topbar-inner{grid-template-columns:1fr;padding:15px}.classificator-result{justify-self:stretch}.classificator-progress-wrap{grid-column:auto;grid-row:auto}.classificator-brand-title{font-size:27px}.classificator-step{width:25px;height:25px;font-size:11px}.page-shell{padding:0 10px}.page-head{display:block}.page-actions{margin-top:14px}.workspace{padding:14px}.page-title{font-size:22px}
+  .classificator-topbar-inner{grid-template-columns:1fr;padding:14px 15px}
+  .classificator-result{justify-self:stretch}
+  .classificator-progress-wrap{grid-column:auto;grid-row:auto}
+  .classificator-brand-title{font-size:27px}
+  .classificator-step{width:26px;height:26px;font-size:11px}
+  .classificator-step.result{min-width:62px;font-size:9px}
+  .page-shell{padding:0 10px}
+  .page-head{display:block}
+  .page-actions{margin-top:14px}
+  .workspace{padding:14px}
+  .page-title{font-size:22px}
 }
-
-/* Etapas auxiliares como 2A podem ser exibidas entre fases principais. */
-.classificator-progress.has-aux{grid-template-columns:repeat(11,1fr)}
-.classificator-step.aux{font-size:11px}

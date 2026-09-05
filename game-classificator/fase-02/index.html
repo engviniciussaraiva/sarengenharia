@@ -18,18 +18,17 @@
   </style>
 </head>
 <body>
-  <div data-classificator-header data-phase="2" data-phase-label="2"></div>
+  <div data-classificator-header data-stage="FASE_02"></div>
 
   <main class="page-shell">
     <header class="page-head">
       <div>
-        <p class="page-eyebrow">Fase 2</p>
-        <h1 class="page-title">Selecione a Configuração da Edificação</h1>
+        <p class="page-eyebrow">Fase 2 — Tipologia da Edificação</p>
+        <h1 class="page-title">Selecione a tipologia da edificação</h1>
         <p class="page-subtitle">Quantidade total de pavimentos da edificação, considerando o térreo.</p>
       </div>
       <div class="page-actions">
         <button class="ghost-btn" id="btnInicio" type="button">Início</button>
-        <button class="ghost-btn" id="btnVoltar" type="button">Voltar fase anterior</button>
       </div>
     </header>
 
@@ -53,11 +52,10 @@
   <script>
     (()=>{
       "use strict";
-      const btnInicio=document.getElementById("btnInicio"),btnVoltar=document.getElementById("btnVoltar"),status=document.getElementById("statusFase");
+      const btnInicio=document.getElementById("btnInicio"),status=document.getElementById("statusFase");
       const cards=[...document.querySelectorAll(".option-card[data-opcao]")];
       const travar=v=>cards.forEach(c=>c.disabled=v);
       btnInicio?.addEventListener("click",()=>window.location.assign("/game-classificator/fase-01/"));
-      btnVoltar?.addEventListener("click",()=>window.location.assign("/game-classificator/fase-01/"));
       async function escrever(texto){status.textContent="";status.classList.add("escrevendo");for(let i=0;i<texto.length;i++){status.textContent+=texto.charAt(i);await new Promise(r=>setTimeout(r,20));}status.classList.remove("escrevendo")}
       async function responder(card){
         const opcao=String(card.dataset.opcao||"").trim();if(!opcao)return;travar(true);status.textContent="Analisando configuração...";

@@ -762,35 +762,27 @@ function validarSequencia(etapaAtual, etapas, estado) {
   const mapa = mapaEtapas(etapas);
   const atual = mapa.get(etapaAtual);
 
-  if (!atual || !atual.classifica) {
+  if (!atual || !atual.ativo) {
     throw criarErro("ETAPA_NAO_PERMITIDA");
   }
 
-  const primeiraClassificatoria = etapas
-    .filter(item => item.classifica)
-    .sort((a, b) => Number(a.ordem) - Number(b.ordem))[0];
-
   const proximaEsperada = estado?.motor?.proxima_etapa || null;
 
+  // Compatibilidade com sessões iniciadas antes do motor registrar a Fase 1.
+  // Sem próxima etapa registrada, somente Implantação ou Tipologia podem iniciar o fluxo.
   if (!proximaEsperada) {
-    if (
-      !primeiraClassificatoria ||
-      etapaAtual !== primeiraClassificatoria.etapa_codigo
-    ) {
+    if (!["FASE_01", "FASE_02"].includes(etapaAtual)) {
       throw criarErro("SEQUENCIA_INVALIDA");
     }
-
     return;
   }
 
   const esperada = mapa.get(proximaEsperada);
 
-  if (!esperada) {
-    return;
-  }
+  if (!esperada) return;
 
-  // Permite voltar e corrigir etapa anterior.
-  // Não permite pular etapa para frente.
+  // Permite voltar a qualquer fase anterior já percorrida para corrigir respostas.
+  // Não permite pular para uma fase posterior ainda não liberada pelo motor.
   if (Number(atual.ordem) > Number(esperada.ordem)) {
     throw criarErro("SEQUENCIA_INVALIDA");
   }
@@ -954,6 +946,74 @@ function resumoPublicoClassificacao(classificacao) {
 
 
 /* ============================================================
+ * NAVEGAÇÃO PÚBLICA DO CABEÇALHO
+ * Expõe apenas fases, rotas e estado de navegação. Não expõe regras.
+ * ============================================================ */
+
+function montarNavegacaoPublica(sessao, etapas) {
+  const principais = etapas
+    .filter(item => /^FASE_0[1-6]$/.test(item.etapa_codigo) || item.etapa_codigo === "RESULTADO")
+    .sort((a, b) => Number(a.ordem) - Number(b.ordem));
+
+  const mapa = mapaEtapas(etapas);
+  const respostasPorEtapa = sessao.estado?.respostas_por_etapa || {};
+  const respondidas = new Set(Object.keys(respostasPorEtapa));
+
+  let ordemMax = 1;
+  const candidatos = [
+    sessao.fase_atual,
+    sessao.estado?.motor?.proxima_etapa,
+    ...Object.keys(respostasPorEtapa)
+  ].filter(Boolean);
+
+  for (const codigo of candidatos) {
+    const etapa = mapa.get(codigo);
+    if (etapa) ordemMax = Math.max(ordemMax, Number(etapa.ordem));
+  }
+
+  return principais.map(etapa => {
+    const ordem = Number(etapa.ordem);
+    const respondida = respondidas.has(etapa.etapa_codigo);
+    const pulada = ordem < ordemMax && !respondida && etapa.etapa_codigo !== "FASE_01";
+    const liberada = Boolean(
+      etapa.publicado &&
+      (
+        respondida ||
+        etapa.etapa_codigo === "FASE_01" ||
+        ordem <= ordemMax
+      ) &&
+      !pulada
+    );
+
+    return {
+      codigo: etapa.etapa_codigo,
+      ordem,
+      titulo: etapa.titulo,
+      rota: etapa.rota,
+      publicado: Boolean(etapa.publicado),
+      respondida,
+      nao_aplicavel: pulada,
+      liberada
+    };
+  });
+}
+
+function contextoPublicoUI(sessao) {
+  const respostas = sessao.estado?.respostas || {};
+  const temSubsolo = Object.prototype.hasOwnProperty.call(respostas, "possui_subsolo");
+  const temPavimentos = respostas.pavimentos_total !== null && respostas.pavimentos_total !== undefined && respostas.pavimentos_total !== "";
+
+  return {
+    possui_subsolo: temSubsolo ? Boolean(respostas.possui_subsolo) : null,
+    pavimentos_total: temPavimentos && Number.isFinite(Number(respostas.pavimentos_total))
+      ? Number(respostas.pavimentos_total)
+      : null,
+    faixa_pavimentos: respostas.faixa_pavimentos || null,
+    uso_subsolo: respostas.uso_subsolo || null
+  };
+}
+
+/* ============================================================
  * HANDLER
  * ============================================================ */
 
@@ -975,10 +1035,13 @@ export default async function handler(req, res) {
     const sessao = await obterSessao(token.nonce);
 
     if (req.method === "GET") {
+      const etapas = await obterEtapasAtivas();
       return res.status(200).json({
         ok: true,
         fase_atual: sessao.fase_atual || null,
-        classificacao: resumoPublicoClassificacao(sessao.classificacao)
+        classificacao: resumoPublicoClassificacao(sessao.classificacao),
+        navegacao: montarNavegacaoPublica(sessao, etapas),
+        contexto_ui: contextoPublicoUI(sessao)
       });
     }
 
@@ -1003,7 +1066,7 @@ export default async function handler(req, res) {
     const etapaMap = mapaEtapas(etapas);
     const etapa = etapaMap.get(etapaCodigo);
 
-    if (!etapa || !etapa.classifica) {
+    if (!etapa || !etapa.ativo) {
       return res.status(400).json({
         ok: false,
         erro: "ETAPA_NAO_PERMITIDA"
@@ -1081,17 +1144,26 @@ export default async function handler(req, res) {
       etapas
     );
 
-    const [prioridades, regras, fluxos] = await Promise.all([
-      obterPrioridades(uf),
-      obterRegras(uf),
-      obterFluxos(uf, etapaCodigo)
-    ]);
+    const fluxos = await obterFluxos(uf, etapaCodigo);
 
-    const classificacao = recalcularClassificacao(
-      respostas,
-      prioridades,
-      regras
-    );
+    let classificacao = sessao.classificacao || {
+      status: "NAO_INICIADA",
+      processo: null,
+      certificacao: null
+    };
+
+    if (etapa.classifica) {
+      const [prioridades, regras] = await Promise.all([
+        obterPrioridades(uf),
+        obterRegras(uf)
+      ]);
+
+      classificacao = recalcularClassificacao(
+        respostas,
+        prioridades,
+        regras
+      );
+    }
 
     const fluxo = resolverFluxo(
       fluxos,
