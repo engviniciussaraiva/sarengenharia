@@ -597,17 +597,8 @@ tr:nth-child(even){
 <div class="field">
   <label>Material da Tubulação</label>
 
-  <select id="materialTubulacao" class="obrigatorio">
-    <option value="">Selecione...</option>
-
-    <option>Aço Carbono Sch 10</option>
-    <option>Aço Carbono Sch 30</option>
-    <option>Aço Carbono Sch 40</option>
-    <option>Aço Carbono Sch 80</option>
-
-    <option>Galvanizado Leve</option>
-    <option>Galvanizado Médio</option>
-    <option>Galvanizado Pesado</option>
+  <select id="materialTubulacao" class="obrigatorio" disabled>
+    <option value="">Carregando materiais cadastrados...</option>
   </select>
 </div>
 
@@ -749,6 +740,30 @@ function htmlSeguro(v){
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function preencherMateriaisTubulacao(){
+  const select = document.getElementById("materialTubulacao");
+  const catalogo = window.TUBOS_DILUVIO || [];
+  const valorAnterior = select.value;
+  const materiais = catalogo
+    .map(item => String(item.material || "").trim())
+    .filter(Boolean);
+
+  select.replaceChildren(
+    new Option("Selecione...", ""),
+    ...materiais.map(material => new Option(material, material))
+  );
+  select.disabled = materiais.length === 0;
+  if(materiais.includes(valorAnterior)) select.value = valorAnterior;
+}
+
+function opcoesDiametroNominal(diametros, selecionado){
+  return (diametros || []).map(dn => {
+    const valor = Number(dn);
+    const ativo = Math.abs(valor - Number(selecionado)) < 1e-9 ? " selected" : "";
+    return `<option value="${valor}"${ativo}>DN ${valor.toLocaleString("pt-BR")}</option>`;
+  }).join("");
 }
 
 function preencherDropsBico(escolhido, forcarEscolha = false){
@@ -1350,10 +1365,9 @@ async function calculoHidraulicoChave(i){
         <td class="vazao-acum">0,00</td>
         
 <td>
-<input class="hidraulica-edit dn-edit"
-type="number"
-value="${trecho.dn_mm}"
-oninput="alterarDN(this)">
+<select class="hidraulica-edit dn-edit" onchange="alterarDN(this)">
+  ${opcoesDiametroNominal(redeInicial.diametros_disponiveis_mm, trecho.dn_mm)}
+</select>
 </td>
 
 <td class="di-mm">0,00</td>
@@ -1437,6 +1451,7 @@ data-k="${k}"
 data-pressao-inicial="${pressaoInicial}"
 data-material="${l.materialTubulacao}"
 data-dn-final="${redeInicial.dn_final_mm}"
+data-dns-disponiveis="${redeInicial.diametros_disponiveis_mm.join(',')}"
 data-material-comp-eq="${redeInicial.material_comprimentos_equivalentes}"> 
         <thead>
           <tr>
@@ -1523,6 +1538,10 @@ function adicionarTrechoAposManometro(calcId){
   const tbody = tabela.querySelector("tbody");
 
   const dn = valorNum(tabela.dataset.dnFinal);
+  const diametrosDisponiveis = String(tabela.dataset.dnsDisponiveis || "")
+    .split(",")
+    .map(Number)
+    .filter(valor => Number.isFinite(valor) && valor > 0);
 
   const novaLinha = document.createElement("tr");
   novaLinha.dataset.temBico = "nao";
@@ -1555,11 +1574,9 @@ style="width:110px;"
     <td class="vazao-acum">0,00</td>
 
     <td>
-      <input
-        class="hidraulica-edit dn-edit"
-        type="number"
-        value="${dn}"
-        oninput="alterarDN(this)">
+      <select class="hidraulica-edit dn-edit" onchange="alterarDN(this)">
+        ${opcoesDiametroNominal(diametrosDisponiveis, dn)}
+      </select>
     </td>
 
     <td class="di-mm">0,00</td>
@@ -1676,11 +1693,16 @@ async function carregarReferenciasDiluvio(){
     const resultado = await executarMotorDiluvio("carregar_referencias");
     window.BICOS_DILUVIO = resultado.bicos || [];
     window.COMP_EQ_DILUVIO = resultado.comprimentos_equivalentes || [];
+    window.TUBOS_DILUVIO = resultado.tubulacoes || [];
 
     if(window.BICOS_DILUVIO.length === 0){
       throw new Error("Nenhum bico ativo foi encontrado.");
     }
+    if(window.TUBOS_DILUVIO.length === 0){
+      throw new Error("Nenhuma tubulação ativa foi encontrada.");
+    }
 
+    preencherMateriaisTubulacao();
     preencherDropsBico(window.BICOS_DILUVIO[0]);
     await calcularAgora(false);
   }catch(error){
