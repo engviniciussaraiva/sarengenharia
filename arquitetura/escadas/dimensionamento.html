@@ -3,13 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta
-    name="sar-recurso-codigo"
-    content="ARQUITETURA_ESCADAS"
->
+<meta name="sar-recurso-codigo" content="ARQUITETURA_ESCADAS">
 
 <script src="/js/sar.page-guard.js"></script>
-  
+<script src="/js/sar.api.js"></script>
+
 <title>Dimensionamento de Escadas</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -22,6 +20,7 @@
   --muted:#6f7b80;
   --ok:#237a3b;
   --erro:#b33a3a;
+  --alerta:#9b6500;
 }
 body{
   font-family:Segoe UI,Arial,sans-serif;
@@ -68,17 +67,19 @@ body{
   min-width:64px;height:44px;border:1px solid #bfc9ce;border-radius:0 8px 8px 0;
   background:#eef2f2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;
 }
-.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
 button{
   border:none;border-radius:8px;padding:11px 18px;font-weight:700;cursor:pointer;font-size:14px;
 }
+button:disabled{cursor:wait;opacity:.62}
 .btn-primary{background:var(--verde);color:#fff}
-.btn-primary:hover{filter:brightness(.95)}
+.btn-primary:hover:not(:disabled){filter:brightness(.95)}
 .btn-secondary{background:#e9eeee;color:#294c4f}
 .status{margin-top:14px;padding:11px 13px;border-radius:8px;font-size:13px;display:none}
 .status.ok{display:block;background:#edf8ef;color:var(--ok);border:1px solid #b9dfc1}
 .status.erro{display:block;background:#fff0f0;color:var(--erro);border:1px solid #efc2c2}
+.status.alerta{display:block;background:#fff8e8;color:var(--alerta);border:1px solid #ead39d}
 .resultados{display:none;margin-top:22px}
 .resultados.show{display:block}
 .section-title{font-size:18px;color:#193f43;margin:0 0 12px}
@@ -90,23 +91,52 @@ tr:last-child td{border-bottom:none}
 th{background:#f0f4f4;color:#234b4e;font-size:13px}
 th:first-child,td:first-child{text-align:left;font-weight:700;min-width:240px}
 .col-ambas{background:#f5faef}
-.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:700;font-size:12px}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:700;font-size:12px;margin-top:4px}
 .badge.ok{background:#e6f5e9;color:#236d36}
 .badge.no{background:#fdeaea;color:#a83232}
-.cards-alternativas{
-  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px;
+.adoption-panel{
+  margin-top:18px;
+  padding:17px;
+  border:1px solid #bfd4ca;
+  border-left:5px solid var(--verde);
+  border-radius:10px;
+  background:#f7fbf9;
 }
-.alt-card{background:#fff;border:1px solid var(--borda);border-radius:10px;padding:14px}
-.alt-card h3{font-size:15px;color:#244f52;margin-bottom:9px}
-.alt-list{display:flex;flex-direction:column;gap:7px}
-.alt-item{font-size:12px;padding:8px;border-radius:7px;background:#f6f8f9;border:1px solid #e5eaed}
-.alt-item.recomendada{background:#eef8e8;border-color:#cde4bc}
-.note{margin-top:14px;font-size:12px;color:var(--muted);line-height:1.45}
+.adoption-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px}
+.adoption-title{font-size:16px;color:#193f43;margin-bottom:5px}
+.adoption-copy{font-size:12px;color:var(--muted);line-height:1.45}
+.adoption-controls{display:flex;align-items:flex-end;gap:9px;min-width:370px}
+.adoption-field{flex:1}
+.adoption-field label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}
+.adoption-field .input-wrap input{background:#fff}
+.validation-grid,.criteria-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin-top:14px;
+}
+.validation-card,.criterion-card{
+  border:1px solid var(--borda);
+  border-radius:9px;
+  background:#fff;
+  padding:12px;
+}
+.validation-card.is-both,.criterion-card.is-both{background:#f5faef;border-color:#cfe0c1}
+.validation-card h3,.criterion-card h3{font-size:13px;color:#244f52;margin-bottom:7px}
+.validation-card p{font-size:12px;line-height:1.45;color:var(--muted);margin-top:6px}
+.criterion-card .formula{font-size:16px;font-weight:800;color:#193f43;margin:7px 0 9px}
+.criterion-card p{font-size:12px;line-height:1.5;color:#4f5e63}
+.criterion-card strong{color:#273f42}
+.technical-section{margin-top:22px}
+.note{margin-top:14px;font-size:12px;color:var(--muted);line-height:1.5}
+@media(max-width:850px){
+  .adoption-head{align-items:stretch;flex-direction:column}
+  .adoption-controls{min-width:0;align-items:stretch;flex-direction:column}
+}
 @media(max-width:780px){
   body{padding:10px}
   .content,.header{padding:16px}
-  .form-grid{grid-template-columns:1fr}
-  .cards-alternativas{grid-template-columns:1fr}
+  .form-grid,.validation-grid,.criteria-grid{grid-template-columns:1fr}
   .header h1{font-size:20px}
 }
 </style>
@@ -144,7 +174,7 @@ th:first-child,td:first-child{text-align:left;font-weight:700;min-width:240px}
       </div>
 
       <div class="actions">
-        <button class="btn-primary" type="button" onclick="calcularEscada()">Calcular</button>
+        <button id="btnCalcular" class="btn-primary" type="button" onclick="calcularEscada()">Calcular</button>
         <button class="btn-secondary" type="button" onclick="limparCalculadora()">Limpar</button>
       </div>
 
@@ -166,11 +196,34 @@ th:first-child,td:first-child{text-align:left;font-weight:700;min-width:240px}
           </table>
         </div>
 
-        <h2 class="section-title" style="margin-top:22px">Outras combinações válidas</h2>
-        <div id="alternativas" class="cards-alternativas"></div>
+        <section class="adoption-panel" aria-labelledby="tituloPisoAdotado">
+          <div class="adoption-head">
+            <div>
+              <h2 id="tituloPisoAdotado" class="adoption-title">Piso adotado pelo projetista</h2>
+              <p class="adoption-copy">O sistema preenche inicialmente a sugestão que atende às duas normas. Altere o valor para validar a dimensão desejada para o projeto.</p>
+            </div>
+            <div class="adoption-controls">
+              <div class="adoption-field">
+                <label for="pisoAdotado">Largura adotada</label>
+                <div class="input-wrap">
+                  <input id="pisoAdotado" inputmode="decimal" placeholder="Ex.: 29,00">
+                  <div class="unit">cm</div>
+                </div>
+              </div>
+              <button id="btnValidar" class="btn-primary" type="button" onclick="validarPisoAdotado()">Validar e recalcular</button>
+              <button class="btn-secondary" type="button" onclick="usarPisoSugerido()">Usar sugerido</button>
+            </div>
+          </div>
+          <div id="validacoesPiso" class="validation-grid"></div>
+        </section>
+
+        <section class="technical-section" aria-labelledby="tituloCriterios">
+          <h2 id="tituloCriterios" class="section-title">Critérios normativos utilizados</h2>
+          <div id="criteriosNormativos" class="criteria-grid"></div>
+        </section>
 
         <div class="note">
-          Nesta primeira versão, o comprimento horizontal corresponde à solução em lance reto. A etapa seguinte incluirá mudança de direção, distribuição por lances e dimensionamento detalhado dos patamares.
+          <strong>Legenda:</strong> h = altura do espelho; p = largura do piso. A quantidade de patamares apresentada considera o limite de desnível entre patamares. O comprimento horizontal corresponde à solução em lance reto.
         </div>
       </div>
     </div>
@@ -178,47 +231,9 @@ th:first-child,td:first-child{text-align:left;font-weight:700;min-width:240px}
 </div>
 
 <script>
-const URL_ESCADAS_REGRAS =
-'https://docs.google.com/spreadsheets/d/e/2PACX-1vSojnsR2aB3mY3SeACwRbFyrUwXLVrnX7rKiZzli8cVtx0auRZmGQPcSSwBxIHe3iLw22193zZGgmGQ/pub?output=csv';
-
-let regrasEscadas = [];
-let regrasCarregadas = false;
-
-function parseCSV(texto){
-  const linhas = [];
-  let linha = [];
-  let campo = '';
-  let dentroAspas = false;
-
-  for(let i = 0; i < texto.length; i++){
-    const c = texto[i];
-    const prox = texto[i + 1];
-
-    if(c === '"'){
-      if(dentroAspas && prox === '"'){
-        campo += '"';
-        i++;
-      }else{
-        dentroAspas = !dentroAspas;
-      }
-    }else if(c === ',' && !dentroAspas){
-      linha.push(campo);
-      campo = '';
-    }else if((c === '\n' || c === '\r') && !dentroAspas){
-      if(c === '\r' && prox === '\n') i++;
-      linha.push(campo);
-      if(linha.some(v => String(v).trim() !== '')) linhas.push(linha);
-      linha = [];
-      campo = '';
-    }else{
-      campo += c;
-    }
-  }
-
-  linha.push(campo);
-  if(linha.some(v => String(v).trim() !== '')) linhas.push(linha);
-  return linhas;
-}
+const ESCADAS_API_PATH = '/api/arquitetura/escadas';
+let ultimoCalculoBase = null;
+let ultimoResultado = null;
 
 function numeroBR(valor){
   const texto = String(valor ?? '').trim();
@@ -229,135 +244,30 @@ function numeroBR(valor){
 function fmt(valor, casas = 2){
   if(!Number.isFinite(valor)) return '—';
   return valor.toLocaleString('pt-BR', {
-    minimumFractionDigits: casas,
-    maximumFractionDigits: casas
+    minimumFractionDigits:casas,
+    maximumFractionDigits:casas
   });
 }
 
-function normalizar(texto){
-  return String(texto || '').trim().toUpperCase();
+function fmtEntrada(valor){
+  return Number.isFinite(valor) ? valor.toFixed(2).replace('.',',') : '';
 }
 
-async function carregarRegrasEscadas(){
-  try{
-    const resposta = await fetch(URL_ESCADAS_REGRAS, {cache:'no-store'});
-    if(!resposta.ok) throw new Error('Falha ao acessar o banco de regras.');
-
-    const texto = await resposta.text();
-    const dados = parseCSV(texto);
-    if(dados.length < 2) throw new Error('Banco de regras vazio.');
-
-    const cab = dados[0].map(normalizar);
-    const idx = nome => cab.indexOf(nome);
-
-    regrasEscadas = dados.slice(1).map(col => ({
-      norma: normalizar(col[idx('NORMA')]),
-      grupo: normalizar(col[idx('GRUPO')]),
-      regra: normalizar(col[idx('REGRA')]),
-      valorMin: numeroBR(col[idx('VALOR_MIN')]),
-      valorMax: numeroBR(col[idx('VALOR_MAX')]),
-      unidade: String(col[idx('UNIDADE')] || '').trim(),
-      condicao: normalizar(col[idx('CONDICAO')]),
-      texto: String(col[idx('TEXTO')] || '').trim(),
-      ordem: Number(col[idx('ORDEM')] || 0),
-      status: normalizar(col[idx('STATUS')])
-    })).filter(r => r.status === 'ATIVO');
-
-    regrasCarregadas = true;
-    mostrarStatus('Regras carregadas com sucesso.', 'ok');
-    setTimeout(() => {
-      const s = document.getElementById('status');
-      if(s.classList.contains('ok')) s.className = 'status';
-    }, 1600);
-  }catch(erro){
-    regrasCarregadas = false;
-    mostrarStatus('Não foi possível carregar o banco SAR_ESCADAS_REGRAS. ' + erro.message, 'erro');
-    console.error(erro);
+async function executarMotorEscadas(dados){
+  if(!window.SARAPI){
+    throw new Error('Conector seguro do SAR não carregado.');
   }
-}
-
-function obterRegra(norma, regra){
-  return regrasEscadas.find(r =>
-    r.norma === normalizar(norma) &&
-    r.regra === normalizar(regra)
-  );
-}
-
-function montarConfiguracao(norma){
-  const espelho = obterRegra(norma, 'ALTURA_ESPELHO');
-  const blondel = obterRegra(norma, 'BLONDEL');
-  const piso = obterRegra(norma, 'LARGURA_PISO');
-  const desnivel = obterRegra(norma, 'DESNIVEL_MAX_LANCE');
-
-  if(!espelho || !blondel || !desnivel){
-    throw new Error('Faltam regras obrigatórias para ' + norma + '.');
+  const retorno = await window.SARAPI.post(ESCADAS_API_PATH, {
+    operacao:'dimensionar',
+    dados
+  });
+  if(retorno?.sucesso !== true || !retorno?.resultado){
+    throw new Error(retorno?.mensagem || 'Resposta inválida do motor SAR.');
   }
-
-  return {
-    norma,
-    espelhoMin: espelho.valorMin,
-    espelhoMax: espelho.valorMax,
-    blondelMin: blondel.valorMin,
-    blondelMax: blondel.valorMax,
-    pisoMin: piso && Number.isFinite(piso.valorMin) ? piso.valorMin : -Infinity,
-    pisoMax: piso && Number.isFinite(piso.valorMax) ? piso.valorMax : Infinity,
-    desnivelMaxLance: desnivel.valorMax
-  };
+  return retorno;
 }
 
-function montarConfiguracaoAmbas(cb, nbr){
-  return {
-    norma:'AMBAS',
-    espelhoMin: Math.max(cb.espelhoMin, nbr.espelhoMin),
-    espelhoMax: Math.min(cb.espelhoMax, nbr.espelhoMax),
-    blondelMin: Math.max(cb.blondelMin, nbr.blondelMin),
-    blondelMax: Math.min(cb.blondelMax, nbr.blondelMax),
-    pisoMin: Math.max(cb.pisoMin, nbr.pisoMin),
-    pisoMax: Math.min(cb.pisoMax, nbr.pisoMax),
-    desnivelMaxLance: Math.min(cb.desnivelMaxLance, nbr.desnivelMaxLance)
-  };
-}
-
-function calcularSolucoes(desnivelMetros, cfg){
-  const H = desnivelMetros * 100;
-  const eMin = Math.ceil(H / cfg.espelhoMax - 1e-9);
-  const eMax = Math.floor(H / cfg.espelhoMin + 1e-9);
-  const solucoes = [];
-
-  for(let E = eMin; E <= eMax; E++){
-    const h = H / E;
-    if(h < cfg.espelhoMin - 1e-9 || h > cfg.espelhoMax + 1e-9) continue;
-
-    const pisoMin = Math.max(cfg.pisoMin, cfg.blondelMin - 2 * h);
-    const pisoMax = Math.min(cfg.pisoMax, cfg.blondelMax - 2 * h);
-    if(pisoMin > pisoMax + 1e-9) continue;
-
-    const pisoSugerido = (pisoMin + pisoMax) / 2;
-    const blondel = 2 * h + pisoSugerido;
-    const pisos = E - 1;
-    const comprimentoReto = pisos * pisoSugerido / 100;
-    const inclinacao = Math.atan(h / pisoSugerido) * 180 / Math.PI;
-    const lances = Math.ceil(desnivelMetros / cfg.desnivelMaxLance - 1e-9);
-    const patamaresIntermediarios = Math.max(0, lances - 1);
-
-    const alvoEspelho = (cfg.espelhoMin + cfg.espelhoMax) / 2;
-    const alvoPiso = Number.isFinite(cfg.pisoMin) && Number.isFinite(cfg.pisoMax)
-      ? (cfg.pisoMin + cfg.pisoMax) / 2
-      : pisoSugerido;
-
-    const score = Math.abs(h - alvoEspelho) + 0.12 * Math.abs(pisoSugerido - alvoPiso);
-
-    solucoes.push({
-      E,h,pisos,pisoMin,pisoMax,pisoSugerido,blondel,
-      comprimentoReto,inclinacao,lances,patamaresIntermediarios,score
-    });
-  }
-
-  solucoes.sort((a,b) => a.score - b.score || a.E - b.E);
-  return solucoes;
-}
-
-function linhaTabela(rotulo, cb, ambas, nbr, classeAmbas = false){
+function linhaTabela(rotulo, cb, ambas, nbr){
   return `
     <tr>
       <td>${rotulo}</td>
@@ -368,113 +278,210 @@ function linhaTabela(rotulo, cb, ambas, nbr, classeAmbas = false){
   `;
 }
 
-function valorOuNao(solucao, formatador){
-  return solucao ? formatador(solucao) : '<span class="badge no">Sem solução</span>';
+function valorOuNao(solucao, formatador, texto = 'Sem solução com o piso adotado'){
+  return solucao ? formatador(solucao) : `<span class="badge no">${texto}</span>`;
 }
 
-function calcularEscada(){
+function celulaPisoAdotado(validacao, valor, ambas = false){
+  const selo = validacao?.atende
+    ? `<span class="badge ok">${ambas ? 'Atende ambas' : 'Atende'}</span>`
+    : `<span class="badge no">${ambas ? 'Não atende ambas' : 'Não atende'}</span>`;
+  return `${fmt(valor)} cm<br>${selo}`;
+}
+
+function celulaSituacao(validacao, ambas = false){
+  return validacao?.atende
+    ? `<span class="badge ok">${ambas ? 'Atende ambas' : 'Atende'}</span>`
+    : `<span class="badge no">${ambas ? 'Não atende ambas' : 'Não atende'}</span>`;
+}
+
+function celulaEspaco(solucao){
+  if(!solucao) return '<span class="badge no">Não verificável</span>';
+  if(solucao.cabe_no_espaco === null) return 'Não informado';
+  return solucao.cabe_no_espaco
+    ? '<span class="badge ok">Cabe no espaço</span>'
+    : '<span class="badge no">Não cabe</span>';
+}
+
+function renderizarTabela(dados){
+  const recomendados = dados.resultados;
+  const adotado = dados.piso_adotado;
+  const validacoes = adotado.normas;
+  const solucao = chave => validacoes[chave]?.solucao || null;
+  const faixa = chave => solucao(chave) || recomendados[chave] || null;
+  const cb = solucao('cbpmesp');
+  const ambas = solucao('ambas');
+  const nbr = solucao('nbr9050');
+  const faixaCB = faixa('cbpmesp');
+  const faixaAmbas = faixa('ambas');
+  const faixaNBR = faixa('nbr9050');
+
+  let html = '';
+  html += linhaTabela('Desnível total', fmt(dados.desnivel_m)+' m', fmt(dados.desnivel_m)+' m', fmt(dados.desnivel_m)+' m');
+  html += linhaTabela('Quantidade de espelhos (E)',
+    valorOuNao(cb,s=>s.quantidade_espelhos), valorOuNao(ambas,s=>s.quantidade_espelhos), valorOuNao(nbr,s=>s.quantidade_espelhos));
+  html += linhaTabela('Altura real do espelho',
+    valorOuNao(cb,s=>fmt(s.altura_espelho_cm)+' cm'), valorOuNao(ambas,s=>fmt(s.altura_espelho_cm)+' cm'), valorOuNao(nbr,s=>fmt(s.altura_espelho_cm)+' cm'));
+  html += linhaTabela('Quantidade de pisos — lance reto',
+    valorOuNao(cb,s=>s.quantidade_pisos), valorOuNao(ambas,s=>s.quantidade_pisos), valorOuNao(nbr,s=>s.quantidade_pisos));
+  html += linhaTabela('Largura mínima do piso',
+    valorOuNao(faixaCB,s=>fmt(s.piso_minimo_cm)+' cm','Sem solução'), valorOuNao(faixaAmbas,s=>fmt(s.piso_minimo_cm)+' cm','Sem solução'), valorOuNao(faixaNBR,s=>fmt(s.piso_minimo_cm)+' cm','Sem solução'));
+  html += linhaTabela('Largura máxima do piso',
+    valorOuNao(faixaCB,s=>fmt(s.piso_maximo_cm)+' cm','Sem solução'), valorOuNao(faixaAmbas,s=>fmt(s.piso_maximo_cm)+' cm','Sem solução'), valorOuNao(faixaNBR,s=>fmt(s.piso_maximo_cm)+' cm','Sem solução'));
+  html += linhaTabela('Piso sugerido pelo sistema',
+    valorOuNao(faixaCB,s=>fmt(s.piso_sugerido_cm)+' cm','Sem solução'), valorOuNao(faixaAmbas,s=>fmt(s.piso_sugerido_cm)+' cm','Sem solução'), valorOuNao(faixaNBR,s=>fmt(s.piso_sugerido_cm)+' cm','Sem solução'));
+  html += linhaTabela('Piso adotado no cálculo',
+    celulaPisoAdotado(validacoes.cbpmesp,adotado.valor_cm), celulaPisoAdotado(validacoes.ambas,adotado.valor_cm,true), celulaPisoAdotado(validacoes.nbr9050,adotado.valor_cm));
+  html += linhaTabela('Resultado da fórmula de Blondel',
+    valorOuNao(cb,s=>fmt(s.blondel_cm)+' cm','—'), valorOuNao(ambas,s=>fmt(s.blondel_cm)+' cm','—'), valorOuNao(nbr,s=>fmt(s.blondel_cm)+' cm','—'));
+  html += linhaTabela('Inclinação',
+    valorOuNao(cb,s=>fmt(s.inclinacao_graus)+'°','—'), valorOuNao(ambas,s=>fmt(s.inclinacao_graus)+'°','—'), valorOuNao(nbr,s=>fmt(s.inclinacao_graus)+'°','—'));
+  html += linhaTabela('Comprimento horizontal — lance reto',
+    valorOuNao(cb,s=>fmt(s.comprimento_reto_m)+' m','—'), valorOuNao(ambas,s=>fmt(s.comprimento_reto_m)+' m','—'), valorOuNao(nbr,s=>fmt(s.comprimento_reto_m)+' m','—'));
+  html += linhaTabela('Verificação do espaço disponível', celulaEspaco(cb), celulaEspaco(ambas), celulaEspaco(nbr));
+  html += linhaTabela('Desnível máximo entre patamares',
+    fmt(dados.criterios.cbpmesp.desnivel_maximo_lance_m)+' m', fmt(dados.criterios.ambas.desnivel_maximo_lance_m)+' m', fmt(dados.criterios.nbr9050.desnivel_maximo_lance_m)+' m');
+  html += linhaTabela('Quantidade mínima de lances',
+    valorOuNao(faixaCB,s=>s.quantidade_lances,'Sem solução'), valorOuNao(faixaAmbas,s=>s.quantidade_lances,'Sem solução'), valorOuNao(faixaNBR,s=>s.quantidade_lances,'Sem solução'));
+  html += linhaTabela('Patamares intermediários obrigatórios',
+    valorOuNao(faixaCB,s=>s.patamares_intermediarios,'Sem solução'), valorOuNao(faixaAmbas,s=>s.patamares_intermediarios,'Sem solução'), valorOuNao(faixaNBR,s=>s.patamares_intermediarios,'Sem solução'));
+  html += linhaTabela('Situação',
+    celulaSituacao(validacoes.cbpmesp), celulaSituacao(validacoes.ambas,true), celulaSituacao(validacoes.nbr9050));
+
+  document.getElementById('tabelaResultados').innerHTML = html;
+}
+
+function cartaoValidacao(titulo, validacao, ambas = false){
+  if(validacao?.atende){
+    const s = validacao.solucao;
+    return `
+      <div class="validation-card ${ambas?'is-both':''}">
+        <h3>${titulo}</h3>
+        <span class="badge ok">${ambas?'Atende ambas':'Atende'}</span>
+        <p>${s.quantidade_espelhos} espelhos, h = ${fmt(s.altura_espelho_cm)} cm e Blondel = ${fmt(s.blondel_cm)} cm.</p>
+      </div>`;
+  }
+
+  const proxima = validacao?.faixa_mais_proxima;
+  const detalhe = proxima
+    ? `Faixa válida mais próxima: ${fmt(proxima.piso_minimo_cm)} a ${fmt(proxima.piso_maximo_cm)} cm, com ${proxima.quantidade_espelhos} espelhos. Valor mais próximo: ${fmt(proxima.valor_mais_proximo_cm)} cm.`
+    : 'Não foi encontrada uma combinação normativa para o desnível informado.';
+  return `
+    <div class="validation-card ${ambas?'is-both':''}">
+      <h3>${titulo}</h3>
+      <span class="badge no">${ambas?'Não atende ambas':'Não atende'}</span>
+      <p>${detalhe}</p>
+    </div>`;
+}
+
+function renderizarValidacoes(dados){
+  const validacoes = dados.piso_adotado.normas;
+  document.getElementById('validacoesPiso').innerHTML =
+    cartaoValidacao('CBPMESP — IT 11/2025',validacoes.cbpmesp) +
+    cartaoValidacao('AMBAS',validacoes.ambas,true) +
+    cartaoValidacao('ABNT NBR 9050',validacoes.nbr9050);
+}
+
+function cartaoCriterio(titulo, criterio, solucao, ambas = false){
+  const lances = solucao?.quantidade_lances;
+  const patamares = solucao?.patamares_intermediarios;
+  const resumo = Number.isFinite(lances)
+    ? `Para o desnível informado: <strong>${lances} ${lances===1?'lance':'lances'}</strong> e <strong>${patamares} ${patamares===1?'patamar intermediário':'patamares intermediários'}</strong>.`
+    : 'Não foi possível determinar os lances para o desnível informado.';
+  return `
+    <div class="criterion-card ${ambas?'is-both':''}">
+      <h3>${titulo}</h3>
+      <div class="formula">${fmt(criterio.blondel_min_cm,0)} ≤ 2h + p ≤ ${fmt(criterio.blondel_max_cm,0)} cm</div>
+      <p>Patamar intermediário quando o desnível ultrapassar <strong>${fmt(criterio.desnivel_maximo_lance_m)} m</strong>.</p>
+      <p>${resumo}</p>
+    </div>`;
+}
+
+function renderizarCriterios(dados){
+  const base = chave => dados.piso_adotado.normas[chave]?.solucao || dados.resultados[chave];
+  document.getElementById('criteriosNormativos').innerHTML =
+    cartaoCriterio('CBPMESP — IT 11/2025',dados.criterios.cbpmesp,base('cbpmesp')) +
+    cartaoCriterio('AMBAS',dados.criterios.ambas,base('ambas'),true) +
+    cartaoCriterio('ABNT NBR 9050',dados.criterios.nbr9050,base('nbr9050'));
+}
+
+function renderizarResultado(dados){
+  ultimoResultado = dados;
+  document.getElementById('pisoAdotado').value = fmtEntrada(dados.piso_adotado.valor_cm);
+  renderizarTabela(dados);
+  renderizarValidacoes(dados);
+  renderizarCriterios(dados);
+  document.getElementById('resultados').classList.add('show');
+}
+
+async function solicitarCalculo(dados, mensagem){
+  const botoes = [document.getElementById('btnCalcular'),document.getElementById('btnValidar')];
+  botoes.forEach(botao=>{if(botao) botao.disabled=true;});
+  mostrarStatus(mensagem,'ok');
+  try{
+    const retorno = await executarMotorEscadas(dados);
+    renderizarResultado(retorno.resultado);
+    const origem = retorno.resultado.piso_adotado.origem;
+    mostrarStatus(
+      origem === 'sistema'
+        ? 'Cálculo concluído. O piso sugerido foi adotado inicialmente e pode ser alterado.'
+        : 'Piso adotado validado e cálculo atualizado.',
+      'ok'
+    );
+  }catch(erro){
+    mostrarStatus(erro?.message || 'Não foi possível concluir o cálculo.','erro');
+    console.error(erro);
+  }finally{
+    botoes.forEach(botao=>{if(botao) botao.disabled=false;});
+  }
+}
+
+async function calcularEscada(){
   const desnivel = numeroBR(document.getElementById('desnivel').value);
   const espaco = numeroBR(document.getElementById('espacoDisponivel').value);
-
-  if(!regrasCarregadas){
-    mostrarStatus('Aguarde o carregamento das regras ou atualize a página.', 'erro');
-    return;
-  }
-
   if(!Number.isFinite(desnivel) || desnivel <= 0){
-    mostrarStatus('Informe um desnível total válido.', 'erro');
+    mostrarStatus('Informe um desnível total válido.','erro');
+    return;
+  }
+  if(Number.isFinite(espaco) && espaco <= 0){
+    mostrarStatus('O espaço horizontal disponível deve ser maior que zero.','erro');
     return;
   }
 
-  try{
-    const cfgCB = montarConfiguracao('CBPMESP');
-    const cfgNBR = montarConfiguracao('NBR9050');
-    const cfgAmbas = montarConfiguracaoAmbas(cfgCB, cfgNBR);
-
-    const listaCB = calcularSolucoes(desnivel, cfgCB);
-    const listaAmbas = calcularSolucoes(desnivel, cfgAmbas);
-    const listaNBR = calcularSolucoes(desnivel, cfgNBR);
-
-    const cb = listaCB[0] || null;
-    const ambas = listaAmbas[0] || null;
-    const nbr = listaNBR[0] || null;
-
-    const caber = s => {
-      if(!s) return '<span class="badge no">Sem solução</span>';
-      if(!Number.isFinite(espaco)) return 'Não informado';
-      return s.comprimentoReto <= espaco + 1e-9
-        ? '<span class="badge ok">Cabe no espaço</span>'
-        : '<span class="badge no">Não cabe</span>';
-    };
-
-    let html = '';
-    html += linhaTabela('Desnível total', fmt(desnivel)+' m', fmt(desnivel)+' m', fmt(desnivel)+' m');
-    html += linhaTabela('Quantidade de espelhos (E)',
-      valorOuNao(cb,s=>s.E), valorOuNao(ambas,s=>s.E), valorOuNao(nbr,s=>s.E));
-    html += linhaTabela('Altura real do espelho',
-      valorOuNao(cb,s=>fmt(s.h)+' cm'), valorOuNao(ambas,s=>fmt(s.h)+' cm'), valorOuNao(nbr,s=>fmt(s.h)+' cm'));
-    html += linhaTabela('Quantidade de pisos (1 lance)',
-      valorOuNao(cb,s=>s.pisos), valorOuNao(ambas,s=>s.pisos), valorOuNao(nbr,s=>s.pisos));
-    html += linhaTabela('Largura mínima do piso',
-      valorOuNao(cb,s=>fmt(s.pisoMin)+' cm'), valorOuNao(ambas,s=>fmt(s.pisoMin)+' cm'), valorOuNao(nbr,s=>fmt(s.pisoMin)+' cm'));
-    html += linhaTabela('Largura máxima do piso',
-      valorOuNao(cb,s=>fmt(s.pisoMax)+' cm'), valorOuNao(ambas,s=>fmt(s.pisoMax)+' cm'), valorOuNao(nbr,s=>fmt(s.pisoMax)+' cm'));
-    html += linhaTabela('Piso sugerido (mediana)',
-      valorOuNao(cb,s=>fmt(s.pisoSugerido)+' cm'), valorOuNao(ambas,s=>fmt(s.pisoSugerido)+' cm'), valorOuNao(nbr,s=>fmt(s.pisoSugerido)+' cm'));
-    html += linhaTabela('Resultado da fórmula de Blondel',
-      valorOuNao(cb,s=>fmt(s.blondel)+' cm'), valorOuNao(ambas,s=>fmt(s.blondel)+' cm'), valorOuNao(nbr,s=>fmt(s.blondel)+' cm'));
-    html += linhaTabela('Inclinação',
-      valorOuNao(cb,s=>fmt(s.inclinacao)+'°'), valorOuNao(ambas,s=>fmt(s.inclinacao)+'°'), valorOuNao(nbr,s=>fmt(s.inclinacao)+'°'));
-    html += linhaTabela('Comprimento horizontal — lance reto',
-      valorOuNao(cb,s=>fmt(s.comprimentoReto)+' m'), valorOuNao(ambas,s=>fmt(s.comprimentoReto)+' m'), valorOuNao(nbr,s=>fmt(s.comprimentoReto)+' m'));
-    html += linhaTabela('Verificação do espaço disponível', caber(cb), caber(ambas), caber(nbr));
-    html += linhaTabela('Desnível máximo por lance',
-      fmt(cfgCB.desnivelMaxLance)+' m', fmt(cfgAmbas.desnivelMaxLance)+' m', fmt(cfgNBR.desnivelMaxLance)+' m');
-    html += linhaTabela('Quantidade mínima de lances',
-      valorOuNao(cb,s=>s.lances), valorOuNao(ambas,s=>s.lances), valorOuNao(nbr,s=>s.lances));
-    html += linhaTabela('Patamares intermediários obrigatórios',
-      valorOuNao(cb,s=>s.patamaresIntermediarios), valorOuNao(ambas,s=>s.patamaresIntermediarios), valorOuNao(nbr,s=>s.patamaresIntermediarios));
-    html += linhaTabela('Situação',
-      cb ? '<span class="badge ok">Atende</span>' : '<span class="badge no">Não atende</span>',
-      ambas ? '<span class="badge ok">Atende ambas</span>' : '<span class="badge no">Não atende ambas</span>',
-      nbr ? '<span class="badge ok">Atende</span>' : '<span class="badge no">Não atende</span>');
-
-    document.getElementById('tabelaResultados').innerHTML = html;
-    renderAlternativas('CBPMESP — IT 11/2025', listaCB, 'alt-cb');
-    renderAlternativas('AMBAS', listaAmbas, 'alt-ambas');
-    renderAlternativas('ABNT NBR 9050', listaNBR, 'alt-nbr');
-
-    document.getElementById('alternativas').innerHTML =
-      blocoAlternativas('CBPMESP — IT 11/2025', listaCB) +
-      blocoAlternativas('AMBAS', listaAmbas) +
-      blocoAlternativas('ABNT NBR 9050', listaNBR);
-
-    document.getElementById('resultados').classList.add('show');
-    mostrarStatus('Cálculo concluído com as regras carregadas do banco.', 'ok');
-  }catch(erro){
-    mostrarStatus(erro.message, 'erro');
-    console.error(erro);
-  }
+  ultimoCalculoBase = {
+    desnivel_m:desnivel,
+    espaco_disponivel_m:Number.isFinite(espaco) ? espaco : null
+  };
+  await solicitarCalculo(ultimoCalculoBase,'Calculando no motor privado do SAR...');
 }
 
-function blocoAlternativas(titulo, lista){
-  if(!lista.length){
-    return `<div class="alt-card"><h3>${titulo}</h3><div class="alt-item">Nenhuma combinação válida encontrada.</div></div>`;
+async function validarPisoAdotado(){
+  if(!ultimoCalculoBase){
+    mostrarStatus('Faça primeiro o cálculo do desnível total.','erro');
+    return;
   }
-
-  const itens = lista.slice(0,6).map((s,i) => `
-    <div class="alt-item ${i===0?'recomendada':''}">
-      ${i===0?'<strong>Recomendada — </strong>':''}
-      ${s.E} espelhos • h ${fmt(s.h)} cm • piso ${fmt(s.pisoSugerido)} cm • ${fmt(s.comprimentoReto)} m reto
-    </div>
-  `).join('');
-
-  return `<div class="alt-card"><h3>${titulo}</h3><div class="alt-list">${itens}</div></div>`;
+  const piso = numeroBR(document.getElementById('pisoAdotado').value);
+  if(!Number.isFinite(piso) || piso <= 0){
+    mostrarStatus('Informe uma largura de piso adotada válida.','erro');
+    return;
+  }
+  await solicitarCalculo(
+    {...ultimoCalculoBase,piso_adotado_cm:piso},
+    'Validando o piso adotado nas duas normas...'
+  );
 }
 
-function renderAlternativas(){ /* mantida apenas para compatibilidade futura */ }
+async function usarPisoSugerido(){
+  const sugerido = ultimoResultado?.resultados?.ambas?.piso_sugerido_cm;
+  if(!Number.isFinite(sugerido)){
+    mostrarStatus('Não há sugestão simultânea disponível para este cálculo.','erro');
+    return;
+  }
+  document.getElementById('pisoAdotado').value = fmtEntrada(sugerido);
+  await validarPisoAdotado();
+}
 
-function mostrarStatus(mensagem, tipo){
+function mostrarStatus(mensagem,tipo){
   const status = document.getElementById('status');
   status.textContent = mensagem;
   status.className = 'status ' + tipo;
@@ -483,14 +490,26 @@ function mostrarStatus(mensagem, tipo){
 function limparCalculadora(){
   document.getElementById('desnivel').value = '';
   document.getElementById('espacoDisponivel').value = '';
+  document.getElementById('pisoAdotado').value = '';
   document.getElementById('resultados').classList.remove('show');
   document.getElementById('tabelaResultados').innerHTML = '';
-  document.getElementById('alternativas').innerHTML = '';
+  document.getElementById('validacoesPiso').innerHTML = '';
+  document.getElementById('criteriosNormativos').innerHTML = '';
   document.getElementById('status').className = 'status';
+  ultimoCalculoBase = null;
+  ultimoResultado = null;
   document.getElementById('desnivel').focus();
 }
 
-carregarRegrasEscadas();
+document.getElementById('pisoAdotado').addEventListener('input',()=>{
+  if(ultimoResultado){
+    mostrarStatus('Valor alterado. Clique em “Validar e recalcular” para atualizar o resultado.','alerta');
+  }
+});
+
+document.getElementById('pisoAdotado').addEventListener('keydown',evento=>{
+  if(evento.key === 'Enter') validarPisoAdotado();
+});
 </script>
 </body>
 </html>
