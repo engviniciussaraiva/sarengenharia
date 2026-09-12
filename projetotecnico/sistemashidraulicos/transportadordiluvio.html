@@ -264,6 +264,10 @@ tr:nth-child(even){
   background:#fff9c4;
 }
 
+select.dn-edit{
+  width:138px;
+}
+
 .field-full{
   grid-column:1 / -1;
   margin-bottom:0;
@@ -496,7 +500,7 @@ tr:nth-child(even){
 
       <div class="field">
         <label>Densidade (L/min/m²)</label>
-        <input id="densidade" class="warn" type="number" step="0.01" value="12" oninput="calcular()">
+        <input id="densidade" class="warn" type="number" step="0.01" oninput="calcular()">
 
       </div>
 
@@ -513,18 +517,20 @@ tr:nth-child(even){
       <div class="field">
         <label>Modelo do Bico</label>
         <select id="modeloBico" class="warn" onchange="alterarModeloBico()">
+          <option value="">Selecione...</option>
 </select> 
 
       </div>
 
       <div class="field">
         <label>Tipo</label>
-        <input id="tipoBico" readonly value="Média Velocidade">
+        <input id="tipoBico" readonly>
       </div>
 
       <div class="field">
         <label>Ângulo abertura defletor (°)</label>
         <select id="angulo" class="warn" onchange="selecaoManual=true; calcular()">
+          <option value="">Selecione...</option>
 </select> 
       </div>
 
@@ -585,7 +591,7 @@ tr:nth-child(even){
 
 <div class="field">
   <label>Tempo de operação (min)</label>
-  <input id="tempo" class="warn" type="number" value="60" oninput="calcular()">
+  <input id="tempo" class="warn" type="number" oninput="calcular()">
 </div>
 
       <div class="field">
@@ -759,10 +765,13 @@ function preencherMateriaisTubulacao(){
 }
 
 function opcoesDiametroNominal(diametros, selecionado){
-  return (diametros || []).map(dn => {
-    const valor = Number(dn);
+  return (diametros || []).map(item => {
+    const valor = Number(item?.dn_mm);
+    const polegada = String(item?.nps_polegadas || "").trim();
+    if(!Number.isFinite(valor) || valor <= 0) return "";
     const ativo = Math.abs(valor - Number(selecionado)) < 1e-9 ? " selected" : "";
-    return `<option value="${valor}"${ativo}>DN ${valor.toLocaleString("pt-BR")}</option>`;
+    const referencia = polegada ? ` — ${htmlSeguro(polegada)}` : "";
+    return `<option value="${valor}"${ativo}>DN ${valor.toLocaleString("pt-BR")}${referencia}</option>`;
   }).join("");
 }
 
@@ -771,6 +780,21 @@ function preencherDropsBico(escolhido, forcarEscolha = false){
 
   const selectModelo = document.getElementById("modeloBico");
   const selectAngulo = document.getElementById("angulo");
+
+  if(!escolhido){
+    const modelosDisponiveis = [
+      ...new Set(listaBicos.map(b => b.modelo).filter(Boolean))
+    ];
+    selectModelo.replaceChildren(
+      new Option("Selecione...", ""),
+      ...modelosDisponiveis.map(modelo => new Option(modelo, modelo))
+    );
+    selectModelo.value = "";
+    selectAngulo.replaceChildren(new Option("Selecione...", ""));
+    selectAngulo.value = "";
+    document.getElementById("tipoBico").value = "";
+    return;
+  }
 
   const modeloAntes = selectModelo.value;
   const anguloAntes = selectAngulo.value;
@@ -782,6 +806,7 @@ function preencherDropsBico(escolhido, forcarEscolha = false){
       : escolhido.modelo;
 
   selectModelo.replaceChildren(
+    new Option("Selecione...", ""),
     ...modelos.map(modelo => new Option(modelo, modelo))
   );
   selectModelo.value = modeloEscolhido;
@@ -795,6 +820,7 @@ function preencherDropsBico(escolhido, forcarEscolha = false){
       : String(escolhido.angulo);
 
   selectAngulo.replaceChildren(
+    new Option("Selecione...", ""),
     ...angulos.map(angulo => new Option(angulo, angulo))
   );
   selectAngulo.value = anguloEscolhido;
@@ -803,18 +829,28 @@ function preencherDropsBico(escolhido, forcarEscolha = false){
 }
 
 function alterarModeloBico(){
-  selecaoManual = true;
   const modelo = document.getElementById("modeloBico").value;
   const primeiro = (window.BICOS_DILUVIO || []).find(b => b.modelo === modelo);
 
-  if(primeiro){
+  if(!primeiro){
+    selecaoManual = false;
     document.getElementById("angulo").replaceChildren(
+      new Option("Selecione...", "")
+    );
+    document.getElementById("tipoBico").value = "";
+    calcular();
+    return;
+  }
+
+  selecaoManual = true;
+  document.getElementById("angulo").replaceChildren(
+      new Option("Selecione...", ""),
       ...(window.BICOS_DILUVIO || [])
         .filter(b => b.modelo === modelo)
         .map(b => new Option(String(b.angulo), String(b.angulo)))
-    );
-    document.getElementById("angulo").value = String(primeiro.angulo);
-  }
+  );
+  document.getElementById("angulo").value = String(primeiro.angulo);
+  document.getElementById("tipoBico").value = primeiro.tipo || "";
   calcular();
 }
 
@@ -1366,7 +1402,7 @@ async function calculoHidraulicoChave(i){
         
 <td>
 <select class="hidraulica-edit dn-edit" onchange="alterarDN(this)">
-  ${opcoesDiametroNominal(redeInicial.diametros_disponiveis_mm, trecho.dn_mm)}
+  ${opcoesDiametroNominal(redeInicial.diametros_disponiveis, trecho.dn_mm)}
 </select>
 </td>
 
@@ -1451,7 +1487,7 @@ data-k="${k}"
 data-pressao-inicial="${pressaoInicial}"
 data-material="${l.materialTubulacao}"
 data-dn-final="${redeInicial.dn_final_mm}"
-data-dns-disponiveis="${redeInicial.diametros_disponiveis_mm.join(',')}"
+data-dns-disponiveis="${htmlSeguro(JSON.stringify(redeInicial.diametros_disponiveis))}"
 data-material-comp-eq="${redeInicial.material_comprimentos_equivalentes}"> 
         <thead>
           <tr>
@@ -1460,7 +1496,7 @@ data-material-comp-eq="${redeInicial.material_comprimentos_equivalentes}">
             <th>K</th>
             <th>Vazão<br>Bico</th>
             <th>Vazão<br>Acum.</th>
-            <th>DN<br>(mm)</th>
+            <th>DN</th>
 <th>DI<br>(mm)</th> 
             <th>Comp.<br>Real</th>
             <th>Comp.<br>Eq.</th>
@@ -1538,10 +1574,12 @@ function adicionarTrechoAposManometro(calcId){
   const tbody = tabela.querySelector("tbody");
 
   const dn = valorNum(tabela.dataset.dnFinal);
-  const diametrosDisponiveis = String(tabela.dataset.dnsDisponiveis || "")
-    .split(",")
-    .map(Number)
-    .filter(valor => Number.isFinite(valor) && valor > 0);
+  let diametrosDisponiveis = [];
+  try{
+    diametrosDisponiveis = JSON.parse(tabela.dataset.dnsDisponiveis || "[]");
+  }catch(error){
+    console.error("Lista de DNs inválida:", error);
+  }
 
   const novaLinha = document.createElement("tr");
   novaLinha.dataset.temBico = "nao";
@@ -1674,11 +1712,7 @@ function limpar(){
     s.selectedIndex = 0;
   });
 
-  document.getElementById("densidade").value = 12;
-  document.getElementById("tempo").value = 60;
-
-  document.getElementById("modeloBico").innerHTML = "";
-  document.getElementById("angulo").innerHTML = "";
+  preencherDropsBico(null);
 
   window.STATUS_CALCULO = "";
 
@@ -1703,8 +1737,8 @@ async function carregarReferenciasDiluvio(){
     }
 
     preencherMateriaisTubulacao();
-    preencherDropsBico(window.BICOS_DILUVIO[0]);
-    await calcularAgora(false);
+    preencherDropsBico(null);
+    limparResultadosCalculo();
   }catch(error){
     console.error("Erro ao carregar referências de dilúvio:", error);
     document.getElementById("observacao").value = error.message;
