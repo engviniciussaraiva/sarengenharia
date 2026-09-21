@@ -18,7 +18,13 @@ body{min-height:100vh}
 button,input{font:inherit}
 
 .classificator-sticky{position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(13,81,63,.09)}
-.classificator-topbar{background:linear-gradient(90deg,#edf9f0 0%,#e6f6eb 55%,#effaf2 100%);border-bottom:1px solid #c7dfcf}
+.classificator-topbar{
+  position:sticky;
+  top:0;
+  z-index:999;
+  background:linear-gradient(90deg,#edf9f0 0%,#e6f6eb 55%,#effaf2 100%);
+  border-bottom:1px solid #c7dfcf;
+}
 .classificator-topbar-inner{max-width:1600px;margin:0 auto;padding:18px 28px 15px;display:grid;grid-template-columns:minmax(250px,.85fr) minmax(540px,1.6fr) minmax(320px,.9fr);gap:26px;align-items:center}
 .classificator-brand-title{margin:0;color:#082f2a;font-size:31px;font-weight:900;line-height:1;letter-spacing:-.035em}.classificator-brand-title span{color:#19a86d}
 .classificator-brand-sub{margin:8px 0 0;color:#294f48;font-size:12px;line-height:1.25}.classificator-brand-sub span{display:block}
