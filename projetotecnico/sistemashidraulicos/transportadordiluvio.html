@@ -1924,21 +1924,52 @@ function valorNum(v){
   return parseFloat(String(v || "0").replace(",", ".")) || 0;
 }
 
-function alterarDN(input){
+async function alterarDN(input){
   const tabela = input.closest("table");
   const linhasTabela = [...tabela.querySelectorAll("tbody tr")];
-const material =
-  tabela.dataset.material;
   const linhaAtual = input.closest("tr");
   const idx = linhasTabela.indexOf(linhaAtual);
-  const novoDN = input.value;
+  const dnAnterior = valorNum(input.dataset.dnAtual || input.value);
+  const novoDN = valorNum(input.value);
+  const dnAnteriorAoTrecho = idx > 0
+    ? valorNum(linhasTabela[idx - 1].querySelector(".dn-edit")?.value)
+    : 0;
+  const dnMinimoCalculado = valorNum(linhaAtual.dataset.dnMinimo);
+  const dnMinimoPermitido = Math.max(dnAnteriorAoTrecho, dnMinimoCalculado);
 
-  for(let i = idx; i < linhasTabela.length; i++){
-    const dnInput = linhasTabela[i].querySelector(".dn-edit");
-    if(dnInput) dnInput.value = novoDN;
+  if(novoDN < dnMinimoPermitido){
+    input.value = String(dnAnterior);
+    alert(
+      `Este trecho exige no mínimo DN ${dnMinimoPermitido.toLocaleString("pt-BR")}. ` +
+      "O diâmetro não pode diminuir no sentido do escoamento."
+    );
+    return;
   }
 
-  recalcularTabelaHidraulica(tabela);
+  const alterados = [];
+  for(let i = idx; i < linhasTabela.length; i++){
+    const dnInput = linhasTabela[i].querySelector(".dn-edit");
+    if(!dnInput) continue;
+
+    const dnAtualDaLinha = valorNum(dnInput.dataset.dnAtual || dnInput.value);
+    const dnMinimoDaLinha = valorNum(linhasTabela[i].dataset.dnMinimo);
+
+    if(i > idx){
+      if(novoDN > dnAnterior && dnAtualDaLinha >= novoDN) break;
+      if(novoDN <= dnAnterior && dnAtualDaLinha !== dnAnterior) break;
+      if(novoDN < dnMinimoDaLinha) break;
+    }
+
+    alterados.push({ input: dnInput, valorAnterior: dnInput.value });
+    dnInput.value = String(novoDN);
+  }
+
+  const resultado = await recalcularTabelaHidraulica(tabela);
+  if(!resultado){
+    alterados.forEach(item => {
+      item.input.value = item.valorAnterior;
+    });
+  }
 }
 
 function referenciaTrecho(tr){
@@ -1949,6 +1980,7 @@ function referenciaTrecho(tr){
 async function recalcularTabelaHidraulica(tabela){
   const linhasTabela = [...tabela.querySelectorAll("tbody tr")];
   const infoPressao = tabela.parentElement.querySelector(".info-pressao-manometro");
+  const infoUltimoPonto = tabela.parentElement.querySelector(".info-ultimo-ponto");
   const sequencia = Number(tabela.dataset.sequencia || 0) + 1;
   tabela.dataset.sequencia = String(sequencia);
 
@@ -1970,11 +2002,13 @@ async function recalcularTabelaHidraulica(tabela){
       }))
     });
 
-    if(Number(tabela.dataset.sequencia) !== sequencia) return;
+    if(Number(tabela.dataset.sequencia) !== sequencia) return null;
 
     resultado.linhas.forEach((linha, idx) => {
       const tr = linhasTabela[idx];
       if(!tr) return;
+      const dnInput = tr.querySelector(".dn-edit");
+      if(dnInput) dnInput.dataset.dnAtual = String(linha.dn_mm);
       tr.querySelector(".di-mm").textContent = fmt(linha.diametro_interno_mm);
       tr.querySelector(".pressao").textContent = fmt(linha.pressao_mca);
       tr.querySelector(".vazao-bico").textContent =
@@ -1995,11 +2029,36 @@ async function recalcularTabelaHidraulica(tabela){
         `Pressão de trabalho no manômetro: ${fmt(resultado.pressao_manometro_mca)} m.c.a. = ` +
         `${fmt(resultado.pressao_manometro_kgf_cm2)} kgf/cm²${aviso}`;
     }
+
+    if(infoUltimoPonto){
+      const ultimaLinhaExtra = [...linhasTabela]
+        .reverse()
+        .find(tr => tr.dataset.temBico === "nao");
+
+      if(ultimaLinhaExtra){
+        const indice = linhasTabela.indexOf(ultimaLinhaExtra);
+        const linhaCalculada = resultado.linhas[indice];
+        const referencia = referenciaTrecho(ultimaLinhaExtra);
+        const partes = referencia.split(/\s*[-–—]\s*/).filter(Boolean);
+        const ponto = partes[partes.length - 1] || referencia || "último ponto";
+
+        infoUltimoPonto.textContent =
+          `Dados do ponto ${ponto}: Vazão: ${fmt(linhaCalculada.vazao_acumulada_lpm)} L/min · ` +
+          `Pressão: ${fmt(linhaCalculada.pressao_requerida_mca)} m.c.a.`;
+        infoUltimoPonto.hidden = false;
+      }else{
+        infoUltimoPonto.textContent = "";
+        infoUltimoPonto.hidden = true;
+      }
+    }
+
+    return resultado;
   }catch(error){
     console.error("Erro no cálculo hidráulico:", error);
     if(infoPressao){
       infoPressao.textContent = `Não foi possível recalcular: ${error.message}`;
     }
+    return null;
   }
 }
 
@@ -2031,7 +2090,7 @@ async function calculoHidraulicoChave(i, redeSalva = null){
 
   redeInicial.linhas.forEach(trecho => {
     linhasTabela += `
-      <tr data-tem-bico="sim">
+      <tr data-tem-bico="sim" data-dn-minimo="${trecho.dn_minimo_calculado_mm}">
         <td>${htmlSeguro(trecho.referencia)}</td>
         <td class="pressao">0,00</td>
         <td>${fmt(k)}</td>
@@ -2039,7 +2098,10 @@ async function calculoHidraulicoChave(i, redeSalva = null){
         <td class="vazao-acum">0,00</td>
         
 <td>
-<select class="hidraulica-edit dn-edit" onchange="alterarDN(this)">
+<select
+  class="hidraulica-edit dn-edit"
+  data-dn-atual="${trecho.dn_mm}"
+  onchange="alterarDN(this)">
   ${opcoesDiametroNominal(redeInicial.diametros_disponiveis, trecho.dn_mm)}
 </select>
 </td>
@@ -2173,6 +2235,20 @@ onclick="excluirUltimoTrechoAdicionado('${calcId}')">
      ">
 </div>
 
+<div class="info-ultimo-ponto"
+     hidden
+     style="
+       margin-top:6px;
+       padding:8px 10px;
+       border-left:4px solid #3f7f72;
+       border-radius:5px;
+       background:#e5f1ed;
+       font-size:14px;
+       font-weight:700;
+       color:#173f3b;
+     ">
+</div>
+
 <div style="margin-top:14px; text-align:center;">
   <button
     class="btn-export"
@@ -2223,6 +2299,7 @@ function criarTrechoAposManometro(tabela, dados = {}){
 
   const novaLinha = document.createElement("tr");
   novaLinha.dataset.temBico = "nao";
+  novaLinha.dataset.dnMinimo = "0";
 
 const trechosExtras = [...tbody.querySelectorAll("tr")]
   .filter(tr => tr.dataset.temBico === "nao").length;
@@ -2241,6 +2318,7 @@ class="hidraulica-edit"
 type="text"
 value="${htmlSeguro(referenciaNova)}"
 style="width:110px;"
+onchange="recalcularTabelaHidraulica(this.closest('table'))"
 >
 </td> 
 
@@ -2254,7 +2332,10 @@ style="width:110px;"
     <td class="vazao-acum">0,00</td>
 
     <td>
-      <select class="hidraulica-edit dn-edit" onchange="alterarDN(this)">
+      <select
+        class="hidraulica-edit dn-edit"
+        data-dn-atual="${dn}"
+        onchange="alterarDN(this)">
         ${opcoesDiametroNominal(diametrosDisponiveis, dn)}
       </select>
     </td>
@@ -2317,6 +2398,7 @@ function aplicarRedeSalva(tabela, redeSalva){
     const dn = tr.querySelector(".dn-edit");
     if(dn && [...dn.options].some(option => Number(option.value) === Number(salva.dn_mm))){
       dn.value = String(salva.dn_mm);
+      dn.dataset.dnAtual = String(salva.dn_mm);
     }
     tr.querySelector(".comp-real-edit").value = fmt(salva.comprimento_real_m);
     tr.querySelector(".comp-eq").value = fmt(salva.comprimento_equivalente_m);
