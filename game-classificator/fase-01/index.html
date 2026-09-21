@@ -31,9 +31,6 @@
         <h1 class="page-title">Selecione a configuração da implantação</h1>
         <p class="page-subtitle">Quantas edificações possui no lote?</p>
       </div>
-      <div class="page-actions">
-        <button class="ghost-btn" id="btnInicio" type="button">Início</button>
-      </div>
     </header>
 
     <section class="workspace">
@@ -65,7 +62,6 @@
     (()=>{
       "use strict";
       const card=document.getElementById("cardUmaEdificacao"),status=document.getElementById("statusFase");
-      document.getElementById("btnInicio")?.addEventListener("click",()=>window.location.assign("/game-classificator/fase-01/"));
       card?.addEventListener("click",async()=>{if(card.disabled)return;card.disabled=true;status.textContent="";try{const data=await SARClassificatorAPI.answer("FASE_01","LOTE_UMA_EDIFICACAO",null);if(!data?.ok)throw new Error("Não foi possível registrar a implantação.");window.location.assign(data.next||"/game-classificator/fase-02/")}catch(e){console.error(e);status.textContent=e.message||"Não foi possível continuar.";card.disabled=false}});
     })();
   </script>

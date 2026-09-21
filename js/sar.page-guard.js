@@ -46,6 +46,42 @@
     };
 
     /*
+     * Cache curto apenas para a navegação entre páginas internas.
+     * O backend continua validando usuário e permissão em cada ação privada.
+     */
+    const PERMISSION_CACHE_KEY = "sar.pageGuard.permissions.v2";
+    const PERMISSION_CACHE_TTL_MS = 120000;
+
+    function lerPermissoesCache(userId) {
+        try {
+            const raw = sessionStorage.getItem(PERMISSION_CACHE_KEY);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            if (String(parsed?.userId || "") !== String(userId || "")) return null;
+            if (!Array.isArray(parsed?.permissoes)) return null;
+            if (Date.now() - Number(parsed?.savedAt || 0) > PERMISSION_CACHE_TTL_MS) return null;
+            return parsed.permissoes;
+        } catch (erro) {
+            return null;
+        }
+    }
+
+    function salvarPermissoesCache(userId, permissoes) {
+        try {
+            sessionStorage.setItem(
+                PERMISSION_CACHE_KEY,
+                JSON.stringify({
+                    userId: String(userId || ""),
+                    savedAt: Date.now(),
+                    permissoes: Array.isArray(permissoes) ? permissoes : []
+                })
+            );
+        } catch (erro) {
+            /* Falha de cache não bloqueia a validação normal. */
+        }
+    }
+
+    /*
      * Esconde a página imediatamente para evitar que o conteúdo
      * apareça antes da validação.
      */
@@ -391,26 +427,42 @@
     return;
 }
 
-        const {
-            data: permissoes,
-            error: permissoesErro
-        } = await supabase.rpc(
-            "sar_minhas_permissoes"
-        );
-
-        if (permissoesErro) {
-            console.error(
-                "SAR Page Guard — erro ao consultar permissões:",
-                permissoesErro
+        let permissoes =
+            lerPermissoesCache(
+                sessao.user.id
             );
 
-            mostrarAcessoNegado(
-                codigo,
-                permissoesErro.message ||
-                "Não foi possível confirmar sua permissão."
-            );
+        if (!permissoes) {
+            const resultadoPermissoes =
+                await supabase.rpc(
+                    "sar_minhas_permissoes"
+                );
 
-            return;
+            const permissoesErro =
+                resultadoPermissoes.error;
+
+            if (permissoesErro) {
+                console.error(
+                    "SAR Page Guard — erro ao consultar permissões:",
+                    permissoesErro
+                );
+
+                mostrarAcessoNegado(
+                    codigo,
+                    permissoesErro.message ||
+                    "Não foi possível confirmar sua permissão."
+                );
+
+                return;
+            }
+
+            permissoes =
+                resultadoPermissoes.data;
+
+            salvarPermissoesCache(
+                sessao.user.id,
+                permissoes
+            );
         }
 
         const permissao =
