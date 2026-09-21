@@ -102,6 +102,10 @@
     return data;
   }
 
+  async function areaConfiguration() {
+    return postWithSession("/api/game/classificator/area/configuracao", {});
+  }
+
   async function restart() {
     if (!getSession()) {
       return start();
@@ -117,6 +121,7 @@
     selectState,
     answer,
     status,
+    areaConfiguration,
     getSession,
     getCachedState,
     clearCachedState,
