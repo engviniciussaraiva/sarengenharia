@@ -1981,6 +1981,7 @@ async function recalcularTabelaHidraulica(tabela){
   const linhasTabela = [...tabela.querySelectorAll("tbody tr")];
   const infoPressao = tabela.parentElement.querySelector(".info-pressao-manometro");
   const infoUltimoPonto = tabela.parentElement.querySelector(".info-ultimo-ponto");
+  const alertaPressao = tabela.parentElement.querySelector(".info-alerta-pressao");
   const sequencia = Number(tabela.dataset.sequencia || 0) + 1;
   tabela.dataset.sequencia = String(sequencia);
 
@@ -2022,12 +2023,9 @@ async function recalcularTabelaHidraulica(tabela){
     });
 
     if(infoPressao){
-      const aviso = resultado.avisos?.length
-        ? ` · Atenção: ${resultado.avisos.join(" ")}`
-        : "";
       infoPressao.textContent =
         `Pressão de trabalho no manômetro: ${fmt(resultado.pressao_manometro_mca)} m.c.a. = ` +
-        `${fmt(resultado.pressao_manometro_kgf_cm2)} kgf/cm²${aviso}`;
+        `${fmt(resultado.pressao_manometro_kgf_cm2)} kgf/cm²`;
     }
 
     if(infoUltimoPonto){
@@ -2049,6 +2047,19 @@ async function recalcularTabelaHidraulica(tabela){
       }else{
         infoUltimoPonto.textContent = "";
         infoUltimoPonto.hidden = true;
+      }
+    }
+
+    if(alertaPressao){
+      if(resultado.pressao_elevada){
+        const mensagem = resultado.avisos?.find(aviso =>
+          aviso.toLowerCase().includes("pressão elevada")
+        ) || "Atenção: Pressão elevada, acima de 100 m.c.a.";
+        alertaPressao.textContent = mensagem;
+        alertaPressao.hidden = false;
+      }else{
+        alertaPressao.textContent = "";
+        alertaPressao.hidden = true;
       }
     }
 
@@ -2211,7 +2222,7 @@ data-material-comp-eq="${redeInicial.material_comprimentos_equivalentes}">
         <tbody>${linhasTabela}</tbody>
       </table>
 
-<div style="margin-top:8px; display:flex; gap:14px; align-items:center;">
+<div style="margin-top:8px; display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
 <button
 class="btn-export"
 onclick="adicionarTrechoAposManometro('${calcId}')">
@@ -2223,31 +2234,41 @@ class="btn-export"
 onclick="excluirUltimoTrechoAdicionado('${calcId}')">
 🗑️ Excluir última linha
 </button>
+
+<button
+class="btn-export"
+style="background:#fbeaea; color:#9f1d1d; border:1px solid #e7bcbc;"
+onclick="excluirTabelaHidraulica('${calcId}')">
+🗑️ Excluir tabela
+</button>
 </div> 
 
-<div class="info-pressao-manometro"
-
-     style="
-       margin-top:10px;
-       font-size:14px;
-       font-weight:600;
-       color:#173f3b;
-     ">
+<div style="
+  margin-top:10px;
+  padding:8px 10px;
+  border-left:4px solid #3f7f72;
+  border-radius:5px;
+  background:#e5f1ed;
+  font-size:14px;
+  font-weight:700;
+  color:#173f3b;
+">
+  <div class="info-pressao-manometro"></div>
+  <div class="info-ultimo-ponto" hidden style="margin-top:5px;"></div>
 </div>
 
-<div class="info-ultimo-ponto"
+<div class="info-alerta-pressao"
      hidden
      style="
-       margin-top:6px;
+       margin-top:7px;
        padding:8px 10px;
-       border-left:4px solid #3f7f72;
+       border-left:4px solid #c62828;
        border-radius:5px;
-       background:#e5f1ed;
+       background:#feecec;
        font-size:14px;
-       font-weight:700;
-       color:#173f3b;
-     ">
-</div>
+       font-weight:800;
+       color:#9f1d1d;
+     "></div>
 
 <div style="margin-top:14px; text-align:center;">
   <button
@@ -2445,6 +2466,24 @@ function excluirUltimoTrechoAdicionado(calcId){
   linhasExtras[linhasExtras.length - 1].remove();
 
   recalcularTabelaHidraulica(tabela);
+}
+
+function excluirTabelaHidraulica(calcId){
+  const bloco = document.getElementById(calcId);
+  if(!bloco) return;
+
+  if(!confirm("Excluir esta tabela de cálculo hidráulico?")) return;
+
+  bloco.remove();
+
+  const conteudo = document.getElementById("calculoHidraulicoConteudo");
+  const possuiOutraTabela = conteudo.querySelector(
+    ".card[id^='calc-chave-']"
+  );
+
+  if(!possuiOutraTabela){
+    conteudo.innerHTML = conteudoVazioCalculoHidraulico();
+  }
 }
 
 
