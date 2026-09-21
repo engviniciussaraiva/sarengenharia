@@ -881,10 +881,10 @@ async function calcularAgora(mostrarErro = false){
   const densidade = n("densidade");
   const tempo = n("tempo");
 
-  if(comprimento <= 0 || largura <= 0 || altura <= 0 || densidade <= 0 || tempo <= 0){
+  if(comprimento <= 0 || largura <= 0 || altura <= 0){
     limparResultadosCalculo();
     if(mostrarErro){
-      alert("Informe Comprimento, Largura, Altura, Densidade e Tempo.");
+      alert("Informe Comprimento, Largura e Altura.");
     }
     return null;
   }
@@ -896,8 +896,8 @@ async function calcularAgora(mostrarErro = false){
       comprimento,
       largura,
       altura,
-      densidade,
-      tempo,
+      densidade: densidade > 0 ? densidade : null,
+      tempo: tempo > 0 ? tempo : null,
       bicos_projetados: n("bicosProjetado"),
       selecao_manual: selecaoManual,
       modelo: document.getElementById("modeloBico").value,
@@ -908,6 +908,13 @@ async function calcularAgora(mostrarErro = false){
 
     preencherDropsBico(escolhido);
     window.STATUS_CALCULO = escolhido.status;
+
+    if(densidade <= 0){
+      document.getElementById("densidade").value = escolhido.densidade_lpm_m2;
+    }
+    if(tempo <= 0){
+      document.getElementById("tempo").value = escolhido.tempo_operacao_min;
+    }
 
     document.getElementById("area").value = fmt(escolhido.area_m2);
     document.getElementById("vazaoTotal").value = fmt(escolhido.vazao_total_minima_lpm);
