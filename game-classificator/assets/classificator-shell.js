@@ -16,7 +16,8 @@
     AREA:'<svg viewBox="0 0 24 24"><path d="M4 5l5-2 6 2 5-2v16l-5 2-6-2-5 2z"/><path d="M9 3v16M15 5v16"/></svg>',
     ALTURA:'<svg viewBox="0 0 24 24"><path d="M5 20V8h8v12zM8 8V4h5v4M17 5v14M15 7l2-2 2 2M15 17l2 2 2-2"/></svg>',
     OCUPACAO:'<svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3"/><path d="M6 20v-2a6 6 0 0112 0v2M4 10a3 3 0 00-2 3v3M20 10a3 3 0 012 3v3"/></svg>',
-    CRITERIOS:'<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7M8 13l1.5 1.5L12 12M14 8h2M14 13h2"/></svg>'
+    CRITERIOS:'<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7M8 13l1.5 1.5L12 12M14 8h2M14 13h2"/></svg>',
+    INICIO:'<svg viewBox="0 0 24 24"><path d="M3 11.5L12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-6h5v6"/></svg>'
   };
 
   host.innerHTML = `
@@ -57,6 +58,16 @@
 
   function drawCriteria(criteria = defaultCriteria) {
     criteriaEl.innerHTML = "";
+
+    const homeButton = document.createElement("button");
+    homeButton.type = "button";
+    homeButton.className = "classificator-criterion classificator-home clickable";
+    homeButton.innerHTML = `${icons.INICIO}<span>Início</span>`;
+    homeButton.title = "Voltar para Implantação";
+    homeButton.setAttribute("aria-label", "Voltar para a fase de Implantação");
+    homeButton.addEventListener("click", () => window.location.assign("/game-classificator/fase-01/"));
+    criteriaEl.appendChild(homeButton);
+
     for (const item of criteria) {
       const button = document.createElement("button");
       button.type = "button";
