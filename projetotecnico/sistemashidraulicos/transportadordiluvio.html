@@ -40,24 +40,62 @@ body{
   padding:18px;
 }
 
-.header{
-  background:linear-gradient(135deg,var(--sar-green),var(--sar-green-2));
-  color:#fff;
-  border-radius:12px;
-  padding:18px 22px;
-  margin-bottom:16px;
-  box-shadow:0 6px 18px rgba(0,0,0,.12);
+.study-topbar{
+  position:sticky;
+  top:0;
+  z-index:1000;
+  display:grid;
+  grid-template-columns:minmax(390px,1fr) auto auto;
+  align-items:center;
+  gap:20px;
+  width:100%;
+  padding:12px 22px;
+  background:linear-gradient(135deg,#e5f1ed,#dbece6);
+  border-bottom:2px solid #a9c9c0;
+  box-shadow:0 4px 12px rgba(32,79,75,.14);
 }
 
-.header h1{
+.study-title h1{
   margin:0;
-  font-size:22px;
+  color:#214c46;
+  font-size:19px;
+  line-height:1.2;
 }
 
-.header p{
-  margin:6px 0 0;
-  opacity:.9;
+.study-title p{
+  margin:4px 0 0;
+  color:#456e67;
+  font-size:12px;
+  font-weight:700;
 }
+
+.study-status{
+  color:#496b65;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+.study-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+}
+
+.study-actions button{
+  min-height:38px;
+  padding:0 14px;
+  border:1px solid transparent;
+  border-radius:8px;
+  white-space:nowrap;
+  box-shadow:0 2px 6px rgba(32,79,75,.12);
+}
+
+#newStudy{background:#effaf5;color:#176449;border-color:#a9d8c4}
+#openStudy{background:#fff;color:#315956;border-color:#bdd0cd}
+#saveStudy{background:#204f4b;color:#fff}
+#importStudy{background:#edf6ff;color:#245f94;border-color:#a8ccef}
+#exportStudy{background:#2d805b;color:#fff}
 
 .field-wide{
   grid-column: span 2;
@@ -164,6 +202,11 @@ button{
   font-size:14px;
 }
 
+button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
 .btn-clean{
   background:#e9eeee;
   color:#344054;
@@ -177,6 +220,69 @@ button{
 .btn-calc{
   background:#173f3b;
   color:#fff;
+}
+
+.calc-action-bar{
+  display:grid;
+  grid-template-columns:auto minmax(230px,1fr) auto;
+  align-items:center;
+  gap:14px;
+  margin-top:16px;
+  padding:12px;
+  border:1px solid var(--sar-border);
+  border-radius:8px;
+  background:#f8faf9;
+}
+
+.calc-action-bar .btn-calc{
+  min-width:250px;
+  height:44px;
+}
+
+.calc-status{
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  padding:9px 12px;
+  border:1px solid var(--sar-border);
+  border-radius:7px;
+  font-size:14px;
+  font-weight:700;
+}
+
+.calc-legend{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  color:#667085;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+.calc-legend strong{color:#344054;margin-right:2px}
+
+.calc-status-idle{background:#f2f4f7;color:#475467}
+.calc-status-loading{background:#eaf3ff;color:#1849a9}
+.calc-status-success{background:#dff3d5;color:#14532d}
+.calc-status-stale{background:#fff4cc;color:#854d0e}
+.calc-status-error{background:#fee4e2;color:#b42318}
+
+.resultados-dimensionamento{
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid var(--sar-border);
+}
+
+.resultados-dimensionamento[hidden]{display:none!important}
+
+.resultados-dimensionamento.resultados-desatualizados{
+  border-top-color:#e5a500;
+}
+
+.results-title{
+  margin:0 0 14px;
+  color:var(--sar-green);
+  font-size:15px;
 }
 
 .table-wrap{
@@ -233,6 +339,17 @@ tr:nth-child(even){
 
 @media(max-width:900px){
   .grid-3,.grid-4{grid-template-columns:1fr}
+  .study-topbar{position:static;grid-template-columns:1fr;gap:9px}
+  .study-actions{justify-content:flex-start;flex-wrap:wrap}
+  .study-status{display:none}
+  .calc-action-bar{grid-template-columns:1fr;align-items:stretch}
+  .calc-action-bar .btn-calc{width:100%;min-width:0}
+  .calc-legend{flex-wrap:wrap}
+}
+
+@media(max-width:1250px) and (min-width:901px){
+  .study-topbar{grid-template-columns:1fr auto}
+  .study-actions{grid-column:1 / -1;justify-content:flex-end}
 }
 
 .btn-table{
@@ -442,6 +559,51 @@ select.dn-edit{
   color:#14532d;
 }
 
+.study-dialog{
+  width:min(920px,94vw);
+  max-height:82vh;
+  padding:0;
+  color:#243f34;
+  background:#fff;
+  border:0;
+  border-radius:14px;
+  box-shadow:0 24px 70px rgba(16,39,30,.34);
+}
+
+.study-dialog::backdrop{background:rgba(16,39,30,.50)}
+
+.study-dialog-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:18px 20px;
+  background:#e5f1ed;
+  border-bottom:1px solid #c9ddd7;
+}
+
+.study-dialog-head h2{margin:0;color:#244d3e;font-size:19px}
+.study-dialog-head button{width:34px;height:34px;padding:0;background:#fff;color:#344054}
+
+.study-dialog-message{
+  margin:16px 20px;
+  padding:10px 12px;
+  background:#edf7f2;
+  border-left:4px solid #43836b;
+}
+
+.study-dialog-message.error{
+  color:#8b3434;
+  background:#fff2f2;
+  border-color:#b44646;
+}
+
+.study-list-wrap{max-height:58vh;overflow:auto;padding:0 20px 20px}
+.study-list-table{min-width:700px;margin:0}
+.study-list-table td:last-child{display:flex;justify-content:center;gap:7px}
+.study-list-table button{padding:7px 12px}
+.study-list-table .delete-study{background:#fff7f7;color:#a23d3d;border:1px solid #e0b7b7}
+
 
 </style>
 
@@ -452,12 +614,25 @@ select.dn-edit{
 </head>
 
 <body>
-<div class="wrap">
-
-  <div class="header">
-    <h1>Dimensionamento de Sistema de Dilúvio para Transportadores Enclausurados</h1>
-    <p>SAR Engenharia · Projeto Técnico · Sistemas Hidráulicos · Proteção por Dilúvio</p>
+<header class="study-topbar">
+  <div class="study-title">
+    <h1>Dimensionamento de Sistema de Dilúvio para Transportadores</h1>
+    <p>SAR Engenharia</p>
   </div>
+
+  <span id="studyCode" class="study-status">Estudo ainda não gravado</span>
+
+  <nav class="study-actions" aria-label="Ações do estudo">
+    <button id="newStudy" type="button">Novo estudo</button>
+    <button id="openStudy" type="button">Abrir estudo</button>
+    <button id="saveStudy" type="button">Salvar estudo</button>
+    <button id="importStudy" type="button">Importar JSON</button>
+    <button id="exportStudy" type="button">Exportar JSON</button>
+    <input id="importFile" type="file" accept="application/json,.json" hidden>
+  </nav>
+</header>
+
+<div class="wrap">
 
   <div class="card">
     <h2 class="section-title">Dados</h2>
@@ -480,28 +655,27 @@ select.dn-edit{
     </div>
       <h2 class="section-title" style="margin-top:18px;">Rede de Dilúvio</h2>
 
-    <div class="grid-4">
-
-
+    <div class="grid-4 entradas-dimensionamento">
       <div class="field">
         <label>Comprimento da área protegida (m)</label>
-        <input id="comprimento" class="obrigatorio"  type="number" step="0.01" oninput="calcular()">
+        <input id="comprimento" class="obrigatorio" type="number" step="0.01" oninput="alterarEntradaDimensionamento('comprimento')">
       </div>
 
       <div class="field">
         <label>Largura da área protegida (m)</label>
-        <input id="largura" class="obrigatorio"  type="number" step="0.01" oninput="calcular()">
+        <input id="largura" class="obrigatorio" type="number" step="0.01" oninput="alterarEntradaDimensionamento('largura')">
       </div>
 
       <div class="field">
         <label>Altura entre a área e o defletor (m)</label>
-        <input id="altura" class="obrigatorio"  type="number" step="0.01" oninput="calcular()">
+        <input id="altura" class="obrigatorio" type="number" step="0.01" oninput="alterarEntradaDimensionamento('altura')">
       </div>
 
       <div class="field">
-        <label>Densidade (L/min/m²)</label>
-        <input id="densidade" class="warn" type="number" step="0.01" oninput="calcular()">
-
+        <label>Material da Tubulação</label>
+        <select id="materialTubulacao" class="obrigatorio" onchange="alterarEntradaDimensionamento('material')" disabled>
+          <option value="">Carregando materiais cadastrados...</option>
+        </select>
       </div>
 
       <div class="field">
@@ -515,118 +689,125 @@ select.dn-edit{
       </div>
 
       <div class="field">
-        <label>Modelo do Bico</label>
-        <select id="modeloBico" class="warn" onchange="alterarModeloBico()">
-          <option value="">Selecione...</option>
-</select> 
-
+        <label>Densidade (L/min/m²)</label>
+        <input id="densidade" class="warn" type="number" step="0.01" oninput="alterarEntradaDimensionamento('densidade')">
       </div>
 
       <div class="field">
-        <label>Tipo</label>
-        <input id="tipoBico" readonly>
+        <label>Tempo de operação (min)</label>
+        <input id="tempo" class="warn" type="number" step="1" oninput="alterarEntradaDimensionamento('tempo')">
+      </div>
+    </div>
+
+    <div class="calc-action-bar">
+      <button id="btnDimensionar" class="btn-calc" type="button" onclick="calcularDimensionamento(true)" disabled>
+        Calcular dimensionamento
+      </button>
+      <div id="statusDimensionamento" class="calc-status calc-status-idle" role="status" aria-live="polite">
+        Preencha comprimento, largura, altura e material.
       </div>
 
-      <div class="field">
-        <label>Ângulo abertura defletor (°)</label>
-        <select id="angulo" class="warn" onchange="selecaoManual=true; calcular()">
-          <option value="">Selecione...</option>
-</select> 
+      <div class="calc-legend" aria-label="Legenda dos campos">
+        <strong>Legenda</strong>
+        <span class="legenda-tag" style="background:#eaf3ff;">Obrigatório</span>
+        <span class="legenda-tag" style="background:#dff3d5;">Checagem</span>
+        <span class="legenda-tag" style="background:#fff9c4;">Editável</span>
       </div>
+    </div>
 
-      <div class="field">
-        <label>Fator K de descarga</label>
-        <input id="fatorK" readonly>
+    <div id="resultadosDimensionamento" class="resultados-dimensionamento" hidden>
+      <h3 class="results-title">Resultados do dimensionamento</h3>
+
+      <div class="grid-4">
+        <div class="field">
+          <label>Modelo do Bico</label>
+          <select id="modeloBico" class="warn" onchange="alterarModeloBico()">
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Tipo</label>
+          <input id="tipoBico" readonly>
+        </div>
+
+        <div class="field">
+          <label>Ângulo abertura defletor (°)</label>
+          <select id="angulo" class="warn" onchange="alterarAnguloBico()">
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Fator K de descarga</label>
+          <input id="fatorK" readonly>
+        </div>
+
+        <div class="field">
+          <label>Diâmetro da descarga (mm)</label>
+          <input id="diametroDescarga" readonly>
+        </div>
+
+        <div class="field">
+          <label>Distância planejada entre bicos (m)</label>
+          <input id="distPlanejada" readonly>
+        </div>
+
+        <div class="field">
+          <label>Nº de bicos planejado</label>
+          <input id="bicosPlanejado" readonly>
+        </div>
+
+        <div class="field">
+          <label>Nº de bicos projetado</label>
+          <input id="bicosProjetado" class="warn" type="number" step="1" min="1" oninput="alterarBicosProjetados()">
+        </div>
+
+        <div class="field">
+          <label>Distância entre bicos real (m)</label>
+          <input id="distReal" readonly>
+        </div>
+
+        <div class="field">
+          <label>Vazão min planejada por bico (L/min)</label>
+          <input id="vazaoPlanejadaBico" readonly>
+        </div>
+
+        <div class="field">
+          <label>Pressão calculada no bico (mca)</label>
+          <input id="pressaoPlanejada" readonly>
+        </div>
+
+        <div class="field">
+          <label>Pressão ajustada no bico (mca)</label>
+          <input id="pressaoAjustada" class="check" readonly>
+        </div>
+
+        <div class="field">
+          <label>Vazão min real por bico (L/min)</label>
+          <input id="vazaoRealBico" readonly>
+        </div>
+
+        <div class="field">
+          <label>Vazão projetada total (L/min)</label>
+          <input id="vazaoProjetadaTotal" class="result" readonly>
+        </div>
+
+        <div class="field">
+          <label>Volume mínimo reservatório (m³)</label>
+          <input id="volumeReservatorio" class="result" readonly>
+        </div>
+
+        <div class="field field-full">
+          <label>Nota Técnica</label>
+          <input id="observacao" class="obs-alerta" readonly>
+        </div>
       </div>
-
-      <div class="field">
-        <label>Diâmetro da descarga (mm)</label>
-        <input id="diametroDescarga" readonly>
-      </div>
-
-            <div class="field">
-        <label>Distância planejada entre bicos (m)</label>
-        <input id="distPlanejada" readonly>
-      </div>
-
-      <div class="field">
-        <label>Nº de bicos planejado</label>
-        <input id="bicosPlanejado" readonly>
-      </div>
-
-      <div class="field">
-        <label>Nº de bicos projetado</label>
-        <input id="bicosProjetado" class="warn" type="number" step="1" oninput="calcular()">
-      </div>
-
-      <div class="field">
-        <label>Distância entre bicos real (m)</label>
-        <input id="distReal" readonly>
-      </div>
-
-      <div class="field">
-        <label>Vazão min planejada por bico (L/min)</label>
-        <input id="vazaoPlanejadaBico" readonly>
-      </div>
-
-      <div class="field">
-        <label>Pressão calculada no bico (mca)</label>
-        <input id="pressaoPlanejada" readonly>
-      </div>
-
-      <div class="field">
-        <label>Pressão ajustada no bico (mca)</label>
-        <input id="pressaoAjustada" class="check" readonly>
-      </div>
-
-      <div class="field">
-        <label>Vazão min real por bico (L/min)</label>
-        <input id="vazaoRealBico" readonly>
-      </div>
-
-      <div class="field">
-  <label>Vazão projetada total (L/min)</label>
-  <input id="vazaoProjetadaTotal" class="result" readonly>
-</div>
-
-<div class="field">
-  <label>Tempo de operação (min)</label>
-  <input id="tempo" class="warn" type="number" oninput="calcular()">
-</div>
-
-      <div class="field">
-        <label>Volume mínimo reservatório (m³)</label>
-        <input id="volumeReservatorio" class="result" readonly>
-      </div>
-
-
-<div class="field">
-  <label>Material da Tubulação</label>
-
-  <select id="materialTubulacao" class="obrigatorio" disabled>
-    <option value="">Carregando materiais cadastrados...</option>
-  </select>
-</div>
-
-
-<div class="field legenda-campos">
-  <label>Legenda</label>
-  <div class="legenda-linha">
-    <span class="legenda-tag" style="background:#eaf3ff;">Obrigatório</span>
-    <span class="legenda-tag" style="background:#dff3d5;">Checagem</span>
-    <span class="legenda-tag" style="background:#fff9c4;">Editável</span>
-  </div>
-</div>
-
-
-      <div class="field field-full">
-  <label>Nota Técnica</label>
-  <input id="observacao" class="obs-alerta" readonly>
-</div>
+    </div>
 
     <div class="actions">
-      <button class="btn-clean" onclick="limpar()">Limpar</button>
-<button class="btn-insert" onclick="inserirLinha()">Inserir</button>
+      <button class="btn-clean" type="button" onclick="limpar()">Limpar</button>
+      <button id="btnInserir" class="btn-insert" type="button" onclick="inserirLinha()" disabled>Inserir</button>
     </div>
   </div>
 
@@ -695,15 +876,48 @@ select.dn-edit{
 
 </div>
 
+<dialog id="studyDialog" class="study-dialog">
+  <div class="study-dialog-head">
+    <h2>Abrir estudo de Dilúvio</h2>
+    <button id="cancelStudyDialog" type="button" aria-label="Fechar">✕</button>
+  </div>
+  <p id="studyDialogMessage" class="study-dialog-message">
+    Carregando estudos...
+  </p>
+  <div class="study-list-wrap">
+    <table class="study-list-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nome do estudo</th>
+          <th>Status</th>
+          <th>Atualizado em</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="studyList"></tbody>
+    </table>
+  </div>
+</dialog>
+
 <script>
 const DILUVIO_API_PATH = "/api/hidraulica/diluvio-transportadores";
 let linhas = [];
 let selecaoManual = false;
-let timerCalculo = null;
+let bicosProjetadosManual = false;
+let calculoAtualizado = false;
+let calculoEmAndamento = false;
+let timerPrevia = null;
+let sequenciaPrevia = 0;
 let sequenciaCalculo = 0;
+let estudoAtualId = null;
+let estudoAtualCodigo = null;
+let estudoAtualNome = "";
+let salvamentoEmAndamento = false;
 
 window.BICOS_DILUVIO = [];
 window.COMP_EQ_DILUVIO = [];
+window.PARAMETROS_DILUVIO = {};
 
 async function executarMotorDiluvio(operacao, dados = {}){
   if(!window.SARAPI){
@@ -746,6 +960,296 @@ function htmlSeguro(v){
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+const CAMPOS_ESTUDO_DILUVIO = [
+  "referencia", "localProtegido", "chave", "comprimento", "largura",
+  "altura", "materialTubulacao", "area", "vazaoTotal", "densidade",
+  "tempo", "modeloBico", "tipoBico", "angulo", "fatorK",
+  "diametroDescarga", "distPlanejada", "bicosPlanejado",
+  "bicosProjetado", "distReal", "vazaoPlanejadaBico",
+  "pressaoPlanejada", "pressaoAjustada", "vazaoRealBico",
+  "vazaoProjetadaTotal", "volumeReservatorio", "observacao"
+];
+
+function atualizarStatusEstudo(){
+  document.getElementById("studyCode").textContent = estudoAtualCodigo
+    ? `${estudoAtualCodigo} · gravado no SAR`
+    : "Estudo ainda não gravado";
+}
+
+function limparEstudoAtual(){
+  estudoAtualId = null;
+  estudoAtualCodigo = null;
+  estudoAtualNome = "";
+  atualizarStatusEstudo();
+}
+
+function conteudoVazioCalculoHidraulico(){
+  return `
+    <p style="color:#667085;font-size:14px;">
+      Clique no botão 📈 da Tabela Resumo para gerar o cálculo hidráulico da chave.
+    </p>
+  `;
+}
+
+function limparCalculosHidraulicos(){
+  document.getElementById("calculoHidraulicoConteudo").innerHTML =
+    conteudoVazioCalculoHidraulico();
+}
+
+function coletarRedesHidraulicas(){
+  return [...document.querySelectorAll(
+    "#calculoHidraulicoConteudo > .card[id^='calc-chave-']"
+  )].map(bloco => {
+    const tabela = bloco.querySelector("table");
+    return {
+      linha_indice: Number(bloco.dataset.linhaIndice),
+      linhas: [...tabela.querySelectorAll("tbody tr")].map(tr => ({
+        referencia: referenciaTrecho(tr),
+        tem_bico: tr.dataset.temBico === "sim",
+        dn_mm: valorNum(tr.querySelector(".dn-edit")?.value),
+        comprimento_real_m: valorNum(
+          tr.querySelector(".comp-real-edit")?.value ||
+          tr.querySelector(".comp-real")?.textContent
+        ),
+        comprimento_equivalente_m: valorNum(
+          tr.querySelector(".comp-eq")?.value
+        ),
+        elevacao_m: valorNum(tr.querySelector(".elevacao-edit")?.value)
+      }))
+    };
+  }).filter(rede => Number.isInteger(rede.linha_indice));
+}
+
+function coletarEstadoEstudo(){
+  const formulario = {};
+  CAMPOS_ESTUDO_DILUVIO.forEach(id => {
+    formulario[id] = document.getElementById(id)?.value ?? "";
+  });
+
+  return {
+    tipo: "SAR_DILUVIO_TRANSPORTADORES",
+    versao_estrutura: 1,
+    formulario,
+    linhas: JSON.parse(JSON.stringify(linhas)),
+    redes_hidraulicas: coletarRedesHidraulicas(),
+    estado_calculo: {
+      selecao_manual: selecaoManual,
+      bicos_projetados_manual: bicosProjetadosManual,
+      calculo_atualizado: calculoAtualizado,
+      resultados_visiveis:
+        !document.getElementById("resultadosDimensionamento").hidden,
+      status: window.STATUS_CALCULO || ""
+    }
+  };
+}
+
+async function aplicarEstadoEstudo(estado){
+  if(!estado || estado.tipo !== "SAR_DILUVIO_TRANSPORTADORES"){
+    throw new Error("O arquivo não pertence ao módulo Dilúvio em Transportadores.");
+  }
+  if(Number(estado.versao_estrutura) !== 1){
+    throw new Error("A versão do estudo não é compatível com esta página.");
+  }
+
+  limpar();
+  linhas = Array.isArray(estado.linhas)
+    ? JSON.parse(JSON.stringify(estado.linhas))
+    : [];
+
+  const formulario = estado.formulario || {};
+  const material = String(formulario.materialTubulacao || "");
+  if([...document.getElementById("materialTubulacao").options]
+    .some(option => option.value === material)){
+    document.getElementById("materialTubulacao").value = material;
+  }
+
+  if(formulario.modeloBico){
+    preencherDropsBico({
+      modelo: formulario.modeloBico,
+      angulo: formulario.angulo,
+      tipo: formulario.tipoBico
+    }, true);
+  }
+
+  CAMPOS_ESTUDO_DILUVIO.forEach(id => {
+    const elemento = document.getElementById(id);
+    if(elemento && Object.hasOwn(formulario, id)){
+      elemento.value = formulario[id] ?? "";
+    }
+  });
+
+  const estadoCalculo = estado.estado_calculo || {};
+  selecaoManual = Boolean(estadoCalculo.selecao_manual);
+  bicosProjetadosManual = Boolean(estadoCalculo.bicos_projetados_manual);
+  calculoAtualizado = Boolean(estadoCalculo.calculo_atualizado);
+  window.STATUS_CALCULO = String(estadoCalculo.status || "");
+
+  const resultados = document.getElementById("resultadosDimensionamento");
+  resultados.hidden = !estadoCalculo.resultados_visiveis;
+  resultados.classList.toggle(
+    "resultados-desatualizados",
+    !resultados.hidden && !calculoAtualizado
+  );
+
+  if(calculoAtualizado){
+    definirStatusCalculo("success", "Cálculo restaurado do estudo.");
+  }else if(!resultados.hidden){
+    definirStatusCalculo(
+      "stale",
+      "Estudo restaurado — clique em Recalcular dimensionamento."
+    );
+  }else if(camposIniciaisValidos()){
+    definirStatusCalculo("idle", "Dados prontos — clique em Calcular dimensionamento.");
+  }else{
+    definirStatusCalculo("idle", "Preencha comprimento, largura, altura e material.");
+  }
+
+  desenharTabela();
+  atualizarMemoria();
+  atualizarControlesCalculo();
+  limparCalculosHidraulicos();
+  await restaurarRedesHidraulicas(estado.redes_hidraulicas || []);
+}
+
+function nomeEstudoSugerido(){
+  return String(
+    estudoAtualNome ||
+    document.getElementById("referencia").value ||
+    linhas[0]?.referencia ||
+    linhas[0]?.local ||
+    "Estudo de Dilúvio"
+  ).trim();
+}
+
+async function salvarEstudo(){
+  if(salvamentoEmAndamento) return;
+  let nome = nomeEstudoSugerido();
+  if(!estudoAtualId){
+    nome = window.prompt("Nome do estudo:", nome);
+    if(nome === null) return;
+    nome = nome.trim();
+    if(!nome){
+      alert("Informe um nome para salvar o estudo.");
+      return;
+    }
+  }
+
+  salvamentoEmAndamento = true;
+  const botao = document.getElementById("saveStudy");
+  botao.disabled = true;
+  try{
+    const retorno = await executarMotorDiluvio("salvar_estudo", {
+      id: estudoAtualId,
+      nome_estudo: nome,
+      dados_estudo: coletarEstadoEstudo()
+    });
+    estudoAtualId = retorno.estudo.id;
+    estudoAtualCodigo = retorno.estudo.codigo_estudo;
+    estudoAtualNome = retorno.estudo.nome_estudo;
+    atualizarStatusEstudo();
+    alert(`Estudo ${estudoAtualCodigo} salvo com sucesso.`);
+  }catch(error){
+    alert(`Não foi possível salvar o estudo.\n${error.message}`);
+  }finally{
+    salvamentoEmAndamento = false;
+    botao.disabled = false;
+  }
+}
+
+async function carregarListaEstudos(){
+  const mensagem = document.getElementById("studyDialogMessage");
+  const lista = document.getElementById("studyList");
+  mensagem.className = "study-dialog-message";
+  mensagem.textContent = "Carregando estudos...";
+  lista.innerHTML = "";
+  try{
+    const retorno = await executarMotorDiluvio("listar_estudos");
+    const estudos = retorno.estudos || [];
+    mensagem.textContent = estudos.length
+      ? `${estudos.length} estudo(s) encontrado(s).`
+      : "Você ainda não possui estudos gravados.";
+    estudos.forEach(estudo => {
+      const tr = document.createElement("tr");
+      const atualizado = estudo.atualizado_em
+        ? new Date(estudo.atualizado_em).toLocaleString("pt-BR")
+        : "—";
+      tr.innerHTML = `
+        <td><b>${htmlSeguro(estudo.codigo_estudo)}</b></td>
+        <td>${htmlSeguro(estudo.nome_estudo)}</td>
+        <td>${htmlSeguro(String(estudo.status || "").replaceAll("_", " "))}</td>
+        <td>${htmlSeguro(atualizado)}</td>
+        <td>
+          <button type="button" data-open-study="${htmlSeguro(estudo.id)}">Abrir</button>
+          <button type="button" class="delete-study" data-delete-study="${htmlSeguro(estudo.id)}" data-study-code="${htmlSeguro(estudo.codigo_estudo)}">Excluir</button>
+        </td>
+      `;
+      lista.appendChild(tr);
+    });
+  }catch(error){
+    mensagem.className = "study-dialog-message error";
+    mensagem.textContent = error.message;
+  }
+}
+
+async function abrirEstudo(id){
+  const retorno = await executarMotorDiluvio("abrir_estudo", {id});
+  const estudo = retorno.estudo;
+  await aplicarEstadoEstudo(estudo.dados_estudo);
+  estudoAtualId = estudo.id;
+  estudoAtualCodigo = estudo.codigo_estudo;
+  estudoAtualNome = estudo.nome_estudo;
+  atualizarStatusEstudo();
+  document.getElementById("studyDialog").close();
+}
+
+async function excluirEstudo(id, codigo){
+  if(!confirm(`Excluir definitivamente o estudo ${codigo}?`)) return;
+  await executarMotorDiluvio("excluir_estudo", {id});
+  if(estudoAtualId === id) limparEstudoAtual();
+  await carregarListaEstudos();
+}
+
+function novoEstudo(){
+  if(!confirm("Criar novo estudo? Os dados não gravados serão substituídos.")) return;
+  linhas = [];
+  desenharTabela();
+  limparCalculosHidraulicos();
+  limpar();
+  limparEstudoAtual();
+}
+
+function exportarEstudoJSON(){
+  const arquivo = {
+    tipo: "SAR_DILUVIO_TRANSPORTADORES",
+    versao_estrutura: 1,
+    exportado_em: new Date().toISOString(),
+    nome_estudo: nomeEstudoSugerido(),
+    dados_estudo: coletarEstadoEstudo()
+  };
+  const blob = new Blob([JSON.stringify(arquivo, null, 2)], {
+    type: "application/json"
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const nomeSeguro = nomeEstudoSugerido()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .toLowerCase() || "estudo-diluvio";
+  link.href = url;
+  link.download = `${nomeSeguro}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+async function importarEstudoJSON(arquivo){
+  const conteudo = JSON.parse(await arquivo.text());
+  const estado = conteudo.dados_estudo || conteudo;
+  await aplicarEstadoEstudo(estado);
+  limparEstudoAtual();
 }
 
 function preencherMateriaisTubulacao(){
@@ -838,7 +1342,8 @@ function alterarModeloBico(){
       new Option("Selecione...", "")
     );
     document.getElementById("tipoBico").value = "";
-    calcular();
+    bicosProjetadosManual = false;
+    marcarCalculoDesatualizado();
     return;
   }
 
@@ -851,45 +1356,147 @@ function alterarModeloBico(){
   );
   document.getElementById("angulo").value = String(primeiro.angulo);
   document.getElementById("tipoBico").value = primeiro.tipo || "";
-  calcular();
+  bicosProjetadosManual = false;
+  marcarCalculoDesatualizado();
+}
+
+function alterarAnguloBico(){
+  selecaoManual = Boolean(
+    document.getElementById("modeloBico").value &&
+    document.getElementById("angulo").value
+  );
+  bicosProjetadosManual = false;
+  marcarCalculoDesatualizado();
+}
+
+function alterarBicosProjetados(){
+  bicosProjetadosManual = n("bicosProjetado") > 0;
+  marcarCalculoDesatualizado();
+}
+
+function definirStatusCalculo(tipo, mensagem){
+  const status = document.getElementById("statusDimensionamento");
+  status.className = `calc-status calc-status-${tipo}`;
+  status.textContent = mensagem;
+}
+
+function camposIniciaisValidos(){
+  return (
+    n("comprimento") > 0 &&
+    n("largura") > 0 &&
+    n("altura") > 0 &&
+    Boolean(document.getElementById("materialTubulacao").value)
+  );
+}
+
+function atualizarControlesCalculo(){
+  const botao = document.getElementById("btnDimensionar");
+  const resultadosVisiveis = !document.getElementById("resultadosDimensionamento").hidden;
+  if(calculoEmAndamento){
+    botao.textContent = "Calculando...";
+  }else if(resultadosVisiveis && calculoAtualizado){
+    botao.textContent = "Cálculo atualizado";
+  }else if(resultadosVisiveis){
+    botao.textContent = "Recalcular dimensionamento";
+  }else{
+    botao.textContent = "Calcular dimensionamento";
+  }
+  botao.disabled = (
+    calculoEmAndamento ||
+    !camposIniciaisValidos() ||
+    (resultadosVisiveis && calculoAtualizado)
+  );
+  document.getElementById("btnInserir").disabled = !calculoAtualizado;
+}
+
+function marcarCalculoDesatualizado(){
+  calculoAtualizado = false;
+  const resultados = document.getElementById("resultadosDimensionamento");
+  resultados.classList.toggle("resultados-desatualizados", !resultados.hidden);
+
+  if(!resultados.hidden){
+    definirStatusCalculo("stale", "Dados alterados — clique em Recalcular dimensionamento.");
+  }else if(camposIniciaisValidos()){
+    definirStatusCalculo("idle", "Dados prontos — clique em Calcular dimensionamento.");
+  }else{
+    definirStatusCalculo("idle", "Preencha comprimento, largura, altura e material.");
+  }
+  atualizarControlesCalculo();
+}
+
+function alterarEntradaDimensionamento(campo){
+  if(["comprimento", "largura", "altura", "densidade"].includes(campo)){
+    bicosProjetadosManual = false;
+  }
+  if(["comprimento", "largura", "densidade"].includes(campo)){
+    agendarPreviaDimensionamento();
+  }
+  marcarCalculoDesatualizado();
 }
 
 function limparResultadosCalculo(){
   [
-    "area", "vazaoTotal", "fatorK", "diametroDescarga",
-    "distPlanejada", "bicosPlanejado", "distReal",
+    "tipoBico", "fatorK", "diametroDescarga", "distPlanejada",
+    "bicosPlanejado", "bicosProjetado", "distReal",
     "vazaoPlanejadaBico", "pressaoPlanejada", "pressaoAjustada",
-    "vazaoRealBico", "vazaoProjetadaTotal", "volumeReservatorio"
+    "vazaoRealBico", "vazaoProjetadaTotal", "volumeReservatorio", "observacao"
   ].forEach(id => {
     document.getElementById(id).value = "";
   });
   window.STATUS_CALCULO = "";
 }
 
-function calcular(){
-  window.clearTimeout(timerCalculo);
-  timerCalculo = window.setTimeout(() => {
-    calcularAgora(false);
-  }, 250);
+function agendarPreviaDimensionamento(){
+  window.clearTimeout(timerPrevia);
+  if(n("comprimento") <= 0 || n("largura") <= 0 || n("densidade") <= 0){
+    document.getElementById("area").value = "";
+    document.getElementById("vazaoTotal").value = "";
+    return;
+  }
+  timerPrevia = window.setTimeout(atualizarPreviaDimensionamento, 250);
 }
 
-async function calcularAgora(mostrarErro = false){
+async function atualizarPreviaDimensionamento(){
+  const minhaSequencia = ++sequenciaPrevia;
+  try{
+    const previa = await executarMotorDiluvio("previsualizar", {
+      comprimento: n("comprimento"),
+      largura: n("largura"),
+      densidade: n("densidade"),
+      tempo: n("tempo")
+    });
+    if(minhaSequencia !== sequenciaPrevia) return;
+    document.getElementById("area").value = fmt(previa.area_m2);
+    document.getElementById("vazaoTotal").value = fmt(previa.vazao_total_minima_lpm);
+  }catch(error){
+    if(minhaSequencia !== sequenciaPrevia) return;
+    document.getElementById("area").value = "";
+    document.getElementById("vazaoTotal").value = "";
+    console.error("Erro na prévia do dilúvio:", error);
+  }
+}
+
+async function calcularDimensionamento(mostrarErro = false){
 
   const comprimento = n("comprimento");
   const largura = n("largura");
   const altura = n("altura");
   const densidade = n("densidade");
   const tempo = n("tempo");
+  const material = document.getElementById("materialTubulacao").value;
 
-  if(comprimento <= 0 || largura <= 0 || altura <= 0){
-    limparResultadosCalculo();
+  if(comprimento <= 0 || largura <= 0 || altura <= 0 || !material){
     if(mostrarErro){
-      alert("Informe Comprimento, Largura e Altura.");
+      alert("Informe Comprimento, Largura, Altura e Material da Tubulação.");
     }
     return null;
   }
 
   const minhaSequencia = ++sequenciaCalculo;
+  calculoEmAndamento = true;
+  calculoAtualizado = false;
+  definirStatusCalculo("loading", "Calculando dimensionamento no motor SAR...");
+  atualizarControlesCalculo();
 
   try{
     const escolhido = await executarMotorDiluvio("dimensionar", {
@@ -899,15 +1506,18 @@ async function calcularAgora(mostrarErro = false){
       densidade: densidade > 0 ? densidade : null,
       tempo: tempo > 0 ? tempo : null,
       bicos_projetados: n("bicosProjetado"),
+      bicos_projetados_manual: bicosProjetadosManual,
       selecao_manual: selecaoManual,
       modelo: document.getElementById("modeloBico").value,
-      angulo: n("angulo")
+      angulo: n("angulo"),
+      material
     });
 
     if(minhaSequencia !== sequenciaCalculo) return null;
 
     preencherDropsBico(escolhido);
     window.STATUS_CALCULO = escolhido.status;
+    bicosProjetadosManual = Boolean(escolhido.bicos_projetados_manual);
 
     if(densidade <= 0){
       document.getElementById("densidade").value = escolhido.densidade_lpm_m2;
@@ -933,22 +1543,38 @@ async function calcularAgora(mostrarErro = false){
     document.getElementById("volumeReservatorio").value = fmt(escolhido.volume_reservatorio_m3);
     document.getElementById("observacao").value = escolhido.observacao;
 
+    const resultados = document.getElementById("resultadosDimensionamento");
+    resultados.hidden = false;
+    resultados.classList.remove("resultados-desatualizados");
+    calculoAtualizado = true;
+    definirStatusCalculo("success", "Cálculo atualizado.");
     atualizarMemoria();
     return escolhido;
   }catch(error){
     if(minhaSequencia === sequenciaCalculo){
       document.getElementById("observacao").value = error.message;
+      definirStatusCalculo("error", error.message);
     }
     console.error("Erro no motor de dilúvio:", error);
     if(mostrarErro) alert(error.message);
     return null;
+  }finally{
+    if(minhaSequencia === sequenciaCalculo){
+      calculoEmAndamento = false;
+      atualizarControlesCalculo();
+    }
   }
 }
 
+async function calcularAgora(mostrarErro = false){
+  return calcularDimensionamento(mostrarErro);
+}
 
 async function dadosAtuais(){
-  const resultado = await calcularAgora(true);
-  if(!resultado) return null;
+  if(!calculoAtualizado){
+    alert("Os dados foram alterados. Clique em Recalcular dimensionamento antes de inserir.");
+    return null;
+  }
 
   return {
     referencia: document.getElementById("referencia").value.trim(),
@@ -961,6 +1587,7 @@ materialTubulacao:
     largura: n("largura"),
     altura: n("altura"),
     densidade: n("densidade"),
+    tempo: n("tempo"),
     area: document.getElementById("area").value,
     vazao: document.getElementById("vazaoProjetadaTotal").value,
     modelo: document.getElementById("modeloBico").value,
@@ -1242,6 +1869,8 @@ async function editarLinha(i){
   const l = linhas[i];
 
   selecaoManual = true;
+  bicosProjetadosManual = true;
+  calculoAtualizado = false;
 
   document.getElementById("referencia").value = l.referencia;
   document.getElementById("localProtegido").value = l.local;
@@ -1254,6 +1883,7 @@ document.getElementById("materialTubulacao").value =
   document.getElementById("largura").value = l.largura;
   document.getElementById("altura").value = l.altura;
   document.getElementById("densidade").value = l.densidade;
+  document.getElementById("tempo").value = l.tempo || window.PARAMETROS_DILUVIO.tempo_operacao_min || "";
 
   document.getElementById("bicosProjetado").value = l.bicos;
 
@@ -1264,7 +1894,8 @@ document.getElementById("materialTubulacao").value =
   }, true);
   document.getElementById("modeloBico").value = l.modelo;
   document.getElementById("angulo").value = String(l.angulo).replace("°", "");
-  await calcularAgora(true);
+  const resultado = await calcularDimensionamento(true);
+  if(!resultado) return;
 
   linhas.splice(i, 1);
   desenharTabela();
@@ -1374,7 +2005,7 @@ async function recalcularTabelaHidraulica(tabela){
 
 
 
-async function calculoHidraulicoChave(i){
+async function calculoHidraulicoChave(i, redeSalva = null){
   const l = linhas[i];
 
   const qtd = Number(l.bicos || 0);
@@ -1560,27 +2191,29 @@ onclick="excluirUltimoTrechoAdicionado('${calcId}')">
   let bloco = document.getElementById(calcId);
 
   if(!bloco){
+    const conteudo = document.getElementById("calculoHidraulicoConteudo");
+    if(!conteudo.querySelector(".card[id^='calc-chave-']")){
+      conteudo.innerHTML = "";
+    }
     bloco = document.createElement("div");
     bloco.id = calcId;
     bloco.className = "card";
-    document.getElementById("calculoHidraulicoConteudo").appendChild(bloco);
+    conteudo.appendChild(bloco);
   }
 
+  bloco.dataset.linhaIndice = String(i);
   bloco.innerHTML = html;
 
   const tabela = bloco.querySelector("table");
+  if(redeSalva) aplicarRedeSalva(tabela, redeSalva);
   await recalcularTabelaHidraulica(tabela);
+  return bloco;
 }
 
-  
-function adicionarTrechoAposManometro(calcId){
-  const bloco = document.getElementById(calcId);
-  if(!bloco) return;
-
-  const tabela = bloco.querySelector("table");
+function criarTrechoAposManometro(tabela, dados = {}){
   const tbody = tabela.querySelector("tbody");
 
-  const dn = valorNum(tabela.dataset.dnFinal);
+  const dn = valorNum(dados.dn_mm || tabela.dataset.dnFinal);
   let diametrosDisponiveis = [];
   try{
     diametrosDisponiveis = JSON.parse(tabela.dataset.dnsDisponiveis || "[]");
@@ -1595,16 +2228,18 @@ const trechosExtras = [...tbody.querySelectorAll("tr")]
   .filter(tr => tr.dataset.temBico === "nao").length;
 
 const referenciaNova =
-  trechosExtras === 0
-    ? "Manômetro-P1"
-    : `P${trechosExtras}-P${trechosExtras + 1}`;
+  dados.referencia || (
+    trechosExtras === 0
+      ? "Manômetro-P1"
+      : `P${trechosExtras}-P${trechosExtras + 1}`
+  );
 
 novaLinha.innerHTML = `
 <td>
 <input
 class="hidraulica-edit"
 type="text"
-value="${referenciaNova}"
+value="${htmlSeguro(referenciaNova)}"
 style="width:110px;"
 >
 </td> 
@@ -1630,7 +2265,7 @@ style="width:110px;"
       <input
         class="hidraulica-edit comp-real-edit"
         type="text"
-        value="0,00"
+        value="${fmt(dados.comprimento_real_m)}"
         oninput="recalcularTabelaHidraulica(this.closest('table'))">
     </td>
 
@@ -1638,7 +2273,7 @@ style="width:110px;"
       <input
 class="hidraulica-edit comp-eq"
 type="text"
-value="0,00"
+value="${fmt(dados.comprimento_equivalente_m)}"
 readonly
 onclick="abrirModalCompEq(this)"> 
     </td>
@@ -1653,7 +2288,7 @@ onclick="abrirModalCompEq(this)">
       <input
         class="hidraulica-edit elevacao-edit"
         type="text"
-        value="0,00"
+        value="${fmt(dados.elevacao_m)}"
         oninput="recalcularTabelaHidraulica(this.closest('table'))">
     </td>
 
@@ -1663,6 +2298,49 @@ onclick="abrirModalCompEq(this)">
   `;
 
   tbody.appendChild(novaLinha);
+  return novaLinha;
+}
+
+function aplicarRedeSalva(tabela, redeSalva){
+  const linhasSalvas = Array.isArray(redeSalva?.linhas)
+    ? redeSalva.linhas
+    : [];
+  const bicosSalvos = linhasSalvas.filter(linha => linha.tem_bico);
+  const extrasSalvos = linhasSalvas.filter(linha => !linha.tem_bico);
+
+  const linhasBicos = [...tabela.querySelectorAll("tbody tr")]
+    .filter(tr => tr.dataset.temBico === "sim");
+
+  linhasBicos.forEach((tr, indice) => {
+    const salva = bicosSalvos[indice];
+    if(!salva) return;
+    const dn = tr.querySelector(".dn-edit");
+    if(dn && [...dn.options].some(option => Number(option.value) === Number(salva.dn_mm))){
+      dn.value = String(salva.dn_mm);
+    }
+    tr.querySelector(".comp-real-edit").value = fmt(salva.comprimento_real_m);
+    tr.querySelector(".comp-eq").value = fmt(salva.comprimento_equivalente_m);
+    tr.querySelector(".elevacao-edit").value = fmt(salva.elevacao_m);
+  });
+
+  extrasSalvos.forEach(linha => criarTrechoAposManometro(tabela, linha));
+}
+
+async function restaurarRedesHidraulicas(redes){
+  if(!Array.isArray(redes) || redes.length === 0) return;
+  for(const rede of redes){
+    const indice = Number(rede?.linha_indice);
+    if(!Number.isInteger(indice) || !linhas[indice]) continue;
+    await calculoHidraulicoChave(indice, rede);
+  }
+}
+
+function adicionarTrechoAposManometro(calcId){
+  const bloco = document.getElementById(calcId);
+  if(!bloco) return;
+
+  const tabela = bloco.querySelector("table");
+  criarTrechoAposManometro(tabela);
 
   recalcularTabelaHidraulica(tabela);
 }
@@ -1710,18 +2388,36 @@ function atualizarMemoria(){
 
 function limpar(){
   selecaoManual = false;
+  bicosProjetadosManual = false;
+  calculoAtualizado = false;
+  calculoEmAndamento = false;
+  window.clearTimeout(timerPrevia);
+  sequenciaPrevia += 1;
+  sequenciaCalculo += 1;
 
-  document.querySelectorAll("input").forEach(i => {
-    i.value = "";
+  [
+    "referencia", "localProtegido", "chave", "comprimento", "largura",
+    "altura", "area", "vazaoTotal"
+  ].forEach(id => {
+    document.getElementById(id).value = "";
   });
 
-  document.querySelectorAll("select").forEach(s => {
-    s.selectedIndex = 0;
-  });
-
+  document.getElementById("densidade").value =
+    window.PARAMETROS_DILUVIO.densidade_lpm_m2 || "";
+  document.getElementById("tempo").value =
+    window.PARAMETROS_DILUVIO.tempo_operacao_min || "";
+  document.getElementById("materialTubulacao").selectedIndex = 0;
   preencherDropsBico(null);
-
-  window.STATUS_CALCULO = "";
+  limparResultadosCalculo();
+  document.getElementById("resultadosDimensionamento").hidden = true;
+  document.getElementById("resultadosDimensionamento").classList.remove(
+    "resultados-desatualizados"
+  );
+  definirStatusCalculo(
+    "idle",
+    "Preencha comprimento, largura, altura e material."
+  );
+  atualizarControlesCalculo();
 
   atualizarMemoria();
 }
@@ -1735,6 +2431,7 @@ async function carregarReferenciasDiluvio(){
     window.BICOS_DILUVIO = resultado.bicos || [];
     window.COMP_EQ_DILUVIO = resultado.comprimentos_equivalentes || [];
     window.TUBOS_DILUVIO = resultado.tubulacoes || [];
+    window.PARAMETROS_DILUVIO = resultado.parametros_padrao || {};
 
     if(window.BICOS_DILUVIO.length === 0){
       throw new Error("Nenhum bico ativo foi encontrado.");
@@ -1744,8 +2441,7 @@ async function carregarReferenciasDiluvio(){
     }
 
     preencherMateriaisTubulacao();
-    preencherDropsBico(null);
-    limparResultadosCalculo();
+    limpar();
   }catch(error){
     console.error("Erro ao carregar referências de dilúvio:", error);
     document.getElementById("observacao").value = error.message;
@@ -1979,6 +2675,56 @@ function exportarPDFChave(id){
 }
 
   
+document.getElementById("newStudy").addEventListener("click", novoEstudo);
+document.getElementById("saveStudy").addEventListener("click", salvarEstudo);
+document.getElementById("exportStudy").addEventListener("click", exportarEstudoJSON);
+document.getElementById("importStudy").addEventListener("click", () => {
+  document.getElementById("importFile").click();
+});
+document.getElementById("importFile").addEventListener("change", async event => {
+  const arquivo = event.target.files?.[0];
+  if(!arquivo) return;
+  try{
+    await importarEstudoJSON(arquivo);
+    alert("Estudo importado com sucesso. Revise os dados antes de salvar.");
+  }catch(error){
+    alert(`Arquivo JSON inválido.\n${error.message}`);
+  }finally{
+    event.target.value = "";
+  }
+});
+
+const studyDialog = document.getElementById("studyDialog");
+document.getElementById("openStudy").addEventListener("click", () => {
+  studyDialog.showModal();
+  carregarListaEstudos();
+});
+document.getElementById("cancelStudyDialog").addEventListener("click", () => {
+  studyDialog.close();
+});
+studyDialog.addEventListener("cancel", event => {
+  event.preventDefault();
+  studyDialog.close();
+});
+document.getElementById("studyList").addEventListener("click", async event => {
+  const abrir = event.target.closest("[data-open-study]");
+  const excluir = event.target.closest("[data-delete-study]");
+  const mensagem = document.getElementById("studyDialogMessage");
+  try{
+    if(abrir) await abrirEstudo(abrir.dataset.openStudy);
+    if(excluir){
+      await excluirEstudo(
+        excluir.dataset.deleteStudy,
+        excluir.dataset.studyCode
+      );
+    }
+  }catch(error){
+    mensagem.className = "study-dialog-message error";
+    mensagem.textContent = error.message;
+  }
+});
+
+atualizarStatusEstudo();
 carregarReferenciasDiluvio();
 
   
