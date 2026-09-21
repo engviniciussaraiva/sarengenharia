@@ -1220,7 +1220,7 @@ function novoEstudo(){
   limparEstudoAtual();
 }
 
-function exportarEstudoJSON(){
+async function exportarEstudoJSON(){
   const arquivo = {
     tipo: "SAR_DILUVIO_TRANSPORTADORES",
     versao_estrutura: 1,
@@ -1228,19 +1228,39 @@ function exportarEstudoJSON(){
     nome_estudo: nomeEstudoSugerido(),
     dados_estudo: coletarEstadoEstudo()
   };
-  const blob = new Blob([JSON.stringify(arquivo, null, 2)], {
-    type: "application/json"
-  });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
+  const conteudo = JSON.stringify(arquivo, null, 2);
   const nomeSeguro = nomeEstudoSugerido()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-zA-Z0-9_-]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .toLowerCase() || "estudo-diluvio";
+  const nomeArquivo = `${nomeSeguro}.json`;
+
+  if(typeof window.showSaveFilePicker === "function"){
+    try{
+      const arquivoEscolhido = await window.showSaveFilePicker({
+        suggestedName: nomeArquivo,
+        types: [{
+          description: "Estudo SAR em JSON",
+          accept: {"application/json": [".json"]}
+        }]
+      });
+      const gravador = await arquivoEscolhido.createWritable();
+      await gravador.write(conteudo);
+      await gravador.close();
+      return;
+    }catch(error){
+      if(error?.name === "AbortError") return;
+      console.warn("Seletor de arquivo indisponível; usando download padrão.", error);
+    }
+  }
+
+  const blob = new Blob([conteudo], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
   link.href = url;
-  link.download = `${nomeSeguro}.json`;
+  link.download = nomeArquivo;
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -1589,6 +1609,7 @@ materialTubulacao:
     densidade: n("densidade"),
     tempo: n("tempo"),
     area: document.getElementById("area").value,
+    vazaoMinima: document.getElementById("vazaoTotal").value,
     vazao: document.getElementById("vazaoProjetadaTotal").value,
     modelo: document.getElementById("modeloBico").value,
     angulo: document.getElementById("angulo").value,
@@ -1977,6 +1998,12 @@ function referenciaTrecho(tr){
   return (input?.value || tr.children[0]?.textContent || "").trim();
 }
 
+function pontoFinalDaReferencia(referencia){
+  const texto = String(referencia || "").trim();
+  const partes = texto.split(/\s*[-–—]\s*/).filter(Boolean);
+  return partes[partes.length - 1] || texto || "último ponto";
+}
+
 async function recalcularTabelaHidraulica(tabela){
   const linhasTabela = [...tabela.querySelectorAll("tbody tr")];
   const infoPressao = tabela.parentElement.querySelector(".info-pressao-manometro");
@@ -2028,6 +2055,24 @@ async function recalcularTabelaHidraulica(tabela){
         `${fmt(resultado.pressao_manometro_kgf_cm2)} kgf/cm²`;
     }
 
+    tabela.dataset.pressaoManometroMca = String(
+      resultado.pressao_manometro_mca
+    );
+
+    const ultimaLinhaTabela = linhasTabela[linhasTabela.length - 1];
+    const ultimoResultado = resultado.linhas[resultado.linhas.length - 1];
+    if(ultimaLinhaTabela && ultimoResultado){
+      tabela.dataset.ultimoPonto = pontoFinalDaReferencia(
+        referenciaTrecho(ultimaLinhaTabela)
+      );
+      tabela.dataset.vazaoUltimoPontoLpm = String(
+        ultimoResultado.vazao_acumulada_lpm
+      );
+      tabela.dataset.pressaoUltimoPontoMca = String(
+        ultimoResultado.pressao_requerida_mca
+      );
+    }
+
     if(infoUltimoPonto){
       const ultimaLinhaExtra = [...linhasTabela]
         .reverse()
@@ -2037,8 +2082,7 @@ async function recalcularTabelaHidraulica(tabela){
         const indice = linhasTabela.indexOf(ultimaLinhaExtra);
         const linhaCalculada = resultado.linhas[indice];
         const referencia = referenciaTrecho(ultimaLinhaExtra);
-        const partes = referencia.split(/\s*[-–—]\s*/).filter(Boolean);
-        const ponto = partes[partes.length - 1] || referencia || "último ponto";
+        const ponto = pontoFinalDaReferencia(referencia);
 
         infoUltimoPonto.textContent =
           `Dados do ponto ${ponto}: Vazão: ${fmt(linhaCalculada.vazao_acumulada_lpm)} L/min · ` +
@@ -2062,6 +2106,9 @@ async function recalcularTabelaHidraulica(tabela){
         alertaPressao.hidden = true;
       }
     }
+
+
+    atualizarMemoria();
 
     return resultado;
   }catch(error){
@@ -2484,27 +2531,70 @@ function excluirTabelaHidraulica(calcId){
   if(!possuiOutraTabela){
     conteudo.innerHTML = conteudoVazioCalculoHidraulico();
   }
+
+  atualizarMemoria();
 }
 
 
 
-function atualizarMemoria(){
-  let txt = "MEMÓRIA DE CÁLCULO - SISTEMA DE DILÚVIO EM TRANSPORTADORES\\n\\n";
+function valorMemoria(valor){
+  if(valor === null || valor === undefined || valor === "") return "—";
+  return typeof valor === "number" ? fmt(valor) : String(valor).trim();
+}
 
-  linhas.forEach((l, i) => {
-    txt += `${i+1}. ${textoOpcional(l.chave)}\\n`;
-    txt += `Local protegido: ${textoOpcional(l.local)}\\n`;
-    txt += `Área protegida: ${l.area} m²\\n`;
-    txt += `Vazão mínima: ${l.vazao} L/min\\n`;
-    txt += `Bico selecionado: ${l.modelo} / Ângulo ${l.angulo}° / K ${l.k}\\n`;
-    txt += `Quantidade de bicos: ${l.bicos}\\n`;
-    txt += `Espaçamento real: ${l.espacamento} m\\n`;
-    txt += `Pressão ajustada: ${l.pressao} mca\\n`;
-    txt += `Volume mínimo de reservatório: ${l.reservatorio} m³\\n`;
-    txt += `Status: ${l.status}\\n\\n`;
+function dadosHidraulicosMemoria(indice){
+  const blocos = [...document.querySelectorAll(
+    "#calculoHidraulicoConteudo > .card[id^='calc-chave-']"
+  )].filter(item => Number(item.dataset.linhaIndice) === indice);
+  const bloco = blocos[blocos.length - 1];
+
+  const tabela = bloco?.querySelector("table");
+  if(!tabela || !tabela.dataset.pressaoManometroMca) return null;
+
+  return {
+    pressaoManometroMca: valorNum(tabela.dataset.pressaoManometroMca),
+    ultimoPonto: tabela.dataset.ultimoPonto || "último ponto",
+    vazaoUltimoPontoLpm: valorNum(tabela.dataset.vazaoUltimoPontoLpm),
+    pressaoUltimoPontoMca: valorNum(tabela.dataset.pressaoUltimoPontoMca)
+  };
+}
+
+function atualizarMemoria(){
+  const titulo = "MEMÓRIA DE CÁLCULO - SISTEMA DE DILÚVIO EM TRANSPORTADORES";
+  const blocos = linhas.map((l, i) => {
+    const hidraulica = dadosHidraulicosMemoria(i);
+    const ponto = hidraulica?.ultimoPonto || "ÚLTIMO PONTO";
+    const dadosDoPonto = hidraulica
+      ? `${fmt(hidraulica.vazaoUltimoPontoLpm)} L/min e ` +
+        `${fmt(hidraulica.pressaoUltimoPontoMca)} m.c.a.`
+      : "—";
+
+    return [
+      `${i + 1}. REFERÊNCIA: ${textoOpcional(l.referencia)}`,
+      `LOCAL PROTEGIDO: ${textoOpcional(l.local)}`,
+      `IDENTIFICAÇÃO DO TRECHO/CHAVE: ${textoOpcional(l.chave)}`,
+      `COMPRIMENTO CONSIDERADO: ${valorMemoria(l.comprimento)} m`,
+      `LARGURA CONSIDERADA: ${valorMemoria(l.largura)} m`,
+      `ALTURA CONSIDERADA: ${valorMemoria(l.altura)} m`,
+      `ÁREA PROTEGIDA: ${valorMemoria(l.area)} m²`,
+      `DENSIDADE DE APLICAÇÃO: ${valorMemoria(l.densidade)} L/min/m²`,
+      `VAZÃO MÍNIMA DO SISTEMA: ${valorMemoria(l.vazaoMinima || l.vazao)} L/min`,
+      `QUANTIDADE DE BICOS: ${valorMemoria(l.bicos)}`,
+      "TIPO DO BICO: DILÚVIO",
+      `MODELO DO BICO: ${valorMemoria(l.modelo)}`,
+      `ÂNGULO DO DEFLETOR: ${valorMemoria(l.angulo)}°`,
+      `FATOR K: ${valorMemoria(l.k)}`,
+      `MATERIAL DA TUBULAÇÃO: ${valorMemoria(l.materialTubulacao)}`,
+      `ESPAÇAMENTO REAL: ${valorMemoria(l.espacamento)} m`,
+      `PRESSÃO NO BICO MAIS DESFAVORÁVEL: ${valorMemoria(l.pressao)} m.c.a.`,
+      `PRESSÃO NO MANÔMETRO: ${hidraulica ? fmt(hidraulica.pressaoManometroMca) : "—"} m.c.a.`,
+      `VAZÃO E PRESSÃO CALCULADAS NO PONTO ${ponto}: ${dadosDoPonto}`,
+      `TEMPO DE OPERAÇÃO: ${valorMemoria(l.tempo)} min`,
+      `VOLUME MÍNIMO DO RESERVATÓRIO: ${valorMemoria(l.reservatorio)} m³`
+    ].join("\n");
   });
 
-  document.getElementById("memoria").value = txt;
+  document.getElementById("memoria").value = [titulo, ...blocos].join("\n\n");
 }
 
 function limpar(){
