@@ -11,57 +11,774 @@
   --line:#cfe2d6;
   --white:#fff;
   --shadow:0 8px 24px rgba(13,81,63,.08);
-}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(135deg,var(--bg) 0%,#f7fcf8 56%,var(--bg-2) 100%);color:var(--ink)}
-body{min-height:100vh}
-button,input{font:inherit}
 
-.classificator-sticky{position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(13,81,63,.09)}
-.classificator-topbar{
-  position:sticky;
+  /* altura reservada para o cabeçalho fixo */
+  --classificator-header-height:145px;
+}
+
+/* =========================================================
+   BASE
+   ========================================================= */
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  min-height:100%;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--bg) 0%,
+      #f7fcf8 56%,
+      var(--bg-2) 100%
+    );
+
+  color:var(--ink);
+}
+
+body{
+  min-height:100vh;
+
+  /*
+    Espaço para o cabeçalho FIXO.
+    Impede o conteúdo da página de subir por baixo dele.
+  */
+  padding-top:var(--classificator-header-height);
+}
+
+button,
+input{
+  font:inherit;
+}
+
+
+/* =========================================================
+   CABEÇALHO FIXO DO CLASSIFICATOR
+   ========================================================= */
+
+.classificator-sticky{
+  position:fixed;
+
   top:0;
-  z-index:999;
-  background:linear-gradient(90deg,#edf9f0 0%,#e6f6eb 55%,#effaf2 100%);
+  left:0;
+  right:0;
+
+  width:100%;
+
+  z-index:9999;
+
+  background:#edf9f0;
+
+  box-shadow:
+    0 2px 12px rgba(13,81,63,.09);
+}
+
+
+/*
+  O FIXED fica somente no container externo.
+  Não precisamos mais de sticky aqui.
+*/
+.classificator-topbar{
+  position:relative;
+
+  width:100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      #edf9f0 0%,
+      #e6f6eb 55%,
+      #effaf2 100%
+    );
+
   border-bottom:1px solid #c7dfcf;
 }
-.classificator-topbar-inner{max-width:1600px;margin:0 auto;padding:18px 28px 15px;display:grid;grid-template-columns:minmax(250px,.85fr) minmax(540px,1.6fr) minmax(320px,.9fr);gap:26px;align-items:center}
-.classificator-brand-title{margin:0;color:#082f2a;font-size:31px;font-weight:900;line-height:1;letter-spacing:-.035em}.classificator-brand-title span{color:#19a86d}
-.classificator-brand-sub{margin:8px 0 0;color:#294f48;font-size:12px;line-height:1.25}.classificator-brand-sub span{display:block}
 
-.classificator-criteria{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:center}
-.classificator-criterion{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 13px;border:1px solid #bcd7c7;border-radius:999px;background:#eef8f1;color:#607b73;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.025em;transition:.18s;text-decoration:none}
-.classificator-criterion svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8}
-.classificator-criterion.done{background:#1f9f6b;border-color:#1f9f6b;color:#fff;box-shadow:0 5px 14px rgba(31,159,107,.15)}
-.classificator-criterion.current{border-color:#0d6d51;color:#0d6d51;box-shadow:0 0 0 3px rgba(13,109,81,.08)}
-.classificator-criterion.clickable{cursor:pointer}.classificator-criterion.clickable:hover{transform:translateY(-1px);border-color:#1a8e67}
-.classificator-home{background:#fff;border-color:#a9cfb9;color:#0d6d51}.classificator-home:hover{background:#f7fcf9;border-color:#0d6d51}.classificator-home svg{stroke-width:1.9}
 
-.classificator-result{justify-self:end;width:100%;max-width:350px}
-.classificator-result-title{margin:0 0 8px;font-size:14px;font-weight:900;color:#0b342f;text-transform:uppercase;letter-spacing:.03em}
-.classificator-result-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.classificator-result-card{min-height:62px;padding:10px 12px;border:1px solid #bad8c6;border-radius:9px;background:rgba(255,255,255,.45)}
-.classificator-result-label{display:block;margin-bottom:5px;color:#4f746a;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
-.classificator-result-value{display:block;color:#0d6d51;font-size:14px;font-weight:900;line-height:1.12}
+.classificator-topbar-inner{
+  max-width:1600px;
 
-.classificator-result-ribbon{display:block;min-height:58px;background:#fff;border-bottom:1px solid #d8e7dd}
-.classificator-result-ribbon button{width:100%;min-height:58px;border:0;background:#fff;padding:14px 30px;cursor:pointer;color:#173f38;text-align:left;visibility:hidden}
-.classificator-result-ribbon.active button{visibility:visible}
-.classificator-result-ribbon-inner{max-width:1600px;margin:0 auto;display:flex;align-items:center;gap:18px}
-.classificator-result-ribbon-mark{width:34px;height:34px;display:grid;place-items:center;border:2px solid #1d9d68;border-radius:50%;color:#1d9d68;font-weight:900;flex:0 0 34px}
-.classificator-result-ribbon-text{display:flex;align-items:center;gap:22px;flex:1;flex-wrap:wrap;font-size:13px}
-.classificator-result-ribbon-text strong{color:#0f674d}.classificator-result-ribbon-arrow{font-size:26px;color:#0f674d}
+  margin:0 auto;
 
-.page-shell{max-width:1500px;margin:22px auto 0;padding:0 22px 32px}
-.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
-.page-eyebrow{margin:0 0 5px;color:#1d9d68;font-size:12px;font-weight:900;letter-spacing:.09em;text-transform:uppercase}
-.page-title{margin:0;color:#173f38;font-size:28px;line-height:1.15}
-.page-subtitle{margin:7px 0 0;color:var(--muted);font-size:14px}
-.page-actions{display:flex;gap:10px;flex-wrap:wrap}
-.ghost-btn{min-width:125px;padding:10px 16px;border:1px solid #bcd4c7;border-radius:9px;background:#fff;color:#174b40;font-size:13px;font-weight:800;cursor:pointer}.ghost-btn:hover{background:#f6fbf8}
-.workspace{min-height:430px;padding:24px;border:1px solid #d7e7dd;border-radius:14px;background:rgba(255,255,255,.86);box-shadow:var(--shadow);backdrop-filter:blur(3px)}
-.status{min-height:20px;margin-top:14px;color:#9a3f37;font-size:13px;text-align:center}
-.primary-btn{min-width:150px;padding:12px 20px;border:0;border-radius:9px;background:var(--palmeiras);color:#fff;font-weight:800;cursor:pointer}.primary-btn:hover{background:#0a4536}.primary-btn:disabled{opacity:.55;cursor:wait}
+  padding:
+    18px
+    28px
+    15px;
 
-@media(max-width:1120px){.classificator-topbar-inner{grid-template-columns:1fr 1fr}.classificator-criteria{grid-column:1/-1;grid-row:2}.classificator-result{max-width:none}}
-@media(max-width:720px){.classificator-topbar-inner{grid-template-columns:1fr;padding:14px}.classificator-criteria{grid-column:auto;grid-template-columns:repeat(2,1fr)}.classificator-home{grid-column:1/-1}.classificator-result{justify-self:stretch}.classificator-brand-title{font-size:27px}.page-shell{padding:0 10px 24px}.page-head{display:block}.page-actions{margin-top:14px}.workspace{padding:14px}.page-title{font-size:23px}}
+  display:grid;
+
+  grid-template-columns:
+    minmax(250px,.85fr)
+    minmax(540px,1.6fr)
+    minmax(320px,.9fr);
+
+  gap:26px;
+
+  align-items:center;
+}
+
+
+/* =========================================================
+   MARCA
+   ========================================================= */
+
+.classificator-brand-title{
+  margin:0;
+
+  color:#082f2a;
+
+  font-size:31px;
+
+  font-weight:900;
+
+  line-height:1;
+
+  letter-spacing:-.035em;
+}
+
+.classificator-brand-title span{
+  color:#19a86d;
+}
+
+
+.classificator-brand-sub{
+  margin:8px 0 0;
+
+  color:#294f48;
+
+  font-size:12px;
+
+  line-height:1.25;
+}
+
+.classificator-brand-sub span{
+  display:block;
+}
+
+
+/* =========================================================
+   NAVEGAÇÃO
+   INÍCIO | ÁREA | ALTURA | OCUPAÇÃO | CRITÉRIOS
+   ========================================================= */
+
+.classificator-criteria{
+  display:grid;
+
+  grid-template-columns:
+    repeat(5,1fr);
+
+  gap:10px;
+
+  align-items:center;
+}
+
+
+.classificator-criterion{
+  position:relative;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  gap:8px;
+
+  min-height:48px;
+
+  padding:
+    10px
+    13px;
+
+  border:
+    1px solid #bcd7c7;
+
+  border-radius:999px;
+
+  background:#eef8f1;
+
+  color:#607b73;
+
+  font-size:13px;
+
+  font-weight:800;
+
+  text-transform:uppercase;
+
+  letter-spacing:.025em;
+
+  transition:
+    transform .18s,
+    border-color .18s,
+    background .18s,
+    color .18s,
+    box-shadow .18s;
+
+  text-decoration:none;
+}
+
+
+.classificator-criterion svg{
+  width:21px;
+  height:21px;
+
+  stroke:currentColor;
+
+  fill:none;
+
+  stroke-width:1.8;
+}
+
+
+/* CRITÉRIO CONCLUÍDO */
+
+.classificator-criterion.done{
+  background:#1f9f6b;
+
+  border-color:#1f9f6b;
+
+  color:#fff;
+
+  box-shadow:
+    0 5px 14px rgba(31,159,107,.15);
+}
+
+
+/* CRITÉRIO ATUAL */
+
+.classificator-criterion.current{
+  border-color:#0d6d51;
+
+  color:#0d6d51;
+
+  box-shadow:
+    0 0 0 3px rgba(13,109,81,.08);
+}
+
+
+/* CRITÉRIO CLICÁVEL */
+
+.classificator-criterion.clickable{
+  cursor:pointer;
+}
+
+.classificator-criterion.clickable:hover{
+  transform:translateY(-1px);
+
+  border-color:#1a8e67;
+}
+
+
+/* =========================================================
+   BOTÃO INÍCIO
+   ========================================================= */
+
+.classificator-home{
+  background:#fff;
+
+  border-color:#a9cfb9;
+
+  color:#0d6d51;
+}
+
+
+.classificator-home:hover{
+  background:#f7fcf9;
+
+  border-color:#0d6d51;
+}
+
+
+.classificator-home svg{
+  stroke-width:1.9;
+}
+
+
+/* =========================================================
+   CLASSIFICAÇÃO ATUAL
+   ========================================================= */
+
+.classificator-result{
+  justify-self:end;
+
+  width:100%;
+
+  max-width:350px;
+}
+
+
+.classificator-result-title{
+  margin:0 0 8px;
+
+  font-size:14px;
+
+  font-weight:900;
+
+  color:#0b342f;
+
+  text-transform:uppercase;
+
+  letter-spacing:.03em;
+}
+
+
+.classificator-result-grid{
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:9px;
+}
+
+
+.classificator-result-card{
+  min-height:62px;
+
+  padding:
+    10px
+    12px;
+
+  border:
+    1px solid #bad8c6;
+
+  border-radius:9px;
+
+  background:
+    rgba(255,255,255,.45);
+}
+
+
+.classificator-result-label{
+  display:block;
+
+  margin-bottom:5px;
+
+  color:#4f746a;
+
+  font-size:9px;
+
+  font-weight:800;
+
+  text-transform:uppercase;
+
+  letter-spacing:.08em;
+}
+
+
+.classificator-result-value{
+  display:block;
+
+  color:#0d6d51;
+
+  font-size:14px;
+
+  font-weight:900;
+
+  line-height:1.12;
+}
+
+
+/* =========================================================
+   FAIXA DE RESULTADO / RESUMO
+   ========================================================= */
+
+.classificator-result-ribbon{
+  display:block;
+
+  min-height:58px;
+
+  background:#fff;
+
+  border-bottom:
+    1px solid #d8e7dd;
+}
+
+
+.classificator-result-ribbon button{
+  width:100%;
+
+  min-height:58px;
+
+  border:0;
+
+  background:#fff;
+
+  padding:
+    14px
+    30px;
+
+  cursor:pointer;
+
+  color:#173f38;
+
+  text-align:left;
+
+  visibility:hidden;
+}
+
+
+.classificator-result-ribbon.active button{
+  visibility:visible;
+}
+
+
+.classificator-result-ribbon-inner{
+  max-width:1600px;
+
+  margin:0 auto;
+
+  display:flex;
+
+  align-items:center;
+
+  gap:18px;
+}
+
+
+.classificator-result-ribbon-mark{
+  width:34px;
+  height:34px;
+
+  display:grid;
+
+  place-items:center;
+
+  border:
+    2px solid #1d9d68;
+
+  border-radius:50%;
+
+  color:#1d9d68;
+
+  font-weight:900;
+
+  flex:
+    0 0 34px;
+}
+
+
+.classificator-result-ribbon-text{
+  display:flex;
+
+  align-items:center;
+
+  gap:22px;
+
+  flex:1;
+
+  flex-wrap:wrap;
+
+  font-size:13px;
+}
+
+
+.classificator-result-ribbon-text strong{
+  color:#0f674d;
+}
+
+
+.classificator-result-ribbon-arrow{
+  font-size:26px;
+
+  color:#0f674d;
+}
+
+
+/* =========================================================
+   CONTEÚDO DAS PÁGINAS
+   ========================================================= */
+
+.page-shell{
+  max-width:1500px;
+
+  margin:
+    22px auto 0;
+
+  padding:
+    0
+    22px
+    32px;
+}
+
+
+.page-head{
+  display:flex;
+
+  align-items:flex-start;
+
+  justify-content:space-between;
+
+  gap:18px;
+
+  margin-bottom:18px;
+}
+
+
+.page-eyebrow{
+  margin:
+    0 0 5px;
+
+  color:#1d9d68;
+
+  font-size:12px;
+
+  font-weight:900;
+
+  letter-spacing:.09em;
+
+  text-transform:uppercase;
+}
+
+
+.page-title{
+  margin:0;
+
+  color:#173f38;
+
+  font-size:28px;
+
+  line-height:1.15;
+}
+
+
+.page-subtitle{
+  margin:
+    7px 0 0;
+
+  color:var(--muted);
+
+  font-size:14px;
+}
+
+
+.page-actions{
+  display:flex;
+
+  gap:10px;
+
+  flex-wrap:wrap;
+}
+
+
+/* =========================================================
+   BOTÕES
+   ========================================================= */
+
+.ghost-btn{
+  min-width:125px;
+
+  padding:
+    10px
+    16px;
+
+  border:
+    1px solid #bcd4c7;
+
+  border-radius:9px;
+
+  background:#fff;
+
+  color:#174b40;
+
+  font-size:13px;
+
+  font-weight:800;
+
+  cursor:pointer;
+}
+
+
+.ghost-btn:hover{
+  background:#f6fbf8;
+}
+
+
+.primary-btn{
+  min-width:150px;
+
+  padding:
+    12px
+    20px;
+
+  border:0;
+
+  border-radius:9px;
+
+  background:var(--palmeiras);
+
+  color:#fff;
+
+  font-weight:800;
+
+  cursor:pointer;
+}
+
+
+.primary-btn:hover{
+  background:#0a4536;
+}
+
+
+.primary-btn:disabled{
+  opacity:.55;
+
+  cursor:wait;
+}
+
+
+/* =========================================================
+   WORKSPACE
+   ========================================================= */
+
+.workspace{
+  min-height:430px;
+
+  padding:24px;
+
+  border:
+    1px solid #d7e7dd;
+
+  border-radius:14px;
+
+  background:
+    rgba(255,255,255,.86);
+
+  box-shadow:
+    var(--shadow);
+
+  backdrop-filter:
+    blur(3px);
+}
+
+
+.status{
+  min-height:20px;
+
+  margin-top:14px;
+
+  color:#9a3f37;
+
+  font-size:13px;
+
+  text-align:center;
+}
+
+
+/* =========================================================
+   RESPONSIVO — TABLET
+   ========================================================= */
+
+@media(max-width:1120px){
+
+  :root{
+    /*
+      O cabeçalho ganha segunda linha
+      porque os critérios descem.
+    */
+    --classificator-header-height:205px;
+  }
+
+
+  .classificator-topbar-inner{
+    grid-template-columns:
+      1fr 1fr;
+  }
+
+
+  .classificator-criteria{
+    grid-column:
+      1 / -1;
+
+    grid-row:2;
+  }
+
+
+  .classificator-result{
+    max-width:none;
+  }
+
+}
+
+
+/* =========================================================
+   RESPONSIVO — CELULAR
+   ========================================================= */
+
+@media(max-width:720px){
+
+  :root{
+    --classificator-header-height:320px;
+  }
+
+
+  .classificator-topbar-inner{
+    grid-template-columns:1fr;
+
+    padding:14px;
+  }
+
+
+  .classificator-criteria{
+    grid-column:auto;
+
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+
+  .classificator-home{
+    grid-column:
+      1 / -1;
+  }
+
+
+  .classificator-result{
+    justify-self:stretch;
+  }
+
+
+  .classificator-brand-title{
+    font-size:27px;
+  }
+
+
+  .page-shell{
+    padding:
+      0
+      10px
+      24px;
+  }
+
+
+  .page-head{
+    display:block;
+  }
+
+
+  .page-actions{
+    margin-top:14px;
+  }
+
+
+  .workspace{
+    padding:14px;
+  }
+
+
+  .page-title{
+    font-size:23px;
+  }
+
+}
