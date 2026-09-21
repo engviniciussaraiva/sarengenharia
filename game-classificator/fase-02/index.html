@@ -4,72 +4,67 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR">
-  <title>GAME ClassificaTOR | Fase 2</title>
+  <title>ClassificaTOR | Escolha do trajeto</title>
   <script src="/js/sar.page-guard.js"></script>
+  <script src="/js/sar.api.js"></script>
+  <script src="/game-classificator/assets/classificator-api.js"></script>
   <link rel="stylesheet" href="/game-classificator/assets/classificator-shell.css">
   <style>
-    .cards{display:grid;grid-template-columns:repeat(4,minmax(210px,1fr));gap:18px;align-items:stretch}
-    .option-card{position:relative;width:100%;padding:0;overflow:hidden;border:1px solid #dce4e1;border-radius:12px;background:#fff;text-align:center;cursor:pointer;transition:.18s}
-    .option-card:hover{transform:translateY(-4px);border-color:#a7c3b2;box-shadow:0 8px 22px rgba(49,88,88,.12)}
-    .option-card:focus-visible{outline:3px solid rgba(124,179,66,.35);outline-offset:3px}.option-card:disabled{cursor:wait;opacity:.58;transform:none;box-shadow:none}
-    .card-image{width:100%;aspect-ratio:1.35/1;overflow:hidden;background:#edf2ef;border-bottom:1px solid #e7eeea}.card-image img{display:block;width:100%;height:100%;object-fit:cover;user-select:none;pointer-events:none;transition:transform .24s ease}.option-card:hover .card-image img{transform:scale(1.025)}
-    .card-body{min-height:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:12px 9px 14px}.card-title{margin:0;color:#315858;font-size:16px;font-weight:800;line-height:1.15;text-transform:uppercase;text-align:center}.card-subtitle{margin:0;color:#6e7d7d;font-size:13px;line-height:1.15;text-align:center}
-    @media(max-width:1200px){.cards{grid-template-columns:repeat(2,minmax(250px,1fr))}}@media(max-width:720px){.cards{grid-template-columns:1fr}.option-card{max-width:560px;margin:0 auto}}
+    .route-shell{min-height:calc(100vh - 180px);padding:28px 0 44px;background:linear-gradient(135deg,#eef9f1 0%,#f8fcf9 55%,#e4f6e9 100%);position:relative;overflow:hidden}
+    .route-shell::after{content:"";position:absolute;left:-80px;bottom:-120px;width:520px;height:340px;opacity:.16;background:repeating-linear-gradient(90deg,transparent 0 32px,#5cb58a 33px 34px),repeating-linear-gradient(0deg,transparent 0 32px,#5cb58a 33px 34px);transform:skewY(-10deg);pointer-events:none}
+    .route-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:26px;position:relative;z-index:1}
+    .route-kicker{margin:0 0 8px;color:#1a9b67;font-weight:900;font-size:12px;letter-spacing:.11em;text-transform:uppercase}.route-title{margin:0;color:#123c35;font-size:36px;line-height:1.06;letter-spacing:-.025em}.route-subtitle{margin:10px 0 0;color:#58756d;font-size:15px}
+    .route-grid{display:grid;grid-template-columns:repeat(4,minmax(230px,1fr));gap:18px;position:relative;z-index:1}
+    .route-card{min-height:330px;padding:24px;border:1px solid #79c09d;border-radius:14px;background:rgba(255,255,255,.77);box-shadow:0 7px 20px rgba(13,81,63,.06);color:#133d35;text-align:left;cursor:pointer;transition:.2s;display:flex;flex-direction:column}
+    .route-card:hover{transform:translateY(-5px);border-color:#199966;box-shadow:0 14px 30px rgba(13,81,63,.12)}.route-card.done{background:linear-gradient(180deg,#effbf4,#e4f6eb);border-color:#23a46f}
+    .route-visual{height:160px;display:grid;place-items:center;color:#1a8b62}.route-visual svg{width:135px;height:135px;stroke:currentColor;fill:none;stroke-width:1.45}.route-card h2{margin:4px 0 8px;font-size:22px;line-height:1}.route-card p{margin:0;color:#58756d;font-size:14px}.route-card-footer{margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding-top:20px}.route-line{width:48px;height:4px;border-radius:99px;background:#1ba26c}.route-arrow{width:43px;height:43px;border:2px solid #1ba26c;border-radius:50%;display:grid;place-items:center;color:#13845a;font-size:24px}.route-done{display:none;color:#168a5e;font-weight:900;font-size:12px;text-transform:uppercase}.route-card.done .route-done{display:block}
+    @media(max-width:1150px){.route-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:680px){.route-grid{grid-template-columns:1fr}.route-title{font-size:29px}.route-head{display:block}.route-head .page-actions{margin-top:16px}}
   </style>
 </head>
 <body>
   <div data-classificator-header data-stage="FASE_02"></div>
+  <section class="route-shell">
+    <main class="page-shell" style="margin-top:0">
+      <header class="route-head">
+        <div><p class="route-kicker">Fase 2 — Definição do trajeto</p><h1 class="route-title">Escolha por qual critério deseja iniciar</h1><p class="route-subtitle">Os critérios podem ser preenchidos na ordem que preferir.</p></div>
+        <div class="page-actions"><button class="ghost-btn" id="btnInicio" type="button">⌂&nbsp; Início</button></div>
+      </header>
 
-  <main class="page-shell">
-    <header class="page-head">
-      <div>
-        <p class="page-eyebrow">Fase 2 — Tipologia da Edificação</p>
-        <h1 class="page-title">Selecione a tipologia da edificação</h1>
-        <p class="page-subtitle">Quantidade total de pavimentos da edificação, considerando o térreo.</p>
+      <div class="route-grid" id="routeGrid">
+        <button class="route-card" type="button" data-code="AREA" data-route="/game-classificator/fase-04/">
+          <div class="route-visual"><svg viewBox="0 0 120 120"><path d="M21 83l37 18 41-20-38-17zM21 83V49l38-18 40 18v32M59 31v70M21 49l38 18 40-18"/><path d="M16 91l43 21 47-23M101 32h14M108 25v14"/></svg></div>
+          <h2>ÁREA</h2><p>Área total construída</p><div class="route-card-footer"><span class="route-line"></span><span class="route-done">Determinado ✓</span><span class="route-arrow">→</span></div>
+        </button>
+        <button class="route-card" type="button" data-code="ALTURA" data-route="/game-classificator/fase-03/">
+          <div class="route-visual"><svg viewBox="0 0 120 120"><path d="M25 101V47h44v54zM35 47V27h34v20M40 58h11M40 69h11M40 80h11M78 24v75M72 31l6-7 6 7M72 92l6 7 6-7"/></svg></div>
+          <h2>ALTURA</h2><p>Altura da edificação</p><div class="route-card-footer"><span class="route-line"></span><span class="route-done">Determinado ✓</span><span class="route-arrow">→</span></div>
+        </button>
+        <button class="route-card" type="button" data-code="OCUPACAO" data-route="/game-classificator/fase-05/">
+          <div class="route-visual"><svg viewBox="0 0 120 120"><path d="M18 91V49h29v42M49 91V34h30v57M81 91V57h22v34M12 96h96"/><circle cx="58" cy="53" r="6"/><circle cx="47" cy="72" r="5"/><circle cx="68" cy="72" r="5"/><path d="M36 91v-4c0-7 5-12 11-12M80 91v-4c0-7-5-12-11-12M49 91v-7c0-8 4-13 10-13s10 5 10 13v7"/></svg></div>
+          <h2>OCUPAÇÃO</h2><p>Grupo e divisão de uso</p><div class="route-card-footer"><span class="route-line"></span><span class="route-done">Determinado ✓</span><span class="route-arrow">→</span></div>
+        </button>
+        <button class="route-card" type="button" data-code="CRITERIOS" data-route="/game-classificator/fase-06/">
+          <div class="route-visual"><svg viewBox="0 0 120 120"><rect x="28" y="18" width="59" height="82" rx="6"/><path d="M41 42l5 5 9-11M41 62l5 5 9-11M41 82l5 5 9-11M62 42h14M62 62h14M62 82h14"/><path d="M83 75l16 7v13c0 9-7 15-16 18-9-3-16-9-16-18V82z"/></svg></div>
+          <h2>CRITÉRIO TÉCNICO</h2><p>Demais exigências normativas</p><div class="route-card-footer"><span class="route-line"></span><span class="route-done">Determinado ✓</span><span class="route-arrow">→</span></div>
+        </button>
       </div>
-      <div class="page-actions">
-        <button class="ghost-btn" id="btnInicio" type="button">Início</button>
-      </div>
-    </header>
-
-    <section class="workspace">
-      <div class="cards">
-        <button class="option-card" type="button" data-opcao="PAV_1_SEM_SUBSOLO"><div class="card-image"><img src="/game-classificator/assets/fase02-pav-1.png" alt="Edificação térrea" draggable="false"></div><div class="card-body"><h2 class="card-title">EDIFICAÇÃO TÉRREA</h2><p class="card-subtitle">1 pavimento</p></div></button>
-        <button class="option-card" type="button" data-opcao="PAV_2_SEM_SUBSOLO"><div class="card-image"><img src="/game-classificator/assets/fase02-pav-2.png" alt="Térreo mais um pavimento" draggable="false"></div><div class="card-body"><h2 class="card-title">TÉRREO + 1 PAVIMENTO</h2><p class="card-subtitle">2 pavimentos</p></div></button>
-        <button class="option-card" type="button" data-opcao="PAV_3_SEM_SUBSOLO"><div class="card-image"><img src="/game-classificator/assets/fase02-pav-3.png" alt="Térreo mais dois pavimentos" draggable="false"></div><div class="card-body"><h2 class="card-title">TÉRREO + 2 PAVIMENTOS</h2><p class="card-subtitle">3 pavimentos</p></div></button>
-        <button class="option-card" type="button" data-opcao="PAV_4_MAIS_SEM_SUBSOLO"><div class="card-image"><img src="/game-classificator/assets/fase02-pav-4mais.png" alt="Térreo mais três pavimentos ou mais" draggable="false"></div><div class="card-body"><h2 class="card-title">TÉRREO + 3 PAVIMENTOS OU MAIS</h2><p class="card-subtitle">4 pavimentos ou mais</p></div></button>
-
-        <button class="option-card" type="button" data-opcao="PAV_1_COM_SUBSOLO"><div class="card-image"><img src="/game-classificator/assets/fase02-pav-1-subsolo.png" alt="Edificação térrea com subsolo" draggable="false"></div><div class="card-body"><h2 class="card-title">EDIFICAÇÃO TÉRREA<br>COM SUBSOLO</h2><p class="card-subtitle">1 pavimento + subsolo</p></div></button>
-        <button class="option-card" type="button" data-opcao="PAV_2_COM_SUBSOLO"><div class="card-image"><img src="/game-classificator/assets/fase02-pav-2-subsolo.png" alt="Térreo mais um pavimento com subsolo" draggable="false"></div><div class="card-body"><h2 class="card-title">TÉRREO + 1 PAVIMENTO<br>COM SUBSOLO</h2><p class="card-subtitle">2 pavimentos + subsolo</p></div></button>
-        <button class="option-card" type="button" data-opcao="PAV_3_COM_SUBSOLO"><div class="card-image"><img src="/game-classificator/assets/fase02-pav-3-subsolo.png" alt="Térreo mais dois pavimentos com subsolo" draggable="false"></div><div class="card-body"><h2 class="card-title">TÉRREO + 2 PAVIMENTOS<br>COM SUBSOLO</h2><p class="card-subtitle">3 pavimentos + subsolo</p></div></button>
-        <button class="option-card" type="button" data-opcao="PAV_4_MAIS_COM_SUBSOLO"><div class="card-image"><img src="/game-classificator/assets/fase02-pav-4mais-subsolo.png" alt="Térreo mais três pavimentos ou mais com subsolo" draggable="false"></div><div class="card-body"><h2 class="card-title">TÉRREO + 3 PAVIMENTOS OU MAIS<br>COM SUBSOLO</h2><p class="card-subtitle">4 pavimentos ou mais + subsolo</p></div></button>
-      </div>
-      <div class="status" id="statusFase" aria-live="polite"></div>
-    </section>
-  </main>
+    </main>
+  </section>
 
   <script src="/game-classificator/assets/classificator-shell.js"></script>
   <script>
     (()=>{
       "use strict";
-      const btnInicio=document.getElementById("btnInicio"),status=document.getElementById("statusFase");
-      const cards=[...document.querySelectorAll(".option-card[data-opcao]")];
-      const travar=v=>cards.forEach(c=>c.disabled=v);
-      btnInicio?.addEventListener("click",()=>window.location.assign("/game-classificator/fase-01/"));
-      async function escrever(texto){status.textContent="";status.classList.add("escrevendo");for(let i=0;i<texto.length;i++){status.textContent+=texto.charAt(i);await new Promise(r=>setTimeout(r,20));}status.classList.remove("escrevendo")}
-      async function responder(card){
-        const opcao=String(card.dataset.opcao||"").trim();if(!opcao)return;travar(true);status.textContent="Analisando configuração...";
-        try{
-          const response=await fetch("/api/game/classificator/responder",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json",Accept:"application/json","X-Requested-With":"SAR-ClassificaTOR"},body:JSON.stringify({fase:"fase-02",opcao})});
-          const data=await response.json().catch(()=>null);
-          if(!response.ok||!data?.ok)throw new Error(response.status===401?"Sua sessão expirou. Volte à Fase 1.":"Não foi possível registrar a configuração.");
-          if(data.classificacao)window.SARClassificatorUI?.updateClassification(data.classificacao);
-          await escrever(data.mensagem||"Configuração registrada.");
-          if(data.next){await new Promise(r=>setTimeout(r,350));window.location.assign(data.next);return;}
-          travar(false);
-        }catch(err){console.error(err);status.classList.remove("escrevendo");status.textContent=err.message||"Não foi possível continuar. Tente novamente.";travar(false)}
-      }
-      cards.forEach(c=>c.addEventListener("click",()=>responder(c)));
+      document.getElementById("btnInicio")?.addEventListener("click",()=>window.location.assign("/game-classificator/fase-01/"));
+      const cards=[...document.querySelectorAll(".route-card")];
+      cards.forEach(card=>card.addEventListener("click",()=>window.location.assign(card.dataset.route)));
+      window.addEventListener("sar:classificator-state",e=>{
+        const criteria=e.detail?.criterios||[];
+        for(const card of cards){
+          const item=criteria.find(c=>c.codigo===card.dataset.code);
+          card.classList.toggle("done",Boolean(item?.concluido));
+        }
+      });
     })();
   </script>
 </body>

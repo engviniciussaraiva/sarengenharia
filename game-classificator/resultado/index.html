@@ -1,37 +1,3 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR">
-  <title>GAME ClassificaTOR | Resultado</title>
-  <script src="/js/sar.page-guard.js"></script>
-  <link rel="stylesheet" href="/game-classificator/assets/classificator-shell.css">
-  <style>
-    .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.result-panel{padding:20px;border:1px solid #dce5e1;border-radius:12px;background:#fff;min-height:150px}.result-panel h2{margin:0 0 12px;color:#315858;font-size:17px}.result-big{font-size:28px;font-weight:900;color:#214c47}.result-muted{color:#6e7d7d;font-size:13px;line-height:1.45}.result-panel.wide{grid-column:1/-1}@media(max-width:760px){.result-grid{grid-template-columns:1fr}.result-panel.wide{grid-column:auto}}
-  </style>
-</head>
-<body>
-  <div data-classificator-header data-stage="RESULTADO"></div>
-  <main class="page-shell">
-    <header class="page-head"><div><p class="page-eyebrow">Resultado</p><h1 class="page-title">Resultado final da classificação</h1><p class="page-subtitle">Consolidação do processo, certificação, medidas de segurança e validade.</p></div><div class="page-actions"><button class="ghost-btn" id="btnInicio" type="button">Início</button></div></header>
-    <section class="workspace">
-      <div class="result-grid">
-        <div class="result-panel"><h2>Tipo do Projeto</h2><div class="result-big" id="resultadoProcesso">Em análise</div></div>
-        <div class="result-panel"><h2>Certificação</h2><div class="result-big" id="resultadoCertificacao">Em análise</div></div>
-        <div class="result-panel wide"><h2>Medidas de segurança</h2><p class="result-muted">Para os enquadramentos aplicáveis, especialmente CLCB e AVCB até 750,00 m², o ClassificaTOR apresentará aqui as medidas de segurança correspondentes ao caso.</p></div>
-        <div class="result-panel wide"><h2>Validade</h2><p class="result-muted">A validade do AVCB/CLCB será apresentada conforme a regra aplicável à ocupação e ao enquadramento final.</p></div>
-      </div>
-    </section>
-  </main>
-  <script src="/game-classificator/assets/classificator-shell.js"></script>
-  <script>
-    document.getElementById("btnInicio")?.addEventListener("click",()=>window.location.assign("/game-classificator/fase-01/"));
-    window.addEventListener("sar:classificator-state",e=>{
-      const c=e.detail?.classificacao;
-      document.getElementById("resultadoProcesso").textContent=c?.processo?.codigo||"Em análise";
-      document.getElementById("resultadoCertificacao").textContent=c?.certificacao?.codigo||"Em análise";
-    });
-  </script>
-</body>
-</html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR"><title>ClassificaTOR | Resumo</title><script src="/js/sar.page-guard.js"></script><script src="/js/sar.api.js"></script><script src="/game-classificator/assets/classificator-api.js"></script><link rel="stylesheet" href="/game-classificator/assets/classificator-shell.css"><style>.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.summary-card{padding:22px;border:1px solid #cfe2d6;border-radius:13px;background:#fff}.summary-card h2{margin:0 0 10px;color:#486a61;font-size:13px;text-transform:uppercase;letter-spacing:.07em}.summary-big{font-size:30px;font-weight:900;color:#126a50}.summary-wide{grid-column:1/-1}.criteria-state{display:flex;gap:10px;flex-wrap:wrap}.criteria-pill{padding:8px 12px;border-radius:999px;background:#edf2ef;color:#70817c;font-size:12px;font-weight:800}.criteria-pill.done{background:#e7f7ee;color:#14845b;border:1px solid #a9d8c0}@media(max-width:700px){.summary-grid{grid-template-columns:1fr}.summary-wide{grid-column:auto}}</style></head>
+<body><div data-classificator-header data-stage="RESULTADO"></div><main class="page-shell"><header class="page-head"><div><p class="page-eyebrow">Resumo</p><h1 class="page-title">Resumo e direcionamentos</h1><p class="page-subtitle">Situação da classificação com base nos critérios já determinados.</p></div><div class="page-actions"><button class="ghost-btn" id="btnTrajeto">Voltar aos critérios</button></div></header><section class="workspace"><div class="summary-grid"><div class="summary-card"><h2>Tipo de projeto</h2><div class="summary-big" id="proc">Em análise</div></div><div class="summary-card"><h2>Certificação</h2><div class="summary-big" id="cert">Em análise</div></div><div class="summary-card summary-wide"><h2>Critérios preenchidos</h2><div class="criteria-state" id="criteriaState"></div></div><div class="summary-card summary-wide"><h2>Direcionamentos</h2><p style="margin:0;color:#607a73;line-height:1.5">Os critérios ainda em cinza devem ser preenchidos para concluir a classificação. As medidas de segurança e a validade serão apresentadas no resultado final quando as respectivas regras estiverem configuradas no motor.</p></div></div></section></main><script src="/game-classificator/assets/classificator-shell.js"></script><script>(()=>{document.getElementById("btnTrajeto").onclick=()=>location.assign("/game-classificator/fase-02/");window.addEventListener("sar:classificator-state",e=>{const d=e.detail||{},c=d.classificacao||{};document.getElementById("proc").textContent=c?.processo?.codigo||"Em análise";document.getElementById("cert").textContent=c?.certificacao?.codigo||"Em análise";const host=document.getElementById("criteriaState");host.innerHTML="";(d.criterios||[]).forEach(i=>{const s=document.createElement("span");s.className="criteria-pill"+(i.concluido?" done":"");s.textContent=`${i.titulo}: ${i.concluido?"determinado":"pendente"}`;host.appendChild(s)})})})();</script></body></html>
