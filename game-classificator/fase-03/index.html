@@ -31,6 +31,8 @@
     }
     .height-control input:disabled{background:#eef5f1;color:#6e817b}
     .height-control span{font-weight:900}
+    .height-requirement{margin:10px 0 0;color:#55736b;font-size:12px;font-weight:750;line-height:1.35}
+    .height-requirement.required{color:#0d6d51}
     .guide-box{background:#eef6ff;border-color:#bed9f2}
     .guide-box ul{margin:0;padding-left:20px;color:#46677d;font-size:13px;line-height:1.55}
     .examples img{width:100%;display:block;border:1px solid #d6e6dc;border-radius:12px;background:#fff}
@@ -88,9 +90,10 @@
         <div class="height-box">
           <h2 class="section-title">Altura considerada</h2>
           <div class="height-control">
-            <input id="altura" inputmode="decimal" autocomplete="off" placeholder="0,00">
+            <input id="altura" inputmode="decimal" autocomplete="off" placeholder="0,00" disabled>
             <span>m</span>
           </div>
+          <p class="height-requirement" id="alturaRequirementText">Defina os pavimentos e a condição do subsolo.</p>
         </div>
         <div class="guide-box">
           <h2 class="section-title">O que considerar?</h2>
@@ -171,8 +174,12 @@
     let possuiSubsolo = null;
     let subsoloAreaMaior50 = null;
     let subsoloOcupacao = null;
+    let alturaNecessaria = null;
+    let requirementSeq = 0;
+    let restoring = false;
 
     const inputAltura = document.getElementById("altura");
+    const requirementText = document.getElementById("alturaRequirementText");
     const subExtra = document.getElementById("subExtra");
     const error = document.getElementById("error");
     const salvar = document.getElementById("btnSalvar");
@@ -186,19 +193,75 @@
       );
     }
 
+    function selectByData(selector, attr, value){
+      const btn=[...document.querySelectorAll(selector)].find(item=>String(item.dataset[attr])===String(value));
+      if(btn) selectSingle(selector,btn);
+    }
+
+    function requirementPayload(){
+      if(!pavimentos || possuiSubsolo === null) return null;
+      if(possuiSubsolo && (subsoloAreaMaior50 === null || !subsoloOcupacao)) return null;
+      return {
+        pavimentos_faixa:pavimentos,
+        possui_subsolo:possuiSubsolo,
+        ...(possuiSubsolo?{
+          subsolo_area_maior_50:subsoloAreaMaior50,
+          subsolo_ocupacao:subsoloOcupacao
+        }:{})
+      };
+    }
+
+    function applyRequirement(data){
+      if(data?.exigir_altura === null || data?.exigir_altura === undefined){
+        alturaNecessaria=null;
+        inputAltura.disabled=true;
+        requirementText.textContent=data?.texto||"Complete as informações para verificar se a altura numérica é necessária.";
+        requirementText.classList.remove("required");
+        return;
+      }
+      alturaNecessaria=data.exigir_altura===true;
+      inputAltura.disabled=!alturaNecessaria;
+      requirementText.textContent=data.texto||(
+        alturaNecessaria?"Informe a altura considerada da edificação.":"Altura numérica não necessária nesta condição."
+      );
+      requirementText.classList.toggle("required",alturaNecessaria);
+      if(!alturaNecessaria) inputAltura.value="0,00";
+    }
+
+    async function refreshRequirement(){
+      const payload=requirementPayload();
+      if(!payload){
+        applyRequirement({exigir_altura:null,texto:"Complete as informações do subsolo para verificar a necessidade da altura."});
+        return;
+      }
+      const seq=++requirementSeq;
+      try{
+        const data=await SARClassificatorAPI.alturaRequirement(payload);
+        if(seq!==requirementSeq) return;
+        if(!data?.ok) throw new Error("Não foi possível verificar a necessidade da altura.");
+        const previous=inputAltura.value;
+        applyRequirement(data);
+        if(restoring && alturaNecessaria && previous && previous!=="0,00") inputAltura.value=previous;
+      }catch(e){
+        console.error(e);
+        if(seq!==requirementSeq) return;
+        alturaNecessaria=null;
+        inputAltura.disabled=true;
+        requirementText.textContent="Não foi possível verificar a necessidade da altura.";
+      }
+    }
+
     document.querySelectorAll("[data-pav]").forEach(btn => {
-      btn.onclick = () => {
+      btn.onclick = async () => {
         selectSingle("[data-pav]", btn);
         pavimentos = btn.dataset.pav;
-        const terreo = pavimentos === "TERREO";
-        inputAltura.disabled = terreo && possuiSubsolo !== true;
-        if (inputAltura.disabled) inputAltura.value = "0,00";
         error.textContent = "";
+        await refreshRequirement();
       };
     });
 
     document.querySelectorAll("[data-sub]").forEach(btn => {
-      btn.onclick = () => {
+      btn.onclick = async () => {
         selectSingle("[data-sub]", btn);
         possuiSubsolo = btn.dataset.sub === "true";
         subExtra.classList.toggle("show", possuiSubsolo);
@@ -207,25 +270,26 @@
           subsoloOcupacao = null;
           document.querySelectorAll("[data-subarea],[data-subuso]").forEach(b => b.classList.remove("selected"));
         }
-        inputAltura.disabled = pavimentos === "TERREO" && !possuiSubsolo;
-        if (inputAltura.disabled) inputAltura.value = "0,00";
         error.textContent = "";
+        await refreshRequirement();
       };
     });
 
     document.querySelectorAll("[data-subarea]").forEach(btn => {
-      btn.onclick = () => {
+      btn.onclick = async () => {
         selectSingle("[data-subarea]", btn);
         subsoloAreaMaior50 = btn.dataset.subarea === "true";
         error.textContent = "";
+        await refreshRequirement();
       };
     });
 
     document.querySelectorAll("[data-subuso]").forEach(btn => {
-      btn.onclick = () => {
+      btn.onclick = async () => {
         selectSingle("[data-subuso]", btn);
         subsoloOcupacao = btn.dataset.subuso;
         error.textContent = "";
+        await refreshRequirement();
       };
     });
 
@@ -235,10 +299,42 @@
     });
 
     function parseNumber(value) {
-      const normalized = String(value || "").trim().replace(/\./g, "").replace(",", ".");
+      const raw=String(value||"").trim();
+      if(!raw) return null;
+      const normalized = raw.includes(",") ? raw.replace(/\./g, "").replace(",", ".") : raw;
       const n = Number(normalized);
       return Number.isFinite(n) ? n : null;
     }
+
+    async function restoreAltura(state){
+      const saved=state?.altura;
+      if(!saved?.concluida) return;
+      restoring=true;
+      pavimentos=saved.pavimentos_faixa||null;
+      possuiSubsolo=saved.possui_subsolo===true;
+      subsoloAreaMaior50=saved.subsolo_area_maior_50;
+      subsoloOcupacao=saved.subsolo_ocupacao||null;
+
+      selectByData("[data-pav]","pav",pavimentos);
+      selectByData("[data-sub]","sub",possuiSubsolo?"true":"false");
+      subExtra.classList.toggle("show",possuiSubsolo);
+      if(possuiSubsolo){
+        selectByData("[data-subarea]","subarea",subsoloAreaMaior50?"true":"false");
+        selectByData("[data-subuso]","subuso",subsoloOcupacao);
+      }
+      if(saved.altura_m!=null && Number(saved.altura_m)>0){
+        inputAltura.value=Number(saved.altura_m).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+      }
+      await refreshRequirement();
+      if(saved.altura_necessaria && Number(saved.altura_m)>0){
+        inputAltura.value=Number(saved.altura_m).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+      }
+      restoring=false;
+    }
+
+    window.addEventListener("sar:classificator-state",event=>restoreAltura(event.detail));
+    const initialState=window.SARClassificatorUI?.getState?.();
+    if(initialState) restoreAltura(initialState);
 
     salvar.onclick = async () => {
       if (!pavimentos) {
@@ -257,11 +353,15 @@
         error.textContent = "Informe a ocupação do subsolo.";
         return;
       }
+      if (alturaNecessaria === null) {
+        error.textContent = "Aguarde a verificação da necessidade da altura.";
+        return;
+      }
 
       let altura = 0;
-      if (!(pavimentos === "TERREO" && !possuiSubsolo)) {
+      if (alturaNecessaria) {
         altura = parseNumber(inputAltura.value);
-        if (altura === null || altura < 0 || (pavimentos !== "TERREO" && altura <= 0)) {
+        if (altura === null || altura <= 0) {
           error.textContent = "Informe uma altura válida em metros.";
           return;
         }

@@ -728,6 +728,60 @@
         }
       }
 
+
+      let restored=false;
+
+      function cardForAreaBand(band){
+        const map={
+          ATE_750:"AREA_ATE_750",
+          ENTRE_750_1500:"AREA_750_1500",
+          ACIMA_1500:"AREA_ACIMA_1500"
+        };
+        return cards.find(card=>card.dataset.opcao===map[String(band||"").toUpperCase()])||null;
+      }
+
+      function showSavedResult(area){
+        document.getElementById("resultClcbArea").textContent=area?.area_computada_clcb_m2==null?"Faixa confirmada":formatArea(area.area_computada_clcb_m2);
+        document.getElementById("resultPtsArea").textContent=area?.area_computada_pts_m2==null?"Faixa confirmada":formatArea(area.area_computada_pts_m2);
+        document.getElementById("resultAreaCode").textContent=area?.resultado_codigo||"Registrado";
+        areaResultPanel.classList.add("show");
+      }
+
+      async function restoreArea(state){
+        if(restored||!state?.area?.concluida) return;
+        restored=true;
+        const saved=state.area;
+        const card=cardForAreaBand(saved.faixa_original);
+        if(!card) return;
+
+        selectedCard=card;
+        cards.forEach(item=>item.classList.toggle("selected",item===card));
+        decisionRange.textContent=card.dataset.label||"";
+        showSavedResult(saved);
+
+        if(saved.descontos_aplicados){
+          try{
+            await ensureAreaConfig();
+            exactInput.value=saved.area_total_exata_m2??"";
+            const informed=saved.descontos_informados||{};
+            document.querySelectorAll("[data-area-field]").forEach(input=>{
+              input.value=informed[input.dataset.campo]??0;
+            });
+            updateTotals();
+            discountPanel.classList.add("show");
+          }catch(error){
+            console.error(error);
+            status.textContent="A área foi registrada, mas não foi possível carregar os campos de desconto.";
+          }
+        }else if(String(saved.faixa_original||"").toUpperCase()!=="ATE_750"){
+          decisionPanel.classList.add("show");
+        }
+      }
+
+      window.addEventListener("sar:classificator-state",event=>restoreArea(event.detail));
+      const initialAreaState=window.SARClassificatorUI?.getState?.();
+      if(initialAreaState) restoreArea(initialAreaState);
+
       cards.forEach(card=>card.addEventListener("click",()=>selectCard(card)));
 
       document.getElementById("btnConfirmarFaixa").addEventListener("click",()=>saveArea(false));

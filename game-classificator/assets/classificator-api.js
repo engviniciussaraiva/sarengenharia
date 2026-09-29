@@ -106,6 +106,10 @@
     return postWithSession("/api/game/classificator/area/configuracao", {});
   }
 
+  async function alturaRequirement(dados = {}) {
+    return postWithSession("/api/game/classificator/altura/necessidade", { dados });
+  }
+
   async function restart() {
     if (!getSession()) {
       return start();
@@ -122,6 +126,7 @@
     answer,
     status,
     areaConfiguration,
+    alturaRequirement,
     getSession,
     getCachedState,
     clearCachedState,
