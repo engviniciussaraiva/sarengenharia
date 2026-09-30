@@ -110,6 +110,13 @@
     return postWithSession("/api/game/classificator/altura/necessidade", { dados });
   }
 
+  async function occupationCatalog(params = {}) {
+    const grupo = String(params?.grupo || "").trim();
+    const busca = String(params?.busca || "").trim();
+    const divisao = String(params?.divisao || "").trim();
+    return postWithSession("/api/game/classificator/ocupacao/catalogo", { grupo, busca, divisao });
+  }
+
   async function restart() {
     if (!getSession()) {
       return start();
@@ -127,6 +134,7 @@
     status,
     areaConfiguration,
     alturaRequirement,
+    occupationCatalog,
     getSession,
     getCachedState,
     clearCachedState,

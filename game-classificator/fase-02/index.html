@@ -55,7 +55,18 @@
     (()=>{
       "use strict";
       const cards=[...document.querySelectorAll(".route-card")];
-      cards.forEach(card=>card.addEventListener("click",()=>window.location.assign(card.dataset.route)));
+      const preloaded=new Set();
+      const assetsByCode={
+        AREA:["/game-classificator/assets/area-ate-750.webp","/game-classificator/assets/area-750-1500.webp","/game-classificator/assets/area-acima-1500.webp"],
+        ALTURA:["/game-classificator/assets/altura-exemplos-semsubsolo.webp","/game-classificator/assets/altura-subsolo-estacionamento.webp","/game-classificator/assets/altura-subsolo-salas.webp"]
+      };
+      function warm(card){
+        if(card.disabled||preloaded.has(card.dataset.code))return;
+        preloaded.add(card.dataset.code);
+        const link=document.createElement("link");link.rel="prefetch";link.href=card.dataset.route;document.head.appendChild(link);
+        for(const src of assetsByCode[card.dataset.code]||[]){const img=new Image();img.decoding="async";img.src=src;}
+      }
+      cards.forEach(card=>{card.addEventListener("pointerenter",()=>warm(card),{passive:true});card.addEventListener("touchstart",()=>warm(card),{passive:true,once:true});card.addEventListener("click",()=>window.location.assign(card.dataset.route));});
       function aplicarEstado(state){
         state=state||{};
         if(state.implantacao_concluida!==true){

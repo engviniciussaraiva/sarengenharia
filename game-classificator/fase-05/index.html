@@ -1,32 +1,91 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR">
   <title>ClassificaTOR | Ocupação</title>
-  <script src="/js/sar.page-guard.js"></script><script src="/js/sar.api.js"></script><script src="/game-classificator/assets/classificator-api.js"></script>
+  <script src="/js/sar.page-guard.js"></script>
+  <script src="/js/sar.api.js"></script>
+  <script src="/game-classificator/assets/classificator-api.js"></script>
   <link rel="stylesheet" href="/game-classificator/assets/classificator-shell.css">
   <style>
-    .occupation-grid{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:14px}.occupation-card{padding:18px;border:1px solid #cee1d6;border-radius:12px;background:#fff;color:#173f38;text-align:left;cursor:pointer;transition:.18s;min-height:98px}.occupation-card:hover{transform:translateY(-2px);border-color:#56aa80;box-shadow:0 8px 20px rgba(13,81,63,.09)}.occupation-code{display:block;margin-bottom:6px;color:#1b9a68;font-size:13px;font-weight:900;letter-spacing:.08em}.occupation-name{display:block;font-size:15px;font-weight:800;line-height:1.25}.occupation-card:disabled{opacity:.55;cursor:wait}.error{min-height:20px;margin-top:14px;color:#9f433b;text-align:center;font-size:13px}@media(max-width:1100px){.occupation-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:760px){.occupation-grid{grid-template-columns:1fr 1fr}}@media(max-width:500px){.occupation-grid{grid-template-columns:1fr}}
+    .search-row{display:grid;grid-template-columns:1fr auto;gap:10px;margin-bottom:22px}
+    .search-box{position:relative}.search-box input{width:100%;min-height:48px;padding:0 15px 0 44px;border:1px solid #bad6c7;border-radius:11px;background:#fff;color:#173f38;font-size:15px;outline:none}.search-box input:focus{border-color:#1f9f6b;box-shadow:0 0 0 3px rgba(31,159,107,.08)}.search-icon{position:absolute;left:15px;top:12px;color:#0d6d51;font-size:20px}.clear-btn{min-width:90px;border:1px solid #bdd7c8;border-radius:10px;background:#fff;color:#315c52;font-weight:800;cursor:pointer}
+    .search-results{display:none;margin:-10px 0 20px;border:1px solid #d5e6dc;border-radius:11px;overflow:hidden;background:#fff}.search-results.show{display:block}.search-item{width:100%;padding:12px 15px;border:0;border-bottom:1px solid #edf3ef;background:#fff;text-align:left;display:grid;grid-template-columns:70px 1fr 24px;gap:10px;align-items:center;cursor:pointer}.search-item:last-child{border-bottom:0}.search-item:hover{background:#f3faf6}.search-code{color:#159963;font-size:12px;font-weight:900}.search-main strong{display:block;color:#173f38;font-size:14px}.search-main span{display:block;margin-top:2px;color:#6c817a;font-size:11px}.search-arrow{color:#0d6d51;font-size:20px}
+    .occupation-grid{display:grid;grid-template-columns:repeat(4,minmax(210px,1fr));gap:14px}.occupation-card{padding:18px;border:1px solid #cee1d6;border-radius:12px;background:#fff;color:#173f38;text-align:left;cursor:pointer;transition:.18s;min-height:98px}.occupation-card:hover{transform:translateY(-2px);border-color:#56aa80;box-shadow:0 8px 20px rgba(13,81,63,.09)}.occupation-card.selected{background:#effaf3;border-color:#1d9d68;box-shadow:0 0 0 3px rgba(31,159,107,.06)}.occupation-code{display:block;margin-bottom:6px;color:#1b9a68;font-size:13px;font-weight:900;letter-spacing:.08em}.occupation-name{display:block;font-size:15px;font-weight:800;line-height:1.25}
+    .division-panel{display:none;margin-top:22px;padding-top:20px;border-top:1px solid #dbe9e0}.division-panel.show{display:block}.division-head{margin-bottom:12px}.division-head h2{margin:0;color:#173f38;font-size:20px}.division-head p{margin:5px 0 0;color:#688078;font-size:12px}.division-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.division-card{padding:13px 14px;border:1px solid #d0e2d7;border-radius:10px;background:#fbfefc;text-align:left;display:grid;grid-template-columns:62px 1fr;gap:10px;cursor:pointer}.division-card:hover,.division-card.selected{border-color:#1d9d68;background:#f0faf4}.division-code{color:#129060;font-weight:900}.division-desc strong{display:block;color:#173f38;font-size:13px}.division-desc span{display:block;margin-top:2px;color:#71867f;font-size:11px;line-height:1.3}
+    .selection{display:none;margin-top:20px;padding:17px;border:1px solid #b9d9c6;border-radius:12px;background:#f2fbf5}.selection.show{display:block}.selection-kicker{color:#149663;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.selection-title{margin-top:5px;color:#103f36;font-size:20px;font-weight:900}.selection-sub{margin-top:4px;color:#58756d;font-size:12px}
+    .questions{margin-top:14px}.question{padding:14px;border:1px solid #d4e5db;border-radius:10px;background:#fff;margin-top:10px}.question.hidden{display:none}.question-title{margin:0 0 9px;color:#173f38;font-size:14px;font-weight:850}.answer-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.answer-btn{min-height:42px;padding:9px 11px;border:1px solid #c6dccf;border-radius:9px;background:#fff;color:#315c52;font-weight:800;cursor:pointer}.answer-btn:hover{border-color:#1d9d68}.answer-btn.selected{background:#1f9f6b;border-color:#1f9f6b;color:#fff}
+    .no-extra{margin-top:12px;padding:11px 13px;border:1px solid #d8e7de;border-radius:9px;background:#fbfefc;color:#5a756d;font-size:12px}.actions{display:flex;justify-content:flex-end;margin-top:14px}.error{min-height:20px;margin-top:12px;color:#9f433b;font-size:13px;text-align:right}.loading{color:#668078;font-size:12px}
+    @media(max-width:1100px){.occupation-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:800px){.occupation-grid,.division-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.occupation-grid,.division-grid,.search-row,.answer-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <div data-classificator-header data-stage="FASE_05"></div>
-  <main class="page-shell"><header class="page-head"><div><p class="page-eyebrow">Ocupação</p><h1 class="page-title">Selecione o grupo de ocupação</h1><p class="page-subtitle">Escolha o grupo correspondente ao uso predominante da edificação.</p></div><div class="page-actions"><button class="ghost-btn" id="btnTrajeto" type="button">Escolher outro critério</button></div></header>
-  <section class="workspace"><div class="occupation-grid" id="grid">
-    <button class="occupation-card" data-opcao="OCUP_A"><span class="occupation-code">GRUPO A</span><span class="occupation-name">Residencial</span></button>
-    <button class="occupation-card" data-opcao="OCUP_B"><span class="occupation-code">GRUPO B</span><span class="occupation-name">Serviço de hospedagem</span></button>
-    <button class="occupation-card" data-opcao="OCUP_C"><span class="occupation-code">GRUPO C</span><span class="occupation-name">Comercial</span></button>
-    <button class="occupation-card" data-opcao="OCUP_D"><span class="occupation-code">GRUPO D</span><span class="occupation-name">Serviço profissional</span></button>
-    <button class="occupation-card" data-opcao="OCUP_E"><span class="occupation-code">GRUPO E</span><span class="occupation-name">Educacional e cultura física</span></button>
-    <button class="occupation-card" data-opcao="OCUP_F"><span class="occupation-code">GRUPO F</span><span class="occupation-name">Local de reunião de público</span></button>
-    <button class="occupation-card" data-opcao="OCUP_G"><span class="occupation-code">GRUPO G</span><span class="occupation-name">Serviços automotivos</span></button>
-    <button class="occupation-card" data-opcao="OCUP_H"><span class="occupation-code">GRUPO H</span><span class="occupation-name">Serviço de saúde e institucional</span></button>
-    <button class="occupation-card" data-opcao="OCUP_I"><span class="occupation-code">GRUPO I</span><span class="occupation-name">Indústria</span></button>
-    <button class="occupation-card" data-opcao="OCUP_J"><span class="occupation-code">GRUPO J</span><span class="occupation-name">Depósito</span></button>
-    <button class="occupation-card" data-opcao="OCUP_K"><span class="occupation-code">GRUPO K</span><span class="occupation-name">Energia</span></button>
-    <button class="occupation-card" data-opcao="OCUP_L"><span class="occupation-code">GRUPO L</span><span class="occupation-name">Explosivos</span></button>
-    <button class="occupation-card" data-opcao="OCUP_M"><span class="occupation-code">GRUPO M</span><span class="occupation-name">Especial</span></button>
-  </div><div class="error" id="error"></div></section></main>
+  <main class="page-shell">
+    <header class="page-head">
+      <div><p class="page-eyebrow">Ocupação</p><h1 class="page-title">Selecione o grupo de ocupação</h1><p class="page-subtitle">Pesquise uma atividade ou escolha o grupo correspondente ao uso predominante.</p></div>
+      <div class="page-actions"><button class="ghost-btn" id="btnTrajeto" type="button">Escolher outro critério</button></div>
+    </header>
+    <section class="workspace">
+      <div class="search-row">
+        <div class="search-box"><span class="search-icon">⌕</span><input id="search" type="search" autocomplete="off" placeholder="Pesquise: restaurante, igreja, hotel, escola, depósito..."></div>
+        <button class="clear-btn" id="clear" type="button">Limpar</button>
+      </div>
+      <div class="search-results" id="searchResults"></div>
+      <div class="occupation-grid" id="groups"></div>
+      <section class="division-panel" id="divisionPanel"><div class="division-head"><h2 id="divisionTitle">Divisões</h2><p>Selecione a divisão correspondente à atividade predominante.</p></div><div class="division-grid" id="divisionGrid"></div></section>
+      <section class="selection" id="selection"><div class="selection-kicker">Ocupação selecionada</div><div class="selection-title" id="selectionTitle"></div><div class="selection-sub" id="selectionSub"></div><div class="questions" id="questions"></div><div class="error" id="error"></div><div class="actions"><button class="primary-btn" id="confirm" type="button">Confirmar ocupação</button></div></section>
+    </section>
+  </main>
   <script src="/game-classificator/assets/classificator-shell.js"></script>
-  <script>(()=>{"use strict";const cards=[...document.querySelectorAll(".occupation-card")],err=document.getElementById("error");document.getElementById("btnTrajeto").onclick=()=>location.assign("/game-classificator/fase-02/");const lock=v=>cards.forEach(c=>c.disabled=v);cards.forEach(c=>c.onclick=async()=>{lock(true);err.textContent="";try{const data=await SARClassificatorAPI.answer("FASE_05",c.dataset.opcao,null);if(!data?.ok)throw new Error("Não foi possível registrar a ocupação.");location.assign(data.next||"/game-classificator/fase-02/")}catch(e){err.textContent=e.message||"Não foi possível salvar.";lock(false)}})})();</script>
+  <script>
+  (()=>{
+    "use strict";
+    const GROUPS=[
+      ["A","Residencial"],["B","Serviço de hospedagem"],["C","Comercial"],["D","Serviço profissional"],
+      ["E","Educacional e cultura física"],["F","Local de reunião de público"],["G","Serviços automotivos"],["H","Serviço de saúde e institucional"],
+      ["I","Indústria"],["J","Depósito"],["K","Energia"],["L","Explosivos"],["M","Especial"]
+    ];
+    const groupEl=document.getElementById("groups"),divisionPanel=document.getElementById("divisionPanel"),divisionGrid=document.getElementById("divisionGrid"),divisionTitle=document.getElementById("divisionTitle"),selection=document.getElementById("selection"),selectionTitle=document.getElementById("selectionTitle"),selectionSub=document.getElementById("selectionSub"),questionsEl=document.getElementById("questions"),errorEl=document.getElementById("error"),confirmBtn=document.getElementById("confirm"),search=document.getElementById("search"),searchResults=document.getElementById("searchResults");
+    let selectedGroup=null,selectedItem=null,questionDefs=[],answers={},busy=false,searchSeq=0,searchTimer=null,restored=false;
+    const groupCache=new Map(),divisionCache=new Map();
+    document.getElementById("btnTrajeto").onclick=()=>location.assign("/game-classificator/fase-02/");
+
+    function renderGroups(){
+      groupEl.innerHTML=GROUPS.map(([code,name])=>`<button class="occupation-card ${selectedGroup===code?'selected':''}" type="button" data-group="${code}"><span class="occupation-code">GRUPO ${code}</span><span class="occupation-name">${name}</span></button>`).join("");
+      groupEl.querySelectorAll("[data-group]").forEach(btn=>btn.onclick=()=>loadGroup(btn.dataset.group));
+    }
+    function esc(value){return String(value??"").replace(/[&<>\"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;","'":"&#039;"}[ch]));}
+    function itemHtml(item,searchMode=false){return searchMode?`<button class="search-item" type="button" data-div="${esc(item.divisao)}"><span class="search-code">${esc(item.divisao)}</span><span class="search-main"><strong>${esc(item.descricao)}</strong><span>Grupo ${esc(item.grupo)} · ${esc(item.exemplos||"")}</span></span><span class="search-arrow">→</span></button>`:`<button class="division-card ${selectedItem?.divisao===item.divisao?'selected':''}" type="button" data-div="${esc(item.divisao)}"><span class="division-code">${esc(item.divisao)}</span><span class="division-desc"><strong>${esc(item.descricao)}</strong><span>${esc(item.exemplos||"")}</span></span></button>`;}
+    async function loadGroup(group){
+      if(busy)return;if(selectedItem?.grupo!==group){selectedItem=null;answers={};selection.classList.remove("show");}selectedGroup=group;renderGroups();errorEl.textContent="";divisionPanel.classList.add("show");divisionTitle.textContent=`Grupo ${group} — ${GROUPS.find(x=>x[0]===group)?.[1]||""}`;divisionGrid.innerHTML='<span class="loading">Carregando opções...</span>';
+      try{let data=groupCache.get(group);if(!data){data=await SARClassificatorAPI.occupationCatalog({grupo:group});groupCache.set(group,data);}renderDivisions(data.itens||[]);}catch(e){divisionGrid.innerHTML="";errorEl.textContent=e?.message||"Não foi possível carregar as ocupações.";}
+    }
+    function renderDivisions(items){divisionGrid.innerHTML=items.map(item=>itemHtml(item)).join("")||'<span class="loading">Nenhuma divisão encontrada.</span>';divisionGrid.querySelectorAll("[data-div]").forEach(btn=>btn.onclick=()=>loadDivision(btn.dataset.div));}
+    async function loadDivision(division,savedAnswers=null){
+      if(busy)return;errorEl.textContent="";questionsEl.innerHTML='<span class="loading">Carregando...</span>';selection.classList.add("show");
+      try{let data=divisionCache.get(division);if(!data){data=await SARClassificatorAPI.occupationCatalog({divisao:division});divisionCache.set(division,data);}selectedItem=data.item;selectedGroup=selectedItem.grupo;questionDefs=data.perguntas||[];answers={...(savedAnswers||{})};renderGroups();selectionTitle.textContent=`${selectedItem.divisao} — ${selectedItem.descricao}`;selectionSub.textContent=`Grupo ${selectedItem.grupo} · ${selectedItem.grupo_nome}${selectedItem.exemplos?` · Exemplos: ${selectedItem.exemplos}`:""}`;renderQuestions();selection.scrollIntoView({behavior:"smooth",block:"nearest"});}
+      catch(e){questionsEl.innerHTML="";errorEl.textContent=e?.message||"Não foi possível carregar a ocupação.";}
+    }
+    function questionActive(q){return !q.quando?.campo||String(answers[q.quando.campo]||"").toUpperCase()===String(q.quando.valor||"").toUpperCase();}
+    function renderQuestions(){
+      const active=questionDefs.filter(questionActive);const activeCodes=new Set(active.map(q=>q.codigo));for(const key of Object.keys(answers)){if(questionDefs.some(q=>q.codigo===key)&&!activeCodes.has(key))delete answers[key];}
+      if(!active.length){questionsEl.innerHTML='<div class="no-extra">Nenhuma pergunta adicional para esta ocupação.</div>';return;}
+      questionsEl.innerHTML=active.map(q=>`<div class="question" data-question="${esc(q.codigo)}"><p class="question-title">${esc(q.titulo)}</p><div class="answer-grid">${(q.opcoes||[]).map(o=>`<button class="answer-btn ${String(answers[q.codigo]||"")===String(o.valor)?'selected':''}" type="button" data-q="${esc(q.codigo)}" data-v="${esc(o.valor)}">${esc(o.rotulo)}</button>`).join("")}</div></div>`).join("");
+      questionsEl.querySelectorAll("[data-q]").forEach(btn=>btn.onclick=()=>{answers[btn.dataset.q]=btn.dataset.v;renderQuestions();errorEl.textContent="";});
+    }
+    function validate(){for(const q of questionDefs){if(!questionActive(q))continue;if(q.obrigatorio&&!answers[q.codigo])return `Responda: ${q.titulo}`;}return "";}
+    function setBusy(v){busy=v;confirmBtn.disabled=v;groupEl.querySelectorAll("button").forEach(b=>b.disabled=v);divisionGrid.querySelectorAll("button").forEach(b=>b.disabled=v);}
+    confirmBtn.onclick=async()=>{if(!selectedItem||busy)return;const problem=validate();if(problem){errorEl.textContent=problem;return;}setBusy(true);errorEl.textContent="";try{const data=await SARClassificatorAPI.answer("FASE_05",null,{ocupacao_divisao:selectedItem.divisao,...answers});if(!data?.ok)throw new Error("Não foi possível registrar a ocupação.");window.SARClassificatorUI?.applyState?.(data);location.assign(data.next||"/game-classificator/fase-02/");}catch(e){errorEl.textContent=e?.message||"Não foi possível registrar a ocupação.";setBusy(false);}};
+
+    search.addEventListener("input",()=>{clearTimeout(searchTimer);const term=search.value.trim();if(term.length<2){searchResults.classList.remove("show");searchResults.innerHTML="";return;}const seq=++searchSeq;searchTimer=setTimeout(async()=>{try{const data=await SARClassificatorAPI.occupationCatalog({busca:term});if(seq!==searchSeq)return;const items=data.itens||[];searchResults.innerHTML=items.map(item=>itemHtml(item,true)).join("")||'<div style="padding:14px;color:#6c817a;font-size:12px">Nenhuma ocupação encontrada.</div>';searchResults.classList.add("show");searchResults.querySelectorAll("[data-div]").forEach(btn=>btn.onclick=()=>{searchResults.classList.remove("show");loadDivision(btn.dataset.div);});}catch(e){if(seq!==searchSeq)return;searchResults.innerHTML='<div style="padding:14px;color:#9f433b;font-size:12px">Falha ao pesquisar.</div>';searchResults.classList.add("show");}},220);});
+    document.getElementById("clear").onclick=()=>{search.value="";searchResults.classList.remove("show");searchResults.innerHTML="";search.focus();};
+
+    async function restore(state){if(restored||!state?.ocupacao?.concluida)return;restored=true;const saved=state.ocupacao;await loadDivision(saved.divisao,saved.respostas||{});if(selectedGroup)await loadGroup(selectedGroup);}
+    window.addEventListener("sar:classificator-state",e=>restore(e.detail));const initial=window.SARClassificatorUI?.getState?.();if(initial)restore(initial);
+    renderGroups();
+  })();
+  </script>
 </body></html>
