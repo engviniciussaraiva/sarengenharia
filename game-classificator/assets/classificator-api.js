@@ -126,9 +126,18 @@
     return data;
   }
 
+  async function resetCriterion(criterio) {
+    const codigo = String(criterio || "").trim().toUpperCase();
+    if (!codigo) throw new Error("Critério inválido.");
+    const data = await postWithSession("/api/game/classificator/criterio/reset", { criterio: codigo });
+    saveState(data);
+    return data;
+  }
+
   window.SARClassificatorAPI = Object.freeze({
     start,
     restart,
+    resetCriterion,
     selectState,
     answer,
     status,

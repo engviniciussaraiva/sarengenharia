@@ -67,6 +67,9 @@ button,input{font:inherit}
 .page-actions{display:flex;gap:10px;flex-wrap:wrap}
 .ghost-btn{min-width:125px;padding:10px 16px;border:1px solid #bcd4c7;border-radius:9px;background:#fff;color:#174b40;font-size:13px;font-weight:800;cursor:pointer}
 .ghost-btn:hover{background:#f6fbf8}
+.classificator-reset-btn{border-color:#d7b5ad;background:#fff;color:#8b4137}
+.classificator-reset-btn:hover{border-color:#b9685b;background:#fff8f6;color:#77342c}
+.classificator-reset-btn:disabled{opacity:.58;cursor:wait}
 .primary-btn{min-width:150px;padding:12px 20px;border:0;border-radius:9px;background:var(--palmeiras);color:#fff;font-weight:800;cursor:pointer}
 .primary-btn:hover{background:#0a4536}
 .primary-btn:disabled{opacity:.55;cursor:wait}

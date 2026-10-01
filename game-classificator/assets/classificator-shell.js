@@ -51,6 +51,14 @@
 
   let lastState = null;
   let restartBusy = false;
+  let criterionResetBusy = false;
+
+  const criterionByStage = Object.freeze({
+    FASE_03: {codigo:"ALTURA", titulo:"Altura", rota:"/game-classificator/fase-03/"},
+    FASE_04: {codigo:"AREA", titulo:"Área", rota:"/game-classificator/fase-04/"},
+    FASE_05: {codigo:"OCUPACAO", titulo:"Ocupação", rota:"/game-classificator/fase-05/"},
+    FASE_06: {codigo:"CRITERIOS", titulo:"Critérios", rota:"/game-classificator/fase-06/"}
+  });
 
   async function restartStudy(button) {
     if (restartBusy) return;
@@ -106,6 +114,58 @@
     }
   }
 
+  function updateCriterionResetButton(data) {
+    const actions = document.querySelector(".page-actions");
+    if (!actions) return;
+
+    const old = actions.querySelector("[data-classificator-reset]");
+    const spec = criterionByStage[currentStage];
+    if (!spec) {
+      old?.remove();
+      return;
+    }
+
+    const item = (data?.criterios || []).find(row => row?.codigo === spec.codigo);
+    if (!item?.concluido) {
+      old?.remove();
+      return;
+    }
+
+    const button = old || document.createElement("button");
+    button.type = "button";
+    button.dataset.classificatorReset = spec.codigo;
+    button.className = "ghost-btn classificator-reset-btn";
+    button.textContent = `Limpar ${spec.titulo}`;
+    button.title = `Apagar somente os dados do critério ${spec.titulo}`;
+
+    if (!old) actions.insertBefore(button, actions.firstChild);
+
+    button.onclick = async () => {
+      if (criterionResetBusy) return;
+      const confirmed = window.confirm(
+        `Limpar os dados de ${spec.titulo}?\n\nOs demais critérios serão mantidos e a classificação será recalculada.`
+      );
+      if (!confirmed) return;
+
+      criterionResetBusy = true;
+      button.disabled = true;
+      const originalText = button.textContent;
+      button.textContent = "Limpando...";
+      try {
+        const result = await window.SARClassificatorAPI?.resetCriterion(spec.codigo);
+        if (!result?.ok) throw new Error("Não foi possível limpar o critério.");
+        applyState(result);
+        window.location.replace(spec.rota);
+      } catch (error) {
+        console.error("ClassificaTOR: falha ao limpar critério", error);
+        button.disabled = false;
+        button.textContent = originalText;
+        criterionResetBusy = false;
+        window.alert(error?.message || "Não foi possível limpar o critério.");
+      }
+    };
+  }
+
   function applyClassification(summary) {
     const determinante = Boolean(summary?.determinante || summary?.provisorio === false);
     const processo = determinante ? (summary?.processo?.codigo || summary?.processo?.texto) : null;
@@ -135,6 +195,7 @@
     }
     drawCriteria(data.criterios || defaultCriteria, implantationDone);
     applyClassification(data.classificacao || null);
+    updateCriterionResetButton(data);
     ribbonButton.onclick = () => window.location.assign(data.resumo?.rota || "/game-classificator/resultado/");
     window.dispatchEvent(new CustomEvent("sar:classificator-state", {detail:data}));
     return data;
