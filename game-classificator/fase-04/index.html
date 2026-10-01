@@ -431,6 +431,10 @@
     }
 
     .inline-error.show{display:block}
+    .discount-warnings{display:none;margin-top:14px;padding:12px 14px;border:1px solid #e7c98f;border-radius:10px;background:#fff9ec;color:#75520d;font-size:12px;line-height:1.45}
+    .discount-warnings.show{display:block}
+    .discount-warning-item+.discount-warning-item{margin-top:7px;padding-top:7px;border-top:1px solid #f0dfbc}
+    .discount-warning-item strong{color:#654405}
 
     @media(max-width:980px){
       .cards,
@@ -525,6 +529,8 @@
           </section>
         </div>
 
+        <div id="discountWarnings" class="discount-warnings" aria-live="polite"></div>
+
         <div class="discount-totals">
           <div class="total-card">
             <span>Desconto informado — CLCB e PTS</span>
@@ -577,6 +583,7 @@
       const totalClcbPts=document.getElementById("totalClcbPts");
       const totalPtsOnly=document.getElementById("totalPtsOnly");
       const totalPts=document.getElementById("totalPts");
+      const discountWarnings=document.getElementById("discountWarnings");
 
       let selectedCard=null;
       let areaConfig=null;
@@ -674,6 +681,29 @@
         totalPts.textContent=formatArea(common+ptsOnly);
       }
 
+      function renderIgnoredDiscounts(items){
+        const list=Array.isArray(items)?items:[];
+        if(!discountWarnings) return;
+        if(!list.length){
+          discountWarnings.classList.remove("show");
+          discountWarnings.replaceChildren();
+          return;
+        }
+        discountWarnings.replaceChildren(...list.map(item=>{
+          const row=document.createElement("div");
+          row.className="discount-warning-item";
+          const informed=formatArea(item?.valor_informado_m2);
+          const limit=formatArea(item?.limite_m2);
+          row.innerHTML=`<strong></strong> — desconto não considerado. Valor informado: <b></b>; limite permitido para desconsideração: <b></b>.`;
+          row.querySelector("strong").textContent=item?.titulo||"Área informada";
+          const values=row.querySelectorAll("b");
+          if(values[0]) values[0].textContent=informed;
+          if(values[1]) values[1].textContent=limit;
+          return row;
+        }));
+        discountWarnings.classList.add("show");
+      }
+
       function collectDiscountData(){
         const data={
           aplicar_descontos:true,
@@ -689,7 +719,6 @@
         const code=String(error?.code||error?.payload?.erro||error?.data?.erro||"");
         if(code==="AREA_EXATA_OBRIGATORIA") return "Informe a área total construída exata.";
         if(code==="AREA_EXATA_FORA_FAIXA") return "A área exata informada não corresponde à faixa selecionada.";
-        if(code==="DESCONTO_FORA_LIMITE") return "Um dos descontos informados ultrapassa o limite permitido.";
         if(code==="DESCONTOS_MAIORES_AREA") return "A soma dos descontos não pode ser maior que a área total construída.";
         if(code==="AREA_DESCONTO_INVALIDO") return "Revise os valores das áreas de desconto.";
         return error?.message||"Não foi possível registrar o critério Área.";
@@ -712,6 +741,7 @@
             document.getElementById("resultClcbArea").textContent=data.area.area_computada_clcb_m2==null?"Faixa confirmada":formatArea(data.area.area_computada_clcb_m2);
             document.getElementById("resultPtsArea").textContent=data.area.area_computada_pts_m2==null?"Faixa confirmada":formatArea(data.area.area_computada_pts_m2);
             document.getElementById("resultAreaCode").textContent=data.area.resultado_codigo||"Registrado";
+            renderIgnoredDiscounts(data.area.descontos_nao_considerados);
             areaResultPanel.classList.add("show");
           }
 
@@ -768,6 +798,7 @@
               input.value=informed[input.dataset.campo]??0;
             });
             updateTotals();
+            renderIgnoredDiscounts(saved.descontos_nao_considerados);
             discountPanel.classList.add("show");
           }catch(error){
             console.error(error);
