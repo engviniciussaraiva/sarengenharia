@@ -1,3 +1,157 @@
 <!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR"><title>ClassificaTOR | Critério técnico</title><script src="/js/sar.page-guard.js"></script><script src="/js/sar.api.js"></script><script src="/game-classificator/assets/classificator-api.js"></script><link rel="stylesheet" href="/game-classificator/assets/classificator-shell.css"><style>.criteria-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.criteria-card{padding:20px;border:1px solid #cee1d6;border-radius:12px;background:#f9fcfa;min-height:118px}.criteria-card h2{margin:0 0 8px;color:#17483e;font-size:16px}.criteria-card p{margin:0;color:#637d76;font-size:13px;line-height:1.45}.criteria-note{margin-bottom:18px;padding:14px;border:1px solid #cfe4d7;border-radius:10px;background:#eef9f2;color:#315b50;font-size:13px}@media(max-width:850px){.criteria-grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.criteria-grid{grid-template-columns:1fr}}</style></head>
-<body><div data-classificator-header data-stage="FASE_06"></div><main class="page-shell"><header class="page-head"><div><p class="page-eyebrow">Critério técnico</p><h1 class="page-title">Demais critérios técnicos</h1><p class="page-subtitle">Condições adicionais que podem alterar o tipo de projeto ou a certificação.</p></div><div class="page-actions"><button class="ghost-btn" id="btnTrajeto" type="button">Escolher outro critério</button></div></header><section class="workspace"><div class="criteria-note">Esta tela será alimentada pelas regras técnicas do banco. Os blocos abaixo representam os grupos de verificação já previstos no motor.</div><div class="criteria-grid"><div class="criteria-card"><h2>GLP e gases inflamáveis</h2><p>Revenda, consumo, armazenamento e limites aplicáveis.</p></div><div class="criteria-card"><h2>Líquidos igníferos</h2><p>Armazenamento, processo e limites correspondentes.</p></div><div class="criteria-card"><h2>Produtos perigosos</h2><p>Condições que restringem os enquadramentos simplificados.</p></div><div class="criteria-card"><h2>Lotação e condições específicas</h2><p>Capacidade de público e restrições particulares da ocupação.</p></div><div class="criteria-card"><h2>Materiais combustíveis</h2><p>Armazenamentos e situações específicas previstas na norma.</p></div><div class="criteria-card"><h2>Sistemas especiais</h2><p>Condições que direcionam o processo para Projeto Técnico.</p></div></div></section></main><script src="/game-classificator/assets/classificator-shell.js"></script><script>document.getElementById("btnTrajeto").onclick=()=>location.assign("/game-classificator/fase-02/");</script></body></html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR">
+  <title>ClassificaTOR | Critérios técnicos</title>
+  <script src="/js/sar.page-guard.js"></script>
+  <script src="/js/sar.api.js"></script>
+  <script src="/game-classificator/assets/classificator-api.js"></script>
+  <link rel="stylesheet" href="/game-classificator/assets/classificator-shell.css">
+  <style>
+    .criteria-wrap{max-width:1180px;margin:0 auto;padding:12px 0 42px}
+    .criteria-tools{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:0 0 16px;padding:13px 15px;border:1px solid #cfe2d7;border-radius:10px;background:#f2faf5}
+    .criteria-tools strong{display:block;color:#153f37;font-size:14px}.criteria-tools small{display:block;margin-top:3px;color:#6b8179;font-size:11px}
+    .tool-buttons{display:flex;gap:8px;flex-wrap:wrap}.tool-btn{border:1px solid #b8d5c4;border-radius:8px;background:#fff;color:#17483e;padding:9px 13px;font-weight:800;cursor:pointer}.tool-btn.primary{background:#0d513f;border-color:#0d513f;color:#fff}.tool-btn.danger{color:#9b3f39;border-color:#e1bdb9;background:#fff8f7;display:none}.tool-btn.danger.show{display:inline-block}
+    .criteria-list{border:1px solid #cbded2;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 8px 24px rgba(13,81,63,.05)}
+    .criterion{padding:17px 18px;border-bottom:1px solid #e2ece6}.criterion:last-child{border-bottom:0}.criterion-head{display:grid;grid-template-columns:minmax(260px,1fr) minmax(340px,1.35fr);gap:22px;align-items:center}.criterion-title{font-size:15px;font-weight:900;color:#173f38}.criterion-note{display:block;margin-top:4px;font-size:11px;font-weight:500;color:#70867f;line-height:1.35}.choice-row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}.choice{min-width:96px;min-height:38px;padding:8px 12px;border:1px solid #c7dbcf;border-radius:8px;background:#fbfefc;color:#355d53;font-size:12px;font-weight:850;cursor:pointer}.choice:hover{border-color:#209b69}.choice.selected{background:#1b9867;border-color:#1b9867;color:#fff}.choice.wide{min-width:150px}
+    .conditional{display:none;margin:13px 0 0;padding:13px 14px;border-radius:9px;background:#f4faf6;border:1px solid #d9e9df}.conditional.show{display:block}.subquestion{display:grid;grid-template-columns:minmax(220px,1fr) minmax(340px,1.35fr);gap:22px;align-items:center}.subquestion+.subquestion{margin-top:11px;padding-top:11px;border-top:1px dashed #d4e4db}.subquestion strong{color:#315b50;font-size:12px}
+    .section-label{padding:10px 18px;background:#eaf6ee;border-bottom:1px solid #cfe2d7;color:#0e644a;font-size:11px;font-weight:950;letter-spacing:.07em;text-transform:uppercase}
+    .result-box{display:none;margin-top:14px;padding:12px 14px;border:1px solid #b9d9c6;border-radius:10px;background:#f2fbf5}.result-box.show{display:block}.result-box strong{color:#0d513f}.result-box span{display:block;margin-top:4px;color:#5c766e;font-size:12px}
+    .footer-actions{display:flex;align-items:center;gap:12px;margin-top:16px}.error{flex:1;color:#a2443d;font-size:12px;min-height:18px}.primary-btn-local{border:0;border-radius:9px;background:#0d513f;color:#fff;padding:12px 20px;font-weight:900;cursor:pointer}.primary-btn-local:disabled,.tool-btn:disabled,.choice:disabled{opacity:.55;cursor:wait}
+    @media(max-width:820px){.criterion-head,.subquestion{grid-template-columns:1fr}.choice-row{justify-content:flex-start}.criteria-tools{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div data-classificator-header data-stage="FASE_06"></div>
+  <main class="page-shell">
+    <header class="page-head">
+      <div>
+        <p class="page-eyebrow">Critérios técnicos</p>
+        <h1 class="page-title">Demais critérios da edificação</h1>
+        <p class="page-subtitle">Responda as condições existentes. Só aparecem complementos quando necessários.</p>
+      </div>
+      <div class="page-actions"><button class="ghost-btn" id="btnTrajeto" type="button">Escolher outro critério</button></div>
+    </header>
+
+    <section class="criteria-wrap">
+      <div class="criteria-tools">
+        <div><strong>Edificação sem nenhuma condição especial abaixo?</strong><small>Este botão marca todas as respostas como “não possui / não exigido”.</small></div>
+        <div class="tool-buttons">
+          <button class="tool-btn danger" id="btnLimpar" type="button">Limpar critérios</button>
+          <button class="tool-btn primary" id="btnNenhuma" type="button">Nenhuma condição especial</button>
+        </div>
+      </div>
+
+      <div class="criteria-list">
+        <div class="section-label">Gases e líquidos</div>
+
+        <section class="criterion" id="glpSection">
+          <div class="criterion-head">
+            <div class="criterion-title">A edificação possui GLP?<span class="criterion-note">Central para consumo ou comercialização/revenda.</span></div>
+            <div class="choice-row" data-ui-field="glp_possui"><button class="choice" data-ui-value="false">Não</button><button class="choice" data-ui-value="true">Sim</button></div>
+          </div>
+          <div class="conditional" id="glpPurposeBox">
+            <div class="subquestion">
+              <strong>Qual a finalidade do GLP?</strong>
+              <div class="choice-row" data-ui-field="glp_finalidade"><button class="choice wide" data-ui-value="CONSUMO">Central para consumo</button><button class="choice wide" data-ui-value="REVENDA">Comercialização / revenda</button></div>
+            </div>
+            <div class="subquestion" id="glpConsumoBox" style="display:none">
+              <strong>Quantidade total da central para consumo</strong>
+              <div class="choice-row" data-ui-field="glp_consumo_faixa"><button class="choice wide" data-ui-value="ATE_190">Até 190 kg</button><button class="choice wide" data-ui-value="ACIMA_190">Acima de 190 kg</button></div>
+            </div>
+            <div class="subquestion" id="glpRevendaBox" style="display:none">
+              <strong>Quantidade total para revenda</strong>
+              <div class="choice-row" data-ui-field="glp_revenda_faixa"><button class="choice wide" data-ui-value="ATE_12480">Até 12.480 kg</button><button class="choice wide" data-ui-value="ACIMA_12480">Acima de 12.480 kg</button></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="criterion">
+          <div class="criterion-head"><div class="criterion-title">Existe processo com líquidos igníferos?<span class="criterion-note">Combustíveis ou inflamáveis utilizados em processo.</span></div><div class="choice-row" data-field="liquidos_processo_faixa"><button class="choice" data-value="NAO_POSSUI">Não</button><button class="choice wide" data-value="ATE_250L">Sim, até 250 L</button><button class="choice wide" data-value="ACIMA_250L">Sim, acima de 250 L</button></div></div>
+        </section>
+
+        <section class="criterion">
+          <div class="criterion-head"><div class="criterion-title">Existe armazenamento de líquidos igníferos?<span class="criterion-note">Tanques ou armazenamento fracionado.</span></div><div class="choice-row" data-field="liquidos_armazenamento_faixa"><button class="choice" data-value="NAO_POSSUI">Não</button><button class="choice" data-value="ATE_1000L">Até 1.000 L</button><button class="choice wide" data-value="ACIMA_1000L_ATE_20M3">1.000 L a 20 m³</button><button class="choice" data-value="ACIMA_20M3">Acima de 20 m³</button><button class="choice wide" data-value="CLASSE_K_ATE_38M3">Classe K até 38 m³</button><button class="choice wide" data-value="CLASSE_K_ACIMA_38M3">Classe K acima 38 m³</button></div></div>
+          <div class="conditional" id="buriedBox"><div class="subquestion"><strong>Esse armazenamento é exclusivamente em tanques enterrados?</strong><div class="choice-row" data-field="liquidos_exclusivamente_enterrados" data-boolean="1"><button class="choice" data-value="true">Sim</button><button class="choice" data-value="false">Não</button></div></div></div>
+        </section>
+
+        <section class="criterion">
+          <div class="criterion-head"><div class="criterion-title">Existem outros gases combustíveis ou inflamáveis?<span class="criterion-note">Não considere aqui o GLP informado acima.</span></div><div class="choice-row" data-field="outros_gases_condicao"><button class="choice" data-value="NAO_POSSUI">Não</button><button class="choice wide" data-value="G4_UM_ACETILENO">G-4: 1 acetileno</button><button class="choice wide" data-value="ATE_10M3">Até 10 m³</button><button class="choice wide" data-value="ACIMA_10M3">Acima de 10 m³</button></div></div>
+        </section>
+
+        <div class="section-label">Armazenamentos e produtos perigosos</div>
+        <section class="criterion"><div class="criterion-head"><div class="criterion-title">Há materiais sólidos combustíveis armazenados em área descoberta?</div><div class="choice-row" data-field="solidos_descobertos_faixa"><button class="choice" data-value="NAO_POSSUI">Não</button><button class="choice wide" data-value="ATE_2500M2">Até 2.500 m²</button><button class="choice wide" data-value="ACIMA_2500M2">Acima de 2.500 m²</button></div></div></section>
+        <section class="criterion"><div class="criterion-head"><div class="criterion-title">Há produtos perigosos?<span class="criterion-note">Explosivos, oxidantes, tóxicos, radioativos, corrosivos ou similares.</span></div><div class="choice-row" data-field="produtos_perigosos_condicao"><button class="choice" data-value="NAO_POSSUI">Não</button><button class="choice wide" data-value="EXCECAO_COMERCIAL_PTS">Exceção comercial admitida</button><button class="choice wide" data-value="FORA_EXCECAO">Fora da exceção</button></div></div></section>
+
+        <div class="section-label">Exigências que direcionam para Projeto Técnico</div>
+        <section class="criterion"><div class="criterion-head"><div class="criterion-title">É necessária comprovação de isolamento de risco?</div><div class="choice-row" data-bool-field="isolamento_risco_exigido"><button class="choice" data-bool="false">Não</button><button class="choice" data-bool="true">Sim</button></div></div></section>
+        <section class="criterion"><div class="criterion-head"><div class="criterion-title">Há exigência de chuveiros automáticos (sprinklers)?</div><div class="choice-row" data-bool-field="sprinklers_exigidos"><button class="choice" data-bool="false">Não</button><button class="choice" data-bool="true">Sim</button></div></div></section>
+        <section class="criterion"><div class="criterion-head"><div class="criterion-title">Há exigência de controle de fumaça?</div><div class="choice-row" data-bool-field="controle_fumaca_exigido"><button class="choice" data-bool="false">Não</button><button class="choice" data-bool="true">Sim</button></div></div></section>
+        <section class="criterion"><div class="criterion-head"><div class="criterion-title">Há exigência de detecção de incêndio?</div><div class="choice-row" data-bool-field="deteccao_incendio_exigida"><button class="choice" data-bool="false">Não</button><button class="choice" data-bool="true">Sim</button></div></div></section>
+        <section class="criterion"><div class="criterion-head"><div class="criterion-title">Há exigência de espuma e resfriamento?</div><div class="choice-row" data-bool-field="espuma_resfriamento_exigido"><button class="choice" data-bool="false">Não</button><button class="choice" data-bool="true">Sim</button></div></div></section>
+        <section class="criterion"><div class="criterion-head"><div class="criterion-title">Há exigência de escada EP, PF, PFP ou AE?</div><div class="choice-row" data-bool-field="escada_especial_exigida"><button class="choice" data-bool="false">Não</button><button class="choice" data-bool="true">Sim</button></div></div></section>
+      </div>
+
+      <div class="result-box" id="savedSummary"><strong id="savedResult"></strong><span id="savedDetail"></span></div>
+      <div class="footer-actions"><div class="error" id="error"></div><button class="primary-btn-local" id="confirm" type="button">Concluir critérios</button></div>
+    </section>
+  </main>
+
+  <script src="/game-classificator/assets/classificator-shell.js"></script>
+  <script>
+  (()=>{
+    "use strict";
+    const answers={}, ui={}; let busy=false, restored=false;
+    const errorEl=document.getElementById("error"), confirmBtn=document.getElementById("confirm"), buriedBox=document.getElementById("buriedBox"), summary=document.getElementById("savedSummary"), clearBtn=document.getElementById("btnLimpar");
+    const required=["glp_condicao","liquidos_processo_faixa","liquidos_armazenamento_faixa","outros_gases_condicao","solidos_descobertos_faixa","produtos_perigosos_condicao"];
+    const boolFields=["isolamento_risco_exigido","sprinklers_exigidos","controle_fumaca_exigido","deteccao_incendio_exigida","espuma_resfriamento_exigido","escada_especial_exigida"];
+    document.getElementById("btnTrajeto").onclick=()=>location.assign("/game-classificator/fase-02/");
+
+    function buriedRequired(){return ["ACIMA_1000L_ATE_20M3","CLASSE_K_ATE_38M3"].includes(answers.liquidos_armazenamento_faixa)}
+    function deriveGlp(){
+      if(ui.glp_possui===false){answers.glp_condicao="NAO_POSSUI";return}
+      if(ui.glp_possui!==true){delete answers.glp_condicao;return}
+      if(ui.glp_finalidade==="CONSUMO"){
+        if(ui.glp_consumo_faixa==="ATE_190") answers.glp_condicao="USO_ATE_190KG";
+        else if(ui.glp_consumo_faixa==="ACIMA_190") answers.glp_condicao="USO_ACIMA_190KG_ATE_10M3";
+        else delete answers.glp_condicao;
+      } else if(ui.glp_finalidade==="REVENDA"){
+        if(ui.glp_revenda_faixa==="ATE_12480") answers.glp_condicao="REVENDA_ATE_12480KG";
+        else if(ui.glp_revenda_faixa==="ACIMA_12480") answers.glp_condicao="REVENDA_ACIMA_12480KG";
+        else delete answers.glp_condicao;
+      } else delete answers.glp_condicao;
+    }
+    function hydrateGlp(value){
+      if(!value)return;
+      if(value==="NAO_POSSUI"){ui.glp_possui=false;return}
+      ui.glp_possui=true;
+      if(value.startsWith("REVENDA_")){ui.glp_finalidade="REVENDA";ui.glp_revenda_faixa=value==="REVENDA_ATE_12480KG"?"ATE_12480":"ACIMA_12480"}
+      else {ui.glp_finalidade="CONSUMO";ui.glp_consumo_faixa=value==="USO_ATE_190KG"?"ATE_190":"ACIMA_190"}
+    }
+    function render(){
+      deriveGlp();
+      document.querySelectorAll("[data-ui-field]").forEach(g=>g.querySelectorAll("[data-ui-value]").forEach(b=>b.classList.toggle("selected",String(ui[g.dataset.uiField])===b.dataset.uiValue)));
+      document.querySelectorAll("[data-field]").forEach(g=>{const f=g.dataset.field;g.querySelectorAll("[data-value]").forEach(b=>{let v=b.dataset.value;if(g.dataset.boolean==="1")v=v==="true";b.classList.toggle("selected",answers[f]===v)})});
+      document.querySelectorAll("[data-bool-field]").forEach(g=>g.querySelectorAll("[data-bool]").forEach(b=>b.classList.toggle("selected",answers[g.dataset.boolField]===(b.dataset.bool==="true"))));
+      document.getElementById("glpPurposeBox").classList.toggle("show",ui.glp_possui===true);
+      document.getElementById("glpConsumoBox").style.display=ui.glp_finalidade==="CONSUMO"?"grid":"none";
+      document.getElementById("glpRevendaBox").style.display=ui.glp_finalidade==="REVENDA"?"grid":"none";
+      buriedBox.classList.toggle("show",buriedRequired()); if(!buriedRequired())delete answers.liquidos_exclusivamente_enterrados;
+    }
+    document.querySelectorAll("[data-ui-field]").forEach(g=>g.querySelectorAll("[data-ui-value]").forEach(b=>b.onclick=()=>{let v=b.dataset.uiValue;if(v==="true"||v==="false")v=v==="true";ui[g.dataset.uiField]=v;if(g.dataset.uiField==="glp_possui"&&v===false){delete ui.glp_finalidade;delete ui.glp_consumo_faixa;delete ui.glp_revenda_faixa}if(g.dataset.uiField==="glp_finalidade"){delete ui.glp_consumo_faixa;delete ui.glp_revenda_faixa}errorEl.textContent="";render()}));
+    document.querySelectorAll("[data-field]").forEach(g=>g.querySelectorAll("[data-value]").forEach(b=>b.onclick=()=>{let v=b.dataset.value;if(g.dataset.boolean==="1")v=v==="true";answers[g.dataset.field]=v;errorEl.textContent="";render()}));
+    document.querySelectorAll("[data-bool-field]").forEach(g=>g.querySelectorAll("[data-bool]").forEach(b=>b.onclick=()=>{answers[g.dataset.boolField]=b.dataset.bool==="true";errorEl.textContent="";render()}));
+
+    document.getElementById("btnNenhuma").onclick=()=>{Object.keys(ui).forEach(k=>delete ui[k]);ui.glp_possui=false;Object.assign(answers,{glp_condicao:"NAO_POSSUI",liquidos_processo_faixa:"NAO_POSSUI",liquidos_armazenamento_faixa:"NAO_POSSUI",outros_gases_condicao:"NAO_POSSUI",solidos_descobertos_faixa:"NAO_POSSUI",produtos_perigosos_condicao:"NAO_POSSUI"});boolFields.forEach(f=>answers[f]=false);delete answers.liquidos_exclusivamente_enterrados;errorEl.textContent="";render()};
+    function validate(){deriveGlp();for(const f of required)if(!answers[f])return "Complete as condições técnicas antes de concluir.";if(buriedRequired()&&typeof answers.liquidos_exclusivamente_enterrados!=="boolean")return "Informe se o armazenamento é exclusivamente em tanques enterrados.";for(const f of boolFields)if(typeof answers[f]!=="boolean")return "Responda Sim ou Não para todas as exigências técnicas.";return ""}
+    function setBusy(v){busy=v;document.querySelectorAll("button").forEach(b=>b.disabled=v)}
+    confirmBtn.onclick=async()=>{if(busy)return;const problem=validate();if(problem){errorEl.textContent=problem;return}setBusy(true);errorEl.textContent="";try{const data=await SARClassificatorAPI.answer("FASE_06",null,answers);if(!data?.ok)throw new Error("Não foi possível registrar os critérios.");window.SARClassificatorUI?.applyState?.(data);location.assign(data.next||"/game-classificator/fase-02/")}catch(e){errorEl.textContent=e?.message||"Não foi possível registrar os critérios.";setBusy(false)}};
+    clearBtn.onclick=async()=>{if(busy)return;if(!window.confirm("Limpar somente os Critérios Técnicos deste estudo?"))return;setBusy(true);try{const data=await SARClassificatorAPI.resetCriterion("CRITERIOS");window.SARClassificatorUI?.applyState?.(data);location.reload()}catch(e){errorEl.textContent=e?.message||"Não foi possível limpar os critérios.";setBusy(false)}};
+    function restore(state){if(restored||!state?.criterios_tecnicos?.concluida)return;restored=true;Object.assign(answers,state.criterios_tecnicos.respostas||{});hydrateGlp(answers.glp_condicao);summary.classList.add("show");clearBtn.classList.add("show");document.getElementById("savedResult").textContent=`${state.criterios_tecnicos.processo||""} + ${state.criterios_tecnicos.certificacao||""}`;document.getElementById("savedDetail").textContent=state.criterios_tecnicos.detalhe||"";render()}
+    window.addEventListener("sar:classificator-state",e=>restore(e.detail));const initial=window.SARClassificatorUI?.getState?.();if(initial)restore(initial);render();
+  })();
+  </script>
+</body>
+</html>
