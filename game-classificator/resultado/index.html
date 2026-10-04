@@ -1,3 +1,334 @@
 <!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR"><title>ClassificaTOR | Resumo</title><script src="/js/sar.page-guard.js"></script><script src="/js/sar.api.js"></script><script src="/game-classificator/assets/classificator-api.js"></script><link rel="stylesheet" href="/game-classificator/assets/classificator-shell.css"><style>.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.summary-card{padding:22px;border:1px solid #cfe2d6;border-radius:13px;background:#fff}.summary-card h2{margin:0 0 10px;color:#486a61;font-size:13px;text-transform:uppercase;letter-spacing:.07em}.summary-big{font-size:30px;font-weight:900;color:#126a50}.summary-wide{grid-column:1/-1}.criteria-state{display:flex;gap:10px;flex-wrap:wrap}.criteria-pill{padding:8px 12px;border-radius:999px;background:#edf2ef;color:#70817c;font-size:12px;font-weight:800}.criteria-pill.done{background:#e7f7ee;color:#14845b;border:1px solid #a9d8c0}@media(max-width:700px){.summary-grid{grid-template-columns:1fr}.summary-wide{grid-column:auto}}</style></head>
-<body><div data-classificator-header data-stage="RESULTADO"></div><main class="page-shell"><header class="page-head"><div><p class="page-eyebrow">Resumo</p><h1 class="page-title">Resumo e direcionamentos</h1><p class="page-subtitle">Situação da classificação com base nos critérios já determinados.</p></div><div class="page-actions"><button class="ghost-btn" id="btnTrajeto">Voltar aos critérios</button></div></header><section class="workspace"><div class="summary-grid"><div class="summary-card"><h2>Tipo de projeto</h2><div class="summary-big" id="proc">Em análise</div></div><div class="summary-card"><h2>Certificação</h2><div class="summary-big" id="cert">Em análise</div></div><div class="summary-card summary-wide"><h2>Critérios preenchidos</h2><div class="criteria-state" id="criteriaState"></div></div><div class="summary-card summary-wide"><h2>Direcionamentos</h2><p style="margin:0;color:#607a73;line-height:1.5">Os critérios ainda em cinza devem ser preenchidos para concluir a classificação. As medidas de segurança e a validade serão apresentadas no resultado final quando as respectivas regras estiverem configuradas no motor.</p></div></div></section></main><script src="/game-classificator/assets/classificator-shell.js"></script><script>(()=>{document.getElementById("btnTrajeto").onclick=()=>location.assign("/game-classificator/fase-02/");window.addEventListener("sar:classificator-state",e=>{const d=e.detail||{},c=d.classificacao||{};document.getElementById("proc").textContent=c?.processo?.codigo||"Em análise";document.getElementById("cert").textContent=c?.certificacao?.codigo||"Em análise";const host=document.getElementById("criteriaState");host.innerHTML="";(d.criterios||[]).forEach(i=>{const s=document.createElement("span");s.className="criteria-pill"+(i.concluido?" done":"");s.textContent=`${i.titulo}: ${i.concluido?"determinado":"pendente"}`;host.appendChild(s)})})})();</script></body></html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR">
+  <title>ClassificaTOR | Relatório Final</title>
+
+  <script src="/js/sar.page-guard.js"></script>
+  <script src="/js/sar.api.js"></script>
+  <script src="/game-classificator/assets/classificator-api.js"></script>
+  <link rel="stylesheet" href="/game-classificator/assets/classificator-shell.css">
+
+  <style>
+    :root{
+      --rel-green:#075b43;
+      --rel-green-2:#0d6b4f;
+      --rel-green-soft:#eaf6ef;
+      --rel-line:#c8ddd2;
+      --rel-text:#173e33;
+      --rel-muted:#6d8079;
+      --rel-bg:#f4fbf7;
+      --rel-white:#fff;
+      --rel-blue:#eef6ff;
+      --rel-blue-line:#c6daf1;
+    }
+
+    body{background:var(--rel-bg);color:var(--rel-text)}
+    .report-shell{max-width:1200px;margin:24px auto 44px;padding:0 18px}
+    .report-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:16px}
+    .report-head h1{margin:0;color:var(--rel-green);font-size:28px;line-height:1.1}
+    .report-head p{margin:6px 0 0;color:var(--rel-muted);font-size:14px}
+    .report-status{padding:8px 11px;border:1px solid var(--rel-line);border-radius:999px;background:var(--rel-green-soft);color:var(--rel-green);font-size:12px;font-weight:800;white-space:nowrap}
+
+    .hero{background:#fff;border:1px solid var(--rel-line);border-left:7px solid var(--rel-green);border-radius:12px;padding:24px;display:grid;grid-template-columns:1.25fr .75fr;gap:20px;box-shadow:0 7px 20px rgba(3,77,55,.06)}
+    .kicker{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--rel-muted)}
+    .hero h2{margin:7px 0 6px;color:var(--rel-green);font-size:34px}
+    .hero-desc{font-size:15px;color:#47665d}
+    .profile{background:var(--rel-green-soft);border:1px solid var(--rel-line);border-radius:10px;padding:16px}
+    .profile strong{display:block;color:var(--rel-green);margin-bottom:6px}
+    .profile small{color:#4e6d63;line-height:1.45}
+
+    .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
+    .criterion-card{background:#fff;border:1px solid var(--rel-line);border-radius:10px;padding:15px;min-height:126px}
+    .criterion-top{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--rel-green);font-size:13px;font-weight:800}
+    .criterion-check{font-size:10px;background:var(--rel-green-soft);padding:4px 7px;border-radius:999px;white-space:nowrap}
+    .criterion-result{font-size:18px;font-weight:850;margin:13px 0 6px}
+    .criterion-detail{font-size:12px;line-height:1.45;color:var(--rel-muted)}
+
+    .section{background:#fff;border:1px solid var(--rel-line);border-radius:10px;margin-top:14px;overflow:hidden}
+    .section-title{padding:14px 17px;background:var(--rel-green-soft);border-bottom:1px solid var(--rel-line);font-size:15px;font-weight:800;color:var(--rel-green)}
+    .split{display:grid;grid-template-columns:1fr 1fr}
+    .column{padding:0 17px 8px}
+    .column + .column{border-left:1px solid var(--rel-line)}
+    .column-title{padding:14px 0 5px;font-size:12px;font-weight:800;color:var(--rel-green);text-transform:uppercase;letter-spacing:.04em}
+    .data-row{display:grid;grid-template-columns:235px 1fr;gap:16px;padding:11px 0;border-bottom:1px solid #e7efeb;font-size:13px}
+    .data-row:last-child{border-bottom:0}
+    .data-row b{color:#274d42}
+    .data-row span{color:#506a62}
+
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th{background:#f7fbf9;color:var(--rel-green);text-align:left;padding:11px 12px;border-bottom:1px solid var(--rel-line)}
+    td{padding:11px 12px;border-bottom:1px solid #e7efeb;vertical-align:top;line-height:1.42}
+    tbody tr:last-child td{border-bottom:0}
+    .it-badge{display:inline-block;min-width:52px;text-align:center;padding:4px 7px;border-radius:6px;font-size:11px;font-weight:800;color:#285a92;background:var(--rel-blue);border:1px solid var(--rel-blue-line)}
+    .origin{color:var(--rel-muted);font-size:12px}
+    .empty{padding:18px;color:var(--rel-muted);font-size:13px}
+    .section-note{margin:0;padding:12px 17px;border-top:1px solid #e7efeb;background:#fbfdfc;color:#557068;font-size:12px}
+
+    .footer-actions{display:flex;justify-content:space-between;gap:10px;margin-top:18px}
+    .footer-right{display:flex;gap:8px}
+    .rel-btn{border:1px solid #b8d3c6;background:#fff;color:var(--rel-green);padding:10px 14px;border-radius:8px;font-weight:750;cursor:pointer}
+    .rel-btn.primary{background:var(--rel-green);color:#fff;border-color:var(--rel-green)}
+    .loading{padding:42px 20px;text-align:center;color:var(--rel-muted);font-size:14px}
+    .fatal{padding:18px;border:1px solid #e1b8b2;background:#fff3f1;color:#8f2f26;border-radius:10px;display:none;margin-top:14px}
+
+    @media(max-width:900px){
+      .hero{grid-template-columns:1fr}
+      .cards{grid-template-columns:1fr 1fr}
+      .split{grid-template-columns:1fr}
+      .column + .column{border-left:0;border-top:1px solid var(--rel-line)}
+    }
+    @media(max-width:620px){
+      .report-head{flex-direction:column;align-items:flex-start}
+      .cards{grid-template-columns:1fr}
+      .data-row{grid-template-columns:1fr}
+      .footer-actions{flex-direction:column}
+      .footer-right{width:100%}
+      .footer-right .rel-btn{flex:1}
+    }
+    @media print{
+      [data-classificator-header],.footer-actions{display:none!important}
+      body{background:#fff}
+      .report-shell{max-width:none;margin:0;padding:0}
+      .section,.hero,.criterion-card{break-inside:avoid}
+    }
+  </style>
+</head>
+<body>
+  <div data-classificator-header data-stage="RESULTADO"></div>
+
+  <main class="report-shell">
+    <div id="loading" class="loading">Carregando relatório do estudo...</div>
+    <div id="fatal" class="fatal"></div>
+
+    <div id="report" hidden>
+      <header class="report-head">
+        <div>
+          <h1>Relatório Final de Classificação</h1>
+          <p>Enquadramento, medidas de segurança aplicáveis e documentação necessária para certificação.</p>
+        </div>
+        <div class="report-status">✓ ESTUDO CONCLUÍDO</div>
+      </header>
+
+      <section class="hero">
+        <div>
+          <div class="kicker">Classificação final</div>
+          <h2 id="resultTitle">—</h2>
+          <div class="hero-desc" id="resultDescription">—</div>
+        </div>
+        <div class="profile">
+          <strong id="profileTitle">Perfil técnico</strong>
+          <small id="profileText">—</small>
+        </div>
+      </section>
+
+      <div class="cards" id="criteriaCards"></div>
+
+      <section class="section">
+        <div class="section-title">Dados utilizados na classificação</div>
+        <div class="split">
+          <div class="column">
+            <div class="column-title">Área</div>
+            <div id="areaData"></div>
+          </div>
+          <div class="column">
+            <div class="column-title">Demais dados</div>
+            <div id="otherData"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">Medidas de segurança contra incêndio aplicáveis</div>
+        <div class="table-wrap" id="measuresTable"></div>
+        <p class="section-note">São exibidas somente as medidas retornadas pelo motor para o enquadramento deste estudo.</p>
+      </section>
+
+      <section class="section">
+        <div class="section-title">Documentação necessária para certificação</div>
+        <div class="table-wrap" id="documentsTable"></div>
+      </section>
+
+      <div class="footer-actions">
+        <button class="rel-btn" id="btnReview">← Revisar classificação</button>
+        <div class="footer-right">
+          <button class="rel-btn primary" type="button" onclick="window.print()">Imprimir resultado</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/game-classificator/assets/classificator-shell.js"></script>
+  <script>
+  (() => {
+    "use strict";
+
+    const loading = document.getElementById("loading");
+    const fatal = document.getElementById("fatal");
+    const reportEl = document.getElementById("report");
+
+    const fmt = new Intl.NumberFormat("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2});
+
+    function safe(value, fallback = "—") {
+      return value === null || value === undefined || value === "" ? fallback : String(value);
+    }
+
+    function area(value) {
+      const n = Number(value);
+      return Number.isFinite(n) ? `${fmt.format(n)} m²` : "—";
+    }
+
+    function height(value) {
+      const n = Number(value);
+      return Number.isFinite(n) ? `${fmt.format(n)} m` : "Não informada / não necessária";
+    }
+
+    function row(label, value) {
+      return `<div class="data-row"><b>${label}</b><span>${safe(value)}</span></div>`;
+    }
+
+    function resultLabel(item) {
+      const r = item?.resultado || {};
+      if (!r?.processo || !r?.certificacao) return "Determinado";
+      return `${r.processo} + ${r.certificacao}`;
+    }
+
+    function resultDescription(data) {
+      const result = data?.resultado || {};
+      if (result.processo === "PT") {
+        return "Projeto Técnico com emissão de Auto de Vistoria do Corpo de Bombeiros.";
+      }
+      if (result.certificacao === "CLCB") {
+        return "Projeto Técnico Simplificado com emissão de Certificado de Licença do Corpo de Bombeiros.";
+      }
+      return "Projeto Técnico Simplificado com emissão de Auto de Vistoria do Corpo de Bombeiros.";
+    }
+
+    function profileText(data) {
+      const p = data?.resultado?.perfil_medidas || {};
+      if (p.codigo === "TABELAS_6A_6M") {
+        return "Medidas definidas pelo enquadramento normativo correspondente à ocupação, área e altura.";
+      }
+      if (p.codigo === "PTS_ATE_750") {
+        return "Perfil de medidas aplicável ao PTS com área computada de até 750,00 m².";
+      }
+      if (p.codigo === "PTS_CLCB") {
+        return "Perfil de medidas aplicável ao PTS com emissão de CLCB.";
+      }
+      return "Perfil técnico determinado pelo motor.";
+    }
+
+    function renderCriteria(items) {
+      const host = document.getElementById("criteriaCards");
+      host.innerHTML = "";
+      for (const item of items || []) {
+        const card = document.createElement("div");
+        card.className = "criterion-card";
+        const detail = item?.resultado?.detalhe || "";
+        card.innerHTML = `
+          <div class="criterion-top">${safe(item.titulo)}
+            <span class="criterion-check">${item.concluido ? "✓ DETERMINADO" : "PENDENTE"}</span>
+          </div>
+          <div class="criterion-result">${safe(resultLabel(item))}</div>
+          <div class="criterion-detail">${safe(detail, "")}</div>`;
+        host.appendChild(card);
+      }
+    }
+
+    function renderData(data) {
+      const a = data?.dados?.area || {};
+      const h = data?.dados?.altura || {};
+      const o = data?.dados?.ocupacao || {};
+
+      document.getElementById("areaData").innerHTML =
+        row("Área total construída", area(a.area_total_exata_m2)) +
+        row("Desconto válido para PTS", area(a.area_desconto_pts_m2 || 0)) +
+        row("Área computada para PTS", area(a.area_computada_pts_m2)) +
+        row("Área computada para CLCB", area(a.area_computada_clcb_m2));
+
+      const occupation = [o.divisao, o.descricao].filter(Boolean).join(" — ");
+      document.getElementById("otherData").innerHTML =
+        row("Implantação", data?.dados?.implantacao) +
+        row("Ocupação", occupation || o.grupo_nome) +
+        row("Altura adotada", height(h.altura_m)) +
+        row("Pavimentos", h.pavimentos_faixa) +
+        row("Subsolo", h.possui_subsolo ? "Possui" : "Não possui");
+    }
+
+    function renderMeasures(items) {
+      const host = document.getElementById("measuresTable");
+      if (!Array.isArray(items) || !items.length) {
+        host.innerHTML = `<div class="empty">Ainda não há medidas cadastradas na matriz normativa para este enquadramento.</div>`;
+        return;
+      }
+      host.innerHTML = `
+        <table>
+          <thead><tr><th style="width:42%">Medida de segurança</th><th style="width:14%">IT</th><th>Origem normativa</th></tr></thead>
+          <tbody>
+            ${items.map(item => `
+              <tr>
+                <td><b>${safe(item.nome)}</b></td>
+                <td><span class="it-badge">${safe(item.instrucao_tecnica)}</span></td>
+                <td><span class="origin">${safe(item.origem || item.fundamento)}</span></td>
+              </tr>`).join("")}
+          </tbody>
+        </table>`;
+    }
+
+    function renderDocuments(items) {
+      const host = document.getElementById("documentsTable");
+      if (!Array.isArray(items) || !items.length) {
+        host.innerHTML = `<div class="empty">Nenhum documento foi determinado pelo motor para este estudo.</div>`;
+        return;
+      }
+      host.innerHTML = `
+        <table>
+          <thead><tr><th style="width:48%">Documento</th><th>Motivo da exigência</th></tr></thead>
+          <tbody>
+            ${items.map(item => `
+              <tr><td><b>${safe(item.nome)}</b></td><td>${safe(item.motivo)}</td></tr>`).join("")}
+          </tbody>
+        </table>`;
+    }
+
+    async function load() {
+      try {
+        const data = await window.SARClassificatorAPI.report();
+        if (!data?.ok) throw new Error("Não foi possível carregar o relatório.");
+
+        if (!data.concluido) {
+          window.location.replace(data.rota_revisao || "/game-classificator/fase-02/");
+          return;
+        }
+
+        document.getElementById("resultTitle").textContent = safe(data?.resultado?.titulo);
+        document.getElementById("resultDescription").textContent = resultDescription(data);
+        document.getElementById("profileTitle").textContent = safe(data?.resultado?.titulo);
+        document.getElementById("profileText").textContent = profileText(data);
+
+        renderCriteria(data.criterios);
+        renderData(data);
+        renderMeasures(data.medidas);
+        renderDocuments(data.documentos);
+
+        document.getElementById("btnReview").onclick = () =>
+          window.location.assign(data.rota_revisao || "/game-classificator/fase-02/");
+
+        loading.hidden = true;
+        reportEl.hidden = false;
+      } catch (error) {
+        console.error("ClassificaTOR relatório:", error);
+        loading.hidden = true;
+        fatal.style.display = "block";
+        fatal.textContent = error?.message || "Não foi possível carregar o relatório final.";
+      }
+    }
+
+    load();
+  })();
+  </script>
+</body>
+</html>

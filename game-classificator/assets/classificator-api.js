@@ -110,6 +110,17 @@
     return postWithSession("/api/game/classificator/altura/necessidade", { dados });
   }
 
+  async function report() {
+    return postWithSession("/api/game/classificator/relatorio", {});
+  }
+
+  async function occupationCatalog(params = {}) {
+    const grupo = String(params?.grupo || "").trim();
+    const busca = String(params?.busca || "").trim();
+    const divisao = String(params?.divisao || "").trim();
+    return postWithSession("/api/game/classificator/ocupacao/catalogo", { grupo, busca, divisao });
+  }
+
   async function restart() {
     if (!getSession()) {
       return start();
@@ -120,7 +131,9 @@
   }
 
   async function resetCriterion(criterio) {
-    const data = await postWithSession("/api/game/classificator/criterio/reset", { criterio });
+    const codigo = String(criterio || "").trim().toUpperCase();
+    if (!codigo) throw new Error("Critério inválido.");
+    const data = await postWithSession("/api/game/classificator/criterio/reset", { criterio: codigo });
     saveState(data);
     return data;
   }
@@ -132,8 +145,10 @@
     selectState,
     answer,
     status,
+    report,
     areaConfiguration,
     alturaRequirement,
+    occupationCatalog,
     getSession,
     getCachedState,
     clearCachedState,
