@@ -6,7 +6,6 @@
 
   const currentStage = String(host.dataset.stage || "").toUpperCase();
   const HOME_ROUTE = "/game-classificator/fase-01/";
-  const PORTAL_ROUTE = "/game-classificator/";
 
   const defaultCriteria = [
     {codigo:"AREA", titulo:"Área", rota:"/game-classificator/fase-04/", etapa:"FASE_04", concluido:false, habilitado:false},
@@ -119,14 +118,8 @@
     home.className = "classificator-criterion classificator-home clickable";
     if (currentStage === "FASE_01") home.classList.add("current-home");
     home.innerHTML = `${icons.HOME}<span>Início</span>`;
-    if (currentStage === "PORTAL") {
-      home.classList.add("current-home");
-      home.title = "Página inicial do ClassificaTOR";
-      home.addEventListener("click", () => window.location.assign(PORTAL_ROUTE));
-    } else {
-      home.title = "Reiniciar o estudo e voltar para Implantação";
-      home.addEventListener("click", () => restartStudy(home));
-    }
+    home.title = "Reiniciar o estudo e voltar para Implantação";
+    home.addEventListener("click", () => restartStudy(home));
     criteriaEl.appendChild(home);
 
     for (const item of criteria) {
@@ -204,20 +197,12 @@
   /* Desenha imediatamente sem aguardar rede. */
   drawCriteria(defaultCriteria, false);
 
-  /*
-   * Na página PORTAL não há estudo aberto.
-   * Mantém o menu superior visível, porém limpo e sem consultar sessão.
-   */
-  if (currentStage !== "PORTAL") {
-    /* status() usa o cache local quando ele estiver recente. */
-    refresh();
+  /* status() usa o cache local quando ele estiver recente. */
+  refresh();
 
-    /* Em segundo plano prepara Área e Ocupação para os próximos cliques. */
-    if (["FASE_02","FASE_03","FASE_04","FASE_05","FASE_06"].includes(currentStage)) {
-      warmStaticData();
-    }
-  } else {
-    applyClassification(null);
+  /* Em segundo plano prepara Área e Ocupação para os próximos cliques. */
+  if (["FASE_02","FASE_03","FASE_04","FASE_05","FASE_06"].includes(currentStage)) {
+    warmStaticData();
   }
 
   window.SARClassificatorUI = Object.freeze({

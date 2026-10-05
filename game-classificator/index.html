@@ -6,225 +6,53 @@
   <meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR">
   <title>ClassificaTOR | São Paulo</title>
 
-  <script src="/js/sar.page-guard.js?v=20261005-portal2abas-v1"></script>
-  <script src="/js/sar.api.js?v=20261005-portal2abas-v1"></script>
-  <script src="/game-classificator/assets/classificator-api.js?v=20261005-portal2abas-v1"></script>
-  <link rel="stylesheet" href="/game-classificator/assets/classificator-shell.css?v=20261005-portal2abas-v1">
+  <script src="/js/sar.page-guard.js?v=20261005-spdirect-v1"></script>
+  <script src="/js/sar.api.js?v=20261005-spdirect-v1"></script>
+  <script src="/game-classificator/assets/classificator-api.js?v=20261005-spdirect-v1"></script>
 
   <style>
-    .portal-shell{max-width:1500px;margin:22px auto 0;padding:0 22px 40px}
-    .portal-head{margin-bottom:18px}
-    .portal-eyebrow{margin:0 0 5px;color:#1d9d68;font-size:12px;font-weight:900;letter-spacing:.09em;text-transform:uppercase}
-    .portal-title{margin:0;color:#173f38;font-size:30px;line-height:1.15}
-    .portal-subtitle{margin:7px 0 0;color:#668078;font-size:14px}
-
-    .mode-tabs{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin:22px 0 0;
-      padding:7px;
-      background:#e5f4e9;
-      border:1px solid #c9dfd1;
-      border-radius:13px;
-    }
-    .mode-tab{
-      min-height:54px;
-      border:1px solid transparent;
-      border-radius:10px;
-      background:transparent;
-      color:#55746a;
-      font-size:14px;
-      font-weight:900;
-      cursor:pointer;
-      transition:.18s;
-    }
-    .mode-tab:hover{background:#f6fbf8;color:#0d6d51}
-    .mode-tab.active{
-      background:#fff;
-      color:#0d6d51;
-      border-color:#a9cfb9;
-      box-shadow:0 4px 12px rgba(13,81,63,.08);
-    }
-
-    .mode-panel{
-      margin-top:14px;
-      min-height:390px;
-      padding:34px;
-      border:1px solid #d7e7dd;
-      border-radius:14px;
-      background:rgba(255,255,255,.9);
-      box-shadow:0 8px 24px rgba(13,81,63,.08);
-    }
-    .mode-panel[hidden]{display:none}
-    .mode-grid{
-      display:grid;
-      grid-template-columns:minmax(0,1.2fr) minmax(330px,.8fr);
-      gap:28px;
-      align-items:center;
-      min-height:320px;
-    }
-    .mode-kicker{margin:0 0 7px;color:#1d9d68;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
-    .mode-title{margin:0;color:#173f38;font-size:30px;line-height:1.14}
-    .mode-copy{max-width:760px;margin:14px 0 0;color:#58756d;font-size:15px;line-height:1.6}
-    .mode-list{margin:19px 0 0;padding:0;list-style:none;display:grid;gap:9px;color:#315e54;font-size:13px}
-    .mode-list li{display:flex;align-items:flex-start;gap:8px}
-    .mode-list li::before{content:"✓";color:#1d9d68;font-weight:900}
-
-    .mode-action-card{
-      padding:24px;
-      border:1px solid #c8dfd1;
-      border-radius:13px;
-      background:linear-gradient(145deg,#eef9f2,#ffffff);
-    }
-    .mode-action-card strong{display:block;color:#0d513f;font-size:18px}
-    .mode-action-card p{margin:8px 0 18px;color:#668078;font-size:13px;line-height:1.5}
-    .start-btn{
-      width:100%;
-      min-height:48px;
-      border:0;
-      border-radius:9px;
-      background:#0d513f;
-      color:#fff;
-      font-weight:900;
-      cursor:pointer;
-    }
-    .start-btn:hover{background:#0a4536}
-    .start-btn:disabled{opacity:.6;cursor:wait}
-
-    .soon-badge{
-      display:inline-block;
-      margin-bottom:14px;
-      padding:6px 10px;
-      border-radius:999px;
-      background:#fff4d6;
-      border:1px solid #ead58e;
-      color:#8a6a12;
-      font-size:11px;
-      font-weight:900;
-      text-transform:uppercase;
-      letter-spacing:.05em;
-    }
-
-    .portal-status{min-height:20px;margin-top:12px;color:#9a3f37;font-size:13px;text-align:center}
-
-    @media(max-width:900px){
-      .mode-grid{grid-template-columns:1fr}
-    }
-    @media(max-width:640px){
-      .portal-shell{padding:0 10px 28px}
-      .mode-tabs{grid-template-columns:1fr}
-      .mode-panel{padding:22px 18px}
-      .mode-title{font-size:25px}
-    }
+    html,body{margin:0;min-height:100%;background:#f2fbf6}
+    body{visibility:hidden}
   </style>
 </head>
 <body>
-  <div data-classificator-header data-stage="PORTAL"></div>
+<script>
+(()=>{
+  "use strict";
 
-  <main class="portal-shell">
-    <header class="portal-head">
-      <p class="portal-eyebrow">ClassificaTOR — São Paulo</p>
-      <h1 class="portal-title">Escolha o modo de classificação</h1>
-      <p class="portal-subtitle">Ferramentas desenvolvidas para o Estado de São Paulo, com base no CBPMESP e na Instrução Técnica 42/2025.</p>
+  let launched=false;
 
-      <div class="mode-tabs" role="tablist" aria-label="Modos do ClassificaTOR">
-        <button class="mode-tab active" id="tabInterativo" type="button" role="tab" aria-selected="true" aria-controls="panelInterativo">
-          Classificador Interativo
-        </button>
-        <button class="mode-tab" id="tabTecnico" type="button" role="tab" aria-selected="false" aria-controls="panelTecnico">
-          Classificador Técnico
-        </button>
-      </div>
-    </header>
+  async function openClassificator(){
+    if(launched) return;
+    launched=true;
 
-    <section class="mode-panel" id="panelInterativo" role="tabpanel" aria-labelledby="tabInterativo">
-      <div class="mode-grid">
-        <div>
-          <p class="mode-kicker">Classificador Interativo</p>
-          <h2 class="mode-title">Classificação guiada, passo a passo</h2>
-          <p class="mode-copy">
-            Fluxo interativo para determinar o tipo de processo e a certificação da edificação,
-            analisando implantação, área, altura, ocupação e critérios técnicos.
-          </p>
-          <ul class="mode-list">
-            <li>Fluxo orientado por cards e perguntas objetivas.</li>
-            <li>Resultado consolidado pelo critério mais restritivo.</li>
-            <li>Relatório completo para os enquadramentos do escopo atual do ClassificaTOR.</li>
-          </ul>
-        </div>
+    try{
+      const data=await window.SARClassificatorAPI.start();
+      window.location.replace(data?.next || "/game-classificator/fase-01/");
+    }catch(error){
+      console.error("ClassificaTOR: falha ao iniciar",error);
+      launched=false;
+      document.body.style.visibility="visible";
+      document.body.innerHTML=`
+        <main style="min-height:100vh;display:grid;place-items:center;padding:24px;font-family:Segoe UI,Arial,sans-serif;color:#173f38">
+          <section style="max-width:520px;background:#fff;border:1px solid #cfe3d7;border-radius:12px;padding:24px;text-align:center">
+            <strong>Não foi possível iniciar o ClassificaTOR.</strong>
+            <p style="margin:10px 0 0;color:#60786f;font-size:14px">Atualize a página ou retorne ao portal SAR.</p>
+          </section>
+        </main>`;
+    }
+  }
 
-        <div class="mode-action-card">
-          <strong>Iniciar Classificador Interativo</strong>
-          <p>Será criado um novo estudo e você seguirá diretamente para a configuração da implantação.</p>
-          <button class="start-btn" id="btnStartInteractive" type="button">INICIAR CLASSIFICAÇÃO</button>
-          <div class="portal-status" id="portalStatus" aria-live="polite"></div>
-        </div>
-      </div>
-    </section>
+  window.addEventListener("sar:pagina-autorizada",openClassificator,{once:true});
 
-    <section class="mode-panel" id="panelTecnico" role="tabpanel" aria-labelledby="tabTecnico" hidden>
-      <div class="mode-grid">
-        <div>
-          <span class="soon-badge">Em desenvolvimento</span>
-          <p class="mode-kicker">Classificador Técnico</p>
-          <h2 class="mode-title">Consulta técnica para usuários avançados</h2>
-          <p class="mode-copy">
-            Este espaço será destinado ao modo técnico do ClassificaTOR. A estrutura será desenvolvida
-            separadamente, sem alterar o Classificador Interativo já validado.
-          </p>
-        </div>
+  function checkAuthorized(){
+    const state=document.documentElement.getAttribute("data-sar-autorizado");
+    if(state) openClassificator();
+    else window.setTimeout(checkAuthorized,40);
+  }
 
-        <div class="mode-action-card">
-          <strong>Classificador Técnico</strong>
-          <p>O módulo ainda não está disponível nesta versão.</p>
-          <button class="start-btn" type="button" disabled>EM DESENVOLVIMENTO</button>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <script src="/game-classificator/assets/classificator-shell.js?v=20261005-portal2abas-v1"></script>
-  <script>
-    (() => {
-      "use strict";
-
-      const tabInterativo = document.getElementById("tabInterativo");
-      const tabTecnico = document.getElementById("tabTecnico");
-      const panelInterativo = document.getElementById("panelInterativo");
-      const panelTecnico = document.getElementById("panelTecnico");
-      const startButton = document.getElementById("btnStartInteractive");
-      const status = document.getElementById("portalStatus");
-
-      function selectTab(kind) {
-        const interactive = kind === "interactive";
-        tabInterativo.classList.toggle("active", interactive);
-        tabTecnico.classList.toggle("active", !interactive);
-        tabInterativo.setAttribute("aria-selected", interactive ? "true" : "false");
-        tabTecnico.setAttribute("aria-selected", interactive ? "false" : "true");
-        panelInterativo.hidden = !interactive;
-        panelTecnico.hidden = interactive;
-      }
-
-      tabInterativo.addEventListener("click", () => selectTab("interactive"));
-      tabTecnico.addEventListener("click", () => selectTab("technical"));
-
-      startButton.addEventListener("click", async () => {
-        if (startButton.disabled) return;
-        startButton.disabled = true;
-        status.textContent = "Iniciando novo estudo...";
-
-        try {
-          const data = await window.SARClassificatorAPI.start();
-          if (!data?.ok) throw new Error("Não foi possível iniciar o ClassificaTOR.");
-          window.location.assign(data.next || "/game-classificator/fase-01/");
-        } catch (error) {
-          console.error(error);
-          status.textContent = error?.message || "Não foi possível iniciar o estudo.";
-          startButton.disabled = false;
-        }
-      });
-    })();
-  </script>
+  checkAuthorized();
+})();
+</script>
 </body>
 </html>
