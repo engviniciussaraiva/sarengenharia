@@ -22,6 +22,48 @@
     CRITERIOS:'<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7M8 13l1.5 1.5L12 12M14 8h2M14 13h2"/></svg>'
   };
 
+  const PREFETCH_ROUTES = [
+    "/game-classificator/fase-02/",
+    "/game-classificator/fase-03/",
+    "/game-classificator/fase-04/",
+    "/game-classificator/fase-05/",
+    "/game-classificator/fase-06/",
+    "/game-classificator/resultado/"
+  ];
+
+  function preconnect(href) {
+    if (!href || document.head.querySelector(`link[rel="preconnect"][href="${href}"]`)) return;
+    const link = document.createElement("link");
+    link.rel = "preconnect";
+    link.href = href;
+    link.crossOrigin = "anonymous";
+    document.head.appendChild(link);
+  }
+
+  function prefetchRoutes() {
+    PREFETCH_ROUTES.forEach(href => {
+      if (location.pathname === href || document.head.querySelector(`link[rel="prefetch"][href="${href}"]`)) return;
+      const link = document.createElement("link");
+      link.rel = "prefetch";
+      link.as = "document";
+      link.href = href;
+      document.head.appendChild(link);
+    });
+  }
+
+  function warmStaticData() {
+    const run = () => window.SARClassificatorAPI?.prewarm?.();
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(run, { timeout: 1200 });
+    } else {
+      window.setTimeout(run, 250);
+    }
+  }
+
+  preconnect("https://sar-api-production.up.railway.app");
+  preconnect("https://bjtxbpmrmhfvpmdsthxr.supabase.co");
+  prefetchRoutes();
+
   host.innerHTML = `
     <div class="classificator-sticky">
       <div class="classificator-topbar">
@@ -157,6 +199,11 @@
 
   /* status() usa o cache local quando ele estiver recente. */
   refresh();
+
+  /* Em segundo plano prepara Área e Ocupação para os próximos cliques. */
+  if (["FASE_02","FASE_03","FASE_04","FASE_05","FASE_06"].includes(currentStage)) {
+    warmStaticData();
+  }
 
   window.SARClassificatorUI = Object.freeze({
     refreshState: refresh,

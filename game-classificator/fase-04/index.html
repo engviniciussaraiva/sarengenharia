@@ -6,10 +6,10 @@
   <meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR">
   <title>GAME ClassificaTOR | Área</title>
 
-  <script src="/js/sar.page-guard.js"></script>
-  <script src="/js/sar.api.js"></script>
-  <script src="/game-classificator/assets/classificator-api.js"></script>
-  <link rel="stylesheet" href="/game-classificator/assets/classificator-shell.css">
+  <script src="/js/sar.page-guard.js?v=20261004-perf2"></script>
+  <script src="/js/sar.api.js?v=20261004-perf2"></script>
+  <script src="/game-classificator/assets/classificator-api.js?v=20261004-perf2"></script>
+  <link rel="stylesheet" href="/game-classificator/assets/classificator-shell.css?v=20261004-perf2">
 
   <style>
     .cards{
@@ -431,10 +431,6 @@
     }
 
     .inline-error.show{display:block}
-    .discount-warnings{display:none;margin-top:14px;padding:12px 14px;border:1px solid #e7c98f;border-radius:10px;background:#fff9ec;color:#75520d;font-size:12px;line-height:1.45}
-    .discount-warnings.show{display:block}
-    .discount-warning-item+.discount-warning-item{margin-top:7px;padding-top:7px;border-top:1px solid #f0dfbc}
-    .discount-warning-item strong{color:#654405}
 
     @media(max-width:980px){
       .cards,
@@ -468,19 +464,19 @@
       <div class="cards" id="areaCards">
         <button class="option-card green" type="button" data-opcao="AREA_ATE_750" data-label="Área total construída até 750,00 m²">
           <span class="selected-mark">✓</span>
-          <div class="card-image"><img decoding="async" src="/game-classificator/assets/area-ate-750.webp" alt="Representação de área total construída até 750 metros quadrados" draggable="false"></div>
+          <div class="card-image"><img src="/game-classificator/assets/area-ate-750.png" alt="Representação de área total construída até 750 metros quadrados" draggable="false"></div>
           <div class="card-body"><h2 class="card-title">Área total construída<br><strong>até 750,00 m²</strong></h2></div>
         </button>
 
         <button class="option-card blue" type="button" data-opcao="AREA_750_1500" data-label="Área total construída entre 750,01 m² e 1.500,00 m²">
           <span class="selected-mark">✓</span>
-          <div class="card-image"><img decoding="async" src="/game-classificator/assets/area-750-1500.webp" alt="Representação de área total construída entre 750,01 e 1.500 metros quadrados" draggable="false"></div>
+          <div class="card-image"><img src="/game-classificator/assets/area-750-1500.png" alt="Representação de área total construída entre 750,01 e 1.500 metros quadrados" draggable="false"></div>
           <div class="card-body"><h2 class="card-title">Área total construída<br><strong>entre 750,01 m² e 1.500,00 m²</strong></h2></div>
         </button>
 
         <button class="option-card purple" type="button" data-opcao="AREA_ACIMA_1500" data-label="Área total construída acima de 1.500,00 m²">
           <span class="selected-mark">✓</span>
-          <div class="card-image"><img decoding="async" src="/game-classificator/assets/area-acima-1500.webp" alt="Representação de área total construída acima de 1.500 metros quadrados" draggable="false"></div>
+          <div class="card-image"><img src="/game-classificator/assets/area-acima-1500.png" alt="Representação de área total construída acima de 1.500 metros quadrados" draggable="false"></div>
           <div class="card-body"><h2 class="card-title">Área total construída<br><strong>acima de 1.500,00 m²</strong></h2></div>
         </button>
       </div>
@@ -529,8 +525,6 @@
           </section>
         </div>
 
-        <div id="discountWarnings" class="discount-warnings" aria-live="polite"></div>
-
         <div class="discount-totals">
           <div class="total-card">
             <span>Desconto informado — CLCB e PTS</span>
@@ -565,7 +559,7 @@
     </section>
   </main>
 
-  <script src="/game-classificator/assets/classificator-shell.js"></script>
+  <script src="/game-classificator/assets/classificator-shell.js?v=20261004-perf2"></script>
   <script>
     (()=>{
       "use strict";
@@ -583,7 +577,6 @@
       const totalClcbPts=document.getElementById("totalClcbPts");
       const totalPtsOnly=document.getElementById("totalPtsOnly");
       const totalPts=document.getElementById("totalPts");
-      const discountWarnings=document.getElementById("discountWarnings");
 
       let selectedCard=null;
       let areaConfig=null;
@@ -681,29 +674,6 @@
         totalPts.textContent=formatArea(common+ptsOnly);
       }
 
-      function renderIgnoredDiscounts(items){
-        const list=Array.isArray(items)?items:[];
-        if(!discountWarnings) return;
-        if(!list.length){
-          discountWarnings.classList.remove("show");
-          discountWarnings.replaceChildren();
-          return;
-        }
-        discountWarnings.replaceChildren(...list.map(item=>{
-          const row=document.createElement("div");
-          row.className="discount-warning-item";
-          const informed=formatArea(item?.valor_informado_m2);
-          const limit=formatArea(item?.limite_m2);
-          row.innerHTML=`<strong></strong> — desconto não considerado. Valor informado: <b></b>; limite permitido para desconsideração: <b></b>.`;
-          row.querySelector("strong").textContent=item?.titulo||"Área informada";
-          const values=row.querySelectorAll("b");
-          if(values[0]) values[0].textContent=informed;
-          if(values[1]) values[1].textContent=limit;
-          return row;
-        }));
-        discountWarnings.classList.add("show");
-      }
-
       function collectDiscountData(){
         const data={
           aplicar_descontos:true,
@@ -719,6 +689,7 @@
         const code=String(error?.code||error?.payload?.erro||error?.data?.erro||"");
         if(code==="AREA_EXATA_OBRIGATORIA") return "Informe a área total construída exata.";
         if(code==="AREA_EXATA_FORA_FAIXA") return "A área exata informada não corresponde à faixa selecionada.";
+        if(code==="DESCONTO_FORA_LIMITE") return "Um dos descontos informados ultrapassa o limite permitido.";
         if(code==="DESCONTOS_MAIORES_AREA") return "A soma dos descontos não pode ser maior que a área total construída.";
         if(code==="AREA_DESCONTO_INVALIDO") return "Revise os valores das áreas de desconto.";
         return error?.message||"Não foi possível registrar o critério Área.";
@@ -741,7 +712,6 @@
             document.getElementById("resultClcbArea").textContent=data.area.area_computada_clcb_m2==null?"Faixa confirmada":formatArea(data.area.area_computada_clcb_m2);
             document.getElementById("resultPtsArea").textContent=data.area.area_computada_pts_m2==null?"Faixa confirmada":formatArea(data.area.area_computada_pts_m2);
             document.getElementById("resultAreaCode").textContent=data.area.resultado_codigo||"Registrado";
-            renderIgnoredDiscounts(data.area.descontos_nao_considerados);
             areaResultPanel.classList.add("show");
           }
 
@@ -798,7 +768,6 @@
               input.value=informed[input.dataset.campo]??0;
             });
             updateTotals();
-            renderIgnoredDiscounts(saved.descontos_nao_considerados);
             discountPanel.classList.add("show");
           }catch(error){
             console.error(error);

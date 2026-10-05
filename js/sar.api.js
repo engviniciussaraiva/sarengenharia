@@ -12,6 +12,7 @@
   const REQUEST_TIMEOUT_MS = 30000;
 
   let supabasePromise = null;
+  let accessTokenCache = null;
 
   class SARAPIError extends Error {
     constructor(message, status, payload) {
@@ -44,6 +45,9 @@
   }
 
   async function getAccessToken() {
+    if (accessTokenCache && accessTokenCache.expiresAt > Date.now() + 30000) {
+      return accessTokenCache.token;
+    }
     const supabase = await getSupabase();
     const {
       data: { session },
@@ -51,12 +55,15 @@
     } = await supabase.auth.getSession();
 
     if (error || !session?.access_token) {
+      accessTokenCache = null;
       throw new SARAPIError(
         "Sua sessão expirou. Entre novamente no SAR.",
         401,
         null
       );
     }
+    const expiresAt = Number(session.expires_at || 0) * 1000;
+    accessTokenCache = { token: session.access_token, expiresAt: expiresAt || (Date.now() + 120000) };
     return session.access_token;
   }
 

@@ -52,6 +52,36 @@
     const PERMISSION_CACHE_KEY = "sar.pageGuard.permissions.v2";
     const PERMISSION_CACHE_TTL_MS = 120000;
 
+    // Fast path apenas para o ClassificaTOR: após uma validação completa, as
+    // próximas navegações entre fases não ficam com a página invisível esperando
+    // o CDN/Supabase. O backend continua validando autenticação e permissão em
+    // todas as ações privadas.
+    const FAST_AUTH_CACHE_KEY = "sar.pageGuard.fastAuth.classificator.v1";
+    const FAST_AUTH_TTL_MS = 5 * 60 * 1000;
+
+    function fastAuthValido(codigo) {
+        if (String(codigo || "").toUpperCase() !== "GAME_CLASSIFICATOR") return false;
+        try {
+            const raw = sessionStorage.getItem(FAST_AUTH_CACHE_KEY);
+            if (!raw) return false;
+            const parsed = JSON.parse(raw);
+            return parsed?.codigo === "GAME_CLASSIFICATOR" &&
+                Date.now() - Number(parsed?.savedAt || 0) <= FAST_AUTH_TTL_MS;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    function salvarFastAuth(codigo) {
+        if (String(codigo || "").toUpperCase() !== "GAME_CLASSIFICATOR") return;
+        try {
+            sessionStorage.setItem(FAST_AUTH_CACHE_KEY, JSON.stringify({
+                codigo: "GAME_CLASSIFICATOR",
+                savedAt: Date.now()
+            }));
+        } catch (_) {}
+    }
+
     function lerPermissoesCache(userId) {
         try {
             const raw = sessionStorage.getItem(PERMISSION_CACHE_KEY);
@@ -82,15 +112,23 @@
     }
 
     /*
-     * Esconde a página imediatamente para evitar que o conteúdo
-     * apareça antes da validação.
+     * Navegação quente do ClassificaTOR: se esta mesma ferramenta já foi
+     * autorizada recentemente, renderiza imediatamente e revalida em paralelo.
+     * Para as demais páginas o comportamento original permanece.
      */
-    document.documentElement.style.visibility = "hidden";
+    const codigoInicial = String(
+        document.querySelector('meta[name="sar-recurso-codigo"]')?.content || ""
+    ).trim().toUpperCase();
+    const fastAuth = fastAuthValido(codigoInicial);
 
-    document.documentElement.setAttribute(
-        "data-sar-validando",
-        "true"
-    );
+    if (!fastAuth) {
+        document.documentElement.style.visibility = "hidden";
+        document.documentElement.setAttribute("data-sar-validando", "true");
+    } else {
+        document.documentElement.style.visibility = "visible";
+        document.documentElement.removeAttribute("data-sar-validando");
+        document.documentElement.setAttribute("data-sar-autorizado", "warm");
+    }
 
     function normalizarCodigo(valor) {
         return String(valor || "")
@@ -514,6 +552,8 @@
                     permissao.administrar ===
                     true
             });
+
+        salvarFastAuth(codigo);
 
         /*
          * Evento para ferramentas que precisem esperar
