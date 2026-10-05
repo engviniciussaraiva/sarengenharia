@@ -1,0 +1,445 @@
+:root {
+  --sar-verde: #1f5a46;
+  --sar-verde-escuro: #174738;
+  --sar-verde-suave: #eef6f2;
+  --sar-fundo: #f5f6f7;
+  --sar-branco: #ffffff;
+  --sar-texto: #3f3f3f;
+  --sar-texto-2: #707070;
+  --sar-borda: #d9dddf;
+  --sar-borda-clara: #e9ebec;
+  --sar-azul-claro: #eef6ff;
+  --sar-azul-borda: #cbdff5;
+  --sar-amarelo: #fff7d6;
+  --sar-amarelo-borda: #ead890;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--sar-fundo);
+  color: var(--sar-texto);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.sar-dxf-page {
+  min-height: 100vh;
+  background: var(--sar-fundo);
+}
+
+/* Menu superior: segue a ideia da central Hidráulica */
+.sar-dxf-tabs {
+  min-height: 56px;
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  background: var(--sar-branco);
+  border-top: 1px solid var(--sar-borda);
+  border-bottom: 1px solid var(--sar-borda);
+}
+
+.sar-dxf-tab {
+  border: 0;
+  border-right: 1px solid var(--sar-borda-clara);
+  background: var(--sar-branco);
+  color: #747474;
+  padding: 0 24px;
+  min-height: 55px;
+  white-space: nowrap;
+  cursor: pointer;
+  position: relative;
+}
+
+.sar-dxf-tab:hover {
+  color: var(--sar-verde);
+  background: #fbfcfb;
+}
+
+.sar-dxf-tab.is-active {
+  color: var(--sar-verde);
+  font-weight: 700;
+  background: #fbfcfb;
+}
+
+.sar-dxf-tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--sar-verde);
+}
+
+.sar-dxf-content {
+  padding: 32px;
+}
+
+.sar-dxf-container {
+  width: 100%;
+  max-width: 1380px;
+  margin: 0 auto;
+}
+
+/* Estado inicial */
+.sar-dxf-home,
+.sar-dxf-coming {
+  min-height: calc(100vh - 150px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.sar-dxf-home-inner {
+  transform: translateY(-20px);
+}
+
+.sar-dxf-home h1,
+.sar-dxf-coming h2 {
+  margin: 0 0 12px;
+  color: #424242;
+}
+
+.sar-dxf-home h1 {
+  font-size: 38px;
+}
+
+.sar-dxf-home p,
+.sar-dxf-coming p {
+  margin: 0;
+  color: var(--sar-texto-2);
+}
+
+/* Cabeçalho interno */
+.sar-dxf-header {
+  margin-bottom: 20px;
+}
+
+.sar-dxf-header h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+}
+
+.sar-dxf-header p {
+  margin: 0;
+  color: var(--sar-texto-2);
+  font-size: 14px;
+}
+
+/* Layout */
+.sar-dxf-grid {
+  display: grid;
+  grid-template-columns: minmax(330px, 430px) minmax(500px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.sar-card {
+  background: var(--sar-branco);
+  border: 1px solid var(--sar-borda);
+  margin-bottom: 16px;
+}
+
+.sar-card-header {
+  padding: 14px 16px;
+  background: #fbfbfb;
+  border-bottom: 1px solid var(--sar-borda-clara);
+}
+
+.sar-card-body {
+  padding: 16px;
+}
+
+.sar-step {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.sar-step-number {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--sar-verde);
+  color: #fff;
+  font-weight: 700;
+}
+
+.sar-step h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.sar-step p {
+  margin: 5px 0 0;
+  color: var(--sar-texto-2);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Upload */
+.sar-upload {
+  min-height: 150px;
+  border: 2px dashed #b8c0c3;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  cursor: pointer;
+}
+
+.sar-upload:hover {
+  border-color: var(--sar-verde);
+  background: #f7fbf9;
+}
+
+.sar-upload-icon {
+  font-size: 35px;
+  margin-bottom: 10px;
+  color: var(--sar-verde);
+}
+
+.sar-upload strong {
+  font-size: 14px;
+}
+
+.sar-upload small {
+  margin-top: 5px;
+  color: var(--sar-texto-2);
+}
+
+.sar-file-input {
+  display: none;
+}
+
+.sar-file-box {
+  display: none;
+  margin-top: 10px;
+  border: 1px solid var(--sar-borda);
+  background: #fafafa;
+  padding: 11px 12px;
+}
+
+.sar-file-box.is-visible {
+  display: block;
+}
+
+.sar-file-name {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sar-file-info {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--sar-texto-2);
+}
+
+/* Campos */
+.sar-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 7px;
+}
+
+.sar-form-row {
+  display: grid;
+  grid-template-columns: 1fr 145px;
+  gap: 10px;
+}
+
+.sar-input,
+.sar-select {
+  width: 100%;
+  height: 42px;
+  border: 1px solid #bfc5c8;
+  background: #fff;
+  color: #333;
+  padding: 0 12px;
+  outline: 0;
+}
+
+.sar-input:focus,
+.sar-select:focus {
+  border-color: var(--sar-verde);
+  box-shadow: 0 0 0 2px rgba(31, 90, 70, .08);
+}
+
+.sar-required {
+  background: #f3f7ff;
+}
+
+.sar-help {
+  margin-top: 11px;
+  padding: 10px 12px;
+  background: var(--sar-azul-claro);
+  border: 1px solid var(--sar-azul-borda);
+  color: #355e86;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/* Botões */
+.sar-btn {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid var(--sar-verde);
+  background: #fff;
+  color: var(--sar-verde);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sar-btn:hover:not(:disabled) {
+  background: var(--sar-verde);
+  color: #fff;
+}
+
+.sar-btn-primary {
+  width: 100%;
+  background: var(--sar-verde);
+  color: #fff;
+}
+
+.sar-btn-primary:hover:not(:disabled) {
+  background: var(--sar-verde-escuro);
+}
+
+.sar-btn:disabled {
+  background: #e8ebed;
+  border-color: #d3d6d8;
+  color: #8b9194;
+  cursor: not-allowed;
+}
+
+/* Prévia */
+.sar-preview-card {
+  min-height: 585px;
+}
+
+.sar-preview-toolbar {
+  min-height: 48px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fbfbfb;
+  border-bottom: 1px solid var(--sar-borda);
+}
+
+.sar-preview-title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sar-preview-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.sar-preview-actions button {
+  min-width: 38px;
+  height: 32px;
+  border: 1px solid var(--sar-borda);
+  background: #fff;
+  cursor: pointer;
+}
+
+.sar-preview {
+  min-height: 515px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  background:
+    linear-gradient(#eceeef 1px, transparent 1px),
+    linear-gradient(90deg, #eceeef 1px, transparent 1px);
+  background-size: 25px 25px;
+  background-color: #fafafa;
+}
+
+.sar-preview-empty {
+  padding: 40px;
+  text-align: center;
+  color: #8a8a8a;
+}
+
+.sar-preview-empty strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #606060;
+}
+
+.sar-preview-image {
+  display: none;
+  max-width: 95%;
+  max-height: 490px;
+  object-fit: contain;
+  transform-origin: center;
+}
+
+.sar-preview-image.is-visible {
+  display: block;
+}
+
+.sar-status {
+  display: none;
+  margin-top: 11px;
+  padding: 11px 12px;
+  background: var(--sar-amarelo);
+  border: 1px solid var(--sar-amarelo-borda);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.sar-status.is-visible {
+  display: block;
+}
+
+@media (max-width: 1000px) {
+  .sar-dxf-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sar-dxf-content {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 620px) {
+  .sar-dxf-content {
+    padding: 14px;
+  }
+
+  .sar-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .sar-dxf-tab {
+    padding: 0 16px;
+  }
+
+  .sar-dxf-home h1 {
+    font-size: 30px;
+  }
+}
