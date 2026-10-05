@@ -6,10 +6,10 @@
   <meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR">
   <title>ClassificaTOR | Relatório Final</title>
 
-  <script src="/js/sar.page-guard.js?v=20261004-perf2"></script>
-  <script src="/js/sar.api.js?v=20261004-perf2"></script>
-  <script src="/game-classificator/assets/classificator-api.js?v=20261004-perf2"></script>
-  <link rel="stylesheet" href="/game-classificator/assets/classificator-shell.css?v=20261004-perf2">
+  <script src="/js/sar.page-guard.js?v=20261005-spdirect-v1"></script>
+  <script src="/js/sar.api.js?v=20261005-spdirect-v1"></script>
+  <script src="/game-classificator/assets/classificator-api.js?v=20261005-spdirect-v1"></script>
+  <link rel="stylesheet" href="/game-classificator/assets/classificator-shell.css?v=20261005-spdirect-v1">
 
   <style>
     :root{
@@ -89,6 +89,21 @@
       .footer-right{width:100%}
       .footer-right .rel-btn{flex:1}
     }
+    .project-referral{
+      margin-top:14px;border:1px solid #b8d9c9;border-left:7px solid #075b43;
+      border-radius:10px;background:#fff;overflow:hidden;
+    }
+    .project-referral-head{
+      padding:14px 17px;background:#eaf6ef;color:#075b43;font-weight:900;
+      font-size:15px;border-bottom:1px solid #c7ddd1;
+    }
+    .project-referral-body{padding:18px}
+    .project-referral-body p{margin:0 0 12px;line-height:1.55;color:#3f6157}
+    .project-module{
+      display:inline-block;margin-top:2px;padding:9px 12px;border-radius:8px;
+      background:#f4faf7;border:1px solid #c7ddd1;color:#075b43;font-weight:800;
+    }
+    .conformity-text{color:#506a62;line-height:1.45}
     @media print{
       [data-classificator-header],.footer-actions{display:none!important}
       body{background:#fff}
@@ -108,7 +123,7 @@
       <header class="report-head">
         <div>
           <h1>Relatório Final de Classificação</h1>
-          <p>Enquadramento, medidas de segurança aplicáveis e documentação necessária para certificação.</p>
+          <p id="reportSubtitle">Enquadramento, medidas de segurança aplicáveis e documentação necessária para certificação.</p>
         </div>
         <div class="report-status">✓ ESTUDO CONCLUÍDO</div>
       </header>
@@ -141,13 +156,26 @@
         </div>
       </section>
 
-      <section class="section">
+      <section class="project-referral" id="projectReferral" hidden>
+        <div class="project-referral-head" id="projectReferralTitle">Encaminhamento técnico</div>
+        <div class="project-referral-body">
+          <p id="projectReferralMessage"></p>
+          <span class="project-module" id="projectReferralModule"></span>
+        </div>
+      </section>
+
+      <section class="section" id="measuresSection">
         <div class="section-title">Medidas de segurança contra incêndio aplicáveis</div>
         <div class="table-wrap" id="measuresTable"></div>
         <p class="section-note">São exibidas somente as medidas retornadas pelo motor para o enquadramento deste estudo.</p>
       </section>
 
-      <section class="section">
+      <section class="section" id="conformitiesSection" hidden>
+        <div class="section-title">Conformidades técnicas complementares</div>
+        <div class="table-wrap" id="conformitiesTable"></div>
+      </section>
+
+      <section class="section" id="documentsSection">
         <div class="section-title">Documentação necessária para certificação</div>
         <div class="table-wrap" id="documentsTable"></div>
       </section>
@@ -161,7 +189,7 @@
     </div>
   </main>
 
-  <script src="/game-classificator/assets/classificator-shell.js?v=20261004-perf2"></script>
+  <script src="/game-classificator/assets/classificator-shell.js?v=20261005-spdirect-v1"></script>
   <script>
   (() => {
     "use strict";
@@ -208,15 +236,15 @@
     }
 
     function profileText(data) {
-      const p = data?.resultado?.perfil_medidas || {};
-      if (p.codigo === "TABELAS_6A_6M") {
-        return "Medidas definidas pelo enquadramento normativo correspondente à ocupação, área e altura.";
+      if (data?.escopo_classificator?.encaminhamento_projeto) {
+        return "Classificação concluída. A definição das medidas e soluções de projeto será realizada em módulo específico do SAR.";
       }
+      const p = data?.resultado?.perfil_medidas || {};
       if (p.codigo === "PTS_ATE_750") {
-        return "Perfil de medidas aplicável ao PTS com área computada de até 750,00 m².";
+        return "ClassificaTOR completo para o enquadramento PTS com área computada de até 750,00 m².";
       }
       if (p.codigo === "PTS_CLCB") {
-        return "Perfil de medidas aplicável ao PTS com emissão de CLCB.";
+        return "ClassificaTOR completo para o enquadramento PTS com emissão de CLCB.";
       }
       return "Perfil técnico determinado pelo motor.";
     }
@@ -294,6 +322,61 @@
         </table>`;
     }
 
+
+    function renderConformities(items) {
+      const section = document.getElementById("conformitiesSection");
+      const host = document.getElementById("conformitiesTable");
+      if (!Array.isArray(items) || !items.length) {
+        section.hidden = true;
+        host.innerHTML = "";
+        return;
+      }
+      section.hidden = false;
+      host.innerHTML = `
+        <table>
+          <thead><tr><th style="width:36%">Conformidade</th><th style="width:14%">IT</th><th>Orientação</th></tr></thead>
+          <tbody>
+            ${items.map(item => `
+              <tr>
+                <td><b>${safe(item.nome)}</b></td>
+                <td><span class="it-badge">${safe(item.instrucao_tecnica)}</span></td>
+                <td><span class="conformity-text">${safe(item.descricao)}</span></td>
+              </tr>`).join("")}
+          </tbody>
+        </table>`;
+    }
+
+    function applyReportScope(data) {
+      const scope = data?.escopo_classificator || {};
+      const referral = data?.encaminhamento || null;
+      const measuresSection = document.getElementById("measuresSection");
+      const docsSection = document.getElementById("documentsSection");
+      const conformitySection = document.getElementById("conformitiesSection");
+      const referralSection = document.getElementById("projectReferral");
+      const subtitle = document.getElementById("reportSubtitle");
+
+      if (scope.encaminhamento_projeto) {
+        measuresSection.hidden = true;
+        docsSection.hidden = true;
+        conformitySection.hidden = true;
+        referralSection.hidden = false;
+        subtitle.textContent = "Enquadramento final e encaminhamento para desenvolvimento de projeto.";
+        document.getElementById("profileTitle").textContent = "Encaminhamento técnico";
+        document.getElementById("projectReferralTitle").textContent =
+          safe(referral?.titulo, "Desenvolvimento de projeto necessário");
+        document.getElementById("projectReferralMessage").textContent =
+          safe(referral?.mensagem, "");
+        document.getElementById("projectReferralModule").textContent =
+          `${safe(referral?.modulo_destino, "Módulo SAR de Projeto Técnico")} — em desenvolvimento`;
+        return;
+      }
+
+      measuresSection.hidden = false;
+      docsSection.hidden = false;
+      referralSection.hidden = true;
+      subtitle.textContent = "Enquadramento, medidas de segurança aplicáveis e documentação necessária para certificação.";
+    }
+
     async function load() {
       try {
         const data = await window.SARClassificatorAPI.report();
@@ -311,8 +394,13 @@
 
         renderCriteria(data.criterios);
         renderData(data);
-        renderMeasures(data.medidas);
-        renderDocuments(data.documentos);
+        applyReportScope(data);
+
+        if (!data?.escopo_classificator?.encaminhamento_projeto) {
+          renderMeasures(data.medidas);
+          renderConformities(data.conformidades_tecnicas);
+          renderDocuments(data.documentos);
+        }
 
         document.getElementById("btnReview").onclick = () =>
           window.location.assign(data.rota_revisao || "/game-classificator/fase-02/");

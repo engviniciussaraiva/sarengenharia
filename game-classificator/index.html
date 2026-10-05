@@ -2,61 +2,57 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="sar-recurso-codigo" content="GAME_CLASSIFICATOR">
+  <title>ClassificaTOR | São Paulo</title>
 
-  <meta
-    name="sar-recurso-codigo"
-    content="GAME_CLASSIFICATOR"
-  >
+  <script src="/js/sar.page-guard.js?v=20261005-spdirect-v1"></script>
+  <script src="/js/sar.api.js?v=20261005-spdirect-v1"></script>
+  <script src="/game-classificator/assets/classificator-api.js?v=20261005-spdirect-v1"></script>
 
-  <title>GAME ClassificaTOR | SAR Engenharia</title>
-
-  <script src="/js/sar.page-guard.js"></script>
-  <script src="/js/sar.api.js"></script>
-  <script src="/game-classificator/assets/classificator-api.js"></script>
-
-  <link
-    rel="stylesheet"
-    href="/game-classificator/game.css"
-  >
-
-  <script
-    src="/game-classificator/game.js"
-    defer
-  ></script>
+  <style>
+    html,body{margin:0;min-height:100%;background:#f2fbf6}
+    body{visibility:hidden}
+  </style>
 </head>
-
 <body>
+<script>
+(()=>{
+  "use strict";
 
-  <main class="game-shell">
+  let launched=false;
 
-    <!--
-      A IMAGEM INTEIRA É CLICÁVEL.
-      Não existe botão extra aparecendo na tela.
-    -->
-    <button
-      id="btnIniciar"
-      class="poster-button"
-      type="button"
-      aria-label="Iniciar GAME ClassificaTOR"
-    >
+  async function openClassificator(){
+    if(launched) return;
+    launched=true;
 
-      <img
-        class="poster-image"
-        src="/game-classificator/assets/tela-01.webp"
-        alt="GAME ClassificaTOR - SAR Engenharia"
-        draggable="false"
-      >
+    try{
+      const data=await window.SARClassificatorAPI.start();
+      window.location.replace(data?.next || "/game-classificator/fase-01/");
+    }catch(error){
+      console.error("ClassificaTOR: falha ao iniciar",error);
+      launched=false;
+      document.body.style.visibility="visible";
+      document.body.innerHTML=`
+        <main style="min-height:100vh;display:grid;place-items:center;padding:24px;font-family:Segoe UI,Arial,sans-serif;color:#173f38">
+          <section style="max-width:520px;background:#fff;border:1px solid #cfe3d7;border-radius:12px;padding:24px;text-align:center">
+            <strong>Não foi possível iniciar o ClassificaTOR.</strong>
+            <p style="margin:10px 0 0;color:#60786f;font-size:14px">Atualize a página ou retorne ao portal SAR.</p>
+          </section>
+        </main>`;
+    }
+  }
 
-    </button>
+  window.addEventListener("sar:pagina-autorizada",openClassificator,{once:true});
 
-    <div
-      id="statusGame"
-      class="status-game"
-      aria-live="polite"
-    ></div>
+  function checkAuthorized(){
+    const state=document.documentElement.getAttribute("data-sar-autorizado");
+    if(state) openClassificator();
+    else window.setTimeout(checkAuthorized,40);
+  }
 
-  </main>
-
+  checkAuthorized();
+})();
+</script>
 </body>
 </html>

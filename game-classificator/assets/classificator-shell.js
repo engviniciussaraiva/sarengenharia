@@ -70,7 +70,7 @@
         <div class="classificator-topbar-inner">
           <div class="classificator-brand">
             <p class="classificator-brand-title">Classifica<span>TOR</span></p>
-            <p class="classificator-brand-sub"><span>Baseado conforme</span><span>Instrução Técnica 42/2025 COBOMSP</span></p>
+            <p class="classificator-brand-sub"><span><strong>Exclusivo para o Estado de São Paulo</strong></span><span>CBPMESP • Instrução Técnica 42/2025</span></p>
           </div>
           <nav class="classificator-criteria" id="classCriteria" aria-label="Navegação do ClassificaTOR"></nav>
         </div>
