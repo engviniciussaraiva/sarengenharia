@@ -17,7 +17,7 @@
     .route-grid{display:grid;grid-template-columns:repeat(4,minmax(230px,1fr));gap:18px;position:relative;z-index:1}
     .route-card{min-height:330px;padding:24px;border:1px solid #79c09d;border-radius:14px;background:rgba(255,255,255,.77);box-shadow:0 7px 20px rgba(13,81,63,.06);color:#133d35;text-align:left;cursor:pointer;transition:.2s;display:flex;flex-direction:column}
     .route-card:hover{transform:translateY(-5px);border-color:#199966;box-shadow:0 14px 30px rgba(13,81,63,.12)}.route-card:disabled{opacity:.58;cursor:not-allowed;transform:none;box-shadow:none}.route-card.done{background:linear-gradient(180deg,#effbf4,#e4f6eb);border-color:#23a46f}
-    .route-visual{height:160px;display:grid;place-items:center;color:#1a8b62}.route-visual svg{width:135px;height:135px;stroke:currentColor;fill:none;stroke-width:1.45}.route-card h2{margin:4px 0 8px;font-size:22px;line-height:1}.route-card p{margin:0;color:#58756d;font-size:14px}.route-card-footer{margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding-top:20px}.route-line{width:48px;height:4px;border-radius:99px;background:#1ba26c}.route-arrow{width:43px;height:43px;border:2px solid #1ba26c;border-radius:50%;display:grid;place-items:center;color:#13845a;font-size:24px}.route-done{display:none;color:#168a5e;font-weight:900;font-size:12px;text-transform:uppercase}.route-card.done .route-done{display:block}
+    .route-visual{height:160px;display:grid;place-items:center;color:#1a8b62}.route-visual svg{width:135px;height:135px;stroke:currentColor;fill:none;stroke-width:1.45}.route-card h2{margin:4px 0 8px;font-size:22px;line-height:1}.route-card p{margin:0;color:#58756d;font-size:14px}.route-result{min-height:70px;margin-top:17px;padding:10px 12px;border:1px solid transparent;border-radius:10px;background:rgba(255,255,255,.28);opacity:0;visibility:hidden;transform:translateY(4px);transition:opacity .2s ease,transform .2s ease,visibility .2s ease}.route-card.done .route-result{opacity:1;visibility:visible;transform:none;border-color:#c6e2d2;background:rgba(255,255,255,.68)}.route-result-status{display:block;color:#168a5e;font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}.route-result-main{display:block;margin-top:3px;color:#0d513f;font-size:16px;font-weight:900;line-height:1.1}.route-result-detail{display:block;margin-top:4px;color:#58756d;font-size:11px;font-weight:700;line-height:1.25}.route-result-main:empty,.route-result-detail:empty{display:none}.route-card-footer{margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding-top:14px}.route-line{width:48px;height:4px;border-radius:99px;background:#1ba26c}.route-arrow{width:43px;height:43px;border:2px solid #1ba26c;border-radius:50%;display:grid;place-items:center;color:#13845a;font-size:24px}
     @media(max-width:1150px){.route-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:680px){.route-grid{grid-template-columns:1fr}.route-title{font-size:29px}.route-head{display:block}.route-head .page-actions{margin-top:16px}}
   </style>
 </head>
@@ -32,19 +32,19 @@
       <div class="route-grid" id="routeGrid">
         <button class="route-card" type="button" disabled data-code="AREA" data-route="/game-classificator/fase-04/">
           <div class="route-visual"><svg viewBox="0 0 120 120"><path d="M21 83l37 18 41-20-38-17zM21 83V49l38-18 40 18v32M59 31v70M21 49l38 18 40-18"/><path d="M16 91l43 21 47-23M101 32h14M108 25v14"/></svg></div>
-          <h2>ÁREA</h2><p>Área total construída</p><div class="route-card-footer"><span class="route-line"></span><span class="route-done">Determinado ✓</span><span class="route-arrow">→</span></div>
+          <h2>ÁREA</h2><p>Área total construída</p><div class="route-result" aria-live="polite"><span class="route-result-status">✓ Determinado</span><strong class="route-result-main"></strong><span class="route-result-detail"></span></div><div class="route-card-footer"><span class="route-line"></span><span class="route-arrow">→</span></div>
         </button>
         <button class="route-card" type="button" disabled data-code="ALTURA" data-route="/game-classificator/fase-03/">
           <div class="route-visual"><svg viewBox="0 0 120 120"><path d="M25 101V47h44v54zM35 47V27h34v20M40 58h11M40 69h11M40 80h11M78 24v75M72 31l6-7 6 7M72 92l6 7 6-7"/></svg></div>
-          <h2>ALTURA</h2><p>Altura da edificação</p><div class="route-card-footer"><span class="route-line"></span><span class="route-done">Determinado ✓</span><span class="route-arrow">→</span></div>
+          <h2>ALTURA</h2><p>Altura da edificação</p><div class="route-result" aria-live="polite"><span class="route-result-status">✓ Determinado</span><strong class="route-result-main"></strong><span class="route-result-detail"></span></div><div class="route-card-footer"><span class="route-line"></span><span class="route-arrow">→</span></div>
         </button>
         <button class="route-card" type="button" disabled data-code="OCUPACAO" data-route="/game-classificator/fase-05/">
           <div class="route-visual"><svg viewBox="0 0 120 120"><path d="M18 91V49h29v42M49 91V34h30v57M81 91V57h22v34M12 96h96"/><circle cx="58" cy="53" r="6"/><circle cx="47" cy="72" r="5"/><circle cx="68" cy="72" r="5"/><path d="M36 91v-4c0-7 5-12 11-12M80 91v-4c0-7-5-12-11-12M49 91v-7c0-8 4-13 10-13s10 5 10 13v7"/></svg></div>
-          <h2>OCUPAÇÃO</h2><p>Grupo e divisão de uso</p><div class="route-card-footer"><span class="route-line"></span><span class="route-done">Determinado ✓</span><span class="route-arrow">→</span></div>
+          <h2>OCUPAÇÃO</h2><p>Grupo e divisão de uso</p><div class="route-result" aria-live="polite"><span class="route-result-status">✓ Determinado</span><strong class="route-result-main"></strong><span class="route-result-detail"></span></div><div class="route-card-footer"><span class="route-line"></span><span class="route-arrow">→</span></div>
         </button>
         <button class="route-card" type="button" disabled data-code="CRITERIOS" data-route="/game-classificator/fase-06/">
           <div class="route-visual"><svg viewBox="0 0 120 120"><rect x="28" y="18" width="59" height="82" rx="6"/><path d="M41 42l5 5 9-11M41 62l5 5 9-11M41 82l5 5 9-11M62 42h14M62 62h14M62 82h14"/><path d="M83 75l16 7v13c0 9-7 15-16 18-9-3-16-9-16-18V82z"/></svg></div>
-          <h2>CRITÉRIO TÉCNICO</h2><p>Demais exigências normativas</p><div class="route-card-footer"><span class="route-line"></span><span class="route-done">Determinado ✓</span><span class="route-arrow">→</span></div>
+          <h2>CRITÉRIO TÉCNICO</h2><p>Demais exigências normativas</p><div class="route-result" aria-live="polite"><span class="route-result-status">✓ Determinado</span><strong class="route-result-main"></strong><span class="route-result-detail"></span></div><div class="route-card-footer"><span class="route-line"></span><span class="route-arrow">→</span></div>
         </button>
       </div>
     </main>
@@ -67,7 +67,25 @@
           const item=criteria.find(c=>c.codigo===card.dataset.code);
           const enabled=item?.habilitado===true;
           card.disabled=!enabled;
-          card.classList.toggle("done",Boolean(item?.concluido));
+          const completed=Boolean(item?.concluido);
+          card.classList.toggle("done",completed);
+
+          const resultBox=card.querySelector(".route-result");
+          const resultMain=card.querySelector(".route-result-main");
+          const resultDetail=card.querySelector(".route-result-detail");
+          const result=item?.resultado||null;
+
+          if(resultMain){
+            const process=result?.processo||"";
+            const certification=result?.certificacao||"";
+            resultMain.textContent=(process&&certification)?`${process} + ${certification}`:"";
+          }
+          if(resultDetail){
+            resultDetail.textContent=result?.detalhe||"";
+          }
+          if(resultBox){
+            resultBox.setAttribute("aria-hidden",completed?"false":"true");
+          }
         }
       }
       window.addEventListener("sar:classificator-state",e=>aplicarEstado(e.detail));
