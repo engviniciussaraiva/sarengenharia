@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automação DXF/CAD | SAR Engenharia</title>
+  <link rel="stylesheet" href="./css/automacao-dxf-cad.css">
+</head>
+<body>
+  <main class="sar-dxf-page">
+    <nav class="sar-dxf-tabs" aria-label="Automações DXF/CAD">
+      <button class="sar-dxf-tab" data-page="croqui">Croqui → DXF</button>
+      <button class="sar-dxf-tab" data-page="pdf">PDF → DXF</button>
+      <button class="sar-dxf-tab" data-page="imagem">Imagem → DXF</button>
+      <button class="sar-dxf-tab" data-page="coordenadas">Coordenadas → DXF</button>
+      <button class="sar-dxf-tab" data-page="outras">Outras Automações</button>
+    </nav>
+
+    <section id="sarDxfContent" class="sar-dxf-content" aria-live="polite"></section>
+  </main>
+
+  <!-- Usa o conector oficial do SAR: autenticação Bearer + Railway -->
+  <script src="/js/sar.api.js"></script>
+  <script src="./js/automacao-dxf-cad.js"></script>
+</body>
+</html>
