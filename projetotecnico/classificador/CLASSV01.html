@@ -1162,8 +1162,6 @@ style="text-align:right;">
 window.onload = async () => {
 
 await Promise.all([
-  carregarRegrasAltura(),
-  carregarClassificacaoAltura(),
   carregarPrioridades(),
   carregarRegrasConsolidacao(),
   carregarOcupacoesBase(),
@@ -1188,7 +1186,6 @@ await Promise.all([
   carregarNotasGeraisMedidas(),
 
   // 🔥 APOIO
-  carregarNotasAltura(),
   carregarMunicipios()
 ]);
 
@@ -1473,8 +1470,6 @@ function formatarNumeroBR(valor) {
 
 let regrasArea = [];
 let regrasAlertaArea = [];
-let regrasAltura = [];
-let classificacaoAltura = [];
 let regrasPrioridade = [];
 let regrasConsolidacao = [];
 let ocupacoesBase = [];
@@ -1507,7 +1502,6 @@ let resultadoOcupacao = null;
 let resultadoRiscoEspecifico = null;
 let resultadoFinalConsolidado = null;  
 
-let notasAltura = [];
  
 function formatarCampoComplementarRisco(valor, tipoCampo) {
 
@@ -1539,85 +1533,7 @@ function formatarCampoComplementarRisco(valor, tipoCampo) {
 // ÁREA MIGRADA PARA O MOTOR PRIVADO RAILWAY + SUPABASE.
 // As antigas planilhas públicas PROC_AREA e PROC_AREA_REGRAS não são mais carregadas pelo navegador.
 
-async function carregarRegrasAltura() {
-
-  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJP_HO-NLAWpUiRFk5ifqR9Jo_zgISf1uZfszA-eKBwdTmcUMwKcSN5IPrW8MK7abJUN7kisY0AE65/pub?output=csv";
-
-  const res = await fetch(url);
-  const texto = await res.text();
-
-  const linhas = texto.split(/\r?\n/).slice(1);
-
-  regrasAltura = linhas
-    .filter(l => l.trim() !== "")
-    .map(l => {
-
-      const col = l
-        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
-        .map(c => c.replace(/\r/g, "").trim());
-
-      return {
-        estado: col[1],
-        criterio: col[2],
-        pav_min: parseInt(col[3]),
-        pav_max: parseInt(col[4]),
-        tem_subsolo: col[5],
-        uso_subsolo: col[6],
-        area_subsolo_min: col[7] === "NA" ? null : parseFloat(col[7]),
-        area_subsolo_max: col[8] === "NA" ? null : parseFloat(col[8]),
-
-        processo: col[9],
-        certificacao: col[10],
-
-        texto_processo: col[11],
-        texto_certificacao: col[12],
-
-        texto: col[13],
-       criterio_determinante: col[14],
-       cor: col[15],
-       ativo: col[16] === "TRUE"
-
-      };
-
-    });
-
-  console.log("Altura carregada:", regrasAltura);
-
-}
-
-async function carregarClassificacaoAltura() {
-
-  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTW5hZ6TPNgHxPKFBqI8PHPWFeQdSKLhHju5s4qS4CnxtNdJMIo6RQSWm22HLkAQCQFfoGQ-VCSvegq/pub?output=csv";
-
-  const res = await fetch(url);
-  const texto = await res.text();
-
-  const linhas = texto.split(/\r?\n/).slice(1);
-
-  classificacaoAltura = linhas
-    .filter(l => l.trim() !== "")
-    .map(l => {
-
-      const col = l
-        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
-        .map(c => c.replace(/\r/g, "").trim());
-
-      return {
-        id: col[0],
-        estado: col[1],
-        altura_min: parseFloat(col[2]),
-        altura_max: parseFloat(col[3]),
-        tipo_altura: col[4],
-        denominacao: col[5],
-        texto_altura: col[6],
-        ativo: col[7] === "TRUE"
-      };
-
-    });
-
-  console.log("Classificação de altura carregada:", classificacaoAltura);
-
-}
+// ALTURA: tabelas privadas são consultadas exclusivamente pelo Railway/Python.
 
 async function carregarPrioridades() {
 
@@ -4327,149 +4243,67 @@ function buscarOcupacaoMaisRestritiva(listaOcupacoes) {
 
 
 
-function buscarClassificacaoFisicaAltura(altura) {
+// O navegador envia apenas os dados digitados. Toda decisão de ALTURA fica no Python.
+let sequenciaCalculoAltura = 0;
 
-  const estado = document.getElementById("estado").value;
-
-  return classificacaoAltura.find(r => {
-
-    if (!r.ativo) return false;
-
-    if (r.estado !== estado) return false;
-
-    if (altura < r.altura_min || altura > r.altura_max) return false;
-
-    return true;
-
-  });
-
-}
-
-
-
-function buscarClassificacaoAlturaCompleta(pav, temSubsolo, usoSubsolo, areaSubsolo) {
-
-  const estado = document.getElementById("estado").value;
-
-  return regrasAltura.find(r => {
-
-    if (!r.ativo) return false;
-
-    // estado e critério
-    if (r.estado !== estado || r.criterio !== "altura") return false;
-
-    // pavimentos
-    if (pav < r.pav_min || pav > r.pav_max) return false;
-
-    // subsolo
-    if (r.tem_subsolo !== "NA" && r.tem_subsolo !== temSubsolo) return false;
-
-    // uso do subsolo
-    if (r.uso_subsolo !== "NA" && r.uso_subsolo !== usoSubsolo) return false;
-
-    // área do subsolo
-    if (r.area_subsolo_min !== null && r.area_subsolo_max !== null) {
-      if (areaSubsolo < r.area_subsolo_min || areaSubsolo > r.area_subsolo_max) return false;
-    }
-
-    return true;
-
-  });
-
-}
-
-function atualizarClassificacaoAltura() {
-
-  const pav = parseInt(document.getElementById("pavimentos").value);
-
-  const temSubsolo =
-    document.getElementById("temSubsolo").value;
-
-  const usoSubsolo =
-    document.getElementById("usoSubsolo").value;
-
-  let areaSubsolo = 0;
-
-  if (document.getElementById("areaSubsolo").value === "SIM") {
-    areaSubsolo = 100;
-
-  } else if (document.getElementById("areaSubsolo").value === "NAO") {
-    areaSubsolo = 25;
-  }
+async function atualizarClassificacaoAltura() {
+  const minhaSequencia = ++sequenciaCalculoAltura;
+  const pav = parseInt(document.getElementById("pavimentos").value, 10);
+  const painelProcesso = document.getElementById("procAltura");
+  const painelCertificacao = document.getElementById("certAltura");
+  const limpar = () => {
+    painelProcesso.innerText = "—";
+    painelCertificacao.innerText = "—";
+    painelCertificacao.style.color = "#333";
+    painelCertificacao.style.fontWeight = "normal";
+    resultadoAltura = null;
+    atualizarMemorialAltura(null, null);
+    atualizarPreviaFinal();
+  };
+  if (!pav) { limpar(); return; }
 
   const alturaTexto = document.getElementById("alturaEdificacao").value;
-
-  const altura = parseFloat(
-    alturaTexto.replace(/\./g, "").replace(",", ".")
-  ) || 0;
-
-  // Guarda dados para o memorial futuramente
-  let classAltura = null;
-
-  if (altura > 0) {
-    classAltura = buscarClassificacaoFisicaAltura(altura);
-  } else if (pav === 1) {
-    classAltura = buscarClassificacaoFisicaAltura(0);
-  }
-
-  // Se não tiver pavimento, limpa resultado da altura
-  if (!pav) {
-
-    document.getElementById("procAltura").innerText = "—";
-    document.getElementById("certAltura").innerText = "—";
-    document.getElementById("certAltura").style.color = "#333";
-    document.getElementById("certAltura").style.fontWeight = "normal";
-
-    resultadoAltura = null;
-atualizarMemorialAltura(null, null); 
+  const alturaMetros = parseFloat(String(alturaTexto || "0").replace(/\./g, "").replace(",", ".")) || 0;
+  try {
+    const resposta = await window.SARAPI.post(
+      "/api/projetotecnico/classificador/altura",
+      {
+        estado: document.getElementById("estado").value || "SP",
+        pavimentos: pav,
+        tem_subsolo: document.getElementById("temSubsolo").value,
+        uso_subsolo: document.getElementById("usoSubsolo").value,
+        area_subsolo: document.getElementById("areaSubsolo").value,
+        altura_metros: alturaMetros
+      }
+    );
+    if (minhaSequencia !== sequenciaCalculoAltura) return;
+    const regra = resposta?.regra || null;
+    const classAltura = resposta?.classificacao_fisica || null;
+    if (regra) {
+      painelProcesso.innerText = regra.texto_processo || "—";
+      painelCertificacao.innerText = regra.texto_certificacao || "—";
+      painelCertificacao.style.fontWeight = "bold";
+      painelCertificacao.style.color = regra.cor || "#333";
+      resultadoAltura = {
+        criterio: regra.criterio_determinante || "Altura",
+        processo: regra.processo,
+        certificacao: regra.certificacao
+      };
+    } else {
+      painelProcesso.innerText = "—";
+      painelCertificacao.innerText = "—";
+      painelCertificacao.style.color = "#333";
+      painelCertificacao.style.fontWeight = "normal";
+      resultadoAltura = null;
+    }
+    atualizarMemorialAltura(regra, classAltura);
     atualizarPreviaFinal();
-
-    return;
+  } catch (erro) {
+    if (minhaSequencia !== sequenciaCalculoAltura) return;
+    console.error("Falha na classificação privada de ALTURA:", erro);
+    limpar();
   }
-
-  const regra = buscarClassificacaoAlturaCompleta(
-    pav,
-    temSubsolo,
-    usoSubsolo,
-    areaSubsolo
-  );
-
-  if (regra) {
-
-    document.getElementById("procAltura").innerText =
-      regra.texto_processo;
-
-    document.getElementById("certAltura").innerText =
-      regra.texto_certificacao;
-
-    document.getElementById("certAltura").style.fontWeight =
-      "bold";
-
-    document.getElementById("certAltura").style.color =
-      regra.cor;
-
-    resultadoAltura = {
-      criterio: regra.criterio_determinante || "Altura",
-      processo: regra.processo,
-      certificacao: regra.certificacao
-    };
-
-  } else {
-
-    document.getElementById("procAltura").innerText = "—";
-    document.getElementById("certAltura").innerText = "—";
-    document.getElementById("certAltura").style.color = "#333";
-    document.getElementById("certAltura").style.fontWeight = "normal";
-
-    resultadoAltura = null;
-
-  }
-atualizarMemorialAltura(regra, classAltura);
-
-  atualizarPreviaFinal();
-
 }
-
 
 function atualizarPreviaFinal() {
 
@@ -6318,34 +6152,27 @@ document.getElementById("municipioInput").addEventListener("focus", function() {
 
 });
 
-async function carregarNotasAltura() {
-
-  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR1G1-4bEzewHWhSSkqZOuvs_BO-jaIIORCgEV0speW1xvic089VXHF-BlbwO_UhS9CycYGke2HbXF3/pub?output=csv";
-
-  const res = await fetch(url);
-  const texto = await res.text();
-
-  const linhas = texto.split("\n").slice(1);
-
-  notasAltura = linhas.map(l => {
-
-    const col = l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-
-    return {
-      estado: col[1],
-      criterio: col[2],
-      tipo: col[3],
-      chave: col[4],
-      titulo: col[5],
-      texto: col[6],
-      ativo: col[7] === "TRUE"
-    };
-
-  });
-
+// Nota técnica de ALTURA obtida apenas pela rota autenticada do Railway.
+async function abrirModalAltura() {
+  const modal = document.getElementById("modalAltura");
+  const titulo = document.getElementById("tituloAltura");
+  const texto = document.getElementById("textoAltura");
+  modal.style.display = "flex";
+  titulo.textContent = "Altura da edificação";
+  texto.textContent = "Carregando nota técnica...";
+  try {
+    const resposta = await window.SARAPI.get("/api/projetotecnico/classificador/altura/nota");
+    if (modal.style.display === "none") return;
+    titulo.textContent = resposta?.nota?.titulo || "Altura da edificação";
+    texto.textContent = resposta?.nota?.texto || "Nota técnica não localizada.";
+  } catch (erro) {
+    console.error("Falha ao consultar nota privada de ALTURA:", erro);
+    texto.textContent = "Não foi possível carregar a nota técnica.";
+  }
 }
-
-
+function fecharModalAltura() {
+  document.getElementById("modalAltura").style.display = "none";
+}
 
 // buscarClassificacaoArea() removida do frontend.
 // A decisão PTS/PT e CLCB/AVCB do critério Área é feita exclusivamente no Railway.
