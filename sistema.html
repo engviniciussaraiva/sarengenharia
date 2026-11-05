@@ -27,8 +27,8 @@ body{
 
 .topbar{
     height:60px;
-    background:#fff;
-    border-bottom:1px solid #ddd;
+    background:#002719;
+    border-bottom:1px solid #68bf16;
     display:flex;
     justify-content:space-between;
     align-items:center;
@@ -118,13 +118,28 @@ body{
 .toggle-left{
     cursor:pointer;
     font-size:22px;
+    color:#fff;
+    user-select:none;
 }
 
 .logo{
-font-size:22px;
-font-weight:700;
-color:#7cb342;
-cursor:pointer;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    height:56px;
+}
+.logo img{
+    display:block;
+    width:auto;
+    height:52px;
+    max-width:min(310px, 65vw);
+    object-fit:contain;
+}
+.topbar .top-print-btn{
+    color:#fff;
+}
+.topbar .top-print-btn:hover{
+    background:rgba(255,255,255,.12);
 } 
 
 /* ==========================
@@ -476,7 +491,7 @@ min-width:20px;
         </div>
 
         <div class="logo" onclick="window.location.href='/'">
-SAR Engenharia
+    <img src="sar-logo-topo.webp" alt="SAR Engenharia — Sistema Avançado de Resposta">
 </div> 
 
     </div>
