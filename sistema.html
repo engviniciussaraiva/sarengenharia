@@ -509,6 +509,22 @@ min-width:20px;
     margin-bottom:5px;
 }
 
+
+/* IDENTIFICACAO DO USUARIO NO CABECALHO */
+.sar-user-area{position:relative;min-width:0}
+.sar-user-trigger{display:flex;align-items:center;gap:10px;border:0;border-left:1px solid rgba(255,255,255,.16);background:transparent;color:#fff;padding:8px 4px 8px 17px;cursor:pointer;font-family:inherit;text-align:left;max-width:300px}
+.sar-user-trigger:hover{background:rgba(255,255,255,.06)}
+.sar-user-avatar{display:flex;align-items:center;justify-content:center;flex:none;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#238b0c,#07572c);font-size:15px;font-weight:700;color:#fff}
+.sar-user-identidade{display:flex;flex-direction:column;min-width:0;gap:2px}
+.sar-user-nome{font-size:14px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sar-user-cargo{display:flex;align-items:center;gap:7px;color:#d7e4dc;font-size:12px}
+.sar-user-chevron{font-size:17px;line-height:12px}
+.sar-user-menu{position:absolute;right:0;top:calc(100% + 8px);min-width:240px;max-width:320px;background:#fff;color:#25362f;padding:13px 15px;border:1px solid #dce5df;box-shadow:0 8px 22px #0002;z-index:3000}
+.sar-user-menu[hidden]{display:none}
+.sar-user-menu-title{font-weight:700;font-size:14px;overflow-wrap:anywhere}
+.sar-user-menu-email{font-size:12px;color:#596b61;margin-top:5px;overflow-wrap:anywhere}
+@media(max-width:580px){.sar-user-trigger{padding-left:8px;gap:7px}.sar-user-avatar{width:34px;height:34px}.sar-user-nome{max-width:125px;font-size:12px}.sar-user-cargo{font-size:11px}}
+
 </style>
 </head>
 
@@ -532,26 +548,20 @@ min-width:20px;
     </div>
 
     <div class="top-right">
-
-    <div class="print-wrapper">
-
-        <button
-            class="top-print-btn"
-            type="button"
-            aria-label="Imprimir resultado"
-            onclick="imprimirFerramentaAtual()"
-        >
-            🖨️
-        </button>
-
-        <span class="print-tooltip">
-            Imprimir resultado
-        </span>
-
+        <div class="sar-user-area" id="sarUserArea">
+            <button class="sar-user-trigger" id="sarUserTrigger" type="button" aria-expanded="false" aria-controls="sarUserMenu" onclick="alternarMenuUsuario()">
+                <span class="sar-user-avatar" id="sarUserAvatar">U</span>
+                <span class="sar-user-identidade">
+                    <span class="sar-user-nome" id="sarUserNome">Usuário SAR</span>
+                    <span class="sar-user-cargo"><span id="sarUserCargo">Carregando...</span><span class="sar-user-chevron">⌄</span></span>
+                </span>
+            </button>
+            <div class="sar-user-menu" id="sarUserMenu" hidden>
+                <div class="sar-user-menu-title" id="sarUserMenuNome">Usuário SAR</div>
+                <div class="sar-user-menu-email" id="sarUserMenuEmail"></div>
+            </div>
+        </div>
     </div>
-
-</div>
-
 
 </div>
 
@@ -2170,6 +2180,36 @@ function imprimirFerramentaAtual(){
 }
 
 
+
+/* Nome e perfil provenientes da sessao autenticada (sem dados fixos). */
+function preencherUsuarioTopo(usuario, cadastro){
+    const meta = usuario?.user_metadata || {};
+    const nome = String(meta.full_name || meta.name || meta.nome || usuario?.email?.split("@")[0] || "Usuário SAR").trim();
+    const partes = nome.split(/\s+/).filter(Boolean);
+    const iniciais = ((partes[0]?.[0] || "U") + (partes.length > 1 ? partes[partes.length - 1][0] : "")).toUpperCase();
+    const perfil = String(cadastro?.tipo_usuario || "Usuário").trim();
+    const perfilExibicao = perfil ? perfil.charAt(0).toUpperCase() + perfil.slice(1).toLowerCase() : "Usuário";
+    document.getElementById("sarUserNome").textContent = nome;
+    document.getElementById("sarUserAvatar").textContent = iniciais;
+    document.getElementById("sarUserCargo").textContent = perfilExibicao;
+    document.getElementById("sarUserMenuNome").textContent = nome;
+    document.getElementById("sarUserMenuEmail").textContent = usuario?.email || "";
+}
+function alternarMenuUsuario(){
+    const menu = document.getElementById("sarUserMenu");
+    const botao = document.getElementById("sarUserTrigger");
+    menu.hidden = !menu.hidden;
+    botao.setAttribute("aria-expanded", String(!menu.hidden));
+}
+document.addEventListener("click", function(event){
+    const area = document.getElementById("sarUserArea");
+    const menu = document.getElementById("sarUserMenu");
+    if(area && menu && !area.contains(event.target)){
+        menu.hidden = true;
+        document.getElementById("sarUserTrigger").setAttribute("aria-expanded", "false");
+    }
+});
+
 window.addEventListener(
     "sar:autorizado",
     async function(event){
@@ -2179,6 +2219,8 @@ window.addEventListener(
 
         SAR_CADASTRO_ATUAL =
             event.detail?.cadastro || null;
+
+        preencherUsuarioTopo(SAR_USUARIO_ATUAL, SAR_CADASTRO_ATUAL);
 
         try{
 
