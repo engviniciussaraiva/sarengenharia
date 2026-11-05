@@ -525,6 +525,51 @@ min-width:20px;
 .sar-user-menu-email{font-size:12px;color:#596b61;margin-top:5px;overflow-wrap:anywhere}
 @media(max-width:580px){.sar-user-trigger{padding-left:8px;gap:7px}.sar-user-avatar{width:34px;height:34px}.sar-user-nome{max-width:125px;font-size:12px}.sar-user-cargo{font-size:11px}}
 
+
+/* SAR V4 — identidade visual do menu lateral. Apenas apresentação. */
+.sidebar{
+  background:linear-gradient(180deg,#001c13 0%,#002b1d 58%,#001b13 100%);
+  border-right:1px solid #20543b;
+  color:#f4fff8;
+}
+/* Mantém o elemento no DOM e elimina apenas a faixa visual Portal. */
+.sidebar .portal-title{display:none !important;}
+#menuDinamico{scrollbar-color:#326d49 #002318;scrollbar-width:thin;}
+.sidebar .menu-item{
+  color:#f4fff8;
+  border-bottom:1px solid rgba(173,225,185,.11);
+  padding:14px 18px;
+  transition:background-color .18s,color .18s,box-shadow .18s;
+}
+.sidebar .menu-item:hover,
+.sidebar .menu-item:focus-within{
+  background:rgba(89,176,82,.17);
+  color:#baff45;
+  box-shadow:inset 3px 0 0 #80db15;
+}
+.sidebar .menu-item.active,
+.sidebar .menu-item.ativo,
+.sidebar .menu-item.selected,
+.sidebar .menu-item[aria-current="page"]{
+  background:linear-gradient(90deg,#07552e,#003a27);
+  color:#c7ff67;
+  box-shadow:inset 3px 0 0 #80db15;
+}
+.sidebar .submenu{background:#002519;}
+.sidebar .submenu a{color:#e7f8ec;border-bottom:1px solid rgba(173,225,185,.09);}
+.sidebar .submenu a:hover{background:#06462d;color:#c7ff67;}
+.sidebar .sidebar-footer{
+  background:transparent;
+  border-top:2px solid #80db15;
+  color:#f4fff8;
+}
+.sidebar .sidebar-footer-btn{color:#f4fff8;}
+.sidebar .sidebar-footer-btn:hover{background:rgba(128,219,21,.16);color:#c7ff67;}
+.sidebar .sidebar-footer-btn.logout:hover{background:rgba(220,65,65,.16);}
+.sidebar .sidebar-footer-brand,
+.sidebar .sidebar-footer-brand strong{color:#f4fff8;}
+.sidebar .sidebar-footer-version{color:#b6cabe;}
+
 </style>
 </head>
 
