@@ -36,13 +36,54 @@ $('equipmentId').addEventListener('change',async()=>{['factorK','minPressure','m
 ['headType','orientation','factorK','designArea'].forEach(id=>$(id).addEventListener('change',()=>prepare()));
 $('criteriaForm').onsubmit=async e=>{e.preventDefault();message('criteriaMessage','Conferindo no servidor…');try{const r=await api('validar_criterios',study());message('criteriaMessage',[r.mensagem,...r.alertas,...r.pendencias_criterio].join('\n'))}catch(error){message('criteriaMessage',error.message)}};
 function filename(){return ($('system').value||'estudo-sprinklers').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'-').slice(0,90)+'.json'}
-function download(file){const blob=new Blob([JSON.stringify(file,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename();document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);}
+function studyJson(file){
+ if(!file||typeof file!=='object'||file.formato!=='SAR_SPRINKLERS_ESTUDO'||file.versao!==1||!file.estudo||typeof file.estudo.values!=='object'||typeof file.estudo.criteria!=='object')throw Error('O servidor não retornou um estudo completo. Nenhum arquivo foi gravado.');
+ const text=JSON.stringify(file,null,2)+'\n';
+ JSON.parse(text);
+ if(new Blob([text]).size>1000000)throw Error('O estudo ultrapassa o limite de 1 MB. Nenhum arquivo foi gravado.');
+ return text;
+}
+function download(text,name){const blob=new Blob([text],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);}
 let saving=false;
-async function saveJson(){if(!ready){message('fileStatus','Aguarde o carregamento dos cadastros.');return}if(saving)return;saving=true;message('fileStatus','Preparando arquivo…');let handle=null;try{if(window.showSaveFilePicker){try{handle=await window.showSaveFilePicker({suggestedName:filename(),types:[{description:'Estudo SAR em JSON',accept:{'application/json':['.json']}}]})}catch(e){if(e.name==='AbortError'){message('fileStatus','Salvamento cancelado.');return}if(!['SecurityError','NotAllowedError'].includes(e.name))throw e}}const r=await api('exportar_json',study());if(handle){const stream=await handle.createWritable();await stream.write(JSON.stringify(r.arquivo,null,2));await stream.close();message('fileStatus','Estudo salvo na sua máquina.')}else{download(r.arquivo);message('fileStatus','Download do estudo solicitado.')}}catch(e){message('fileStatus',e.message)}finally{saving=false}}
+async function saveJson(){
+ if(!ready){message('fileStatus','Aguarde o carregamento dos cadastros.');return}
+ if(saving)return;
+ saving=true;
+ const buttons=['save','saveCriteria','saveJson'].map($),draft=study(),name=filename();
+ buttons.forEach(b=>b.disabled=true);
+ message('fileStatus','Preparando e conferindo o estudo no servidor…');
+ let stream=null;
+ try{
+  // Preparar ANTES de abrir o seletor: uma falha da API não pode criar um arquivo vazio.
+  const r=await api('exportar_json',draft),text=studyJson(r?.arquivo);
+  let handle=null;
+  if(window.showSaveFilePicker){
+   try{handle=await window.showSaveFilePicker({suggestedName:name,types:[{description:'Estudo SAR em JSON',accept:{'application/json':['.json']}}]})}
+   catch(e){
+    if(e.name==='AbortError'){message('fileStatus','Salvamento cancelado.');return}
+    if(!['SecurityError','NotAllowedError'].includes(e.name))throw e;
+   }
+  }
+  if(handle){
+   stream=await handle.createWritable();
+   await stream.write(text);
+   await stream.close();stream=null;
+   const saved=await handle.getFile();
+   if(await saved.text()!==text)throw Error('Não foi possível confirmar o conteúdo gravado. Salve novamente com outro nome.');
+   message('fileStatus','Estudo salvo e conteúdo conferido: '+name+'.');
+  }else{
+   download(text,name);
+   message('fileStatus','JSON preparado. Download solicitado: '+name+'. Confira a pasta de downloads.');
+  }
+ }catch(e){
+  if(stream){try{await stream.abort()}catch{}}
+  message('fileStatus','Não foi possível salvar o estudo: '+e.message);
+ }finally{saving=false;buttons.forEach(b=>b.disabled=false)}
+}
 ['save','saveCriteria','saveJson'].forEach(id=>$(id).onclick=saveJson);
 $('openJson').onclick=()=>{if(!ready)return;if(($('system').value||selected)&&!confirm('Abrir outro arquivo substituirá os dados desta tela. Salve o estudo atual antes de continuar. Deseja abrir?'))return;$('jsonFile').value='';$('jsonFile').click()};
 function applyStudy(r){const s=r.estudo;valueIds.forEach(id=>{if(s.values[id]!==undefined)$(id).value=display(s.values[id]);else if(!['roof','storage'].includes(id))$(id).value=''});criteriaIds.forEach(id=>{if(id!=='criterionCode')$(id).value=display(s.criteria[id]??(id==='systemType'?'Tubulação molhada':''))});network=s.network;selected=r.atividade||null;renderActivity(selected);document.querySelectorAll('.choice').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.network===network)));$('criterionCode').replaceChildren();option($('criterionCode'),'','Valores manuais / a definir');r.criterios.forEach(c=>option($('criterionCode'),c.codigo,c.descricao));$('criterionCode').value=s.criteria.criterionCode||'';lastReference=r;contextResult(r);update();showStep(1);message('message',r.alertas.join('\n'));}
-$('jsonFile').onchange=async()=>{const file=$('jsonFile').files?.[0];if(!file)return;try{if(file.size>1000000)throw Error('Selecione um arquivo JSON de até 1 MB.');const raw=JSON.parse(await file.text());const r=await api('importar_json',{arquivo:raw});searchVersion++;contextVersion++;criteriaVersion++;clearTimeout(searchTimer);clearTimeout(contextTimer);applyStudy(r);message('fileStatus','Estudo aberto. Confira os dados e as referências atualizadas.')}catch(e){message('fileStatus','Não foi possível abrir: '+e.message)}};
+$('jsonFile').onchange=async()=>{const file=$('jsonFile').files?.[0];if(!file)return;try{if(file.size>1000000)throw Error('Selecione um arquivo JSON de até 1 MB.');const text=(await file.text()).replace(/^\uFEFF/,'');if(!text.trim())throw Error('O arquivo está vazio. Salve novamente o estudo na versão atualizada do SAR.');let raw;try{raw=JSON.parse(text)}catch{throw Error('O arquivo está incompleto ou não contém um JSON válido. Salve novamente o estudo.');}const r=await api('importar_json',{arquivo:raw});searchVersion++;contextVersion++;criteriaVersion++;clearTimeout(searchTimer);clearTimeout(contextTimer);applyStudy(r);message('fileStatus','Estudo aberto. Confira os dados e as referências atualizadas.')}catch(e){message('fileStatus','Não foi possível abrir: '+e.message)}};
 async function start(){try{const r=await api('iniciar');risks=r.riscos;heads=r.chuveiros;r.ocupacoes.forEach(o=>option($('occupation'),o.codigo,o.codigo+' — '+o.descricao));['risk','criteriaRisk'].forEach(id=>{$(id).replaceChildren();option($(id),'','Selecione');risks.forEach(r=>option($(id),r.codigo,r.descricao))});heads.forEach(h=>option($('equipmentId'),h.id,[h.nome_equipamento,h.fabricante,h.modelo].filter(Boolean).join(' · ')));ready=true;message('startupMessage','Cadastros conectados. Referência de carga de incêndio: SP.');update();}catch(e){message('startupMessage',e.message+' Atualize a página para tentar novamente.');['save','saveCriteria','saveJson','openJson','continueOne'].forEach(id=>$(id).disabled=true)}}
 if(window.SAR_PAGINA_PERMISSAO)start();else window.addEventListener('sar:pagina-autorizada',start,{once:true});
 })();
