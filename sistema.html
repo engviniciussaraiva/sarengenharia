@@ -572,7 +572,7 @@ min-width:20px;
 
 
 /* SAR HOME V6 — banner aprovado, sem alterar navegação ou permissões */
-.sar-home-banner{width:100%;border-radius:10px;overflow:hidden;background:#002719;line-height:0}
+.sar-home-banner{width:100%;max-width:1200px;margin-inline:auto;border-radius:10px;overflow:hidden;background:#002719;line-height:0}
 .sar-home-banner img{display:block;width:100%;height:auto;object-fit:contain}
 /* SAR HOME V5 — estilos restritos à página inicial */
 .main.sar-home-mode{display:block;text-align:left;overflow-y:auto;background:#f1f8f3;}
@@ -1230,14 +1230,19 @@ function mostrarHome(){
     esconderSubabas();
     const area = document.getElementById('mainContent');
     area.classList.add('sar-home-mode');
-    const principais = new Set(SAR_MENU_COMPLETO.map(function(item){
-        return String(item.modulo_codigo || '').trim().toUpperCase();
-    }));
-    const master = String(SAR_CADASTRO_ATUAL?.tipo_usuario || '').toLowerCase() === 'master';
+    // A estrutura de menu é a referência de navegação. Ela inclui módulos,
+    // abas e subabas, mas apenas registros ativos e visíveis no menu.
+    const codigosNavegaveis = new Set();
+    SAR_MENU_COMPLETO.forEach(function(linha){
+        ['modulo_codigo','aba_codigo','subaba_codigo'].forEach(function(chave){
+            const codigo = String(linha[chave] || '').trim().toUpperCase();
+            if(codigo){ codigosNavegaveis.add(codigo); }
+        });
+    });
     const autorizados = SAR_HOME_MODULOS.filter(function(item){
         const codigo = String(item.codigo || '').trim().toUpperCase();
-        return !item.modulo_pai && principais.has(codigo) &&
-            podeVisualizar(codigo) && (codigo !== 'ADMINISTRACAO' || master);
+        return item.ativo === true && item.exibir_na_home === true &&
+            codigosNavegaveis.has(codigo) && podeVisualizar(codigo);
     }).sort(function(a,b){
         return Number(a.ordem_home || 0)-Number(b.ordem_home || 0) ||
             String(a.modulo || '').localeCompare(String(b.modulo || ''),'pt-BR');
@@ -1261,8 +1266,48 @@ function mostrarHome(){
         ${cards ? `<div class="sar-home-grid">${cards}</div>` : '<div class="sar-home-empty">Nenhum módulo habilitado para sua página inicial no momento.</div>'}
     </section>`;
     area.querySelectorAll('[data-sar-home-codigo]').forEach(function(botao){
-        botao.addEventListener('click',function(){ abrirModulo(botao.dataset.sarHomeCodigo); });
+        botao.addEventListener('click',function(){ sarAbrirCardHome(botao.dataset.sarHomeCodigo); });
     });
+}
+
+// Abre cards usando as rotinas existentes e a estrutura de menu autorizada.
+function sarAbrirCardHome(codigoInformado){
+    const codigo = String(codigoInformado || '').trim().toUpperCase();
+    if(!podeVisualizar(codigo)){
+        mostrarAcessoNegado(codigo);
+        return;
+    }
+    const linhaModulo = SAR_MENU_COMPLETO.find(function(item){
+        return String(item.modulo_codigo || '').trim().toUpperCase() === codigo;
+    });
+    if(linhaModulo){
+        abrirModulo(codigo);
+        return;
+    }
+    const linhaAba = SAR_MENU_COMPLETO.find(function(item){
+        return String(item.aba_codigo || '').trim().toUpperCase() === codigo;
+    });
+    if(linhaAba){
+        const pai = String(linhaAba.modulo_codigo || '').trim().toUpperCase();
+        if(!podeVisualizar(pai)){ mostrarAcessoNegado(pai); return; }
+        abrirModulo(pai);
+        abrirAba(pai,codigo,linhaAba.aba_nome,linhaAba.aba_rota || '',null);
+        return;
+    }
+    const linhaSubaba = SAR_MENU_COMPLETO.find(function(item){
+        return String(item.subaba_codigo || '').trim().toUpperCase() === codigo;
+    });
+    if(linhaSubaba){
+        const pai = String(linhaSubaba.modulo_codigo || '').trim().toUpperCase();
+        const aba = String(linhaSubaba.aba_codigo || '').trim().toUpperCase();
+        if(!podeVisualizar(pai) || !podeVisualizar(aba)){
+            mostrarAcessoNegado(codigo);
+            return;
+        }
+        abrirModulo(pai);
+        abrirAba(pai,aba,linhaSubaba.aba_nome,linhaSubaba.aba_rota || '',null);
+        abrirSubaba(codigo,linhaSubaba.subaba_rota || '',null);
+    }
 }
 
 function obterIconeModulo(icone){
