@@ -587,12 +587,16 @@ min-width:20px;
 .sar-home-heading{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:27px 0 16px;flex-wrap:wrap;}
 .sar-home-heading h2{font-size:23px;color:#073e2d;}
 .sar-home-heading p{font-size:12px;color:#5b786a;}
-.sar-home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:16px;}
-.sar-home-card{display:flex;flex-direction:column;align-items:flex-start;gap:12px;min-height:160px;padding:20px;border:1px solid #d2e5d9;border-left:4px solid #1ca267;background:#fff;box-shadow:0 2px 12px rgba(7,53,33,.035);font-family:inherit;text-align:left;color:#173d2e;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s;}
-.sar-home-card:hover,.sar-home-card:focus-visible{transform:translateY(-2px);border-color:#80db15;box-shadow:0 6px 20px rgba(7,53,33,.12);outline:none;}
-.sar-home-card-icon{display:flex;align-items:center;justify-content:center;min-width:43px;height:43px;padding:5px;background:#eaf6ee;font-size:25px;}
-.sar-home-card-title{font-size:17px;font-weight:750;color:#073e2d;overflow-wrap:anywhere;}
-.sar-home-card-desc{font-size:13px;line-height:1.45;color:#587166;overflow-wrap:anywhere;}
+/* V9: cards escuros inspirados no painel SAR aprovado */
+.sar-home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;max-width:1200px;margin-inline:auto;}
+.sar-home-card{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:170px;padding:18px 12px 22px;border:1px solid #397d50;border-radius:13px;background:linear-gradient(155deg,#12492e 0%,#06321f 48%,#002318 100%);box-shadow:inset 0 1px 1px #4c9461,0 3px 9px rgba(0,34,19,.18);font-family:inherit;text-align:center;color:#fff;cursor:pointer;overflow:hidden;transition:transform .18s,box-shadow .18s,border-color .18s;}
+.sar-home-card::after{content:'';position:absolute;bottom:-3px;left:8%;right:8%;height:8px;border-radius:50%;background:#9dff00;filter:blur(7px);opacity:.9;z-index:-1;pointer-events:none;}
+.sar-home-card:hover,.sar-home-card:focus-visible{transform:translateY(-3px);border-color:#a4f743;box-shadow:inset 0 1px 1px #63b47a,0 7px 20px rgba(0,47,25,.25),0 0 10px rgba(152,255,0,.15);outline:2px solid transparent;}
+.sar-home-card:focus-visible{outline:2px solid #b6ff39;outline-offset:3px;}
+.sar-home-card-icon{display:flex;align-items:center;justify-content:center;width:52px;height:52px;flex:0 0 52px;color:#a6ff00;}
+.sar-home-card-icon svg{display:block;width:48px;height:48px;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;fill:none;filter:drop-shadow(0 0 3px rgba(162,255,0,.24));}
+.sar-home-card-title{font-size:17px;font-weight:750;color:#fff;line-height:1.15;overflow-wrap:anywhere;}
+.sar-home-card-desc{font-size:13px;line-height:1.35;color:#f1f8f2;overflow-wrap:anywhere;max-width:185px;}
 .sar-home-empty{background:#fff;border:1px dashed #b7d7c2;padding:24px;color:#537464;font-size:14px;}
 @media(max-width:700px){.sar-home{padding:18px 14px 28px}.sar-home-hero{padding:20px}.sar-home-grid{grid-template-columns:repeat(auto-fill,minmax(185px,1fr));}}
 
@@ -1225,6 +1229,23 @@ async function carregarModulosHome(){
     SAR_HOME_MODULOS = data || [];
 }
 
+function sarIconeVetorialHome(item){
+    const texto = String([item.modulo,item.codigo,item.descricao_card].join(' ')).toLowerCase();
+    const caminhos = [
+        [/inc[eê]ndio|ppci|extintor|fogo/, '<path d="M12 22c4.5 0 8-3.1 8-7.6 0-3.3-2.2-5.9-4-7.4.1 3-1.3 4-2.3 4.3C14.3 7.7 11.6 4 9 2c.5 3.8-1.1 5.9-3.2 8.4C4.5 12 4 13.5 4 15.2 4 19.2 7.5 22 12 22Z"/><path d="M12 22c2.2 0 4-1.5 4-3.8 0-1.5-.8-2.6-2-3.6-.2 1.8-1 2.3-1.5 2.4-.1-1.6-1.1-3.1-2.5-4.2 0 2-2 3.5-2 5.5 0 2.1 1.7 3.7 4 3.7Z"/>'],
+        [/hidr[aá]ul|sprinkler|bomba|reservat/, '<path d="M12 2C9 7 5 11 5 15a7 7 0 0 0 14 0c0-4-4-8-7-13Z"/><path d="M9 17a3 3 0 0 0 3 3"/>'],
+        [/convers|vaz[aã]o|press[aã]o|unidade/, '<path d="M3 7h18m-5-4 5 4-5 4M21 17H3m5-4-5 4 5 4"/>'],
+        [/biblioteca|livro|norma/, '<path d="m4 7 8-4 8 4-8 4-8-4Zm0 5 8 4 8-4M4 17l8 4 8-4"/>'],
+        [/memorial|document|relat[oó]rio/, '<path d="M6 2h8l5 5v15H6V2Z"/><path d="M14 2v6h5M9 13h7M9 17h7"/>'],
+        [/arquitet|escada|planta/, '<path d="M3 21 21 3M7 21H3v-4M21 7V3h-4M9 15l2 2M12 12l2 2M15 9l2 2"/>'],
+        [/impress[aã]o|3d|modelo/, '<path d="m12 2 9 5-9 5-9-5 9-5Zm-9 5v10l9 5 9-5V7M12 12v10"/>'],
+        [/dxf|cad|desenho/, '<path d="M5 2h9l5 5v15H5V2Z"/><path d="M14 2v5h5M7 15h10M8 12l3 6m0-6-3 6m5-6 3 6m0-6-3 6"/>'],
+        [/classifica|game|jogo/, '<rect x="3" y="7" width="18" height="12" rx="5"/><path d="M8 11v5m-2.5-2.5h5M16 12h.01M18 15h.01"/>']
+    ];
+    const desenho = (caminhos.find(([re])=>re.test(texto))||[null,'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/>'])[1];
+    return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">'+desenho+'</svg>';
+}
+
 function mostrarHome(){
     document.getElementById('tabs').style.display = 'none';
     esconderSubabas();
@@ -1250,7 +1271,7 @@ function mostrarHome(){
     const cards = autorizados.map(function(item){
         const nome = sarEscaparHtml(item.modulo || item.codigo);
         const descricao = sarEscaparHtml(item.descricao_card || item.descricao || 'Acessar módulo do SAR');
-        const icone = sarEscaparHtml(obterIconeModulo(item.icone));
+        const icone = sarIconeVetorialHome(item);
         const codigo = sarEscaparHtml(String(item.codigo || '').trim().toUpperCase());
         return `<button type="button" class="sar-home-card" data-sar-home-codigo="${codigo}">
             <span class="sar-home-card-icon" aria-hidden="true">${icone}</span>
