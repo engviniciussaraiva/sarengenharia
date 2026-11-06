@@ -571,6 +571,9 @@ min-width:20px;
 .sidebar .sidebar-footer-version{color:#b6cabe;}
 
 
+/* SAR HOME V6 — banner aprovado, sem alterar navegação ou permissões */
+.sar-home-banner{width:100%;border-radius:10px;overflow:hidden;background:#002719;line-height:0}
+.sar-home-banner img{display:block;width:100%;height:auto;object-fit:contain}
 /* SAR HOME V5 — estilos restritos à página inicial */
 .main.sar-home-mode{display:block;text-align:left;overflow-y:auto;background:#f1f8f3;}
 .sar-home{min-height:100%;padding:28px clamp(18px,3vw,44px) 44px;color:#123e30;}
@@ -1251,12 +1254,8 @@ function mostrarHome(){
         </button>`;
     }).join('');
     area.innerHTML = `<section class="sar-home">
-        <div class="sar-home-hero">
-            <div class="sar-home-eyebrow">Sistema Avançado de Resposta</div>
-            <h1>SAR Engenharia</h1>
-            <h2>Onde a norma encontra a resposta.</h2>
-            <p>Plataforma integrada para projetos, cálculos, memoriais e gestão em engenharia, com recursos técnicos organizados em um único ambiente.</p>
-            <div class="sar-home-features"><span>Conformidade normativa</span><span>Cálculos automatizados</span><span>Biblioteca técnica integrada</span></div>
+        <div class="sar-home-banner">
+            <img src="sar-banner-boas-vindas.png" alt="Seja bem-vindo(a)! SAR Engenharia — Onde a norma encontra a resposta. Plataforma de engenharia e segurança contra incêndio." loading="eager">
         </div>
         <div class="sar-home-heading"><h2>Módulos do Sistema</h2><p>Disponíveis conforme suas permissões</p></div>
         ${cards ? `<div class="sar-home-grid">${cards}</div>` : '<div class="sar-home-empty">Nenhum módulo habilitado para sua página inicial no momento.</div>'}
