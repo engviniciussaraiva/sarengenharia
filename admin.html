@@ -2603,6 +2603,19 @@
 
         <label class="switch-row">
           <span>
+            <strong>Exibir na página inicial</strong>
+            <small>Mostra este módulo como card na Home, respeitando as permissões do usuário.</small>
+          </span>
+          <input id="moduloExibirHome" type="checkbox">
+        </label>
+
+        <div class="campo">
+          <label for="moduloOrdemHome">Ordem na página inicial</label>
+          <input id="moduloOrdemHome" type="number" step="1" value="0">
+        </div>
+
+        <label class="switch-row">
+          <span>
             <strong>Exibir como card</strong>
             <small>Mostra este item na Central de módulos do módulo-pai.</small>
           </span>
@@ -2895,6 +2908,8 @@
       moduloDestaqueSite: document.getElementById("moduloDestaqueSite"),
       moduloEmBreve: document.getElementById("moduloEmBreve"),
       moduloExibirCatalogo: document.getElementById("moduloExibirCatalogo"),
+      moduloExibirHome: document.getElementById("moduloExibirHome"),
+      moduloOrdemHome: document.getElementById("moduloOrdemHome"),
       moduloComercializavel: document.getElementById("moduloComercializavel"),
       estadoModuloEdicao: document.getElementById("estadoModuloEdicao"),
       btnFecharDrawerModulo: document.getElementById("btnFecharDrawerModulo"),
@@ -4076,6 +4091,8 @@
       elementos.moduloDestaqueSite.checked = false;
       elementos.moduloEmBreve.checked = false;
       elementos.moduloExibirCatalogo.checked = false;
+      elementos.moduloExibirHome.checked = false;
+      elementos.moduloOrdemHome.value = "0";
       elementos.moduloComercializavel.checked = false;
     }
 
@@ -4115,6 +4132,8 @@
         elementos.moduloDestaqueSite.checked = item.destaque_site === true;
         elementos.moduloEmBreve.checked = item.em_breve === true;
         elementos.moduloExibirCatalogo.checked = item.exibir_catalogo === true;
+        elementos.moduloExibirHome.checked = item.exibir_na_home === true;
+        elementos.moduloOrdemHome.value = Number(item.ordem_home || 0);
         elementos.moduloComercializavel.checked = item.comercializavel === true;
       }else{
         elementos.drawerModuloTitulo.textContent = "Novo módulo";
@@ -4243,9 +4262,39 @@
           );
         }
 
+        // A configuração da Home é independente das funções antigas de cadastro.
+        // Para módulos novos, buscamos o UUID pelo código após o cadastro.
+        let idParaHome = moduloEdicaoId;
+        if(!idParaHome){
+          const { data: listaAtualizada, error: erroLista } = await supabase.rpc(
+            "sar_admin_listar_modulos"
+          );
+          if(erroLista) throw new Error(
+            "Módulo cadastrado, mas não foi possível localizar o ID para configurar a Home: " + erroLista.message
+          );
+          idParaHome = (listaAtualizada || []).find(
+            (item) => item.codigo === codigo
+          )?.id;
+        }
+        if(!idParaHome) throw new Error(
+          "Módulo cadastrado, mas não foi possível identificar o ID para configurar a Home."
+        );
+
+        const { error: erroHome } = await supabase.rpc(
+          "sar_admin_configurar_home",
+          {
+            p_id:idParaHome,
+            p_exibir_na_home:elementos.moduloExibirHome.checked,
+            p_ordem_home:Number(elementos.moduloOrdemHome.value || 0)
+          }
+        );
+        if(erroHome) throw new Error(
+          "Módulo salvo, mas a configuração da Home não foi gravada: " + erroHome.message
+        );
+
         definirEstado(
           elementos.estadoModuloEdicao,
-          "Módulo salvo com sucesso."
+          "Módulo e configuração da Home salvos com sucesso."
         );
 
         await carregarModulos();
