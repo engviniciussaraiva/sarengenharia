@@ -570,6 +570,29 @@ min-width:20px;
 .sidebar .sidebar-footer-brand strong{color:#f4fff8;}
 .sidebar .sidebar-footer-version{color:#b6cabe;}
 
+
+/* SAR HOME V5 — estilos restritos à página inicial */
+.main.sar-home-mode{display:block;text-align:left;overflow-y:auto;background:#f1f8f3;}
+.sar-home{min-height:100%;padding:28px clamp(18px,3vw,44px) 44px;color:#123e30;}
+.sar-home-hero{padding:28px 30px;background:linear-gradient(120deg,#e7f5eb,#f7fcf8);border:1px solid #d1e7d8;border-left:4px solid #159c62;}
+.sar-home-eyebrow{color:#078455;font-weight:750;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+.sar-home-hero h1{font-size:clamp(26px,3vw,38px);line-height:1.15;color:#073e2d;margin:0 0 9px;}
+.sar-home-hero h2{font-size:clamp(17px,2vw,24px);color:#16824b;font-weight:650;margin:0 0 12px;}
+.sar-home-hero p{font-size:15px;line-height:1.55;color:#47675a;max-width:740px;}
+.sar-home-features{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:20px;color:#25654b;font-size:13px;font-weight:600;}
+.sar-home-features span::before{content:'✓';color:#079b5e;font-weight:800;margin-right:7px;}
+.sar-home-heading{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:27px 0 16px;flex-wrap:wrap;}
+.sar-home-heading h2{font-size:23px;color:#073e2d;}
+.sar-home-heading p{font-size:12px;color:#5b786a;}
+.sar-home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:16px;}
+.sar-home-card{display:flex;flex-direction:column;align-items:flex-start;gap:12px;min-height:160px;padding:20px;border:1px solid #d2e5d9;border-left:4px solid #1ca267;background:#fff;box-shadow:0 2px 12px rgba(7,53,33,.035);font-family:inherit;text-align:left;color:#173d2e;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s;}
+.sar-home-card:hover,.sar-home-card:focus-visible{transform:translateY(-2px);border-color:#80db15;box-shadow:0 6px 20px rgba(7,53,33,.12);outline:none;}
+.sar-home-card-icon{display:flex;align-items:center;justify-content:center;min-width:43px;height:43px;padding:5px;background:#eaf6ee;font-size:25px;}
+.sar-home-card-title{font-size:17px;font-weight:750;color:#073e2d;overflow-wrap:anywhere;}
+.sar-home-card-desc{font-size:13px;line-height:1.45;color:#587166;overflow-wrap:anywhere;}
+.sar-home-empty{background:#fff;border:1px dashed #b7d7c2;padding:24px;color:#537464;font-size:14px;}
+@media(max-width:700px){.sar-home{padding:18px 14px 28px}.sar-home-hero{padding:20px}.sar-home-grid{grid-template-columns:repeat(auto-fill,minmax(185px,1fr));}}
+
 </style>
 </head>
 
@@ -659,33 +682,7 @@ id="menuRodape"
 
 <div class="main" id="mainContent"> 
 
-    <div class="welcome">
-
-        <h1>SAR Engenharia</h1>
-
-        <p>Sistema Avançado de Resposta</p>
-
-        <p><b>VALIDAR VERSÃO IMPRESSAO FINAL / TERMINAR ESCADAS / TIRAR BOTÃO DO CALCULO DE BOMBAS</b></p>
-
-        <br>
-
-        <p><b>Módulos Ativos</b></p>
-
-        <p>✓ PPCI</p>
-
-        <p>✓ Impressão 3D</p>
-
-        <br>
-
-        <p><b>Módulos em Desenvolvimento</b></p>
-
-        <p>• Hidráulica</p>
-
-        <p>• Conversões</p>
-
-        <p>• Escadas</p>
-
-    </div>
+    <div class="sar-home-empty">Carregando página inicial...</div>
 
 </div>
 
@@ -1206,44 +1203,67 @@ function abrirCalculadoraImpressao(){
 }
 
 
+let SAR_HOME_MODULOS = [];
+
+function sarEscaparHtml(valor){
+    return String(valor ?? '').replace(/[&<>"']/g, function(caractere){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[caractere];
+    });
+}
+
+async function carregarModulosHome(){
+    const supabase = window.SARGuard?.supabase;
+    if(!supabase){ throw new Error('Conexão segura indisponível.'); }
+    const {data,error} = await supabase.from('sar_modulos')
+        .select('id,codigo,modulo,descricao,descricao_card,icone,ativo,modulo_pai,exibir_na_home,ordem_home')
+        .eq('ativo',true).eq('exibir_na_home',true)
+        .order('ordem_home',{ascending:true});
+    if(error){ throw error; }
+    SAR_HOME_MODULOS = data || [];
+}
+
 function mostrarHome(){
-
-document.getElementById("tabs").style.display = "none";
-
-esconderSubabas();     
-
-document.getElementById("mainContent").innerHTML = `
-
-        <div class="welcome">
-
+    document.getElementById('tabs').style.display = 'none';
+    esconderSubabas();
+    const area = document.getElementById('mainContent');
+    area.classList.add('sar-home-mode');
+    const principais = new Set(SAR_MENU_COMPLETO.map(function(item){
+        return String(item.modulo_codigo || '').trim().toUpperCase();
+    }));
+    const master = String(SAR_CADASTRO_ATUAL?.tipo_usuario || '').toLowerCase() === 'master';
+    const autorizados = SAR_HOME_MODULOS.filter(function(item){
+        const codigo = String(item.codigo || '').trim().toUpperCase();
+        return !item.modulo_pai && principais.has(codigo) &&
+            podeVisualizar(codigo) && (codigo !== 'ADMINISTRACAO' || master);
+    }).sort(function(a,b){
+        return Number(a.ordem_home || 0)-Number(b.ordem_home || 0) ||
+            String(a.modulo || '').localeCompare(String(b.modulo || ''),'pt-BR');
+    });
+    const cards = autorizados.map(function(item){
+        const nome = sarEscaparHtml(item.modulo || item.codigo);
+        const descricao = sarEscaparHtml(item.descricao_card || item.descricao || 'Acessar módulo do SAR');
+        const icone = sarEscaparHtml(obterIconeModulo(item.icone));
+        const codigo = sarEscaparHtml(String(item.codigo || '').trim().toUpperCase());
+        return `<button type="button" class="sar-home-card" data-sar-home-codigo="${codigo}">
+            <span class="sar-home-card-icon" aria-hidden="true">${icone}</span>
+            <span class="sar-home-card-title">${nome}</span>
+            <span class="sar-home-card-desc">${descricao}</span>
+        </button>`;
+    }).join('');
+    area.innerHTML = `<section class="sar-home">
+        <div class="sar-home-hero">
+            <div class="sar-home-eyebrow">Sistema Avançado de Resposta</div>
             <h1>SAR Engenharia</h1>
-
-            <p>Sistema Avançado de Resposta</p>
-
-            <p><b>Versão Alpha</b></p>
-
-            <br>
-
-            <p><b>Módulos Ativos</b></p>
-
-            <p>✓ PPCI</p>
-
-            <p>✓ Impressão 3D</p>
-
-            <br>
-
-            <p><b>Módulos em Desenvolvimento</b></p>
-
-            <p>• Hidráulica</p>
-
-            <p>• Conversões</p>
-
-            <p>• Escadas</p>
-
+            <h2>Onde a norma encontra a resposta.</h2>
+            <p>Plataforma integrada para projetos, cálculos, memoriais e gestão em engenharia, com recursos técnicos organizados em um único ambiente.</p>
+            <div class="sar-home-features"><span>Conformidade normativa</span><span>Cálculos automatizados</span><span>Biblioteca técnica integrada</span></div>
         </div>
-
-    `;
-
+        <div class="sar-home-heading"><h2>Módulos do Sistema</h2><p>Disponíveis conforme suas permissões</p></div>
+        ${cards ? `<div class="sar-home-grid">${cards}</div>` : '<div class="sar-home-empty">Nenhum módulo habilitado para sua página inicial no momento.</div>'}
+    </section>`;
+    area.querySelectorAll('[data-sar-home-codigo]').forEach(function(botao){
+        botao.addEventListener('click',function(){ abrirModulo(botao.dataset.sarHomeCodigo); });
+    });
 }
 
 function obterIconeModulo(icone){
@@ -1375,6 +1395,7 @@ if(ehAdministracao && !ehMaster){
 
 
 function mostrarAcessoNegado(recurso){
+    document.getElementById("mainContent").classList.remove("sar-home-mode");
 
     const nomeRecurso =
         String(recurso || "este recurso")
@@ -1401,6 +1422,7 @@ function mostrarAcessoNegado(recurso){
 
 
 function abrirModulo(modulo){
+    document.getElementById("mainContent").classList.remove("sar-home-mode");
 
     const codigoModulo =
         String(modulo || "")
@@ -1490,6 +1512,7 @@ function abrirModulo(modulo){
 
 
 function abrirArquivo(arquivo, codigoRecurso = ""){
+    document.getElementById("mainContent").classList.remove("sar-home-mode");
 
     const codigoNormalizado =
         String(codigoRecurso || "")
@@ -2274,6 +2297,14 @@ window.addEventListener(
             await carregarMinhasPermissoes();
 
             carregarModulos();
+
+            try{
+                await carregarModulosHome();
+            }catch(erroHome){
+                SAR_HOME_MODULOS = [];
+                console.error('Não foi possível carregar os cards da Home:', erroHome);
+            }
+            mostrarHome();
 
             await carregarMenuRodape();
 
