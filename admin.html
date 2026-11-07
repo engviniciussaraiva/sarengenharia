@@ -4424,12 +4424,22 @@
       lista.innerHTML = itens.length ? itens.map(m=>`<article class="cms-item" style="align-items:center">
         <div class="cms-item-principal"><strong>${escaparHtml(m.modulo||m.nome||m.codigo||'Módulo')}</strong>
         <p>${escaparHtml(m.codigo||'')}</p></div>
-        <div class="cms-item-acoes"><label style="display:flex;align-items:center;gap:10px;font-weight:600">
+        <div class="cms-item-acoes" style="display:flex;flex-wrap:wrap;gap:9px;align-items:center"><label style="display:flex;align-items:center;gap:10px;font-weight:600">
           Exibir no site
           <select data-cms-site-id="${escaparHtml(String(m.id))}" aria-label="Exibir ${escaparHtml(m.modulo||m.codigo||'módulo')} no site">
             <option value="false" ${m.exibir_site_publico!==true?'selected':''}>Não</option>
             <option value="true" ${m.exibir_site_publico===true?'selected':''}>Sim</option>
-          </select></label></div></article>`).join('') : '<p>Nenhum módulo ativo encontrado.</p>';
+          </select></label>
+          <label>Destino <select data-cms-destino-tipo="${escaparHtml(String(m.id))}">
+            <option value="nenhum" ${!m.site_destino_tipo||m.site_destino_tipo==='nenhum'?'selected':''}>Sem link</option>
+            <option value="pagina" ${m.site_destino_tipo==='pagina'?'selected':''}>Página SAR</option>
+            <option value="video" ${m.site_destino_tipo==='video'?'selected':''}>Vídeo</option>
+            <option value="externo" ${m.site_destino_tipo==='externo'?'selected':''}>Link externo</option>
+          </select></label>
+          <label>Endereço <input type="url" data-cms-destino-url="${escaparHtml(String(m.id))}" value="${escaparHtml(m.site_destino_url||'')}" placeholder="https://..." style="min-width:220px;max-width:300px"></label>
+          <label><input type="checkbox" data-cms-nova-aba="${escaparHtml(String(m.id))}" ${m.site_abrir_nova_aba!==false?'checked':''}> Nova aba</label>
+          <button type="button" class="btn btn-secundario" data-cms-salvar-destino="${escaparHtml(String(m.id))}">Salvar link</button>
+          </div></article>`).join('') : '<p>Nenhum módulo ativo encontrado.</p>';
     }
     async function alterarExibicaoModuloSiteCms(select){
       const id=select.dataset.cmsSiteId;
@@ -4451,6 +4461,41 @@
         alert('Não foi possível salvar a divulgação do módulo: '+(e instanceof Error?e.message:String(e)));
       }finally{select.disabled=false;}
     }
+    async function salvarDestinoModuloSiteCms(botao){
+      const id=botao.dataset.cmsSalvarDestino;
+      const modulo=cmsModulosSiteCache.find(m=>String(m.id)===id);
+      if(!modulo)return;
+      const lista=document.getElementById('cmsListaModulosSite');
+      const tipo=lista.querySelector(`[data-cms-destino-tipo="${id}"]`).value;
+      const url=lista.querySelector(`[data-cms-destino-url="${id}"]`).value.trim();
+      const novaAba=lista.querySelector(`[data-cms-nova-aba="${id}"]`).checked;
+      if(tipo!=='nenhum'){
+        try{
+          const endereco=new URL(url,location.origin);
+          if(!['https:','http:'].includes(endereco.protocol))throw new Error();
+          if(tipo==='pagina' && endereco.origin!==location.origin)throw new Error();
+          if(tipo==='video' && !['youtube.com','www.youtube.com','youtu.be','www.youtu.be'].includes(endereco.hostname.toLowerCase()))throw new Error();
+          if(!url)throw new Error();
+        }catch(_){alert('Endereço inválido para o tipo selecionado. Para Página SAR, utilize endereço do próprio domínio; para Vídeo, YouTube.');return;}
+      }
+      botao.disabled=true;
+      try{
+        if(!await validarSessao())throw new Error('Sessão inválida.');
+        const {error}=await supabase.rpc('sar_admin_cms_configurar_destino_modulo',{
+          p_modulo_id:id,p_tipo:tipo,p_url:tipo==='nenhum'?null:url,p_nova_aba:novaAba
+        });
+        if(error)throw new Error(error.message);
+        modulo.site_destino_tipo=tipo;
+        modulo.site_destino_url=tipo==='nenhum'?null:url;
+        modulo.site_abrir_nova_aba=novaAba;
+        alert('Destino comercial salvo.');
+      }catch(e){alert('Falha ao salvar destino: '+(e instanceof Error?e.message:String(e)));}
+      finally{botao.disabled=false;}
+    }
+    document.getElementById('cmsListaModulosSite').addEventListener('click',e=>{
+      const botao=e.target.closest('[data-cms-salvar-destino]');
+      if(botao)salvarDestinoModuloSiteCms(botao);
+    });
     document.getElementById('cmsFiltroModulosSite').addEventListener('input',renderizarModulosSiteCms);
     document.getElementById('cmsRecarregarModulosSite').addEventListener('click',carregarModulosSiteCms);
     document.getElementById('cmsListaModulosSite').addEventListener('change',e=>{
