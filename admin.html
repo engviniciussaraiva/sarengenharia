@@ -1519,6 +1519,15 @@
     }
 
   </style>
+<style>
+.cms-apresentacao-dialog{border:1px solid #397d50;border-radius:12px;padding:24px;width:min(760px,calc(100vw - 32px));max-height:90vh;overflow:auto;color:#173a2a;background:#f5faf6;box-shadow:0 20px 70px #0008}
+.cms-apresentacao-dialog::backdrop{background:#001c13bb}
+.cms-apresentacao-dialog form{display:grid;gap:12px}
+.cms-apresentacao-dialog label{display:grid;gap:5px;font-weight:600}
+.cms-apresentacao-dialog input:not([type=checkbox]),.cms-apresentacao-dialog textarea{width:100%;box-sizing:border-box;padding:10px;border:1px solid #b6d0be;border-radius:5px;font:inherit}
+.cms-apresentacao-dialog input[type=checkbox]{margin-right:8px}
+.cms-apresentacao-acoes{display:flex;justify-content:flex-end;gap:12px;margin-top:10px}
+</style>
 </head>
 
 <body>
@@ -2042,6 +2051,26 @@
           </div>
           <div id="cmsEstadoModulosSite" class="estado visivel">Abra esta aba para carregar os módulos.</div>
           <div id="cmsListaModulosSite" class="cms-lista"></div>
+          <dialog id="cmsApresentacaoDialog" class="cms-apresentacao-dialog" aria-labelledby="cmsApresentacaoTitulo">
+            <form id="cmsApresentacaoForm" method="dialog">
+              <h2 id="cmsApresentacaoTitulo">Apresentação comercial</h2>
+              <p>Conteúdo público do módulo. Um item por linha nos campos de lista.</p>
+              <input type="hidden" id="cmsApresentacaoModuloId">
+              <label>Título <input id="cmsApresentacaoNome" maxlength="180" required></label>
+              <label>Subtítulo <input id="cmsApresentacaoSubtitulo" maxlength="250"></label>
+              <label>Descrição <textarea id="cmsApresentacaoDescricao" rows="4"></textarea></label>
+              <label>Funcionalidades (uma por linha) <textarea id="cmsApresentacaoFuncoes" rows="4"></textarea></label>
+              <label>Normas e referências (uma por linha) <textarea id="cmsApresentacaoNormas" rows="3"></textarea></label>
+              <label>Benefícios (um por linha) <textarea id="cmsApresentacaoBeneficios" rows="3"></textarea></label>
+              <label>Imagem (URL HTTPS) <input id="cmsApresentacaoImagem" type="url" placeholder="https://..."></label>
+              <label>Vídeo YouTube (URL HTTPS) <input id="cmsApresentacaoVideo" type="url" placeholder="https://www.youtube.com/watch?v=..."></label>
+              <label><input id="cmsApresentacaoPublicado" type="checkbox"> Publicar apresentação</label>
+              <div class="cms-apresentacao-acoes">
+                <button type="button" class="btn btn-secundario" id="cmsApresentacaoFechar">Cancelar</button>
+                <button type="button" class="btn" id="cmsApresentacaoSalvar">Salvar apresentação</button>
+              </div>
+            </form>
+          </dialog>
         </section>
 
         <section class="cms-painel" data-cms-painel="midias">
@@ -4439,6 +4468,7 @@
           <label>Endereço <input type="url" data-cms-destino-url="${escaparHtml(String(m.id))}" value="${escaparHtml(m.site_destino_url||'')}" placeholder="https://..." style="min-width:220px;max-width:300px"></label>
           <label><input type="checkbox" data-cms-nova-aba="${escaparHtml(String(m.id))}" ${m.site_abrir_nova_aba!==false?'checked':''}> Nova aba</label>
           <button type="button" class="btn btn-secundario" data-cms-salvar-destino="${escaparHtml(String(m.id))}">Salvar link</button>
+          <button type="button" class="btn btn-secundario" data-cms-editar-apresentacao="${escaparHtml(String(m.id))}">Editar apresentação</button>
           </div></article>`).join('') : '<p>Nenhum módulo ativo encontrado.</p>';
     }
     async function alterarExibicaoModuloSiteCms(select){
@@ -4492,9 +4522,56 @@
       }catch(e){alert('Falha ao salvar destino: '+(e instanceof Error?e.message:String(e)));}
       finally{botao.disabled=false;}
     }
+    // SAR CMS V2 Etapa 4: edição da página pública de apresentação.
+    const cmsDialog=document.getElementById('cmsApresentacaoDialog');
+    const cmsCampo=(id)=>document.getElementById('cmsApresentacao'+id);
+    async function editarApresentacaoModulo(id){
+      const modulo=cmsModulosSiteCache.find(m=>String(m.id)===String(id));
+      if(!modulo)return;
+      if(!await validarSessao()){alert('Sessão inválida.');return;}
+      const {data,error}=await supabase.rpc('sar_admin_cms_obter_apresentacao',{p_modulo_id:id});
+      if(error){alert('Não foi possível consultar a apresentação: '+error.message);return;}
+      const r=Array.isArray(data)?(data[0]||{}):(data||{});
+      cmsCampo('ModuloId').value=id;
+      cmsCampo('Nome').value=r.titulo||modulo.modulo||modulo.nome||modulo.codigo||'';
+      for(const [campo,chave] of [['Subtitulo','subtitulo'],['Descricao','descricao'],['Funcoes','funcionalidades'],['Normas','normas'],['Beneficios','beneficios'],['Imagem','imagem_url'],['Video','video_url']]){
+        const valor=r[chave];cmsCampo(campo).value=Array.isArray(valor)?valor.join('\n'):(valor||'');
+      }
+      cmsCampo('Publicado').checked=r.publicado===true;
+      cmsDialog.showModal();
+    }
+    document.getElementById('cmsApresentacaoFechar').addEventListener('click',()=>cmsDialog.close());
+    document.getElementById('cmsApresentacaoSalvar').addEventListener('click',async()=>{
+      const botao=document.getElementById('cmsApresentacaoSalvar');
+      const id=cmsCampo('ModuloId').value;
+      const listas=['Funcoes','Normas','Beneficios'].map(c=>cmsCampo(c).value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean));
+      const imagem=cmsCampo('Imagem').value.trim(),video=cmsCampo('Video').value.trim();
+      for(const u of [imagem,video]){if(u){try{if(new URL(u).protocol!=='https:')throw Error();}catch(_){alert('Utilize URLs HTTPS válidas.');return;}}}
+      if(video){try{if(!['youtube.com','www.youtube.com','youtu.be','www.youtu.be'].includes(new URL(video).hostname.toLowerCase()))throw Error();}catch(_){alert('Informe um vídeo do YouTube.');return;}}
+      if(!cmsCampo('Nome').value.trim()){alert('Informe o título.');return;}
+      botao.disabled=true;
+      try{
+        if(!await validarSessao())throw new Error('Sessão inválida.');
+        const {error}=await supabase.rpc('sar_admin_cms_salvar_apresentacao',{
+          p_modulo_id:id,p_titulo:cmsCampo('Nome').value.trim(),p_subtitulo:cmsCampo('Subtitulo').value.trim(),
+          p_descricao:cmsCampo('Descricao').value.trim(),p_funcionalidades:listas[0],p_normas:listas[1],
+          p_beneficios:listas[2],p_imagem_url:imagem||null,p_video_url:video||null,p_publicado:cmsCampo('Publicado').checked
+        });
+        if(error)throw new Error(error.message);
+        cmsDialog.close();
+        const url=new URL('/modulo.html',location.origin);url.searchParams.set('id',id);
+        const campoTipo=document.querySelector(`[data-cms-destino-tipo="${id}"]`);
+        const campoUrl=document.querySelector(`[data-cms-destino-url="${id}"]`);
+        if(campoTipo&&campoUrl){campoTipo.value='pagina';campoUrl.value=url.href;}
+        alert('Apresentação salva. O destino Página SAR foi preenchido; clique em "Salvar link" para ativar o redirecionamento do card.');
+      }catch(e){alert('Falha ao salvar apresentação: '+(e instanceof Error?e.message:String(e)));}
+      finally{botao.disabled=false;}
+    });
     document.getElementById('cmsListaModulosSite').addEventListener('click',e=>{
       const botao=e.target.closest('[data-cms-salvar-destino]');
       if(botao)salvarDestinoModuloSiteCms(botao);
+      const editar=e.target.closest('[data-cms-editar-apresentacao]');
+      if(editar)editarApresentacaoModulo(editar.dataset.cmsEditarApresentacao);
     });
     document.getElementById('cmsFiltroModulosSite').addEventListener('input',renderizarModulosSiteCms);
     document.getElementById('cmsRecarregarModulosSite').addEventListener('click',carregarModulosSiteCms);

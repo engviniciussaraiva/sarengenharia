@@ -995,3 +995,6 @@ body{background:linear-gradient(180deg,#001c13 0%,#002b1d 58%,#001b13 100%);}
 .cms-module-link{display:flex;flex-direction:column;text-decoration:none;color:inherit;cursor:pointer;}
 .cms-module-link:focus-visible{outline:3px solid #b8ff42;outline-offset:4px;}
 .cms-module-action{display:block;margin-top:auto;padding-top:14px;font-size:12px;font-weight:700;color:#b8ff42;}
+
+/* SAR CMS V2 Etapa 4 — barra superior alinhada ao verde institucional do sistema */
+header#cabecalhoSite{background:linear-gradient(180deg,#001c13 0%,#002b1d 58%,#001b13 100%);backdrop-filter:none;}
