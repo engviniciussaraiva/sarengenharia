@@ -15,7 +15,19 @@ function linkHtml(reg,classe="btn") {if(!reg||!txt(reg.botao_link))return "";ret
 async function pagina(){const {data,error}=await supabase.from("sar_site_paginas").select("*").eq("slug",slug).eq("ativo",true).maybeSingle();if(error)throw error;return data;}
 async function conteudos(pid){const {data,error}=await supabase.from("sar_site_conteudo").select("*").eq("pagina_id",pid).eq("ativo",true).order("ordem");if(error)throw error;return data||[];}
 async function menu(){const {data,error}=await supabase.from("sar_site_menu").select("*").eq("ativo",true).order("ordem");if(error)throw error;return data||[];}
-async function modulos(){const {data,error}=await supabase.from("sar_modulos").select("*").eq("ativo",true).eq("exibir_site_publico",true).order("ordem_menu");if(error)return[];return data||[];}
+async function modulos(){
+  // A apresentação comercial é opcional: nunca filtrar por sua existência.
+  const consulta=()=>supabase.from("sar_modulos").select("*").eq("ativo",true).eq("exibir_site_publico",true).order("ordem_menu");
+  const {data,error}=await consulta();
+  if(error){
+    console.error("SAR CMS: falha ao consultar módulos públicos",error);
+    throw new Error("Não foi possível consultar os módulos públicos: "+(error.message||"erro desconhecido"));
+  }
+  if(!data?.length){
+    console.warn("SAR CMS: consulta de módulos públicos retornou zero registros. Verifique permissões SELECT/RLS da sessão pública e exibir_site_publico.");
+  }
+  return data||[];
+}
 function grupos(rows){const g={};const alias={ECOSSISTEM:"ECOSSISTEMA",ECOSSISTEMA_SAR:"ECOSSISTEMA"};sort(rows).forEach(r=>{const raw=code(r.bloco||r.chave);const b=alias[raw]||raw;(g[b]??=[]).push(r)});return g;}
 function menuLink(m,i){const alvo=m.alvo==="_blank"?"_blank":"_self";const icone=txt(m.icone)?`<span class="cms-menu-icone" aria-hidden="true">${esc(icon(m.icone))}</span>`:"";return `<a class="${i===0?"active ":""}${m.destaque?"cms-menu-destaque":""}" href="${esc(m.link||"#")}" target="${alvo}" ${alvo==="_blank"?'rel="noopener noreferrer"':""}>${icone}${esc(m.rotulo||"")}</a>`;}
 function renderHeader(g,menus){const marca=item(g,"MARCA"),sub=item(g,"SUBTITULO"),bot=item(g,"BOTAO_ACESSAR");document.getElementById("cabecalhoSite").innerHTML=`<div class="logo"><div class="logo-mark"></div><div>${esc(marca?.titulo||"")}<small>${esc(sub?.titulo||sub?.subtitulo||"")}</small></div></div><nav aria-label="Navegação principal" id="menuPublico">${menus.map(menuLink).join('')}</nav>${linkHtml(bot,"btn primary")}`;}
@@ -49,5 +61,5 @@ function renderContato(g){
     </div>`;
 }
 function renderRodape(g,menus=[]){const x=item(g,"RODAPE")||g[0];const el=document.getElementById("rodape");if(!x){el.hidden=true;return}el.innerHTML=`<div class="cms-rodape-principal"><div class="logo"><div>${esc(x.titulo||"")}<small>${esc(x.subtitulo||"")}</small></div></div><p>${esc(x.texto||"")}</p></div><div class="cms-rodape-inferior"><span>${esc(x.botao_texto||"")}</span><span>${esc(x.botao_link||"")}</span></div>${menus.length?`<nav class="cms-rodape-menu" aria-label="Links do rodapé">${menus.map(menuLink).join("")}</nav>`:""}`;}
-async function iniciar(){try{const p=await pagina();if(!p)throw new Error("Página home não encontrada no CMS.");document.title=p.titulo_seo||document.title;const meta=document.querySelector('meta[name="description"]');if(meta)meta.content=p.descricao_seo||"";const [rows,menus,mods]=await Promise.all([conteudos(p.id),menu(),modulos()]);const g=grupos(rows);renderHeader(g.CABECALHO||[],menus.filter(m=>code(m.local_menu)==="CABECALHO"));renderHero(g.HERO||[]);renderEcossistema(g.ECOSSISTEMA||[],mods);renderBeneficios(g.BENEFICIOS||[]);renderCta(g.CTA||[]);renderContato(g.CONTATO||[]);renderRodape(g.RODAPE||[],menus.filter(m=>code(m.local_menu)==="RODAPE"));}catch(e){console.error("SAR CMS:",e);document.body.innerHTML='<main class="page"><div class="cms-erro">Não foi possível carregar o site. Verifique o CMS e o Supabase.</div></main>';}}
+async function iniciar(){try{const p=await pagina();if(!p)throw new Error("Página home não encontrada no CMS.");document.title=p.titulo_seo||document.title;const meta=document.querySelector('meta[name="description"]');if(meta)meta.content=p.descricao_seo||"";const [rows,menus,mods]=await Promise.all([conteudos(p.id),menu(),modulos()]);const g=grupos(rows);renderHeader(g.CABECALHO||[],menus.filter(m=>code(m.local_menu)==="CABECALHO"));renderHero(g.HERO||[]);renderEcossistema(g.ECOSSISTEMA||[],mods);if(!mods.length){document.getElementById("modulos").innerHTML='<p role="status" style="grid-column:1/-1;padding:16px;color:#fff">Módulos indisponíveis no momento. Verifique a consulta pública e as políticas de acesso.</p>';}renderBeneficios(g.BENEFICIOS||[]);renderCta(g.CTA||[]);renderContato(g.CONTATO||[]);renderRodape(g.RODAPE||[],menus.filter(m=>code(m.local_menu)==="RODAPE"));}catch(e){console.error("SAR CMS:",e);document.body.innerHTML='<main class="page"><div class="cms-erro">Não foi possível carregar o site. Verifique o CMS e o Supabase.</div></main>';}}
 iniciar();
