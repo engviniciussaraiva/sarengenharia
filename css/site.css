@@ -998,3 +998,12 @@ body{background:linear-gradient(180deg,#001c13 0%,#002b1d 58%,#001b13 100%);}
 
 /* SAR CMS V2 Etapa 4 — barra superior alinhada ao verde institucional do sistema */
 header#cabecalhoSite{background:linear-gradient(180deg,#001c13 0%,#002b1d 58%,#001b13 100%);backdrop-filter:none;}
+
+/* Identidade institucional: mesma assinatura textual do sistema.html.
+   Aplicada apenas ao cabeçalho público; não altera outros logotipos. */
+#cabecalhoSite .sar-logo-publica{gap:0;min-width:0;}
+#cabecalhoSite .sar-logo-texto{display:flex;flex-direction:column;min-width:0;}
+#cabecalhoSite .sar-logo-nome{color:#fff;font-size:clamp(19px,2.1vw,30px);font-weight:850;letter-spacing:-.8px;line-height:1.12;}
+#cabecalhoSite .sar-logo-subtitulo{display:flex;align-items:center;gap:9px;margin-top:5px;color:#fff;font-size:clamp(7px,.72vw,11px);font-weight:800;letter-spacing:1.5px;line-height:1.3;}
+#cabecalhoSite .sar-logo-traco{width:20px;min-width:12px;height:2px;background:#a8ff23;display:inline-block;}
+@media(max-width:600px){#cabecalhoSite .sar-logo-subtitulo{letter-spacing:.55px;gap:5px;}#cabecalhoSite .sar-logo-traco{width:10px;}}
