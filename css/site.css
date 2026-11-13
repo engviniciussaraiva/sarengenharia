@@ -1055,3 +1055,9 @@ header#cabecalhoSite{background:linear-gradient(180deg,#001c13 0%,#002b1d 58%,#0
 .sar-carousel-dots button.active{background:#b5ff12}
 @media(max-width:960px){.hero{grid-template-columns:1fr;gap:14px}.sar-hero-visual{max-width:700px;margin:0 auto}.sar-hero-visual img{max-height:420px}}
 @media(max-width:560px){.hero{padding:28px 0}.sar-hero-visual img{max-height:300px}.sar-hero-carousel{gap:7px}.sar-carousel-prev,.sar-carousel-next{font-size:28px}}
+
+/* SAR Index V3.1 — aproximar o HERO do cabeçalho, mantendo uma folga discreta. */
+.page{padding-top:calc(var(--header-h) + 12px)}
+.hero{padding-top:12px;align-items:start}
+.sar-hero-visual{align-self:start;align-items:flex-start}
+@media(max-width:720px){.page{padding-top:calc(var(--header-h) + 10px)}.hero{padding-top:10px}}
