@@ -1034,3 +1034,24 @@ header#cabecalhoSite{background:linear-gradient(180deg,#001c13 0%,#002b1d 58%,#0
 @media(max-width:1050px){.modules-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:720px){.modules-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{padding:35px 0}}
 @media(max-width:480px){.modules-grid{grid-template-columns:1fr}}
+
+/* SAR Index V3 — hero em duas colunas, imagem técnica e carrossel compacto */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);align-items:center;gap:clamp(22px,3vw,56px);padding:clamp(36px,4vw,64px) 0;min-height:0}
+.hero .copy{min-width:0;max-width:none;width:100%}
+.hero h1{max-width:none;line-height:1.08;margin-bottom:14px}
+.sar-hero-underline{width:100%;height:6px;border-radius:8px;background:#a9ff0a;box-shadow:0 0 12px rgba(169,255,10,.16);margin:0 0 22px}
+.hero .lead{max-width:100%;margin-bottom:24px}
+.sar-hero-visual{min-width:0;align-self:stretch;display:flex;align-items:center;justify-content:center;overflow:hidden;pointer-events:none}
+.sar-hero-visual img{display:block;width:100%;height:auto;max-height:600px;object-fit:contain;mix-blend-mode:screen}
+.sar-hero-carousel{display:flex;align-items:center;gap:12px;max-width:100%;min-height:88px;color:#fff}
+.sar-carousel-content{min-width:0;flex:1;display:flex;flex-direction:column;gap:5px}
+.sar-carousel-title{font-size:clamp(16px,1.55vw,24px);font-weight:850;color:#b5ff12;line-height:1.2}
+.sar-carousel-description{font-size:clamp(13px,1.1vw,17px);line-height:1.4;color:#f2f8f4;min-height:2.7em}
+.sar-carousel-prev,.sar-carousel-next{border:0;background:transparent;color:#b5ff12;cursor:pointer;font-size:36px;line-height:1;flex:0 0 22px;padding:5px 0}
+.sar-carousel-prev:hover,.sar-carousel-next:hover{color:#fff}
+.sar-carousel-prev:focus-visible,.sar-carousel-next:focus-visible,.sar-carousel-dots button:focus-visible{outline:2px solid #b5ff12;outline-offset:3px}
+.sar-carousel-dots{display:flex;gap:9px;align-items:center;margin-top:7px}
+.sar-carousel-dots button{width:10px;height:10px;border:1px solid #b5ff12;border-radius:50%;background:transparent;padding:0;cursor:pointer}
+.sar-carousel-dots button.active{background:#b5ff12}
+@media(max-width:960px){.hero{grid-template-columns:1fr;gap:14px}.sar-hero-visual{max-width:700px;margin:0 auto}.sar-hero-visual img{max-height:420px}}
+@media(max-width:560px){.hero{padding:28px 0}.sar-hero-visual img{max-height:300px}.sar-hero-carousel{gap:7px}.sar-carousel-prev,.sar-carousel-next{font-size:28px}}

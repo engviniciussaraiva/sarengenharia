@@ -19,7 +19,40 @@ async function modulos(){const {data,error}=await supabase.from("sar_modulos").s
 function grupos(rows){const g={};const alias={ECOSSISTEM:"ECOSSISTEMA",ECOSSISTEMA_SAR:"ECOSSISTEMA"};sort(rows).forEach(r=>{const raw=code(r.bloco||r.chave);const b=alias[raw]||raw;(g[b]??=[]).push(r)});return g;}
 function menuLink(m,i){const alvo=m.alvo==="_blank"?"_blank":"_self";const icone=txt(m.icone)?`<span class="cms-menu-icone" aria-hidden="true">${esc(icon(m.icone))}</span>`:"";return `<a class="${i===0?"active ":""}${m.destaque?"cms-menu-destaque":""}" href="${esc(m.link||"#")}" target="${alvo}" ${alvo==="_blank"?'rel="noopener noreferrer"':""}>${icone}${esc(m.rotulo||"")}</a>`;}
 function renderHeader(g,menus){const marca=item(g,"MARCA"),sub=item(g,"SUBTITULO"),bot=item(g,"BOTAO_ACESSAR");document.getElementById("cabecalhoSite").innerHTML=`<div class="logo sar-logo-publica"><div class="sar-logo-texto"><div class="sar-logo-nome">${esc(marca?.titulo||"SAR Engenharia")}</div><small class="sar-logo-subtitulo"><span class="sar-logo-traco" aria-hidden="true"></span>${esc(sub?.titulo||sub?.subtitulo||"SISTEMA AVANÇADO DE RESPOSTA")}<span class="sar-logo-traco" aria-hidden="true"></span></small></div></div><nav aria-label="Navegação principal" id="menuPublico">${menus.map(menuLink).join('')}</nav>${linkHtml(bot,"btn primary")}`;}
-function renderHero(g){const badge=item(g,"BADGE"),titulo=item(g,"TITULO"),desc=item(g,"DESCRICAO"),pilares=sort(g.filter(x=>code(x.item_codigo).startsWith("PILAR_"))),b1=item(g,"BOTAO_CONHECER"),b2=item(g,"BOTAO_ACESSAR");const t=txt(titulo?.titulo);const p=t.includes(":")?t.split(/:(.*)/s):[t,""];document.getElementById("heroConteudo").innerHTML=`${badge?`<div class="badge">${esc(badge.titulo)}</div>`:""}<h1>${esc(p[0]+(p[1]?":":""))}${p[1]?`<span>${esc(p[1].trim())}</span>`:""}</h1>${desc?`<p class="lead">${esc(desc.titulo||desc.texto)}</p>`:""}<div class="cta">${linkHtml(b1,"btn primary")}${linkHtml(b2,"btn")}</div>`;}
+const SAR_SLIDES_PADRAO=[
+  {titulo:"ENGENHARIA INTELIGENTE",texto:"Transformando conhecimento técnico em soluções automatizadas."},
+  {titulo:"PRECISÃO NORMATIVA",texto:"Critérios técnicos integrados para decisões mais seguras."},
+  {titulo:"PRODUTIVIDADE",texto:"Menos tarefas repetitivas. Mais tempo para engenharia."},
+  {titulo:"TECNOLOGIA APLICADA",texto:"Cálculos, projetos e documentos em um único ecossistema."},
+  {titulo:"EVOLUÇÃO CONTÍNUA",texto:"Uma plataforma que acompanha os desafios da engenharia."}
+];
+let sarCarouselTimer;
+function iniciarCarrosselHero(slides){
+ const host=document.getElementById("sarHeroCarousel");if(!host)return;
+ let pos=0;
+ const titulo=host.querySelector(".sar-carousel-title"),descricao=host.querySelector(".sar-carousel-description"),dots=host.querySelector(".sar-carousel-dots");
+ function mostrar(i){pos=(i+slides.length)%slides.length;titulo.textContent=slides[pos].titulo;descricao.textContent=slides[pos].texto;dots.querySelectorAll("button").forEach((b,j)=>{b.classList.toggle("active",j===pos);b.setAttribute("aria-current",String(j===pos));});}
+ dots.innerHTML=slides.map((_,i)=>`<button type="button" aria-label="Mostrar mensagem ${i+1}" ${i===0?'aria-current="true"':''}></button>`).join("");
+ dots.querySelectorAll("button").forEach((b,i)=>b.addEventListener("click",()=>{mostrar(i);reiniciar();}));
+ host.querySelector(".sar-carousel-prev").addEventListener("click",()=>{mostrar(pos-1);reiniciar();});
+ host.querySelector(".sar-carousel-next").addEventListener("click",()=>{mostrar(pos+1);reiniciar();});
+ const reduzMovimento=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+ function parar(){clearInterval(sarCarouselTimer);}
+ function reiniciar(){parar();if(!reduzMovimento&&slides.length>1)sarCarouselTimer=setInterval(()=>mostrar(pos+1),5000);}
+ host.addEventListener("mouseenter",parar);host.addEventListener("mouseleave",reiniciar);
+ host.addEventListener("focusin",parar);host.addEventListener("focusout",e=>{if(!host.contains(e.relatedTarget))reiniciar();});
+ document.addEventListener("visibilitychange",()=>document.hidden?parar():reiniciar());
+ mostrar(0);reiniciar();
+}
+function renderHero(g){
+ const badge=item(g,"BADGE"),titulo=item(g,"TITULO"),desc=item(g,"DESCRICAO");
+ const t=txt(titulo?.titulo);const p=t.includes(":")?t.split(/:(.*)/s):[t,""];
+ const registros=sort(g.filter(x=>code(x.item_codigo).startsWith("CARROSSEL_")));
+ const slides=registros.length?registros.map(x=>({titulo:txt(x.titulo),texto:txt(x.texto||x.subtitulo)})).filter(x=>x.titulo):SAR_SLIDES_PADRAO;
+ document.getElementById("heroConteudo").innerHTML=`${badge?`<div class="badge">${esc(badge.titulo)}</div>`:""}<h1>${esc(p[0]+(p[1]?":":""))}${p[1]?`<span>${esc(p[1].trim())}</span>`:""}</h1><div class="sar-hero-underline" aria-hidden="true"></div>${desc?`<p class="lead">${esc(desc.titulo||desc.texto)}</p>`:""}<div class="sar-hero-carousel" id="sarHeroCarousel" aria-label="Mensagens sobre a plataforma"><button type="button" class="sar-carousel-prev" aria-label="Mensagem anterior">‹</button><div class="sar-carousel-content"><strong class="sar-carousel-title"></strong><span class="sar-carousel-description"></span><div class="sar-carousel-dots" aria-label="Selecionar mensagem"></div></div><button type="button" class="sar-carousel-next" aria-label="Próxima mensagem">›</button></div>`;
+ iniciarCarrosselHero(slides.length?slides:SAR_SLIDES_PADRAO);
+}
+
 function renderEcossistema(g,mods){const h=item(g,"CABECALHO"),nota=item(g,"NOTA"),rod=item(g,"RODAPE");document.getElementById("ecossistemaCabecalho").outerHTML=`<div class="showcase-head" id="ecossistemaCabecalho"><div class="showcase-brand"><div><strong>${esc(h?.titulo||"")}</strong><span>${esc(h?.subtitulo||"")}</span></div></div><div class="showcase-note">${esc(nota?.texto||nota?.titulo||"")}</div></div>`;document.getElementById("modulos").innerHTML=mods.map(m=>`${(()=>{const tipo=txt(m.site_destino_tipo);const url=txt(m.site_destino_url);if(!['pagina','video','externo'].includes(tipo)||!url)return `<article class="module-card ${m.destaque_site?'featured':''}"><div class="module-icon">${esc(icon(m.icone))}</div><h3>${esc(m.modulo||m.codigo)}</h3><p>${esc(m.descricao||"")}</p>${m.em_breve?'<span class="module-tag">Em breve</span>':''}</article>`;let destino;try{destino=new URL(url,location.origin);if(!['http:','https:'].includes(destino.protocol))throw Error();if(tipo==='pagina'&&destino.origin!==location.origin)throw Error();if(tipo==='video'&&!['youtube.com','www.youtube.com','youtu.be','www.youtu.be'].includes(destino.hostname.toLowerCase()))throw Error();}catch(_){return `<article class="module-card ${m.destaque_site?'featured':''}"><div class="module-icon">${esc(icon(m.icone))}</div><h3>${esc(m.modulo||m.codigo)}</h3><p>${esc(m.descricao||"")}</p>${m.em_breve?'<span class="module-tag">Em breve</span>':''}</article>`;}const nova=m.site_abrir_nova_aba!==false;return `<a class="module-card cms-module-link ${m.destaque_site?'featured':''}" href="${esc(destino.href)}" target="${nova?'_blank':'_self'}" ${nova?'rel="noopener noreferrer"':''} aria-label="Conhecer ${esc(m.modulo||m.codigo)}"><div class="module-icon">${esc(icon(m.icone))}</div><h3>${esc(m.modulo||m.codigo)}</h3><p>${esc(m.descricao||"")}</p>${m.em_breve?'<span class="module-tag">Em breve</span>':''}<span class="cms-module-action">Conhecer módulo ↗</span></a>`;})()}`).join('');document.getElementById("ecossistemaRodape").outerHTML=`<div class="showcase-footer" id="ecossistemaRodape"><span>${esc(rod?.texto||rod?.titulo||"")}</span><span>${esc(rod?.subtitulo||"")}</span></div>`;}
 
 // Faixa institucional: o CMS continua sendo a fonte dos textos quando os cinco PILAR_ estiverem configurados.
