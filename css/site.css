@@ -1061,3 +1061,7 @@ header#cabecalhoSite{background:linear-gradient(180deg,#001c13 0%,#002b1d 58%,#0
 .hero{padding-top:12px;align-items:start}
 .sar-hero-visual{align-self:start;align-items:flex-start}
 @media(max-width:720px){.page{padding-top:calc(var(--header-h) + 10px)}.hero{padding-top:10px}}
+
+/* HERO: subtitulo do registro TITULO, administrado pelo CMS */
+.hero .sar-hero-subtitle{color:#fff;font-size:clamp(22px,2.7vw,40px);font-weight:750;line-height:1.15;margin:-4px 0 16px;letter-spacing:-.02em;overflow-wrap:anywhere;}
+@media(max-width:600px){.hero .sar-hero-subtitle{font-size:clamp(20px,5vw,29px);margin:0 0 12px;}}
