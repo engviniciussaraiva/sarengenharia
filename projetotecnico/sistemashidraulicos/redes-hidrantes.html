@@ -1,0 +1,405 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="sar-recurso-codigo" content="MODULO_HIDRAULICO_REDE_HIDRANTE"><script src="/js/sar.page-guard.js"></script><script src="/js/sar.api-config.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"><title>SAR | Dimensionamento de Redes de Hidrantes</title><style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f8f8f8;color:#000}h1{text-align:center;color:#006400;font-size:30px;margin:25px 0 10px;font-weight:700}.topnav{display:flex;background:#006400;overflow-x:auto}.topnav button{flex:1 0 145px;background:#006400;color:#fff;padding:15px 10px;font-size:16px;border:0;border-bottom:4px solid transparent;cursor:pointer;min-height:102px;line-height:1.2}.topnav button.active{background:#004d00;border-bottom:4px solid #00cc66;font-weight:700}.topnav button:hover:not(.active){background:#005500}.aba{display:none;padding:25px}.aba.ativa{display:block}h2{font-size:24px;color:#006400;margin:0 0 14px}.linha{display:flex;gap:20px;flex-wrap:wrap}.coluna{flex:1;min-width:220px}label{font-weight:700;display:block;margin-bottom:6px}input,select{width:100%;padding:8px;font-size:16px;border-radius:6px;border:1px solid #ccc;background:#fff;margin-bottom:12px;height:43px}input[readonly]{background:#fff}.linha-titulo{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:16px;flex-wrap:wrap}.botoes-cadastro button{background:darkgreen;color:#fff;font-size:16px;border:0;padding:10px 16px;margin:0 8px 8px 0;border-radius:8px;cursor:pointer}.botoes-cadastro .remover-tudo{background:#b71c1c}.bloco{border:1px solid #ccc;border-radius:12px;padding:18px;background:#fff;margin-bottom:22px}summary{font-weight:bold;cursor:pointer}.muted{color:#666}.table{border-collapse:collapse;width:100%;background:white}.table th,.table td{border:1px solid #aaa;padding:8px;text-align:center}.table th{background:#f0f0f0}.hint{margin-top:12px;color:#555;font-size:14px}@media(max-width:800px){h1{font-size:24px}.topnav button{font-size:14px;min-height:85px;flex-basis:130px}.aba{padding:18px}}
+
+/* Somente a Aba 01: referência de projeto avulso com arquivo local */
+#aba1 .avulso-mensagem{background:#edf5ed;border-left:4px solid #006400;padding:12px 14px;margin-bottom:20px;line-height:1.5;font-size:14px}
+#aba1 textarea{width:100%;font-family:Arial,sans-serif;font-size:16px;border-radius:6px;border:1px solid #ccc;background:#fff;padding:10px;resize:vertical}
+
+/* Exclusivamente Aba 02: preserva a identidade e as abas do protótipo legado */
+#aba2 .ed-banner{background:#edf5ed;border-left:4px solid #006400;padding:12px 14px;margin-bottom:22px;font-size:14px;line-height:1.55}
+#aba2 .ed-topline,#aba2 .ed-header,#aba2 .ed-row-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+#aba2 h3{color:#006400;margin:0 0 12px;font-size:18px}
+#aba2 .ed-count{color:#fff;background:#006400;padding:2px 9px;border-radius:20px;font-size:13px;vertical-align:middle}
+#aba2 .ed-button{border:1px solid #006400;color:white;background:#006400;border-radius:6px;padding:10px 15px;font-size:14px;cursor:pointer;font-family:Arial,sans-serif;min-height:42px}
+#aba2 .ed-button:hover{background:#004d00}
+#aba2 .ed-danger{background:#fff;color:#a02424;border-color:#cc8888}
+#aba2 .ed-danger:hover{background:#faebeb}
+#aba2 .ed-list{display:flex;flex-wrap:wrap;gap:9px;margin:10px 0 20px}
+#aba2 .ed-chip{border:1px solid #adb9b2;background:#fff;color:#224e2d;border-radius:6px;padding:11px 14px;cursor:pointer;min-height:43px;font-size:14px}
+#aba2 .ed-chip.selected{background:#006400;border-color:#006400;color:#fff;font-weight:700}
+#aba2 .ed-chip:focus-visible,#aba2 button:focus-visible{outline:3px solid #00cc66;outline-offset:2px}
+#aba2 .ed-editor{background:#fff;border:1px solid #cbd6ce;border-radius:9px;padding:19px}
+#aba2 .ed-header{border-bottom:1px solid #e2e6e2;padding-bottom:9px;margin-bottom:17px}
+#aba2 .ed-header h3{margin:0}
+#aba2 .ed-grupo-j{background:#f7faf7;border:1px solid #d0dcd3;border-radius:7px;margin:11px 0 17px;padding:16px}
+#aba2 .ed-explainer{font-size:14px;line-height:1.5;color:#333;margin:0 0 15px}
+#aba2 .ed-scroll{overflow-x:auto}
+#aba2 .ed-table{width:100%;border-collapse:collapse;background:#fff;min-width:650px}
+#aba2 .ed-table th,#aba2 .ed-table td{padding:8px;text-align:left;border:1px solid #d5ded8;font-size:14px}
+#aba2 .ed-table th{background:#e7eee8;color:#183a25}
+#aba2 .ed-table td input,#aba2 .ed-table td select{font-size:14px;margin:0;min-height:39px;height:39px}
+#aba2 .ed-table .ed-result-value{white-space:nowrap;font-weight:700;color:#006400}
+#aba2 .ed-table .ed-removeprod{border:1px solid #bf9090;background:#fff;color:#9c3030;border-radius:5px;padding:9px 12px;cursor:pointer}
+#aba2 .ed-row-actions{margin:12px 0 8px;justify-content:flex-start}
+#aba2 .ed-note{font-size:13px;color:#656565}
+#aba2 .ed-governante{background:#e8f4e8;border-left:4px solid #006400;padding:11px 14px;margin-top:12px;font-size:14px;line-height:1.5}
+#aba2 .ed-ajuste{margin:18px 0;padding:14px;background:#f9f9f9;border:1px solid #e2e2e2;border-radius:6px}
+#aba2 .ed-check{display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer;font-weight:700}
+#aba2 .ed-check input{width:19px;height:19px;flex-shrink:0;margin:0;accent-color:#006400}
+#aba2 #ed-ajuste-conteudo{margin-top:14px}
+#aba2 textarea{width:100%;font-family:Arial,sans-serif;font-size:15px;border-radius:6px;border:1px solid #ccc;padding:9px;resize:vertical}
+#aba2 .ed-resultado{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:15px;background:#edf5ee;border:1px solid #cfdbd0;border-radius:7px;margin-top:17px}
+#aba2 .ed-resultado div{border-right:1px solid #d4e0d5;min-width:0;display:flex;flex-direction:column;gap:6px}
+#aba2 .ed-resultado div:last-child{border:0}
+#aba2 .ed-resultado span{font-size:12px;color:#525c54}
+#aba2 .ed-resultado strong{font-size:16px;color:#00572c}
+#aba2 .ed-risk.baixo{color:#087045}#aba2 .ed-risk.medio{color:#a56a00}#aba2 .ed-risk.alto{color:#b22424}
+#aba2 .ed-source{padding:11px 12px;border:1px dashed #b8b8b8;background:#fcfcfc;margin-top:16px;line-height:1.5;font-size:13px;color:#555}
+#aba2 .ed-status{min-height:22px;margin:12px 0 0;color:#006400;font-size:14px;font-weight:700}
+#aba2 [hidden]{display:none!important}
+@media(max-width:670px){#aba2 .ed-resultado{grid-template-columns:1fr}#aba2 .ed-resultado div{border-right:0;border-bottom:1px solid #d4e0d5;padding-bottom:8px}#aba2 .ed-resultado div:last-child{border-bottom:0;padding-bottom:0}#aba2 .ed-editor{padding:12px}}
+
+
+/* CABEÇALHO PADRÃO SAR — reproduzido do cabeçalho V6.1, isolado das abas. */
+.sar-modulo-cabecalho{
+  position:sticky;top:0;z-index:60;width:100%;min-height:64px;
+  padding:10px 22px;background:#0b3426;border-bottom:3px solid #9dd532;
+  color:#fff;display:flex;align-items:center;justify-content:space-between;
+  gap:16px;box-shadow:0 4px 14px #07281e22;
+  font-family:'Segoe UI',Arial,sans-serif;text-align:left;
+}
+.sar-modulo-cabecalho .sar-modulo-identidade{min-width:0}
+.sar-modulo-cabecalho h1{
+  font-family:inherit;text-align:left;color:#fff;font-size:19px;
+  line-height:1.25;margin:0;font-weight:700;letter-spacing:-.025em;
+  white-space:normal;overflow-wrap:break-word;
+}
+.sar-modulo-cabecalho .sar-modulo-subline{
+  font-size:10px;font-weight:400;color:#b9d5c5;letter-spacing:.03em;margin-top:3px;
+}
+.sar-modulo-cabecalho .sar-modulo-acoes{
+  display:flex;gap:6px;align-items:center;flex-shrink:0;
+}
+.sar-modulo-cabecalho .sar-modulo-botao{
+  box-sizing:border-box;height:31px;padding:0 11px;border:1px solid #84a896;
+  border-radius:0;background:transparent;color:#fff;font-size:11.5px;
+  font-family:inherit;font-weight:650;cursor:pointer;
+}
+.sar-modulo-cabecalho .sar-modulo-botao:hover{background:#25513e}
+.sar-modulo-cabecalho .sar-modulo-botao:focus-visible{
+  outline:2px solid #b6ff39;outline-offset:2px;
+}
+.sar-modulo-cabecalho .sar-modulo-botao.destaque{
+  background:#fff;color:#0b3426;border-color:#fff;
+}
+.sar-modulo-cabecalho .sar-modulo-botao.destaque:hover{background:#e6efe8}
+.sar-modulo-cabecalho .sar-modulo-menu{position:relative}
+.sar-modulo-cabecalho .sar-modulo-menu summary{
+  list-style:none;display:flex;align-items:center;justify-content:center;
+  margin:0;user-select:none;cursor:pointer;
+}
+.sar-modulo-cabecalho .sar-modulo-menu summary::-webkit-details-marker{display:none}
+.sar-modulo-cabecalho .sar-modulo-menu-conteudo{
+  position:absolute;right:0;top:35px;z-index:70;width:240px;padding:5px;
+  border:1px solid #b6c6bd;background:#fff;box-shadow:0 12px 22px #102f2044;
+  color:#19352c;
+}
+.sar-modulo-cabecalho .sar-modulo-menu-conteudo button{
+  display:block;width:100%;padding:10px;text-align:left;border:0;border-radius:0;
+  background:#fff;color:#19352c;font-family:inherit;font-size:12px;cursor:pointer;
+}
+.sar-modulo-cabecalho .sar-modulo-menu-conteudo button:hover{background:#eff6f1}
+.sar-modulo-aviso{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  z-index:100;max-width:min(550px,calc(100vw - 24px));padding:12px 18px;
+  background:#0b3426;color:#fff;border-left:4px solid #9dd532;
+  box-shadow:0 8px 20px #08291e55;font:12px/1.5 'Segoe UI',Arial,sans-serif;
+}
+.sar-modulo-aviso[hidden]{display:none!important}
+@media(max-width:720px){
+  .sar-modulo-cabecalho{padding:11px 12px;flex-wrap:wrap;gap:10px}
+  .sar-modulo-cabecalho h1{font-size:16px}
+  .sar-modulo-cabecalho .sar-modulo-acoes{flex-wrap:wrap}
+  .sar-modulo-cabecalho .sar-modulo-botao{min-height:33px}
+}
+
+</style></head><body>
+<header class="sar-modulo-cabecalho" aria-label="Cabeçalho do módulo SAR">
+  <div class="sar-modulo-identidade">
+    <h1>Dimensionamento hidráulico — Rede de hidrantes</h1>
+    <div class="sar-modulo-subline">SAR · ESTUDO DE REDE HIDRÁULICA</div>
+  </div>
+  <div class="sar-modulo-acoes" aria-label="Ações do estudo">
+    <button type="button" class="sar-modulo-botao" id="sar-novo">Novo</button>
+    <button type="button" class="sar-modulo-botao" id="sar-abrir">Abrir JSON</button>
+    <button type="button" class="sar-modulo-botao destaque" id="sar-salvar">Salvar JSON</button>
+    <details class="sar-modulo-menu" id="sar-mais">
+      <summary class="sar-modulo-botao" aria-label="Mais ações">Mais ▾</summary>
+      <div class="sar-modulo-menu-conteudo">
+        <button type="button" data-sar-aba="aba1">Referência do Projeto</button>
+        <button type="button" data-sar-aba="aba2">Dados da Edificação</button>
+        <button type="button" id="sar-sobre">Sobre esta versão</button>
+      </div>
+    </details>
+  </div>
+</header>
+<div id="sar-aviso" class="sar-modulo-aviso" role="status" aria-live="polite" hidden></div>
+<nav class="topnav" aria-label="Seções do dimensionamento"><button data-tab="aba1" class="active">📄 Referência do<br> Projeto</button><button data-tab="aba2">🏢 Dados da<br> Edificação</button><button data-tab="aba3">⚙️ Configurações<br> do Sistema de<br> Hidrantes</button><button data-tab="aba4">🚰 Rede<br> Isométrica</button><button data-tab="aba6">⚡ Conjunto Moto<br> Bomba</button><button data-tab="aba5">✏️ Memória de<br> Cálculo</button><button data-tab="aba7">🧾 Memorial<br> Descritivo</button></nav>
+<section id="aba1" class="aba ativa">
+  <h2>📄 Referência do Projeto</h2>
+  <div class="avulso-mensagem"><strong>Projeto avulso</strong><br>As informações de referência são preenchidas neste estudo, sem necessidade de vínculo com o Cadastro Central de Projetos.</div>
+  <div class="linha">
+    <div class="coluna"><label for="av-cliente">Cliente</label><input id="av-cliente" placeholder="Nome completo ou razão social" maxlength="180" autocomplete="organization"></div>
+    <div class="coluna"><label for="av-cpfCnpj">CPF / CNPJ</label><input id="av-cpfCnpj" placeholder="000.000.000-00 ou 00.000.000/0000-00" maxlength="18" inputmode="numeric" autocomplete="off" title="O campo aceita CPF ou CNPJ e aplica a máscara brasileira automaticamente."></div>
+  </div>
+  <div class="linha">
+    <div class="coluna"><label for="av-endereco">Endereço</label><input id="av-endereco" placeholder="Logradouro, número, complemento e bairro" maxlength="240" autocomplete="street-address"></div>
+  </div>
+  <div class="linha">
+    <div class="coluna"><label for="av-estado">Estado</label><select id="av-estado"><option value="">Selecione o estado</option></select></div>
+    <div class="coluna"><label for="av-municipio">Município</label><input id="av-municipio" placeholder="Selecione primeiro o estado" maxlength="120" autocomplete="address-level2" disabled title="Futuramente, os municípios serão sugeridos conforme o estado selecionado."></div>
+  </div>
+  <div class="linha">
+    <div class="coluna"><label for="av-referencia">Referência / revisão</label><input id="av-referencia" placeholder="Ex.: HID-001 / Rev. 00" maxlength="100"></div>
+    <div class="coluna"><label for="av-projetoCobom">Número do projeto COBOM</label><input id="av-projetoCobom" placeholder="Informe, se houver" maxlength="100"></div>
+  </div>
+  <div class="linha">
+    <div class="coluna"><label for="av-data">Data</label><input id="av-data" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10"></div>
+    <div class="coluna"><label for="av-obra">Obra</label><input id="av-obra" placeholder="Identificação da obra" maxlength="180"></div>
+  </div>
+  <div class="linha">
+    <div class="coluna"><label for="av-areaConstruidaTotal">Área construída total (m²)</label><input id="av-areaConstruidaTotal" type="text" inputmode="decimal" placeholder="Ex.: 5.000,00" maxlength="22"></div>
+  </div>
+  <div class="linha">
+    <div class="coluna"><label for="av-rt">Responsável técnico</label><input id="av-rt" placeholder="Nome do engenheiro responsável" maxlength="180"></div>
+    <div class="coluna"><label for="av-crea">CREA do responsável técnico</label><input id="av-crea" placeholder="Ex.: CREA-SP 1234567890" maxlength="80"></div>
+  </div>
+  <div class="linha">
+    <div class="coluna"><label for="av-art">ART</label><input id="av-art" placeholder="Número da ART" maxlength="100"></div>
+  </div>
+  <label for="av-notas">Observações</label><textarea id="av-notas" rows="3" placeholder="Observações referentes ao projeto" maxlength="2000"></textarea>
+
+</section>
+<section id="aba2" class="aba" aria-labelledby="ed-titulo">
+  <h2 id="ed-titulo">🏢 Dados da Edificação</h2>
+  <div class="ed-banner"><strong>Cadastro das edificações deste projeto</strong><br>
+  Cadastre quantas edificações forem necessárias. Cada uma possui sua ocupação, área protegida e carga de incêndio. As configurações hidráulicas e os diferentes tipos de hidrantes serão tratados nas próximas abas.</div>
+
+  <div class="ed-topline"><h3>Edificações cadastradas <span id="ed-count" class="ed-count">1</span></h3>
+    <button id="ed-add" class="ed-button" type="button">+ Cadastrar Edificação</button></div>
+  <div id="ed-list" class="ed-list" role="group" aria-label="Selecionar edificação cadastrada"></div>
+
+  <div id="ed-editor" class="ed-editor">
+    <div class="ed-header"><h3>Dados da edificação selecionada</h3><button type="button" id="ed-remove" class="ed-button ed-danger">Excluir edificação</button></div>
+    <div class="linha">
+      <div class="coluna"><label for="ed-nome">Identificação da edificação</label><input id="ed-nome" type="text" placeholder="Ex.: Galpão 01" maxlength="140"></div>
+      <div class="coluna"><label for="ed-area">Área protegida pelo sistema (m²)</label><input id="ed-area" type="text" inputmode="decimal" placeholder="Ex.: 2.500,00"></div>
+    </div>
+    <div class="linha">
+      <div class="coluna"><label for="ed-grupo">Grupo de ocupação</label><select id="ed-grupo"></select></div>
+      <div class="coluna"><label for="ed-divisao">Divisão de ocupação</label><select id="ed-divisao"></select></div>
+    </div>
+    <div class="linha">
+      <div class="coluna"><label for="ed-atividade">Atividade desenvolvida</label><select id="ed-atividade"></select></div>
+      <div class="coluna"><label for="ed-carga">Carga de incêndio adotada (MJ/m²)</label><input id="ed-carga" type="text" readonly placeholder="Aguardando classificação"></div>
+    </div>
+
+    <div id="ed-j" class="ed-grupo-j" hidden>
+      <h3>Classificação de armazenamento — Grupo J</h3>
+      <p class="ed-explainer">Cadastre os produtos armazenados e a altura correspondente a cada um. Para o enquadramento da edificação, <strong>será considerada a maior carga de incêndio encontrada</strong>.</p>
+      <div class="ed-scroll"><table class="ed-table"><thead><tr><th>Produto armazenado</th><th>Altura de armazenamento</th><th>Carga de incêndio (MJ/m²)</th><th></th></tr></thead><tbody id="ed-produtos"></tbody></table></div>
+      <div class="ed-row-actions"><button type="button" id="ed-addprod" class="ed-button">+ Adicionar produto</button><span id="ed-qtdprod" class="ed-note"></span></div>
+      <div id="ed-governante" class="ed-governante" aria-live="polite">Cadastre um produto para definir a carga governante.</div>
+    </div>
+
+    <div class="ed-ajuste"><label class="ed-check"><input type="checkbox" id="ed-ajustar"> Ajustar a carga de incêndio com justificativa técnica</label>
+      <div id="ed-ajuste-conteudo" hidden>
+        <div class="linha"><div class="coluna"><label for="ed-cargaManual">Carga de incêndio proposta (MJ/m²)</label><input id="ed-cargaManual" type="text" inputmode="decimal" placeholder="Ex.: 1.250,00"></div></div>
+        <label for="ed-justificativa">Justificativa técnica</label><textarea id="ed-justificativa" rows="2" placeholder="Descreva o fundamento do ajuste..."></textarea>
+      </div>
+    </div>
+
+    <div class="ed-resultado"><div><span>Enquadramento da edificação</span><strong id="ed-resultado-divisao">Não classificada</strong></div>
+      <div><span>Potencial de risco de incêndio</span><strong id="ed-resultado-risco" class="ed-risk">A determinar</strong></div>
+      <div><span>Carga de incêndio (MJ/m²)</span><strong id="ed-resultado-carga">—</strong></div></div>
+    <div class="ed-source" id="ed-fonte">Dados de ocupação, produtos e classificação consultados exclusivamente no motor privado do SAR. Aguardando conexão com a API oficial.</div>
+    <div id="ed-status" role="status" aria-live="polite" class="ed-status"></div>
+  </div>
+</section>
+<section id="aba3" class="aba"><p class="ed-source">Em desenvolvimento. Campos demonstrativos; não representam critérios hidráulicos aplicáveis.</p><h2>⚙️ Configurações do Sistema de Hidrantes</h2><div class="linha"><div class="coluna"><label>Tipo de Sistema:</label><select><option>Tipo 2 - DN 40</option><option>-- Selecionar --</option></select><label>Selecionar Modelo do Esguicho:</label><select><option>-- Selecionar --</option></select><label>Fator K do Esguicho:</label><input><label>Volume mínimo da reserva de incêndio (L):</label><input value="8.000" readonly><label>Tipo de Expedição do hidrante:</label><input value="Simples" readonly></div><div class="coluna"><label>Vazão mínima na válvula do hidrante (lpm):</label><input value="150"><label>Pressão mínima na válvula do hidrante (m.c.a.):</label><input value="30"><label>Diâmetro do Esguicho (mm):</label><input value="40"><label>Diâmetro da Mangueira (mm):</label><input value="40"><label>Quantidade de hidrantes na rede:</label><input placeholder="Informe a quantidade"></div></div></section>
+<section id="aba4" class="aba"><p class="ed-source">Em desenvolvimento. O lançamento hidráulico desta tela ainda não está conectado ao motor.</p><h2>🚰 Rede Isométrica</h2><div class="linha-titulo"><div class="botoes-cadastro"><button type="button">➕ Adicionar Hidrante</button><button type="button">➕ Adicionar Trecho</button><button type="button">➕ Adicionar Equipamento</button><button type="button" class="remover-tudo">🗑️ Remover Tudo</button></div></div><div class="bloco"><details open><summary>Hidrantes cadastrados</summary><p class="muted">Área visual demonstrativa — nenhum lançamento realizado.</p></details></div><div class="bloco"><details open><summary>Trechos da rede</summary><p class="muted">Área visual demonstrativa — nenhum lançamento realizado.</p></details></div></section>
+<section id="aba6" class="aba"><p class="ed-source">Em desenvolvimento. Nenhum cálculo de conjunto motobomba é executado nesta tela.</p><h2>⚡ Conjunto Moto Bomba</h2><div class="linha"><div class="coluna"><label>Vazão de projeto (lpm):</label><input></div><div class="coluna"><label>Altura manométrica (m.c.a.):</label><input></div></div><div class="bloco"><b>Bomba principal</b><p class="muted">Área reservada para o conjunto moto bomba.</p></div></section>
+<section id="aba5" class="aba"><h2>✏️ Memória de Cálculo</h2><table class="table"><thead><tr><th>Trecho</th><th>Vazão (lpm)</th><th>DN</th><th>Comprimento (m)</th><th>Perda (m.c.a.)</th><th>Velocidade (m/s)</th></tr></thead><tbody><tr><td colspan="6">Sem resultados</td></tr></tbody></table></section>
+<section id="aba7" class="aba"><h2>🧾 Memorial Descritivo</h2><div class="bloco"><p class="muted">Área reservada ao memorial descritivo.</p></div></section>
+<script>document.querySelectorAll('.topnav button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.topnav button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.aba').forEach(x=>x.classList.toggle('ativa',x.id===b.dataset.tab));}));</script>
+<script>
+// Referência do projeto: acesso aos dados para futuro comando JSON compartilhado entre módulos.
+(function(){
+  'use strict';
+  const ids=['cliente','cpfCnpj','endereco','estado','municipio','referencia','projetoCobom','data','obra','areaConstruidaTotal','rt','crea','art','notas'];
+  const ufs=[['AC','Acre'],['AL','Alagoas'],['AP','Amapá'],['AM','Amazonas'],['BA','Bahia'],['CE','Ceará'],['DF','Distrito Federal'],['ES','Espírito Santo'],['GO','Goiás'],['MA','Maranhão'],['MT','Mato Grosso'],['MS','Mato Grosso do Sul'],['MG','Minas Gerais'],['PA','Pará'],['PB','Paraíba'],['PR','Paraná'],['PE','Pernambuco'],['PI','Piauí'],['RJ','Rio de Janeiro'],['RN','Rio Grande do Norte'],['RS','Rio Grande do Sul'],['RO','Rondônia'],['RR','Roraima'],['SC','Santa Catarina'],['SP','São Paulo'],['SE','Sergipe'],['TO','Tocantins']];
+  const el = k => document.getElementById('av-'+k);
+  ufs.forEach(([sigla,nome])=>el('estado').add(new Option(nome+' ('+sigla+')',sigla)));
+  el('data').value = new Date().toLocaleDateString('pt-BR');
+  function formatarCpfCnpj(valor){
+    const d=String(valor||'').replace(/\D/g,'').slice(0,14);
+    if(d.length<=11){
+      return d.replace(/^(\d{3})(\d)/,'$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d{1,2})$/ ,'.$1-$2');
+    }
+    return d.replace(/^(\d{2})(\d)/,'$1.$2')
+            .replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3')
+            .replace(/\.(\d{3})(\d)/,'.$1/$2')
+            .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+  }
+  el('cpfCnpj').addEventListener('input', e=>{e.target.value=formatarCpfCnpj(e.target.value)});
+  function atualizarMunicipio(estadoMudou=false){
+    const campo=el('municipio');const ufSelecionada=Boolean(el('estado').value);
+    if(estadoMudou)campo.value='';
+    campo.disabled=!ufSelecionada;
+    campo.placeholder=ufSelecionada?'Informe o município':'Selecione primeiro o estado';
+  }
+  const parseBR=valor=>{
+    const raw=String(valor||'').trim().replace(/\s/g,'');if(!raw)return null;
+    const n=Number(raw.includes(',')?raw.replace(/\./g,'').replace(',','.'):raw);
+    return Number.isFinite(n)&&n>=0?n:null;
+  };
+  el('areaConstruidaTotal').addEventListener('blur',()=>{
+    const raw=el('areaConstruidaTotal').value.trim();if(!raw)return;
+    const v=parseBR(raw);if(v==null){el('areaConstruidaTotal').setCustomValidity('Informe uma área construída válida.');el('areaConstruidaTotal').reportValidity();return;}
+    el('areaConstruidaTotal').setCustomValidity('');
+    el('areaConstruidaTotal').value=v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  });
+  el('areaConstruidaTotal').addEventListener('input',()=>el('areaConstruidaTotal').setCustomValidity(''));
+  el('estado').addEventListener('change',()=>atualizarMunicipio(true));
+  atualizarMunicipio();
+  function coletar(){const dados={};ids.forEach(k=>dados[k]=el(k).value);return dados;}
+  function aplicar(dados){
+    if(!dados||typeof dados!=='object'||Array.isArray(dados))throw new Error('Referência do projeto inválida.');
+    if(ids.some(k=>k in dados&&typeof dados[k]!=='string'))throw new Error('Campo de referência com tipo inválido.');
+    const estado=dados.estado||'';if(estado&&!ufs.some(([uf])=>uf===estado))throw new Error('Estado inválido.');
+    ids.forEach(k=>{
+      const anterior=(k==='cliente'&&typeof dados.responsavelUso==='string')?dados.responsavelUso:'';
+      const value=typeof dados[k]==='string'?dados[k]:anterior;
+      el(k).value=value.slice(0,el(k).maxLength>0?el(k).maxLength:2000);
+    });
+    el('cpfCnpj').value=formatarCpfCnpj(el('cpfCnpj').value);
+    atualizarMunicipio();
+  }
+  window.SARHidrantesReferencia=Object.freeze({coletar,aplicar});
+})();
+</script>
+<script src="../../../js/redes-hidrantes-aba02.js" defer></script>
+<script>
+// Integração preparada para futura barra de ferramentas PADRÃO do SAR.
+// Nenhum botão ou mensagem de JSON nesta aba; apenas métodos internos acessíveis pelo futuro cabeçalho.
+(function(){
+  'use strict';
+  const formato='sar.hidrantes.estudo-avulso';
+  const versao_formato=1;
+  function coletar(){
+    return {
+      formato,versao_formato,salvo_em:new Date().toISOString(),
+      referenciaProjeto:window.SARHidrantesReferencia.coletar(),
+      edificacoes:window.SARHidrantesEdificacoes.coletar(),
+      // Módulos ainda não operacionais nesta prévia serão integrados depois.
+      configuracoes:null,rede:null,resultados:null
+    };
+  }
+  function normalizar(conteudo){
+    const dados=typeof conteudo==='string'?JSON.parse(conteudo):conteudo;
+    if(!dados||typeof dados!=='object'||Array.isArray(dados))throw new Error('Arquivo JSON inválido.');
+    // Arquivos anteriores contendo somente a Aba 01 continuam compatíveis.
+    if(dados.formato==='sar.hidrantes.referencia-projeto-avulso'&&dados.versao_formato===1){
+      if(!dados.dados||typeof dados.dados!=='object')throw new Error('Referência antiga inválida.');
+      return {referenciaProjeto:dados.dados,edificacoes:null};
+    }
+    if(dados.formato!==formato||dados.versao_formato!==versao_formato)throw new Error('Formato ou versão do estudo incompatível.');
+    if(!dados.referenciaProjeto||!dados.edificacoes)throw new Error('Dados de estudo incompletos.');
+    return dados;
+  }
+  function aplicar(conteudo){
+    const dados=normalizar(conteudo);
+    // Validar a referência antes de aplicar; edificação também validada no próprio método.
+    if(dados.edificacoes)window.SARHidrantesEdificacoes.aplicar(dados.edificacoes);
+    window.SARHidrantesReferencia.aplicar(dados.referenciaProjeto);
+    return dados;
+  }
+  function nomeSeguro(t){
+    return String(t||'projeto-avulso').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'_').replace(/^_+|_+$/g,'').slice(0,75)||'projeto-avulso';
+  }
+  function salvarArquivo(){
+    const dados=coletar(),blob=new Blob([JSON.stringify(dados,null,2)],{type:'application/json;charset=utf-8'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;
+    a.download='SAR_Hidrantes_'+nomeSeguro(dados.referenciaProjeto.referencia||dados.referenciaProjeto.obra)+'.json';
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);
+  }
+  const input=document.createElement('input');input.type='file';input.accept='.json,application/json';input.hidden=true;
+  input.setAttribute('aria-label','Selecionar estudo SAR JSON');document.body.appendChild(input);
+  async function carregarArquivo(file){
+    if(!file||file.size>5_000_000)throw new Error('Arquivo ausente ou superior a 5 MB.');
+    return aplicar(await file.text());
+  }
+  function abrirArquivo(){input.value='';input.click();}
+  input.addEventListener('change',async e=>{
+    const file=e.target.files?.[0];if(!file)return;
+    try{
+      await carregarArquivo(file);
+      window.SARCabecalhoModulo?.avisar('Estudo JSON carregado com sucesso.');
+    }catch(err){
+      console.warn('Falha ao abrir JSON do estudo:',err);
+      window.SARCabecalhoModulo?.avisar(err?.message||'Não foi possível abrir o estudo.',true);
+    }finally{input.value='';}
+  });
+  function novo(){
+    const vazios=Object.fromEntries(
+      ['cliente','cpfCnpj','endereco','estado','municipio','referencia','projetoCobom','data','obra','areaConstruidaTotal','rt','crea','art','notas'].map(k=>[k,''])
+    );
+    vazios.data=new Date().toLocaleDateString('pt-BR');
+    window.SARHidrantesEdificacoes.aplicar({
+      edificacaoAtiva:1,
+      edificacoes:[{id:1,nome:'Galpão 01',area:'',grupo:'',divisao:'',atividade:'',produtos:[],ajuste:false,cargaManual:'',justificativa:''}]
+    });
+    window.SARHidrantesReferencia.aplicar(vazios);
+    document.querySelector('[data-tab="aba1"]')?.click();
+  }
+  window.SARHidrantesEstudo=Object.freeze({coletar,aplicar,salvarArquivo,abrirArquivo,carregarArquivo,novo});
+})();
+</script>
+<script>
+/* Ponte local entre o cabeçalho padronizado e os métodos do estudo.
+ * Futuramente, este cabeçalho será compartilhado entre os módulos SAR.
+ * Não executa cálculo hidráulico ou classificação normativa. */
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  let avisoTimer;
+  function avisar(texto,erro=false){
+    const el=$('sar-aviso');
+    el.textContent=String(texto);
+    el.style.borderLeftColor=erro?'#f3a5a0':'#9dd532';
+    el.hidden=false;
+    clearTimeout(avisoTimer);
+    avisoTimer=setTimeout(()=>{el.hidden=true},4000);
+  }
+  window.SARCabecalhoModulo=Object.freeze({avisar});
+  $('sar-salvar').addEventListener('click',()=>{
+    try{
+      window.SARHidrantesEstudo.salvarArquivo();
+      avisar('JSON local salvo — Abas 01 e 02. As demais abas ainda não fazem parte do arquivo.');
+    }catch(e){avisar(e.message||'Erro ao salvar o estudo.',true)}
+  });
+  $('sar-abrir').addEventListener('click',()=>{
+    if(!confirm('Abrir arquivo JSON? Os dados atuais das Abas 01 e 02 serão substituídos.'))return;
+    window.SARHidrantesEstudo.abrirArquivo();
+  });
+  $('sar-novo').addEventListener('click',()=>{
+    if(!confirm('Iniciar novo estudo? Os dados atuais não salvos serão perdidos.'))return;
+    window.SARHidrantesEstudo.novo();
+    avisar('Novo estudo iniciado. Campos das Abas 01 e 02 reiniciados.');
+  });
+  $('sar-mais').querySelectorAll('[data-sar-aba]').forEach(botao=>{
+    botao.addEventListener('click',()=>{
+      document.querySelector('[data-tab="'+botao.dataset.sarAba+'"]')?.click();
+      $('sar-mais').open=false;
+    });
+  });
+  $('sar-sobre').addEventListener('click',()=>{
+    $('sar-mais').open=false;
+    avisar('Aba 02 consulta a API oficial do SAR para classificação normativa. Demais abas continuam em desenvolvimento; não há cálculo hidráulico da rede nesta versão.');
+  });
+  document.addEventListener('click',e=>{
+    if(!$('sar-mais').contains(e.target))$('sar-mais').open=false;
+  });
+})();
+</script>
+</body></html>
