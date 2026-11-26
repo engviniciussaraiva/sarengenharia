@@ -1070,3 +1070,39 @@ header#cabecalhoSite{background:linear-gradient(180deg,#001c13 0%,#002b1d 58%,#0
 .sar-hero-badges{display:flex;flex-direction:column;align-items:flex-start;gap:9px;max-width:100%;}
 .sar-hero-badges .badge{max-width:100%;box-sizing:border-box;white-space:normal;overflow-wrap:anywhere;}
 .sar-hero-badges .badge::before{flex:0 0 8px;}
+
+/* SAR Index V7 — botão de acesso institucional, somente no cabeçalho */
+#cabecalhoSite .sar-acesso-header{
+  background:#073A2B;
+  border:1px solid #A3FF12;
+  border-radius:9px;
+  box-shadow:none;
+  color:#fff;
+  font-family:"Segoe UI",Arial,sans-serif;
+  font-size:14px;
+  font-weight:400;
+  line-height:1.2;
+  letter-spacing:0;
+  padding:10px 17px;
+  gap:10px;
+  white-space:nowrap;
+  text-decoration:none;
+}
+#cabecalhoSite .sar-acesso-header .sar-acesso-engenheiro{
+  flex:0 0 26px;
+  width:26px;
+  height:26px;
+  color:#A3FF12;
+}
+#cabecalhoSite .sar-acesso-header .sar-acesso-rotulo{font-weight:400;}
+#cabecalhoSite .sar-acesso-header:hover{
+  background:#0B4935;
+  border-color:#C0FF55;
+  box-shadow:0 0 12px rgba(163,255,18,.13);
+  filter:none;
+}
+#cabecalhoSite .sar-acesso-header:focus-visible{outline:2px solid #A3FF12;outline-offset:3px;}
+@media(max-width:720px){
+ #cabecalhoSite .sar-acesso-header{padding:8px 11px;font-size:12px;gap:7px;}
+ #cabecalhoSite .sar-acesso-header .sar-acesso-engenheiro{width:23px;height:23px;flex-basis:23px;}
+}
