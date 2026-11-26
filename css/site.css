@@ -1065,3 +1065,8 @@ header#cabecalhoSite{background:linear-gradient(180deg,#001c13 0%,#002b1d 58%,#0
 /* HERO: subtitulo do registro TITULO, administrado pelo CMS */
 .hero .sar-hero-subtitle{color:#fff;font-size:clamp(22px,2.7vw,40px);font-weight:750;line-height:1.15;margin:-4px 0 16px;letter-spacing:-.02em;overflow-wrap:anywhere;}
 @media(max-width:600px){.hero .sar-hero-subtitle{font-size:clamp(20px,5vw,29px);margin:0 0 12px;}}
+
+/* HERO: todos os BADGE, BADGE1, BADGE2... ativos em linhas independentes. */
+.sar-hero-badges{display:flex;flex-direction:column;align-items:flex-start;gap:9px;max-width:100%;}
+.sar-hero-badges .badge{max-width:100%;box-sizing:border-box;white-space:normal;overflow-wrap:anywhere;}
+.sar-hero-badges .badge::before{flex:0 0 8px;}

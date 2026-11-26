@@ -45,11 +45,12 @@ function iniciarCarrosselHero(slides){
  mostrar(0);reiniciar();
 }
 function renderHero(g){
- const badge=item(g,"BADGE"),titulo=item(g,"TITULO"),desc=item(g,"DESCRICAO");
+ const badges=sort(g.filter(x=>/^BADGE(?:[0-9]+)?$/.test(code(x.item_codigo||x.chave)) && ativo(x) && txt(x.titulo)));
+ const titulo=item(g,"TITULO"),desc=item(g,"DESCRICAO");
  const t=txt(titulo?.titulo);const p=t.includes(":")?t.split(/:(.*)/s):[t,""];
  const registros=sort(g.filter(x=>code(x.item_codigo).startsWith("CARROSSEL_")));
  const slides=registros.length?registros.map(x=>({titulo:txt(x.titulo),texto:txt(x.texto||x.subtitulo)})).filter(x=>x.titulo):SAR_SLIDES_PADRAO;
- document.getElementById("heroConteudo").innerHTML=`${badge?`<div class="badge">${esc(badge.titulo)}</div>`:""}<h1>${esc(p[0]+(p[1]?":":""))}${p[1]?`<span>${esc(p[1].trim())}</span>`:""}</h1>${txt(titulo?.subtitulo)?`<div class="sar-hero-subtitle">${esc(titulo.subtitulo)}</div>`:""}<div class="sar-hero-underline" aria-hidden="true"></div>${desc?`<p class="lead">${esc(desc.titulo||desc.texto)}</p>`:""}<div class="sar-hero-carousel" id="sarHeroCarousel" aria-label="Mensagens sobre a plataforma"><button type="button" class="sar-carousel-prev" aria-label="Mensagem anterior">‹</button><div class="sar-carousel-content"><strong class="sar-carousel-title"></strong><span class="sar-carousel-description"></span><div class="sar-carousel-dots" aria-label="Selecionar mensagem"></div></div><button type="button" class="sar-carousel-next" aria-label="Próxima mensagem">›</button></div>`;
+ document.getElementById("heroConteudo").innerHTML=`${badges.length?`<div class="sar-hero-badges">${badges.map(b=>`<div class="badge">${esc(b.titulo)}</div>`).join("")}</div>`:""}<h1>${esc(p[0]+(p[1]?":":""))}${p[1]?`<span>${esc(p[1].trim())}</span>`:""}</h1>${txt(titulo?.subtitulo)?`<div class="sar-hero-subtitle">${esc(titulo.subtitulo)}</div>`:""}<div class="sar-hero-underline" aria-hidden="true"></div>${desc?`<p class="lead">${esc(desc.titulo||desc.texto)}</p>`:""}<div class="sar-hero-carousel" id="sarHeroCarousel" aria-label="Mensagens sobre a plataforma"><button type="button" class="sar-carousel-prev" aria-label="Mensagem anterior">‹</button><div class="sar-carousel-content"><strong class="sar-carousel-title"></strong><span class="sar-carousel-description"></span><div class="sar-carousel-dots" aria-label="Selecionar mensagem"></div></div><button type="button" class="sar-carousel-next" aria-label="Próxima mensagem">›</button></div>`;
  iniciarCarrosselHero(slides.length?slides:SAR_SLIDES_PADRAO);
 }
 
