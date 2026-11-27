@@ -54,6 +54,25 @@
 @media(max-width:670px){#aba2 .ed-resultado{grid-template-columns:1fr}#aba2 .ed-resultado div{border-right:0;border-bottom:1px solid #d4e0d5;padding-bottom:8px}#aba2 .ed-resultado div:last-child{border-bottom:0;padding-bottom:0}#aba2 .ed-editor{padding:12px}}
 
 
+/* SAR — Navegação técnica compacta, integrada ao cabeçalho fixo. */
+:root{--sar-cabecalho-altura:64px}
+.topnav{
+  position:sticky;top:var(--sar-cabecalho-altura);z-index:59;
+  background:#0b3426;border-bottom:1px solid #406e59;
+  box-shadow:0 2px 6px rgba(5,42,28,.10);
+}
+.topnav button{
+  background:#0b3426;color:#fff;min-height:54px;
+  height:auto;padding:5px 7px;font-family:'Segoe UI',Arial,sans-serif;
+  font-size:12.5px;font-weight:600;line-height:1.15;
+  border-bottom:3px solid transparent;
+}
+.topnav button.active{background:#154c36;border-bottom-color:#9dd532;color:#fff}
+.topnav button:hover:not(.active){background:#154c36}
+#aba2 .ed-topline.empty{justify-content:flex-end}
+#aba2 #ed-list[hidden],#aba2 #ed-total[hidden]{display:none!important}
+@media(max-width:800px){.topnav button{min-height:54px;font-size:12px;padding:5px 7px;flex-basis:132px}}
+
 /* CABEÇALHO PADRÃO SAR — reproduzido do cabeçalho V6.1, isolado das abas. */
 .sar-modulo-cabecalho{
   position:sticky;top:0;z-index:60;width:100%;min-height:64px;
@@ -137,6 +156,17 @@
     </details>
   </div>
 </header>
+<script>
+/* Apenas sincroniza a posição da barra de abas com a altura do cabeçalho. */
+(function(){
+  const cabecalho=document.querySelector('.sar-modulo-cabecalho');
+  if(!cabecalho)return;
+  function medir(){document.documentElement.style.setProperty('--sar-cabecalho-altura',cabecalho.getBoundingClientRect().height+'px')}
+  medir();
+  if(window.ResizeObserver)new ResizeObserver(medir).observe(cabecalho);
+  else window.addEventListener('resize',medir);
+})();
+</script>
 <div id="sar-aviso" class="sar-modulo-aviso" role="status" aria-live="polite" hidden></div>
 <nav class="topnav" aria-label="Seções do dimensionamento"><button data-tab="aba1" class="active">📄 Referência do<br> Projeto</button><button data-tab="aba2">🏢 Dados da<br> Edificação</button><button data-tab="aba3">⚙️ Configurações<br> do Sistema de<br> Hidrantes</button><button data-tab="aba4">🚰 Rede<br> Isométrica</button><button data-tab="aba6">⚡ Conjunto Moto<br> Bomba</button><button data-tab="aba5">✏️ Memória de<br> Cálculo</button><button data-tab="aba7">🧾 Memorial<br> Descritivo</button></nav>
 <section id="aba1" class="aba ativa">
@@ -174,16 +204,12 @@
   <label for="av-notas">Observações</label><textarea id="av-notas" rows="3" placeholder="Observações referentes ao projeto" maxlength="2000"></textarea>
 
 </section>
-<section id="aba2" class="aba" aria-labelledby="ed-titulo">
-  <h2 id="ed-titulo">🏢 Dados da Edificação</h2>
-  <div class="ed-banner"><strong>Cadastro das edificações deste projeto</strong><br>
-  Cadastre quantas edificações forem necessárias. Cada uma possui sua ocupação, área protegida e carga de incêndio. As configurações hidráulicas e os diferentes tipos de hidrantes serão tratados nas próximas abas.</div>
-
-  <div class="ed-topline"><h3>Edificações cadastradas <span id="ed-count" class="ed-count">1</span></h3>
+<section id="aba2" class="aba" aria-label="Dados da Edificação">
+  <div id="ed-topline" class="ed-topline empty"><h3 id="ed-total" hidden>Edificações cadastradas <span id="ed-count" class="ed-count">0</span></h3>
     <button id="ed-add" class="ed-button" type="button">+ Cadastrar Edificação</button></div>
-  <div id="ed-list" class="ed-list" role="group" aria-label="Selecionar edificação cadastrada"></div>
+  <div id="ed-list" class="ed-list" role="group" aria-label="Selecionar edificação cadastrada" hidden></div>
 
-  <div id="ed-editor" class="ed-editor">
+  <div id="ed-editor" class="ed-editor" hidden>
     <div class="ed-header"><h3>Dados da edificação selecionada</h3><button type="button" id="ed-remove" class="ed-button ed-danger">Excluir edificação</button></div>
     <div class="linha">
       <div class="coluna"><label for="ed-nome">Identificação da edificação</label><input id="ed-nome" type="text" placeholder="Ex.: Galpão 01" maxlength="140"></div>
@@ -351,8 +377,8 @@
     );
     vazios.data=new Date().toLocaleDateString('pt-BR');
     window.SARHidrantesEdificacoes.aplicar({
-      edificacaoAtiva:1,
-      edificacoes:[{id:1,nome:'Galpão 01',area:'',grupo:'',divisao:'',atividade:'',produtos:[],ajuste:false,cargaManual:'',justificativa:''}]
+      edificacaoAtiva:null,
+      edificacoes:[]
     });
     window.SARHidrantesReferencia.aplicar(vazios);
     document.querySelector('[data-tab="aba1"]')?.click();

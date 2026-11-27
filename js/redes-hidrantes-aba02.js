@@ -13,11 +13,11 @@
   const opt=(rotulo,valor)=>new Option(rotulo,String(valor));
   const numBR=s=>{const raw=String(s??'').trim().replace(/\s/g,'');if(!raw)return null;const n=Number(raw.includes(',')?raw.replace(/\./g,'').replace(',','.'):raw);return Number.isFinite(n)&&n>=0?n:null};
   const novo=(id,nome)=>({id,nome,area:'',grupo:'',divisao:'',atividade:'',produtos:[],ajuste:false,cargaManual:'',justificativa:''});
-  let eds=[novo(1,'Galpão 01')], ativo=1, nextEd=2, nextProd=1;
+  let eds=[], ativo=null, nextEd=1, nextProd=1;
   let catalogo=[],grupos=[],pronto=false,sequencia=0,temporizador=null;
   let promiseClient=null;
   const buscar=()=>eds.find(e=>e.id===ativo);
-  const dadosGrupo=()=>catalogo.filter(r=>r.grupo===buscar().grupo);
+  const dadosGrupo=()=>catalogo.filter(r=>r.grupo===buscar()?.grupo);
   function mensagem(msg,erro=false){$('ed-status').textContent=msg;$('ed-status').style.color=erro?'#b71c1c':'#006400';}
   function estadoFonte(texto){$('ed-fonte').textContent=texto;}
   function atualizarResultado(res){
@@ -50,7 +50,10 @@
       b.addEventListener('click',()=>{ativo=ed.id;render();});return b;
     }));
     $('ed-count').textContent=String(eds.length);
-    $('ed-remove').disabled=eds.length===1;
+    $('ed-total').hidden=eds.length===0;
+    $('ed-list').hidden=eds.length===0;
+    $('ed-topline').classList.toggle('empty',eds.length===0);
+    $('ed-remove').disabled=eds.length===0;
   }
   function choices(sel,lista,valor,rotulo='Selecione'){
     sel.replaceChildren(opt(rotulo,''),...lista.map(([v,t])=>opt(t,v)));
@@ -199,6 +202,13 @@
   }
   function render(){
     cards();const ed=buscar();
+    if(!ed){
+      clearTimeout(temporizador);
+      apiSeq=++sequencia; // descarta classificações pendentes de uma edificação excluída
+      $('ed-editor').hidden=true;
+      return;
+    }
+    $('ed-editor').hidden=false;
     $('ed-nome').value=ed.nome;$('ed-area').value=ed.area;
     grupoOptions();ocupacaoOptions();$('ed-j').hidden=ed.grupo!=='J';
     $('ed-ajustar').checked=ed.ajuste;$('ed-ajuste-conteudo').hidden=!ed.ajuste;
@@ -269,7 +279,7 @@
     }catch(e){if(seq!==apiSeq||ativo!==edId)return;atualizarResultado(null);mensagem(e.message||'Falha ao classificar.',true);}
   }
   $('ed-add').addEventListener('click',()=>{if(eds.length>=30){mensagem('Limite de 30 edificações por estudo.',true);return;}const ed=novo(nextEd++,'Edificação '+(eds.length+1));eds.push(ed);ativo=ed.id;render();$('ed-nome').focus();});
-  $('ed-remove').addEventListener('click',()=>{if(eds.length<=1)return;const ed=buscar();if(!confirm('Excluir '+(ed.nome||'a edificação')+' do estudo?'))return;eds=eds.filter(x=>x.id!==ed.id);ativo=eds[0].id;render();});
+  $('ed-remove').addEventListener('click',()=>{if(!eds.length)return;const ed=buscar();if(!ed)return;if(!confirm('Excluir '+(ed.nome||'a edificação')+' do estudo?'))return;eds=eds.filter(x=>x.id!==ed.id);ativo=eds[0]?.id??null;render();});
   $('ed-nome').addEventListener('input',e=>{buscar().nome=e.target.value;cards();});
   $('ed-area').addEventListener('input',e=>{buscar().area=e.target.value;});
   $('ed-area').addEventListener('blur',e=>{if(!e.target.value.trim())return;const v=numBR(e.target.value);if(v===null){mensagem('Área protegida inválida.',true);return;}e.target.value=fmt(v);buscar().area=e.target.value;});
@@ -281,7 +291,7 @@
   $('ed-justificativa').addEventListener('input',e=>{buscar().justificativa=e.target.value;agendarClassificacao();});
   function coletar(){return {edificacaoAtiva:ativo,edificacoes:eds.map(e=>({id:e.id,nome:e.nome,area:e.area,grupo:e.grupo,divisao:e.divisao,atividade:e.atividade,produtos:e.produtos.map(p=>({id:p.id,produto:String(p.produto),altura:String(p.altura)})),ajuste:!!e.ajuste,cargaManual:e.cargaManual,justificativa:e.justificativa}))};}
   function aplicar(dados){
-    if(!dados||!Array.isArray(dados.edificacoes)||dados.edificacoes.length<1||dados.edificacoes.length>30)throw new Error('JSON: cadastro de edificações inválido.');
+    if(!dados||!Array.isArray(dados.edificacoes)||dados.edificacoes.length>30)throw new Error('JSON: cadastro de edificações inválido.');
     const ids=new Set(),pr=new Set();
     const novas=dados.edificacoes.map((e,i)=>{
       if(!Number.isSafeInteger(e.id)||e.id<=0||ids.has(e.id))throw new Error('JSON: ID de edificação duplicado/inválido.');ids.add(e.id);
@@ -290,8 +300,8 @@
       const p=e.produtos.map(q=>{if(!Number.isSafeInteger(q.id)||q.id<1||pr.has(q.id))throw new Error('JSON: ID de produto inválido.');pr.add(q.id);return {id:q.id,produto:String(q.produto||'').slice(0,100),altura:String(q.altura??'').slice(0,25)}});
       return {...novo(e.id,e.nome),area:e.area,grupo:e.grupo,divisao:e.divisao,atividade:e.atividade,produtos:p,ajuste:e.ajuste,cargaManual:e.cargaManual,justificativa:e.justificativa};
     });
-    if(!ids.has(dados.edificacaoAtiva))throw new Error('JSON: edificação selecionada inválida.');
-    eds=novas;ativo=dados.edificacaoAtiva;nextEd=Math.max(...eds.map(e=>e.id))+1;nextProd=Math.max(0,...eds.flatMap(e=>e.produtos.map(p=>p.id)))+1;render();
+    if(novas.length&&!ids.has(dados.edificacaoAtiva))throw new Error('JSON: edificação selecionada inválida.');
+    eds=novas;ativo=novas.length?dados.edificacaoAtiva:null;nextEd=Math.max(0,...eds.map(e=>e.id))+1;nextProd=Math.max(0,...eds.flatMap(e=>e.produtos.map(p=>p.id)))+1;render();
   }
   window.SARHidrantesEdificacoes=Object.freeze({coletar,aplicar});
   render();
