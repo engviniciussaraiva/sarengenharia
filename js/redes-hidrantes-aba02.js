@@ -1,3 +1,4 @@
+// V4: consolidação das tabelas CLASSV01 — motor SAR (Python) calcula e valida a ocupação mista.
 /* SAR — Hidrantes / Aba 02: Ocupação / Uso.
  * UI baseada no bloco Ocupação / Uso do CLASSV01.html (mesmo visual).
  * Sem regras normativas no navegador; todas as classificações vêm da API SAR.
@@ -52,7 +53,7 @@
     $('ed-resultado-carga').textContent=q==null?'—':fmt(q);
     $('ed-carga').value=q==null?'':fmt(q);
     const ed=buscar();if(ed)ed.divisao=div==='A determinar'?'':div;
-    renderPredominante();
+    renderLista();
   }
   const registrosPorUso=uso=>catalogo.filter(r=>r.grupo===uso);
   const alturaExigida=r=>!!r && r.grupo==='J' && r.divisao_direta!=='J-1' && (Number(r.carga_incendio_m)||r.metodo_calculo_mj==='por_metro');
@@ -99,35 +100,95 @@
     $(cfg.input).addEventListener('blur',()=>setTimeout(()=>ocultarSugestoes(cfg),120));
   }
   conectarBusca(autoc.unico);conectarBusca(autoc.misto);
-  function escolherPredominanteVisual(ed){
-    if(!ed?.ocupacoes?.length)return 'Aguardando cadastro de ocupações.';
-    if(ed.ocupacoes.length===1)return 'Ocupação cadastrada: '+ed.ocupacoes[0].descricao+'. A classificação técnica será apresentada pelo motor SAR.';
-    const exclusivamenteJ=ed.ocupacoes.every(o=>o.grupo==='J');
-    if(exclusivamenteJ){
-      const id=resultadoAtual?.produto_governante_id;
-      const gov=ed.ocupacoes.find(o=>String(o.atividade)===String(id));
-      return gov?'Produto governante conforme motor SAR: '+gov.descricao+'.':'Produtos cadastrados. O motor SAR determina a maior carga de incêndio entre eles.';
-    }
-    return 'Múltiplas ocupações cadastradas. O enquadramento e a ocupação predominante dependem da consolidação das regras no backend do SAR.';
+  // Renderização das tabelas (dados e classificação SEMPRE retornam da API).
+  // A digitação/cadastro das ocupações permanece uma função de interface.
+  function el(tag,texto,classe){
+    const v=document.createElement(tag);
+    if(texto!==undefined&&texto!==null)v.textContent=String(texto);
+    if(classe)v.className=classe;
+    return v;
   }
-  function renderPredominante(){const ed=buscar();$('ed-predominante').textContent=escolherPredominanteVisual(ed);}
+  function tabela(titulos){
+    const wrap=el('div',null,'ed-ocupacoes-tabela-wrapper');
+    const table=el('table',null,'ed-ocupacoes-tabela');
+    const thead=el('thead'),tr=el('tr');
+    titulos.forEach(([nome,classe])=>tr.append(el('th',nome,classe)));
+    thead.append(tr);table.append(thead,el('tbody'));wrap.append(table);
+    return [wrap,table.querySelector('tbody')];
+  }
+  const entradaOuMotor=o=>resultadoAtual?.ocupacoes?.find(
+    r=>String(r.id)===String(o.id)
+  )||null;
+  function renderPredominante(){
+    const box=$('ed-predominante'),ed=buscar();box.replaceChildren();
+    if(!ed?.ocupacoes.length){box.textContent='Aguardando cadastro de ocupações.';return;}
+    if(!resultadoAtual){
+      box.textContent='Aguardando retorno do motor SAR. Informe a área protegida e as ocupações.';
+      return;
+    }
+    const res=resultadoAtual;
+    const [wrap,tbody]=tabela([
+      ['Pavimento',''],['Ocupação',''],['Divisão','center'],
+      ['Carga de incêndio (MJ/m²)','num'],['Área (m²)','num'],['% sobre total','num']
+    ]);
+    (res.linhas_predominancia||res.ocupacoes||[]).forEach(r=>{
+      const tr=el('tr');
+      if(r.predominante)tr.classList.add('predominante');
+      if(r.determinante&&res.situacao==='mista')tr.classList.add('determinante');
+      const titulo=el('td',r.pavimento||'—'),uso=el('td',r.uso||r.grupo||'—');
+      if(r.predominante)uso.append(el('span',' — predominante','tag-predominante'));
+      if(r.determinante&&res.situacao==='mista')uso.append(el('span',' — determinante','tag-determinante'));
+      tr.append(titulo,uso,el('td',r.divisao||'—','center'),
+        el('td',fmt(r.carga_mj_m2),'num'),el('td',fmt(r.area_m2),'num'),
+        el('td',fmt(r.percentual)+'%','num'));
+      tbody.append(tr);
+    });
+    box.append(wrap);
+    const classe=res.resultado_final_validado?'':'aviso';
+    const resumo=el('div',null,'ed-pred-resumo '+classe);
+    let mensagem='';
+    if(res.situacao==='unica')mensagem='Edificação com ocupação única. Aplica-se a ocupação cadastrada para a caracterização.';
+    else if(res.situacao==='nao_mista')mensagem='Edificação não caracterizada com ocupação mista segundo a regra cadastrada; aplica-se a ocupação predominante.';
+    else if(res.situacao==='mista')mensagem='Edificação caracterizada com ocupação mista. O motor aplica o peso normativo das prioridades cadastradas para determinar a ocupação governante.';
+    else mensagem='Enquadramento pendente de validação normativa.';
+    resumo.append(el('strong',mensagem));
+    if(res.regra_ocupacao_mista_id!=null&&res.limite_subsidiaria_m2!=null){
+      resumo.append(el('div','Área subsidiária: '+fmt(res.area_subsidiaria_m2)+
+        ' m². Limite cadastrado: '+fmt(res.limite_subsidiaria_m2)+' m².'));
+    }
+    const gov=res.ocupacao_determinante;
+    if(gov)resumo.append(el('div','Ocupação adotada como determinante para o enquadramento técnico: '+
+       (gov.uso||gov.grupo)+' — '+(gov.divisao||'sem divisão registrada')));
+    if(res.aviso)resumo.append(el('div',res.aviso));
+    box.append(resumo);
+  }
   function renderLista(){
     const ed=buscar(),box=$('ed-lista-ocupacoes');box.replaceChildren();
     if(!ed?.ocupacoes.length){box.textContent='Aguardando inclusão de ocupações.';renderPredominante();return;}
+    const [wrap,tbody]=tabela([
+      ['Pavimento',''],['Ocupação',''],['Descrição',''],['Divisão','center'],
+      ['Carga de incêndio (MJ/m²)','num'],['Área (m²)','num'],['Ação','center']
+    ]);
     ed.ocupacoes.forEach((o,i)=>{
-      const row=document.createElement('div');row.className='ed-oc-item';
-      const info=document.createElement('div'),strong=document.createElement('strong'),small=document.createElement('small');
-      strong.textContent=o.descricao;
-      const a=[o.grupo||'',o.divisao||''];
-      if(o.pavimento)a.push(o.pavimento);
-      if(o.area)a.push('Área: '+o.area+' m²');
-      if(o.grupo==='J'&&o.altura)a.push('Armazenamento: '+o.altura+' m');
-      small.textContent=a.filter(Boolean).join(' · ');
-      info.append(strong,small);
-      const b=document.createElement('button');b.type='button';b.className='ed-oc-remover';b.textContent='Remover';b.setAttribute('aria-label','Remover ocupação '+o.descricao);
-      b.addEventListener('click',()=>{ed.ocupacoes.splice(i,1);sincronizarTecnicos(ed);renderLista();agendarClassificacao();});
-      row.append(info,b);box.append(row);
-    });renderPredominante();
+      const r=entradaOuMotor(o);const area=r?.area_m2;
+      const tr=el('tr');
+      const tdAcao=el('td',null,'center');
+      const btn=el('button','✕','ed-oc-excluir');btn.type='button';
+      btn.setAttribute('aria-label','Remover ocupação '+(o.descricao||''));
+      btn.addEventListener('click',()=>{
+        ed.ocupacoes.splice(i,1);sincronizarTecnicos(ed);
+        limparResultado();renderLista();agendarClassificacao();
+      });tdAcao.append(btn);
+      tr.append(el('td',r?.pavimento||o.pavimento||'Toda a edificação'),
+        el('td',r?.uso||(grupos.find(g=>g.codigo===o.grupo)?.nome||o.grupo)),
+        el('td',r?.descricao||o.descricao||'—'),
+        el('td',r?.divisao||o.divisao||'—','center'),
+        el('td',r?fmt(r.carga_mj_m2):'—','num'),
+        el('td',area!=null?fmt(area):((!ed.ocupacaoUnica&&o.area)?o.area:(ed.area||'—')),'num'),
+        tdAcao);
+      tbody.append(tr);
+    });
+    box.append(wrap);renderPredominante();
   }
   function sincronizarTecnicos(ed){
     const itens=ed.ocupacoes;
@@ -155,7 +216,7 @@
   function alternarModo(atualizar=true){
     const unico=$('ed-ocupacao-unica').checked;
     $('ed-bloco-unico').hidden=!unico;$('ed-bloco-misto').hidden=unico;
-    if(atualizar){const ed=buscar();if(ed)ed.ocupacaoUnica=unico;limparRascunho();}
+    if(atualizar){const ed=buscar();if(ed){ed.ocupacaoUnica=unico;agendarClassificacao();}limparRascunho();}
   }
   $('ed-ocupacao-unica').addEventListener('change',()=>alternarModo());
   function adicionarOcupacao(modo){
@@ -163,6 +224,17 @@
     if(ed.ocupacoes.length>=40){mensagem('Máximo de 40 ocupações por edificação.',true);return;}
     const cfg=autoc[modo],r=cfg.selecionado;
     if(!pronto||!r){mensagem('Selecione o uso e uma ocupação da lista.',true);$(cfg.input).focus();return;}
+    if(!(numBR(ed.area)>0)){
+      mensagem('Informe antes a área protegida pelo sistema para esta edificação.',true);
+      $('ed-area').focus();return;
+    }
+    // Ocupação única equivale a apenas uma atividade; exceção do Grupo J:
+    // produtos distintos podem compartilhar a mesma área de armazenamento.
+    if(modo==='unico'&&ed.ocupacoes.length&&
+      !(r.grupo==='J'&&ed.ocupacoes.every(o=>o.grupo==='J'))){
+      mensagem('Ocupação única já cadastrada. Remova a anterior para substituí-la, ou desmarque "Ocupação única" para cadastrar setores distintos.',true);
+      return;
+    }
     const req=alturaExigida(r),altura=req?String($(cfg.height).value).trim():'';
     if(req&&!(numBR(altura)>0)){mensagem('Informe a altura de armazenamento positiva em metros.',true);$(cfg.height).focus();return;}
     const pavimento=modo==='misto'?$('ed-pavimento').value.trim():'';
@@ -173,7 +245,7 @@
       mensagem('Esta ocupação já foi adicionada com os mesmos parâmetros.',true);return;
     }
     ed.ocupacoes.push({id:nextOcc++,grupo:r.grupo,atividade:String(r.id),descricao:r.descricao,divisao:r.divisao_direta||r.divisao_referencia||'',altura,pavimento,area:area?fmt(numBR(area)):''});
-    sincronizarTecnicos(ed);renderLista();agendarClassificacao();
+    sincronizarTecnicos(ed);limparResultado();renderLista();agendarClassificacao();
     limparBusca(cfg);$(cfg.input).focus();mensagem('Ocupação adicionada à edificação.');
   }
   $('ed-add-ocupacao').addEventListener('click',()=>adicionarOcupacao('unico'));
@@ -181,7 +253,7 @@
   $('ed-limpar-ocupacoes').addEventListener('click',()=>{
     const ed=buscar();if(!ed?.ocupacoes.length)return;
     if(!confirm('Remover todas as ocupações cadastradas nesta edificação?'))return;
-    ed.ocupacoes=[];sincronizarTecnicos(ed);renderLista();agendarClassificacao();
+    ed.ocupacoes=[];sincronizarTecnicos(ed);limparResultado();renderLista();agendarClassificacao();
   });
   async function getClient(){
     if(!promiseClient)promiseClient=import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm').then(m=>m.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}));
@@ -213,11 +285,15 @@
   }
   function agendarClassificacao(){
     clearTimeout(temporizador);const seq=++apiSeq;
-    limparResultado();
-    if(!pronto)return;
-    const ed=buscar();if(!ed||!ed.ocupacoes.length)return;
-    const allJ=ed.ocupacoes.every(o=>o.grupo==='J');
-    if(ed.ocupacoes.length>1&&!allJ){mensagem('Várias ocupações: aguardando consolidação normativa no motor do SAR. Dados preservados no JSON.',true);return;}
+    limparResultado();renderLista();
+    const ed=buscar();
+    if(!pronto||!ed||!ed.ocupacoes.length)return;
+    if(!(numBR(ed.area)>0)){
+      mensagem('Informe a Área protegida pelo sistema (m²) para a determinação da ocupação.',true);return;
+    }
+    if(ed.ajuste&&ed.ocupacoes.length>1){
+      mensagem('Ajuste de carga por justificativa deve ser individualizado. Desative o ajuste global para classificar várias ocupações.',true);return;
+    }
     if(ed.ajuste&&(!ed.cargaManual||ed.justificativa.trim().length<10)){
       mensagem('Ajuste de carga exige valor e justificativa técnica de pelo menos 10 caracteres.',true);return;
     }
@@ -225,19 +301,24 @@
   }
   async function classificarAtiva(seq){
     const ed=buscar(),id=ed?.id;if(!ed)return;
-    const allJ=ed.ocupacoes.every(o=>o.grupo==='J');
-    let dados={uf:'SP',grupo:allJ?'J':ed.ocupacoes[0].grupo};
-    if(allJ){
-      dados.produtos=ed.ocupacoes.map(o=>({atividade_id:Number(o.atividade),...(getRecord(o.atividade)?.divisao_direta==='J-1'?{}:{altura_m:o.altura})}));
-      if(dados.produtos.some(p=>p.altura_m!==undefined&&!(numBR(p.altura_m)>0))){mensagem('Informe altura válida para os produtos de depósito.',true);return;}
-    }else dados.atividade_id=Number(ed.ocupacoes[0].atividade);
+    const dados={
+      uf:'SP', area_total_m2:ed.area, ocupacao_unica:ed.ocupacaoUnica!==false,
+      ocupacoes:ed.ocupacoes.map(o=>({
+        id:o.id,grupo:o.grupo,atividade_id:Number(o.atividade),
+        altura_m:o.altura||null,pavimento:o.pavimento||'Toda a edificação',
+        area_m2:o.area||null,
+      }))
+    };
     if(ed.ajuste){dados.carga_manual_mj_m2=ed.cargaManual;dados.justificativa=ed.justificativa;}
-    mensagem('Classificando no motor SAR...');
+    mensagem('Consultando as ocupações e determinando a predominância no motor SAR...');
     try{
-      const resposta=await enviar('classificar',dados);
+      const resposta=await enviar('consolidar_ocupacoes',dados);
       if(seq!==apiSeq||ativo!==id)return;
-      atualizarResultado(resposta);mensagem('Classificação concluída no backend SAR.');
-    }catch(e){if(seq!==apiSeq||ativo!==id)return;limparResultado();mensagem(e.message||'Falha ao classificar.',true);}
+      atualizarResultado(resposta);
+      mensagem(resposta.resultado_final_validado
+        ?'Ocupações consolidadas pelo backend SAR.'
+        :(resposta.aviso||'Aguardando validação de regra normativa.'),!resposta.resultado_final_validado);
+    }catch(e){if(seq!==apiSeq||ativo!==id)return;limparResultado();renderLista();mensagem(e.message||'Falha ao consolidar ocupações.',true);}
   }
   $('ed-add').addEventListener('click',()=>{
     if(eds.length>=30){mensagem('Limite de 30 edificações por estudo.',true);return;}
@@ -249,8 +330,8 @@
     eds=eds.filter(e=>e.id!==ed.id);ativo=eds[0]?.id??null;render();
   });
   $('ed-nome').addEventListener('input',e=>{const ed=buscar();if(ed){ed.nome=e.target.value;renderCards();}});
-  $('ed-area').addEventListener('input',e=>{const ed=buscar();if(ed)ed.area=e.target.value;});
-  $('ed-area').addEventListener('blur',e=>{if(!e.target.value.trim())return;const q=numBR(e.target.value);if(q===null){mensagem('Área protegida inválida.',true);return;}e.target.value=fmt(q);buscar().area=e.target.value;});
+  $('ed-area').addEventListener('input',e=>{const ed=buscar();if(ed){ed.area=e.target.value;agendarClassificacao();}});
+  $('ed-area').addEventListener('blur',e=>{if(!e.target.value.trim())return;const q=numBR(e.target.value);if(q===null){mensagem('Área protegida inválida.',true);return;}e.target.value=fmt(q);buscar().area=e.target.value;agendarClassificacao();});
   $('ed-ajustar').addEventListener('change',e=>{const ed=buscar();if(ed){ed.ajuste=e.target.checked;$('ed-ajuste-conteudo').hidden=!e.target.checked;agendarClassificacao();}});
   $('ed-cargaManual').addEventListener('input',e=>{const ed=buscar();if(ed){ed.cargaManual=e.target.value;agendarClassificacao();}});
   $('ed-justificativa').addEventListener('input',e=>{const ed=buscar();if(ed){ed.justificativa=e.target.value;agendarClassificacao();}});

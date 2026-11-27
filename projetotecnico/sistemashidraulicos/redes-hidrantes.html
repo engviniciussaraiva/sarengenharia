@@ -181,6 +181,27 @@
 #aba2 .ed-ocupacao-card .ed-source{margin-top:14px}
 @media(max-width:680px){#aba2 .ed-ocupacao-card{padding:13px}#aba2 .ed-ocupacao-grid{grid-template-columns:1fr}#aba2 .ed-quadro-cabecalho{flex-wrap:wrap}}
 
+
+/* Quadro de ocupações e predominância — estrutura visual do CLASSV01,
+   isolada na Aba 02 e alimentada exclusivamente pelo resultado da API. */
+#aba2 .ed-ocupacoes-tabela-wrapper{width:100%;overflow-x:auto}
+#aba2 .ed-ocupacoes-tabela{width:100%;min-width:625px;border-collapse:collapse;font-size:13px;background:#fff;color:#333}
+#aba2 .ed-ocupacoes-tabela th{padding:7px 6px;background:#e8f5e9;color:#1b5e20;border:1px solid #d7d7d7;font-weight:700;text-align:left}
+#aba2 .ed-ocupacoes-tabela td{padding:7px 6px;border:1px solid #dedede;text-align:left;line-height:1.45}
+#aba2 .ed-ocupacoes-tabela td:nth-child(4),#aba2 .ed-ocupacoes-tabela th:nth-child(4){text-align:center}
+#aba2 .ed-ocupacoes-tabela td.num,#aba2 .ed-ocupacoes-tabela th.num{text-align:right}
+#aba2 .ed-ocupacoes-tabela td.center,#aba2 .ed-ocupacoes-tabela th.center{text-align:center}
+#aba2 .ed-ocupacoes-tabela tr.predominante{background:#f1f8e9;font-weight:700}
+#aba2 .ed-ocupacoes-tabela tr.predominante td:first-child{border-left:4px solid #1b5e20}
+#aba2 .ed-ocupacoes-tabela tr.determinante{outline:2px solid #ef6c00;outline-offset:-2px}
+#aba2 .ed-ocupacoes-tabela .tag-predominante{color:#1b5e20;font-weight:700}
+#aba2 .ed-ocupacoes-tabela .tag-determinante{color:#bc5c00;font-weight:700}
+#aba2 .ed-oc-excluir{background:#b21f28;color:white;border:0;border-radius:4px;padding:6px 10px;cursor:pointer;font-size:14px}
+#aba2 .ed-pred-resumo{margin-top:10px;padding:12px;border:1px solid #dedede;background:#fff;border-radius:6px;font-size:13px;line-height:1.6}
+#aba2 .ed-pred-resumo strong{color:#1b5e20}
+#aba2 .ed-pred-resumo.erro strong{color:#b21f28}
+#aba2 .ed-pred-resumo.aviso strong{color:#8b6700}
+
 </style></head><body>
 <header class="sar-modulo-cabecalho" aria-label="Cabeçalho do módulo SAR">
   <div class="sar-modulo-identidade">
