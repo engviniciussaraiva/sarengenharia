@@ -823,7 +823,7 @@
     }
 
     .tabela-modulos{
-      min-width:1250px;
+      min-width:900px;
     }
 
     .estrutura-modulo{
@@ -2194,9 +2194,7 @@
             <thead>
               <tr>
                 <th>Estrutura</th>
-                <th>Código</th>
                 <th>Categoria</th>
-                <th>Rota</th>
                 <th>Ordem</th>
                 <th>Menu</th>
                 <th>Site</th>
@@ -2205,7 +2203,7 @@
               </tr>
             </thead>
             <tbody id="corpoModulos">
-              <tr><td class="vazio" colspan="9">Carregando módulos...</td></tr>
+              <tr><td class="vazio" colspan="7">Carregando módulos...</td></tr>
             </tbody>
           </table>
         </section>
@@ -4052,7 +4050,7 @@
     function renderizarModulos(modulos){
       if(!modulos.length){
         elementos.corpoModulos.innerHTML =
-          '<tr><td class="vazio" colspan="9">Nenhum módulo encontrado.</td></tr>';
+          '<tr><td class="vazio" colspan="7">Nenhum módulo encontrado.</td></tr>';
         return;
       }
 
@@ -4082,14 +4080,8 @@
               </div>
             </td>
 
-            <td class="codigo-modulo">${escaparHtml(item.codigo || "—")}</td>
             <td>${escaparHtml(item.categoria || "—")}</td>
 
-            <td>
-              <div class="rota-modulo" title="${escaparHtml(item.rota || "")}">
-                ${escaparHtml(item.rota || "—")}
-              </div>
-            </td>
 
             <td>${Number(item.ordem_menu || 0)}</td>
 
@@ -4261,7 +4253,7 @@
 
       }catch(error){
         elementos.corpoModulos.innerHTML =
-          '<tr><td class="vazio" colspan="9">Não foi possível carregar os módulos.</td></tr>';
+          '<tr><td class="vazio" colspan="7">Não foi possível carregar os módulos.</td></tr>';
 
         definirEstado(
           elementos.estadoModulos,
