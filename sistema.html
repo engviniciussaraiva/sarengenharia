@@ -1573,6 +1573,29 @@ function abrirModulo(modulo){
             <p>Selecione uma ferramenta acima.</p>
         </div>
     `;
+
+    /*
+     * SAR — Acesso inicial ao novo dimensionamento de hidrantes.
+     * Quando ele for a ÚNICA aba visível e autorizada do grupo,
+     * abrir a ferramenta automaticamente, evitando a tela vazia.
+     *
+     * Se houver outras abas visíveis, manter integralmente a
+     * seleção original e as permissões administradas no SAR.
+     * Não tornar visíveis módulos ocultos ou sem permissão.
+     */
+    const abasAbertas = Array.from(
+        document.querySelectorAll("#tabs .tab")
+    );
+    const unicaAbaHidrantes = abasAbertas.length === 1 &&
+        SAR_MENU_COMPLETO.some(function(item){
+            return String(item.modulo_codigo || "").trim().toUpperCase() === codigoModulo &&
+                String(item.aba_codigo || "").trim().toUpperCase() ===
+                    "MODULO_HIDRAULICO_REDE_HIDRANTE" &&
+                podeVisualizar(item.aba_codigo);
+        });
+    if(unicaAbaHidrantes){
+        abasAbertas[0].click();
+    }
 }
 
 
