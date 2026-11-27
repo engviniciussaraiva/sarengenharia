@@ -28,7 +28,6 @@
     $('ed-resultado-carga').textContent=Number.isFinite(Number(carga))&&carga!==undefined&&carga!==null?fmt(carga):'—';
     $('ed-carga').value=carga===undefined||carga===null?'':fmt(carga);
     if(buscar().grupo==='J'){
-      $('ed-divisao').replaceChildren(opt(divisao==='A determinar'?'Aguardando enquadramento':divisao,divisao==='A determinar'?'':divisao));
       buscar().divisao=divisao==='A determinar'?'':divisao;
       const produtos=res?.produtos||[],governante=produtos.find(p=>p.atividade_id===res?.produto_governante_id);
       $('ed-governante').textContent=governante?
@@ -61,20 +60,127 @@
     choices($('ed-grupo'),grupos.map(g=>[g.codigo,`${g.codigo} — ${g.nome||'Ocupação'}`]),buscar().grupo,pronto?'Selecione o grupo':'Carregando cadastros...');
     $('ed-grupo').disabled=!pronto;
   }
-  function divisaoOptions(){
-    const ed=buscar(),sel=$('ed-divisao');
-    if(ed.grupo==='J'){
-      choices(sel,ed.divisao?[[ed.divisao,ed.divisao]]:[],ed.divisao,'Conforme carga governante');sel.disabled=true;return;
+  // Ocupação — comportamento do Hidrante Beta (seleção nativa com filtro
+  // progressivo, acentos ignorados e lista expandida no mesmo SELECT).
+  // Mantém o ID técnico de cada registro do Cadastro Central do SAR.
+  let ocupacaoLista=[],ocupacaoFiltro='',ocupacaoAberta=false;
+  const normalizarOcupacao=texto=>String(texto||'').normalize('NFD')
+      .replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
+
+  function rotuloOcupacao(registro){
+    const divisao=registro.divisao_direta||registro.divisao_referencia||'';
+    const carga=registro.carga_incendio_m2;
+    const partes=[registro.descricao||'Atividade sem descrição'];
+    if(divisao)partes.push(divisao);
+    if(carga!==null&&carga!==undefined&&String(carga).trim()!==''){
+      const valor=Number(carga);
+      partes.push((Number.isFinite(valor)?valor.toLocaleString('pt-BR'):String(carga))+' MJ/m²');
     }
-    const divs=[...new Set(dadosGrupo().map(r=>r.divisao_direta||r.divisao_referencia).filter(Boolean))].sort();
-    choices(sel,divs.map(d=>[d,d]),ed.divisao,'Selecione a divisão');sel.disabled=!pronto||!ed.grupo;
+    return partes.join(' | ');
   }
-  function atividadeOptions(){
+
+  function fecharListaOcupacao(restaurar=true){
+    const sel=$('ed-atividade');
+    ocupacaoAberta=false;ocupacaoFiltro='';
+    sel.removeAttribute('size');
+    sel.removeAttribute('data-open');
+    if(restaurar)filtrarListaOcupacao('',false);
+  }
+
+  function filtrarListaOcupacao(termo=ocupacaoFiltro,abrir=ocupacaoAberta){
+    const sel=$('ed-atividade'), ed=buscar();
+    const filtro=normalizarOcupacao(termo);
+    const valores=ocupacaoLista.filter(item=>!filtro||normalizarOcupacao(item.rotulo).includes(filtro));
+    const valorEscolhido=ed?.atividade||'';
+    // Nenhuma escolha técnica é registrada até o usuário selecionar/confirmar.
+    sel.replaceChildren(opt(filtro?'Resultados encontrados: '+valores.length:'Selecione a ocupação',''),
+      ...valores.map(item=>opt(item.rotulo,item.valor)));
+    sel.options[0].disabled=true;
+    const selecionado=valores.some(item=>item.valor===String(valorEscolhido));
+    if(selecionado)sel.value=String(valorEscolhido);
+    else if(filtro&&valores.length)sel.selectedIndex=1; // destaque para Enter
+    else sel.selectedIndex=0;
+    if(abrir && sel.disabled!==true && buscar().grupo!=='J'){
+      sel.size=Math.min(Math.max(valores.length+1,2),10);
+      sel.dataset.open='1';ocupacaoAberta=true;
+    }else{
+      sel.removeAttribute('size');sel.removeAttribute('data-open');ocupacaoAberta=false;
+    }
+  }
+
+  function ocupacaoOptions(){
     const ed=buscar(),sel=$('ed-atividade');
-    if(ed.grupo==='J'){choices(sel,[['grupo-j','Depósito / Armazenamento (conforme produtos)']],'grupo-j');sel.disabled=true;return;}
-    const opcoes=dadosGrupo().filter(r=>(r.divisao_direta||r.divisao_referencia)===ed.divisao).map(r=>[r.id,r.descricao]);
-    choices(sel,opcoes,ed.atividade,'Selecione a atividade');sel.disabled=!pronto||!ed.divisao;
+    ocupacaoAberta=false;ocupacaoFiltro='';
+    if(ed.grupo==='J'){
+      ocupacaoLista=[];
+      sel.replaceChildren(opt('Depósito / Armazenamento — informe os produtos abaixo','grupo-j'));
+      sel.value='grupo-j';sel.disabled=true;sel.removeAttribute('size');
+      return;
+    }
+    ocupacaoLista=dadosGrupo().map(r=>({valor:String(r.id),rotulo:rotuloOcupacao(r)}))
+       .sort((a,b)=>a.rotulo.localeCompare(b.rotulo,'pt-BR',{sensitivity:'base'}));
+    sel.disabled=!pronto||!ed.grupo;
+    filtrarListaOcupacao('',false);
+    if(!pronto)sel.options[0].textContent='Carregando cadastros...';
+    else if(!ed.grupo)sel.options[0].textContent='Selecione o uso primeiro';
+    else if(!ocupacaoLista.length)sel.options[0].textContent='Nenhuma ocupação cadastrada para este uso';
   }
+
+  function registrarOcupacaoSelecionada(){
+    if(!pronto||buscar().grupo==='J')return;
+    const sel=$('ed-atividade');
+    const valor=String(sel.value||'');
+    if(!valor||!ocupacaoLista.some(item=>item.valor===valor)){
+      fecharListaOcupacao();return;
+    }
+    const ed=buscar();ed.atividade=valor;
+    const registro=catalogo.find(r=>String(r.id)===valor);
+    // Divisão permanece informação derivada, sem campo manual na interface.
+    ed.divisao=registro?(registro.divisao_direta||registro.divisao_referencia||''):'';
+    fecharListaOcupacao();
+    agendarClassificacao();
+  }
+
+  $('ed-atividade').addEventListener('keydown',evento=>{
+    if(!pronto||buscar().grupo==='J')return;
+    const sel=$('ed-atividade');
+    if(evento.key==='Escape'){
+      evento.preventDefault();fecharListaOcupacao();return;
+    }
+    if(evento.key==='Enter'){
+      if(ocupacaoAberta){evento.preventDefault();registrarOcupacaoSelecionada();}
+      return;
+    }
+    if(evento.key==='Backspace'){
+      evento.preventDefault();ocupacaoFiltro=ocupacaoFiltro.slice(0,-1);
+      filtrarListaOcupacao(ocupacaoFiltro,true);return;
+    }
+    if(evento.key.length===1&&!evento.ctrlKey&&!evento.altKey&&!evento.metaKey){
+      evento.preventDefault();ocupacaoFiltro+=evento.key;
+      filtrarListaOcupacao(ocupacaoFiltro,true);return;
+    }
+    // Setas, PageUp/PageDown, Home e End mantêm a navegação nativa.
+  });
+  $('ed-atividade').addEventListener('mousedown',evento=>{
+    const sel=$('ed-atividade');
+    if(sel.disabled||ocupacaoAberta)return;
+    evento.preventDefault();ocupacaoFiltro='';
+    filtrarListaOcupacao('',true);sel.focus();
+  });
+  $('ed-atividade').addEventListener('touchstart',evento=>{
+    const sel=$('ed-atividade');
+    if(sel.disabled||ocupacaoAberta)return;
+    evento.preventDefault();ocupacaoFiltro='';
+    filtrarListaOcupacao('',true);sel.focus();
+  },{passive:false});
+  $('ed-atividade').addEventListener('dblclick',()=>{
+    if(ocupacaoAberta)registrarOcupacaoSelecionada();
+  });
+  $('ed-atividade').addEventListener('change',registrarOcupacaoSelecionada);
+  $('ed-atividade').addEventListener('blur',()=>{
+    // Fecha a lista sem apagar a ocupação efetivamente selecionada.
+    setTimeout(()=>{if(ocupacaoAberta)fecharListaOcupacao();},120);
+  });
   function renderProdutos(){
     const ed=buscar();$('ed-produtos').replaceChildren();
     const grupoJ=catalogo.filter(r=>r.grupo==='J');
@@ -94,7 +200,7 @@
   function render(){
     cards();const ed=buscar();
     $('ed-nome').value=ed.nome;$('ed-area').value=ed.area;
-    grupoOptions();divisaoOptions();atividadeOptions();$('ed-j').hidden=ed.grupo!=='J';
+    grupoOptions();ocupacaoOptions();$('ed-j').hidden=ed.grupo!=='J';
     $('ed-ajustar').checked=ed.ajuste;$('ed-ajuste-conteudo').hidden=!ed.ajuste;
     $('ed-cargaManual').value=ed.cargaManual;$('ed-justificativa').value=ed.justificativa;
     if(ed.grupo==='J')renderProdutos();
@@ -168,8 +274,7 @@
   $('ed-area').addEventListener('input',e=>{buscar().area=e.target.value;});
   $('ed-area').addEventListener('blur',e=>{if(!e.target.value.trim())return;const v=numBR(e.target.value);if(v===null){mensagem('Área protegida inválida.',true);return;}e.target.value=fmt(v);buscar().area=e.target.value;});
   $('ed-grupo').addEventListener('change',e=>{const ed=buscar();ed.grupo=e.target.value;ed.divisao='';ed.atividade='';ed.ajuste=false;ed.cargaManual='';ed.justificativa='';ed.produtos=[];if(ed.grupo==='J')ed.produtos.push({id:nextProd++,produto:'',altura:''});render();});
-  $('ed-divisao').addEventListener('change',e=>{const ed=buscar();ed.divisao=e.target.value;ed.atividade='';atividadeOptions();agendarClassificacao();});
-  $('ed-atividade').addEventListener('change',e=>{buscar().atividade=e.target.value;agendarClassificacao();});
+  // Divisão preenchida pelo motor / registro de ocupação, sem controle visual próprio.
   $('ed-addprod').addEventListener('click',()=>{const ed=buscar();if(ed.produtos.length>=40){mensagem('Limite de 40 produtos.',true);return;}ed.produtos.push({id:nextProd++,produto:'',altura:''});renderProdutos();agendarClassificacao();});
   $('ed-ajustar').addEventListener('change',e=>{buscar().ajuste=e.target.checked;$('ed-ajuste-conteudo').hidden=!e.target.checked;agendarClassificacao();});
   $('ed-cargaManual').addEventListener('input',e=>{buscar().cargaManual=e.target.value;agendarClassificacao();});

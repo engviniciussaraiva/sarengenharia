@@ -6,6 +6,10 @@
 #aba1 textarea{width:100%;font-family:Arial,sans-serif;font-size:16px;border-radius:6px;border:1px solid #ccc;background:#fff;padding:10px;resize:vertical}
 
 /* Exclusivamente Aba 02: preserva a identidade e as abas do protótipo legado */
+/* Mesmo seletor de Ocupação do Hidrante Beta: expande a lista ao digitar,
+   sem alterar componentes das demais abas ou acrescentar regra normativa no frontend. */
+#aba2 #ed-atividade[size]{height:auto;min-height:86px;max-height:310px;position:relative;z-index:4;padding:4px 7px;}
+#aba2 .ed-ocupacao-ajuda{display:block;color:#627568;font-size:12px;margin:-7px 0 12px;line-height:1.4;}
 #aba2 .ed-banner{background:#edf5ed;border-left:4px solid #006400;padding:12px 14px;margin-bottom:22px;font-size:14px;line-height:1.55}
 #aba2 .ed-topline,#aba2 .ed-header,#aba2 .ed-row-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
 #aba2 h3{color:#006400;margin:0 0 12px;font-size:18px}
@@ -186,11 +190,12 @@
       <div class="coluna"><label for="ed-area">Área protegida pelo sistema (m²)</label><input id="ed-area" type="text" inputmode="decimal" placeholder="Ex.: 2.500,00"></div>
     </div>
     <div class="linha">
-      <div class="coluna"><label for="ed-grupo">Grupo de ocupação</label><select id="ed-grupo"></select></div>
-      <div class="coluna"><label for="ed-divisao">Divisão de ocupação</label><select id="ed-divisao"></select></div>
+      <div class="coluna"><label for="ed-grupo">Uso</label><select id="ed-grupo"></select></div>
     </div>
     <div class="linha">
-      <div class="coluna"><label for="ed-atividade">Atividade desenvolvida</label><select id="ed-atividade"></select></div>
+      <div class="coluna"><label for="ed-atividade">Ocupação</label><select id="ed-atividade" aria-label="Ocupação — digite letras para filtrar" aria-describedby="ed-ocupacao-ajuda"></select><small id="ed-ocupacao-ajuda" class="ed-ocupacao-ajuda">Clique para listar ou digite para filtrar. Use as setas e Enter para selecionar; Esc para cancelar.</small></div>
+    </div>
+    <div class="linha">
       <div class="coluna"><label for="ed-carga">Carga de incêndio adotada (MJ/m²)</label><input id="ed-carga" type="text" readonly placeholder="Aguardando classificação"></div>
     </div>
 
