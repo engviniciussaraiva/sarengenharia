@@ -600,6 +600,12 @@ min-width:20px;
 .sar-home-empty{background:#fff;border:1px dashed #b7d7c2;padding:24px;color:#537464;font-size:14px;}
 @media(max-width:700px){.sar-home{padding:18px 14px 28px}.sar-home-hero{padding:20px}.sar-home-grid{grid-template-columns:repeat(auto-fill,minmax(185px,1fr));}}
 
+/* Central de módulos do PAI: reutiliza os cards aprovados da Home. */
+.main.sar-modulo-cards-mode{display:block;text-align:left;overflow-y:auto;background:#f1f8f3}
+.sar-modulo-cards{padding:28px clamp(18px,3vw,44px) 40px;min-height:100%}
+.sar-modulo-cards .sar-home-grid{margin:0;width:100%;max-width:1200px}
+@media(max-width:700px){.sar-modulo-cards{padding:18px 14px 28px}}
+
 </style>
 </head>
 
@@ -730,6 +736,7 @@ id="menuRodape"
 <script>
 
 let SAR_MENU_COMPLETO = [];
+let SAR_CATALOGO_MODULOS = [];
 let SAR_USUARIO_ATUAL = null;
 let SAR_CADASTRO_ATUAL = null;
 
@@ -772,16 +779,23 @@ async function carregarEstruturaMenuSupabase(){
             ativo,
             exibir_menu_logado,
             status_desenvolvimento,
-            em_breve
+            em_breve,
+            exibir_catalogo,
+            titulo_card,
+            descricao_card,
+            descricao
         `)
-        .eq("ativo", true)
-        .eq("exibir_menu_logado", true);
+        .eq("ativo", true);
 
     if(error){
         throw error;
     }
 
-    const registros = data || [];
+    const todosOsAtivos = data || [];
+    // Exibir no menu e exibir como card são escolhas INDEPENDENTES no Admin.
+    SAR_CATALOGO_MODULOS = todosOsAtivos.filter((item) => item.exibir_catalogo === true);
+    // O menu existente continua respeitando exatamente exibir_menu_logado.
+    const registros = todosOsAtivos.filter((item) => item.exibir_menu_logado === true);
     const porId = new Map();
 
     registros.forEach(function(item){
@@ -1250,6 +1264,7 @@ function mostrarHome(){
     document.getElementById('tabs').style.display = 'none';
     esconderSubabas();
     const area = document.getElementById('mainContent');
+    area.classList.remove('sar-modulo-cards-mode');
     area.classList.add('sar-home-mode');
     // A estrutura de menu é a referência de navegação. Ela inclui módulos,
     // abas e subabas, mas apenas registros ativos e visíveis no menu.
@@ -1460,7 +1475,7 @@ if(ehAdministracao && !ehMaster){
 
 
 function mostrarAcessoNegado(recurso){
-    document.getElementById("mainContent").classList.remove("sar-home-mode");
+    document.getElementById("mainContent").classList.remove("sar-home-mode", "sar-modulo-cards-mode");
 
     const nomeRecurso =
         String(recurso || "este recurso")
@@ -1486,8 +1501,74 @@ function mostrarAcessoNegado(recurso){
 }
 
 
+/*
+ * Cards filhos configurados no Administrador por "Exibir como card".
+ * Somente filhos DIRETOS, ativos e com autorização individual; não altera permissões.
+ * "Exibir na página inicial" continua exclusivo da Home.
+ */
+function sarCardsDoModuloPai(codigoPai){
+    const codigo = String(codigoPai || '').trim().toUpperCase();
+    const linhaPai = SAR_MENU_COMPLETO.find((linha) =>
+        String(linha.modulo_codigo || '').trim().toUpperCase() === codigo
+    );
+    const idPai = linhaPai?.modulo_id;
+    if(!idPai) return [];
+    return SAR_CATALOGO_MODULOS.filter((item) =>
+        String(item.modulo_pai || '') === String(idPai) &&
+        item.ativo === true &&
+        podeVisualizar(item.codigo)
+    ).sort((a,b) =>
+        Number(a.ordem_menu ?? a.ordem ?? 999999) - Number(b.ordem_menu ?? b.ordem ?? 999999) ||
+        String(a.modulo || '').localeCompare(String(b.modulo || ''),'pt-BR')
+    );
+}
+
+function sarExibirCardsDoModuloPai(codigoPai, cards){
+    const area = document.getElementById('mainContent');
+    area.classList.add('sar-modulo-cards-mode');
+    const htmlCards = cards.map((item) => {
+        const codigo = sarEscaparHtml(String(item.codigo || '').trim().toUpperCase());
+        const titulo = sarEscaparHtml(item.titulo_card || item.modulo || item.codigo);
+        const descricao = sarEscaparHtml(item.descricao_card || item.descricao || 'Acessar módulo do SAR');
+        const icone = sarIconeVetorialHome(item);
+        return `<button type="button" class="sar-home-card" data-sar-card-filho="${codigo}">
+            <span class="sar-home-card-icon" aria-hidden="true">${icone}</span>
+            <span class="sar-home-card-title">${titulo}</span>
+            <span class="sar-home-card-desc">${descricao}</span>
+        </button>`;
+    }).join('');
+    area.innerHTML = `<section class="sar-modulo-cards" aria-label="Módulos disponíveis">
+        <div class="sar-home-grid">${htmlCards}</div>
+    </section>`;
+    area.querySelectorAll('[data-sar-card-filho]').forEach((botao) => {
+        botao.addEventListener('click', () => {
+            const codigoFilho = botao.dataset.sarCardFilho;
+            const item = cards.find((r) =>
+                String(r.codigo || '').trim().toUpperCase() === codigoFilho
+            );
+            // Revalidar autorização no clique; não criar privilégios.
+            if(!item || !podeVisualizar(codigoFilho)){
+                mostrarAcessoNegado(codigoFilho);
+                return;
+            }
+            const linha = SAR_MENU_COMPLETO.find((r) =>
+                String(r.modulo_codigo || '').trim().toUpperCase() === codigoPai &&
+                String(r.aba_codigo || '').trim().toUpperCase() === codigoFilho
+            );
+            if(linha){
+                abrirAba(codigoPai,codigoFilho,linha.aba_nome,linha.aba_rota || '',null);
+            }else if(String(item.rota || '').trim()){
+                // Card independente do menu: exibir_catalogo é controle próprio.
+                document.getElementById('tabs').style.display = 'none';
+                esconderSubabas();
+                abrirArquivo(String(item.rota).trim(),codigoFilho);
+            }
+        });
+    });
+}
+
 function abrirModulo(modulo){
-    document.getElementById("mainContent").classList.remove("sar-home-mode");
+    document.getElementById("mainContent").classList.remove("sar-home-mode", "sar-modulo-cards-mode");
 
     const codigoModulo =
         String(modulo || "")
@@ -1574,6 +1655,16 @@ function abrirModulo(modulo){
         </div>
     `;
 
+    /* Cards dos filhos configurados pelo Administrador. Caso existam,
+     * substituem SOMENTE a mensagem de seleção no conteúdo do pai.
+     * As abas superiores permanecem acessíveis como antes.
+     */
+    const cardsDoPai = sarCardsDoModuloPai(codigoModulo);
+    if(cardsDoPai.length){
+        sarExibirCardsDoModuloPai(codigoModulo, cardsDoPai);
+        return;
+    }
+
     /*
      * SAR — Acesso inicial ao novo dimensionamento de hidrantes.
      * Quando ele for a ÚNICA aba visível e autorizada do grupo,
@@ -1600,7 +1691,7 @@ function abrirModulo(modulo){
 
 
 function abrirArquivo(arquivo, codigoRecurso = ""){
-    document.getElementById("mainContent").classList.remove("sar-home-mode");
+    document.getElementById("mainContent").classList.remove("sar-home-mode", "sar-modulo-cards-mode");
 
     const codigoNormalizado =
         String(codigoRecurso || "")
@@ -1722,6 +1813,7 @@ function abrirAba(
     arquivo,
     elementoClicado
 ){
+    document.getElementById("mainContent").classList.remove("sar-modulo-cards-mode");
 
     const codigoAbaNormalizado =
         String(codigoAba || "")

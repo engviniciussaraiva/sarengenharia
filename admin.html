@@ -4009,6 +4009,46 @@
       return original;
     }
 
+    /*
+     * A listagem administrativa é uma ÁRVORE, não uma lista global por ordem_menu.
+     * Usa exclusivamente modulo_pai (UUID) para agrupamento; não grava no banco.
+     * Preserva busca, filtros, edição e todos os módulos já cadastrados.
+     */
+    function ordenarModulosPorHierarquia(itensFiltrados){
+      const visiveis = new Set(itensFiltrados.map((item) => String(item.id)));
+      const mapa = new Map(modulosCache.map((item) => [String(item.id), item]));
+      const filhos = new Map();
+      const ordenados = [];
+      const visitados = new Set();
+
+      const ordenarIrmaos = (a, b) =>
+        Number(a.ordem_menu ?? a.ordem ?? 999999) - Number(b.ordem_menu ?? b.ordem ?? 999999) ||
+        String(a.modulo || '').localeCompare(String(b.modulo || ''), 'pt-BR');
+
+      for(const item of modulosCache){
+        const idPai = String(item.modulo_pai || '');
+        if(!filhos.has(idPai)) filhos.set(idPai, []);
+        filhos.get(idPai).push(item);
+      }
+      for(const irmaos of filhos.values()) irmaos.sort(ordenarIrmaos);
+
+      function visitar(item){
+        const id = String(item.id);
+        if(visitados.has(id)) return;
+        visitados.add(id);
+        if(visiveis.has(id)) ordenados.push(item);
+        for(const filho of filhos.get(id) || []) visitar(filho);
+      }
+
+      const raizes = modulosCache.filter((item) =>
+        !item.modulo_pai || !mapa.has(String(item.modulo_pai))
+      ).sort(ordenarIrmaos);
+      raizes.forEach(visitar);
+      // Uma referência circular, caso exista, não deve ocultar módulos.
+      [...modulosCache].sort(ordenarIrmaos).forEach(visitar);
+      return ordenados;
+    }
+
     function renderizarModulos(modulos){
       if(!modulos.length){
         elementos.corpoModulos.innerHTML =
@@ -4016,7 +4056,7 @@
         return;
       }
 
-      elementos.corpoModulos.innerHTML = modulos.map((item) => {
+      elementos.corpoModulos.innerHTML = ordenarModulosPorHierarquia(modulos).map((item) => {
         const nivel = obterNivelModulo(item);
         const statusClasse = item.ativo !== true
           ? "inativo"
