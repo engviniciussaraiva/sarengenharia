@@ -136,6 +136,51 @@
   .sar-modulo-cabecalho .sar-modulo-botao{min-height:33px}
 }
 
+/* SAR HIDRANTES / ABA 02 — Aparência da seção Ocupação / Uso do CLASSV01.
+   Componente recolhido por padrão; regras normativas exclusivas do backend. */
+#aba2 .ed-ocupacao-card{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:18px 18px 16px;margin:19px 0 0;color:#333}
+#aba2 .ed-ocupacao-titulo{list-style:none;display:flex;align-items:center;gap:8px;color:#1b5e20;font-size:17px;font-weight:700;cursor:pointer;line-height:1.35}
+#aba2 .ed-ocupacao-titulo::-webkit-details-marker{display:none}
+#aba2 .ed-ocupacao-seta{display:inline-block;color:#1b5e20;transition:transform .18s;font-size:14px}
+#aba2 .ed-ocupacao-card[open] .ed-ocupacao-seta{transform:rotate(90deg)}
+#aba2 .ed-ocupacao-conteudo{padding-top:15px;font:14px/1.4 Arial,sans-serif}
+#aba2 .ed-opcao-unica{border:1px solid #dcdcdc;background:#fafafa;padding:12px;border-radius:8px;margin-bottom:15px}
+#aba2 .ed-modo-label{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#1b5e20;cursor:pointer;margin:0}
+#aba2 .ed-modo-label input{width:14px;height:14px;min-width:14px;flex:none;margin:0;accent-color:#1976d2}
+#aba2 .ed-modo-ajuda{font-size:12px;color:#666;margin-top:6px;line-height:1.4}
+#aba2 .ed-ocupacao-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;align-items:end;margin:7px 0}
+#aba2 .ed-ocupacao-grid>div{min-width:0}
+#aba2 .ed-ocupacao-grid label{display:block;font-size:13px;font-weight:500;margin:0 0 5px}
+#aba2 .ed-ocupacao-grid input,#aba2 .ed-ocupacao-grid select{width:100%;height:39px;min-height:39px;margin:0 0 10px;font:14px Arial,sans-serif;border:1px solid #dedede;border-radius:6px;padding:9px 11px}
+#aba2 .ed-ocupacao-grid input:disabled{background:#eee;color:#777;cursor:not-allowed}
+#aba2 .ed-ocupacao-grid .ed-numero{text-align:right}
+#aba2 .ed-area-nota{border:1px solid #e0e0e0;background:#fafafa;padding:10px;border-radius:6px;margin-bottom:10px;font-size:13px;color:#555;line-height:1.4}
+#aba2 .ed-botao-linha{display:flex;justify-content:flex-end;margin:10px 0 0}
+#aba2 .ed-oc-botao{background:#1b5e20;color:#fff;border:0;border-radius:6px;padding:10px 15px;font-size:14px;cursor:pointer}
+#aba2 .ed-oc-botao:hover{background:#2e7d32}
+#aba2 .ed-busca-box{position:relative}
+#aba2 .ed-busca-lista{position:absolute;top:calc(100% - 8px);left:0;right:0;z-index:15;border:1px solid #bbc9bf;border-radius:0 0 6px 6px;background:#fff;box-shadow:0 9px 18px #0c2f1a24;max-height:240px;overflow-y:auto}
+#aba2 .ed-busca-lista[hidden]{display:none!important}
+#aba2 .ed-busca-lista button{display:block;width:100%;border:0;border-bottom:1px solid #e9eeea;border-radius:0;background:#fff;color:#333;text-align:left;padding:9px 11px;font-size:13px;line-height:1.4;cursor:pointer;white-space:normal}
+#aba2 .ed-busca-lista button:hover,#aba2 .ed-busca-lista button[aria-selected="true"]{background:#e9f4eb;color:#154d2d}
+#aba2 .ed-busca-lista .ed-busca-vazia{padding:9px 11px;color:#666;font-size:12px}
+#aba2 .ed-bloco-pavimentos{border:1px solid #dcdcdc;border-radius:8px;padding:12px;margin-bottom:12px;background:#fff}
+#aba2 .ed-bloco-pavimentos h4,#aba2 .ed-quadro h4{font-size:15px;color:#1b5e20;margin:0 0 8px;font-weight:700}
+#aba2 .ed-bloco-pavimentos p{font-size:12px;color:#666;margin:0 0 12px;line-height:1.4}
+#aba2 .ed-quadro{margin-top:16px;border:1px solid #dcdcdc;background:#fafafa;padding:14px;border-radius:8px}
+#aba2 .ed-quadro-cabecalho{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:10px}
+#aba2 .ed-quadro-cabecalho h4{margin:0}
+#aba2 .ed-listagem{font-size:13px;color:#555;line-height:1.5}
+#aba2 .ed-oc-limpar{background:#777;color:#fff;border:0;padding:7px 10px;border-radius:5px;font-size:12px;cursor:pointer}
+#aba2 .ed-oc-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #e2e7e2}
+#aba2 .ed-oc-item:last-child{border-bottom:0}
+#aba2 .ed-oc-item strong{display:block;color:#1b5e20;font-size:13px}
+#aba2 .ed-oc-item small{display:block;color:#566358;font-size:12px;margin-top:4px}
+#aba2 .ed-oc-remover{color:#9c3030;background:#fff;border:1px solid #e6b0b0;border-radius:5px;padding:7px 9px;font-size:12px;cursor:pointer;white-space:nowrap}
+#aba2 .ed-ocupacao-card .ed-ajuste{margin-top:17px}
+#aba2 .ed-ocupacao-card .ed-source{margin-top:14px}
+@media(max-width:680px){#aba2 .ed-ocupacao-card{padding:13px}#aba2 .ed-ocupacao-grid{grid-template-columns:1fr}#aba2 .ed-quadro-cabecalho{flex-wrap:wrap}}
+
 </style></head><body>
 <header class="sar-modulo-cabecalho" aria-label="Cabeçalho do módulo SAR">
   <div class="sar-modulo-identidade">
@@ -215,36 +260,59 @@
       <div class="coluna"><label for="ed-nome">Identificação da edificação</label><input id="ed-nome" type="text" placeholder="Ex.: Galpão 01" maxlength="140"></div>
       <div class="coluna"><label for="ed-area">Área protegida pelo sistema (m²)</label><input id="ed-area" type="text" inputmode="decimal" placeholder="Ex.: 2.500,00"></div>
     </div>
-    <div class="linha">
-      <div class="coluna"><label for="ed-grupo">Uso</label><select id="ed-grupo"></select></div>
-    </div>
-    <div class="linha">
-      <div class="coluna"><label for="ed-atividade">Ocupação</label><select id="ed-atividade" aria-label="Ocupação — digite letras para filtrar" aria-describedby="ed-ocupacao-ajuda"></select><small id="ed-ocupacao-ajuda" class="ed-ocupacao-ajuda">Clique para listar ou digite para filtrar. Use as setas e Enter para selecionar; Esc para cancelar.</small></div>
-    </div>
-    <div class="linha">
-      <div class="coluna"><label for="ed-carga">Carga de incêndio adotada (MJ/m²)</label><input id="ed-carga" type="text" readonly placeholder="Aguardando classificação"></div>
-    </div>
-
-    <div id="ed-j" class="ed-grupo-j" hidden>
-      <h3>Classificação de armazenamento — Grupo J</h3>
-      <p class="ed-explainer">Cadastre os produtos armazenados e a altura correspondente a cada um. Para o enquadramento da edificação, <strong>será considerada a maior carga de incêndio encontrada</strong>.</p>
-      <div class="ed-scroll"><table class="ed-table"><thead><tr><th>Produto armazenado</th><th>Altura de armazenamento</th><th>Carga de incêndio (MJ/m²)</th><th></th></tr></thead><tbody id="ed-produtos"></tbody></table></div>
-      <div class="ed-row-actions"><button type="button" id="ed-addprod" class="ed-button">+ Adicionar produto</button><span id="ed-qtdprod" class="ed-note"></span></div>
-      <div id="ed-governante" class="ed-governante" aria-live="polite">Cadastre um produto para definir a carga governante.</div>
-    </div>
-
-    <div class="ed-ajuste"><label class="ed-check"><input type="checkbox" id="ed-ajustar"> Ajustar a carga de incêndio com justificativa técnica</label>
-      <div id="ed-ajuste-conteudo" hidden>
-        <div class="linha"><div class="coluna"><label for="ed-cargaManual">Carga de incêndio proposta (MJ/m²)</label><input id="ed-cargaManual" type="text" inputmode="decimal" placeholder="Ex.: 1.250,00"></div></div>
-        <label for="ed-justificativa">Justificativa técnica</label><textarea id="ed-justificativa" rows="2" placeholder="Descreva o fundamento do ajuste..."></textarea>
+    <!-- Referência visual e operacional: CLASSV01.html > Ocupação / Uso.
+         Componente recolhido por padrão. Cálculos/classificações permanecem no backend. -->
+    <details id="ed-ocupacao-card" class="ed-ocupacao-card">
+      <summary class="ed-ocupacao-titulo"><span class="ed-ocupacao-seta" aria-hidden="true">▶</span> 🏢 Ocupação / Uso</summary>
+      <div class="ed-ocupacao-conteudo">
+        <div class="ed-opcao-unica">
+          <label class="ed-modo-label" for="ed-ocupacao-unica"><input type="checkbox" id="ed-ocupacao-unica" checked> Ocupação única para toda a edificação</label>
+          <div class="ed-modo-ajuda">Marque esta opção quando todos os pavimentos possuírem a mesma ocupação principal.</div>
+        </div>
+        <div id="ed-bloco-unico">
+          <div class="ed-ocupacao-grid">
+            <div><label for="ed-grupo">Uso</label><select id="ed-grupo"><option value="">-- Selecione o uso --</option></select></div>
+            <div class="ed-busca-box"><label for="ed-atividade">Ocupação / Descrição</label><input type="text" id="ed-atividade" placeholder="Digite para buscar a ocupação..." autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ed-lista-busca"><div id="ed-lista-busca" class="ed-busca-lista" role="listbox" hidden></div></div>
+          </div>
+          <div class="ed-ocupacao-grid">
+            <div><label for="ed-altura">Altura do armazenamento (m)</label><input id="ed-altura" type="text" inputmode="decimal" value="0,00" disabled class="ed-numero"></div>
+            <div class="ed-area-nota"><strong>Área considerada:</strong><br>Será adotada automaticamente a <strong>Área protegida pelo sistema</strong> da edificação.</div>
+          </div>
+          <div class="ed-botao-linha"><button type="button" class="ed-oc-botao" id="ed-add-ocupacao">+ Adicionar Ocupação</button></div>
+        </div>
+        <div id="ed-bloco-misto" hidden>
+          <div class="ed-bloco-pavimentos">
+            <h4>Ocupações por pavimento</h4>
+            <p>Use esta opção quando houver ocupações diferentes entre pavimentos ou mais de uma ocupação no mesmo pavimento.</p>
+            <div class="ed-ocupacao-grid">
+              <div><label for="ed-pavimento">Pavimento / setor</label><input id="ed-pavimento" type="text" maxlength="100" placeholder="Ex.: Térreo / Almoxarifado"></div>
+              <div><label for="ed-area-ocupacao">Área desta ocupação (m²)</label><input id="ed-area-ocupacao" type="text" inputmode="decimal" placeholder="Ex.: 150,00" class="ed-numero"></div>
+              <div><label for="ed-grupo-misto">Uso</label><select id="ed-grupo-misto"><option value="">-- Selecione o uso --</option></select></div>
+              <div class="ed-busca-box"><label for="ed-atividade-misto">Ocupação / Descrição</label><input id="ed-atividade-misto" type="text" autocomplete="off" placeholder="Digite para buscar a ocupação..." role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ed-lista-busca-misto"><div class="ed-busca-lista" id="ed-lista-busca-misto" role="listbox" hidden></div></div>
+              <div><label for="ed-altura-misto">Altura do armazenamento (m)</label><input id="ed-altura-misto" type="text" inputmode="decimal" value="0,00" disabled class="ed-numero"></div>
+            </div>
+            <div class="ed-botao-linha"><button type="button" class="ed-oc-botao" id="ed-add-ocupacao-mista">+ Cadastrar ocupação neste pavimento</button></div>
+          </div>
+        </div>
+        <div class="ed-quadro">
+          <div class="ed-quadro-cabecalho"><h4>📋 Ocupações cadastradas na edificação</h4><button type="button" class="ed-oc-limpar" id="ed-limpar-ocupacoes">🧹 Limpar lista</button></div>
+          <div id="ed-lista-ocupacoes" class="ed-listagem">Aguardando inclusão de ocupações.</div>
+        </div>
+        <div class="ed-quadro"><h4>📌 Determinação da Ocupação Predominante</h4><div id="ed-predominante" class="ed-listagem">Aguardando cadastro de ocupações.</div></div>
+        <div class="ed-ajuste"><label class="ed-check"><input type="checkbox" id="ed-ajustar"> Ajustar a carga de incêndio com justificativa técnica</label>
+          <div id="ed-ajuste-conteudo" hidden>
+            <div class="linha"><div class="coluna"><label for="ed-cargaManual">Carga de incêndio proposta (MJ/m²)</label><input id="ed-cargaManual" type="text" inputmode="decimal" placeholder="Ex.: 1.250,00"></div></div>
+            <label for="ed-justificativa">Justificativa técnica</label><textarea id="ed-justificativa" rows="2" placeholder="Descreva o fundamento do ajuste..."></textarea>
+          </div>
+        </div>
+        <div class="ed-resultado"><div><span>Enquadramento da edificação</span><strong id="ed-resultado-divisao">Não classificada</strong></div>
+          <div><span>Potencial de risco de incêndio</span><strong id="ed-resultado-risco" class="ed-risk">A determinar</strong></div>
+          <div><span>Carga de incêndio (MJ/m²)</span><strong id="ed-resultado-carga">—</strong></div></div>
+        <input id="ed-carga" type="hidden" aria-hidden="true">
+        <div class="ed-source" id="ed-fonte">Dados de ocupação e classificação consultados exclusivamente no motor privado do SAR.</div>
+        <div id="ed-status" role="status" aria-live="polite" class="ed-status"></div>
       </div>
-    </div>
-
-    <div class="ed-resultado"><div><span>Enquadramento da edificação</span><strong id="ed-resultado-divisao">Não classificada</strong></div>
-      <div><span>Potencial de risco de incêndio</span><strong id="ed-resultado-risco" class="ed-risk">A determinar</strong></div>
-      <div><span>Carga de incêndio (MJ/m²)</span><strong id="ed-resultado-carga">—</strong></div></div>
-    <div class="ed-source" id="ed-fonte">Dados de ocupação, produtos e classificação consultados exclusivamente no motor privado do SAR. Aguardando conexão com a API oficial.</div>
-    <div id="ed-status" role="status" aria-live="polite" class="ed-status"></div>
+    </details>
   </div>
 </section>
 <section id="aba3" class="aba"><p class="ed-source">Em desenvolvimento. Campos demonstrativos; não representam critérios hidráulicos aplicáveis.</p><h2>⚙️ Configurações do Sistema de Hidrantes</h2><div class="linha"><div class="coluna"><label>Tipo de Sistema:</label><select><option>Tipo 2 - DN 40</option><option>-- Selecionar --</option></select><label>Selecionar Modelo do Esguicho:</label><select><option>-- Selecionar --</option></select><label>Fator K do Esguicho:</label><input><label>Volume mínimo da reserva de incêndio (L):</label><input value="8.000" readonly><label>Tipo de Expedição do hidrante:</label><input value="Simples" readonly></div><div class="coluna"><label>Vazão mínima na válvula do hidrante (lpm):</label><input value="150"><label>Pressão mínima na válvula do hidrante (m.c.a.):</label><input value="30"><label>Diâmetro do Esguicho (mm):</label><input value="40"><label>Diâmetro da Mangueira (mm):</label><input value="40"><label>Quantidade de hidrantes na rede:</label><input placeholder="Informe a quantidade"></div></div></section>
